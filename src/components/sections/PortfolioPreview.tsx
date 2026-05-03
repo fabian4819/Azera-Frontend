@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion, useInView } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { Users, Eye, TrendingUp } from 'lucide-react';
+import { Users, Eye, TrendingUp, ArrowRight } from 'lucide-react';
 import api from '../../lib/api';
 
 interface PortfolioItem {
@@ -22,9 +22,9 @@ const placeholders: PortfolioItem[] = [
 ];
 
 const gradients = [
-  'linear-gradient(135deg, #6B2EE8, #E8197A)',
-  'linear-gradient(135deg, #38C6F0, #6B2EE8)',
-  'linear-gradient(135deg, #E8197A, #38C6F0)',
+  'linear-gradient(135deg, #6728e4, #ff81aa)',
+  'linear-gradient(135deg, #814bfe, #6728e4)',
+  'linear-gradient(135deg, #ff81aa, #814bfe)',
 ];
 
 const easeOut = [0.16, 1, 0.3, 1] as const;
@@ -41,54 +41,26 @@ export default function PortfolioPreview() {
   }, []);
 
   return (
-    <section
-      ref={ref}
-      style={{ background: '#08060F', padding: '128px 24px', position: 'relative', overflow: 'hidden' }}
-    >
-      {/* Orbs */}
-      <div className="orb" style={{ width: '400px', height: '400px', background: '#E8197A', bottom: '-100px', left: '-100px' }} />
-      <div className="orb" style={{ width: '350px', height: '350px', background: '#6B2EE8', top: '-100px', right: '10%', opacity: 0.2 }} />
+    <section className="section-py" style={{ background: '#ffffff', position: 'relative', overflow: 'hidden' }} ref={ref}>
+      <div className="blob" style={{ width: '350px', height: '350px', background: '#e1e0ff', opacity: 0.25, top: '10%', right: '5%' }} />
+      <div className="blob" style={{ width: '300px', height: '300px', background: '#ffd9e1', opacity: 0.2, bottom: '10%', left: '5%' }} />
 
-      <div style={{ maxWidth: '1280px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
-        {/* Header */}
+      <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 24px', position: 'relative', zIndex: 1 }}>
         <motion.div
           style={{ textAlign: 'center', marginBottom: '72px' }}
           initial={{ opacity: 0, y: 24 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6, ease: easeOut }}
         >
-          <span className="section-label" style={{ display: 'inline-block', marginBottom: '16px' }}>
-            Portfolio
-          </span>
-          <h2
-            style={{
-              fontFamily: 'Syne, sans-serif',
-              fontWeight: 800,
-              fontSize: 'clamp(2rem, 5vw, 3.5rem)',
-              color: '#EDE9F8',
-              lineHeight: 1.15,
-            }}
-          >
+          <span className="section-label" style={{ marginBottom: '16px' }}>Portfolio</span>
+          <h2 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800, fontSize: 'clamp(2rem, 5vw, 3.5rem)', color: '#191c20', lineHeight: 1.15 }}>
             Kampanye{' '}
-            <span
-              style={{
-                background: 'linear-gradient(135deg, #6B2EE8, #E8197A)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-              }}
-            >
-              Terbaik
-            </span>{' '}
+            <span className="pill-label" style={{ fontSize: '0.75rem', verticalAlign: 'middle' }}>Terbaik</span>{' '}
             Kami.
           </h2>
         </motion.div>
 
-        {/* Cards */}
-        <div
-          style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px', marginBottom: '56px' }}
-          className="portfolio-prev-grid"
-        >
+        <div className="portfolio-prev-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px', marginBottom: '56px' }}>
           {items.map((item, i) => (
             <motion.div
               key={item._id}
@@ -96,106 +68,43 @@ export default function PortfolioPreview() {
               animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.6, ease: easeOut, delay: i * 0.12 }}
             >
-              <div
-                style={{
-                  background: 'rgba(255,255,255,0.04)',
-                  backdropFilter: 'blur(20px)',
-                  WebkitBackdropFilter: 'blur(20px)',
-                  border: '1px solid rgba(255,255,255,0.08)',
-                  borderRadius: '20px',
-                  overflow: 'hidden',
-                  transition: 'all 0.3s ease',
-                }}
-              >
-                {/* Top gradient bar */}
-                <div
-                  style={{
-                    height: '4px',
-                    background: gradients[i % gradients.length],
-                  }}
-                />
-
+              <div className="glass-panel card-hover" style={{ overflow: 'hidden' }}>
+                <div style={{ height: '4px', background: gradients[i % gradients.length] }} />
                 <div style={{ padding: '28px' }}>
-                  {/* Brand initial circle */}
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
                     <div
                       style={{
-                        width: '48px',
-                        height: '48px',
-                        borderRadius: '14px',
-                        background: gradients[i % gradients.length],
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontFamily: 'Syne, sans-serif',
-                        fontWeight: 900,
-                        fontSize: '1.3rem',
-                        color: 'white',
+                        width: '52px', height: '52px', borderRadius: '16px', background: gradients[i % gradients.length],
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800, fontSize: '1.4rem', color: 'white',
                       }}
                     >
                       {item.brand[0]}
                     </div>
                     {item.featured && (
-                      <span
-                        style={{
-                          background: 'rgba(107,46,232,0.2)',
-                          color: '#A78BFA',
-                          borderRadius: '999px',
-                          padding: '4px 12px',
-                          fontSize: '0.65rem',
-                          fontWeight: 700,
-                          letterSpacing: '0.1em',
-                          fontFamily: 'Syne, sans-serif',
-                        }}
-                      >
+                      <span style={{ background: '#e1e0ff', color: '#6728e4', borderRadius: '999px', padding: '5px 14px', fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.08em', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
                         FEATURED
                       </span>
                     )}
                   </div>
-
-                  <h3
-                    style={{
-                      fontFamily: 'Syne, sans-serif',
-                      fontWeight: 700,
-                      fontSize: '1.1rem',
-                      color: '#EDE9F8',
-                      marginBottom: '4px',
-                    }}
-                  >
+                  <h3 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700, fontSize: '1.1rem', color: '#191c20', marginBottom: '4px' }}>
                     {item.brand}
                   </h3>
-                  <p style={{ color: '#38C6F0', fontSize: '0.82rem', marginBottom: '12px', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
+                  <p style={{ color: '#814bfe', fontSize: '0.82rem', marginBottom: '12px', fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 500 }}>
                     {item.hashtag}
                   </p>
-
-                  <span
-                    style={{
-                      background: 'rgba(107,46,232,0.2)',
-                      color: '#A78BFA',
-                      borderRadius: '999px',
-                      padding: '4px 12px',
-                      fontSize: '0.72rem',
-                      fontWeight: 600,
-                      display: 'inline-block',
-                      marginBottom: '20px',
-                    }}
-                  >
+                  <span style={{ background: '#f3eaff', color: '#6728e4', borderRadius: '999px', padding: '4px 14px', fontSize: '0.72rem', fontWeight: 600, display: 'inline-block', marginBottom: '20px' }}>
                     {item.category}
                   </span>
-
-                  {/* Metrics */}
                   <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#8B87A8', fontSize: '0.78rem' }}>
-                      <Users size={13} color="#8B87A8" />
-                      {item.kolCount} KOL
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#777683', fontSize: '0.78rem' }}>
+                      <Users size={13} /> {item.kolCount} KOL
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#8B87A8', fontSize: '0.78rem' }}>
-                      <Eye size={13} color="#8B87A8" />
-                      {item.reach}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#777683', fontSize: '0.78rem' }}>
+                      <Eye size={13} /> {item.reach}
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#10B981', fontSize: '0.78rem' }}>
-                      <TrendingUp size={13} color="#10B981" />
-                      {item.engagement}% ER
+                      <TrendingUp size={13} /> {item.engagement}% ER
                     </div>
                   </div>
                 </div>
@@ -204,15 +113,15 @@ export default function PortfolioPreview() {
           ))}
         </div>
 
-        {/* CTA */}
         <motion.div
           style={{ textAlign: 'center' }}
           initial={{ opacity: 0, y: 16 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6, ease: easeOut, delay: 0.4 }}
         >
-          <Link to="/portfolio" className="btn-outline" style={{ fontSize: '1rem', padding: '14px 36px' }}>
-            Lihat Semua Portfolio →
+          <Link to="/portfolio" className="btn-secondary" style={{ fontSize: '1rem', padding: '14px 36px', gap: '10px' }}>
+            Lihat Semua Portfolio
+            <ArrowRight size={18} />
           </Link>
         </motion.div>
       </div>

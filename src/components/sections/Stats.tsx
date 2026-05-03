@@ -3,9 +3,9 @@ import { useInView } from 'framer-motion';
 
 const stats = [
   { value: 20000, suffix: '', label: 'KOL Aktif', display: '20K+' },
-  { value: 100,   suffix: '+', label: 'Brand Partner', display: '100+' },
-  { value: 500,   suffix: '+', label: 'Kampanye Sukses', display: '500+' },
-  { value: 98,    suffix: '%', label: 'Tingkat Kepuasan', display: '98%' },
+  { value: 100, suffix: '+', label: 'Brand Partner', display: '100+' },
+  { value: 500, suffix: '+', label: 'Kampanye Sukses', display: '500+' },
+  { value: 98, suffix: '%', label: 'Tingkat Kepuasan', display: '98%' },
 ];
 
 function CountUp({ target, suffix, started }: { target: number; suffix: string; started: boolean }) {
@@ -37,12 +37,7 @@ function CountUp({ target, suffix, started }: { target: number; suffix: string; 
         : count.toString()
       : count.toString();
 
-  return (
-    <span>
-      {display}
-      {suffix}
-    </span>
-  );
+  return <span>{display}{suffix}</span>;
 }
 
 export default function Stats() {
@@ -50,75 +45,25 @@ export default function Stats() {
   const isInView = useInView(ref, { once: true, margin: '-80px' });
 
   return (
-    <section
-      ref={ref}
-      style={{ background: '#08060F', padding: '80px 24px', position: 'relative', overflow: 'hidden' }}
-    >
-      {/* Top gradient line */}
-      <div
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          height: '1px',
-          background: 'linear-gradient(90deg, transparent, #6B2EE8, #E8197A, #38C6F0, transparent)',
-          opacity: 0.5,
-        }}
-      />
-      {/* Bottom gradient line */}
-      <div
-        style={{
-          position: 'absolute',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          height: '1px',
-          background: 'linear-gradient(90deg, transparent, #6B2EE8, #E8197A, #38C6F0, transparent)',
-          opacity: 0.5,
-        }}
-      />
+    <section ref={ref} style={{ background: '#15157d', padding: '80px 24px', position: 'relative', overflow: 'hidden' }}>
+      <div className="blob" style={{ width: '300px', height: '300px', background: '#814bfe', opacity: 0.25, top: '-100px', left: '10%' }} />
+      <div className="blob" style={{ width: '250px', height: '250px', background: '#ff81aa', opacity: 0.2, bottom: '-80px', right: '10%' }} />
 
-      <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(4, 1fr)',
-          }}
-          className="stats-grid"
-        >
+      <div style={{ maxWidth: '1280px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
+        <div className="stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)' }}>
           {stats.map((stat, i) => (
             <div
               key={stat.label}
               style={{
                 textAlign: 'center',
-                padding: '20px 32px',
-                borderRight: i < stats.length - 1 ? '1px solid rgba(107,46,232,0.2)' : 'none',
+                padding: '32px',
+                borderRight: i < stats.length - 1 ? '1px solid rgba(157,161,255,0.2)' : 'none',
               }}
             >
-              <p
-                style={{
-                  fontFamily: 'Syne, sans-serif',
-                  fontWeight: 900,
-                  fontSize: 'clamp(2.5rem, 6vw, 4rem)',
-                  lineHeight: 1,
-                  marginBottom: '8px',
-                  background: 'linear-gradient(135deg, #6B2EE8, #E8197A)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text',
-                }}
-              >
+              <p style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800, fontSize: 'clamp(2.5rem, 6vw, 4rem)', lineHeight: 1, marginBottom: '8px', color: '#9da1ff' }}>
                 <CountUp target={stat.value} suffix={stat.suffix} started={isInView} />
               </p>
-              <p
-                style={{
-                  color: '#8B87A8',
-                  fontSize: '0.875rem',
-                  fontFamily: 'Plus Jakarta Sans, sans-serif',
-                  letterSpacing: '0.04em',
-                }}
-              >
+              <p style={{ color: 'rgba(157,161,255,0.7)', fontSize: '0.875rem', fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
                 {stat.label}
               </p>
             </div>
@@ -129,7 +74,7 @@ export default function Stats() {
       <style>{`
         @media (max-width: 640px) {
           .stats-grid { grid-template-columns: repeat(2, 1fr) !important; }
-          .stats-grid > div { border-right: none !important; border-bottom: 1px solid rgba(107,46,232,0.2); }
+          .stats-grid > div { border-right: none !important; border-bottom: 1px solid rgba(157,161,255,0.2); }
         }
       `}</style>
     </section>

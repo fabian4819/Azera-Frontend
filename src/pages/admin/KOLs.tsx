@@ -27,9 +27,9 @@ const platformOptions = ['', 'instagram', 'tiktok', 'youtube'];
 const thStyle: React.CSSProperties = {
   padding: '14px 16px',
   textAlign: 'left',
-  fontFamily: 'Syne, sans-serif',
+  fontFamily: "'Plus Jakarta Sans', sans-serif",
   fontWeight: 700,
-  color: '#120E28',
+  color: '#191c20',
   fontSize: '0.78rem',
   whiteSpace: 'nowrap',
   letterSpacing: '0.04em',
@@ -38,7 +38,7 @@ const thStyle: React.CSSProperties = {
 const tdStyle: React.CSSProperties = {
   padding: '14px 16px',
   fontSize: '0.875rem',
-  color: '#5B5780',
+  color: '#464652',
   whiteSpace: 'nowrap',
   fontFamily: 'Plus Jakarta Sans, sans-serif',
 };
@@ -46,16 +46,16 @@ const tdStyle: React.CSSProperties = {
 const controlStyle: React.CSSProperties = {
   padding: '10px 14px',
   borderRadius: '10px',
-  border: '1.5px solid #E0DCFF',
+  border: '1.5px solid #c7c8cf',
   fontSize: '0.875rem',
   outline: 'none',
   fontFamily: 'Plus Jakarta Sans, sans-serif',
   background: 'white',
   cursor: 'pointer',
-  color: '#120E28',
+  color: '#191c20',
 };
 
-const platformColors: Record<string, string> = { IG: '#E8197A', TK: '#065F46', YT: '#C2410C' };
+const platformColors: Record<string, string> = { IG: '#ff81aa', TK: '#065F46', YT: '#C2410C' };
 const platformBg: Record<string, string> = { IG: '#FFF0F7', TK: '#F0FDF4', YT: '#FFF7ED' };
 
 export default function KOLs() {
@@ -114,7 +114,7 @@ export default function KOLs() {
           style={{ display: 'flex', gap: '10px', flex: 1, minWidth: '240px' }}
         >
           <div style={{ position: 'relative', flex: 1 }}>
-            <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#8B87A8' }} />
+            <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#777683' }} />
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -142,7 +142,7 @@ export default function KOLs() {
           </select>
           <button
             onClick={fetchKOLs}
-            style={{ ...controlStyle, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '10px', color: '#8B87A8' }}
+            style={{ ...controlStyle, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '10px', color: '#777683' }}
           >
             <RefreshCw size={16} />
           </button>
@@ -150,11 +150,11 @@ export default function KOLs() {
       </div>
 
       {/* Table */}
-      <div style={{ background: 'white', borderRadius: '16px', border: '1px solid #F0EEFF', overflow: 'hidden', boxShadow: '0 2px 12px rgba(107,46,232,0.06)' }}>
+      <div style={{ background: 'white', borderRadius: '16px', border: '1px solid #e1e0ff', overflow: 'hidden', boxShadow: '0 2px 12px rgba(107,46,232,0.06)' }}>
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem' }}>
             <thead>
-              <tr style={{ background: '#F8F7FF', borderBottom: '1px solid #F0EEFF' }}>
+              <tr style={{ background: '#f8f9ff', borderBottom: '1px solid #e1e0ff' }}>
                 {['Nama', 'WA', 'Kota', 'Platform', 'Followers', 'ER%', 'Rating', 'Status', 'Tanggal', 'Aksi'].map((h) => (
                   <th key={h} style={thStyle}>{h}</th>
                 ))}
@@ -172,11 +172,11 @@ export default function KOLs() {
                 return (
                   <tr
                     key={k._id}
-                    style={{ borderBottom: '1px solid #F0EEFF', background: i % 2 === 0 ? 'white' : '#FDFCFF', transition: 'background 0.15s' }}
+                    style={{ borderBottom: '1px solid #e1e0ff', background: i % 2 === 0 ? 'white' : '#fcfcff', transition: 'background 0.15s' }}
                     onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.background = '#F8F6FF')}
-                    onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.background = i % 2 === 0 ? 'white' : '#FDFCFF')}
+                    onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.background = i % 2 === 0 ? 'white' : '#fcfcff')}
                   >
-                    <td style={{ ...tdStyle, fontWeight: 600, color: '#120E28' }}>{k.namaLengkap}</td>
+                    <td style={{ ...tdStyle, fontWeight: 600, color: '#191c20' }}>{k.namaLengkap}</td>
                     <td style={tdStyle}>{k.whatsapp}</td>
                     <td style={tdStyle}>{k.kota}</td>
                     <td style={tdStyle}>
@@ -190,7 +190,7 @@ export default function KOLs() {
                               borderRadius: '4px',
                               padding: '2px 7px',
                               fontSize: '0.68rem',
-                              fontFamily: 'Syne, sans-serif',
+                              fontFamily: "'Plus Jakarta Sans', sans-serif",
                               fontWeight: 700,
                             }}
                           >
@@ -200,10 +200,10 @@ export default function KOLs() {
                       </div>
                     </td>
                     <td style={tdStyle}>{getMaxFollowers(k.socialMedia || {})}</td>
-                    <td style={{ ...tdStyle, color: '#120E28', fontWeight: 600 }}>{er > 0 ? `${er}%` : '—'}</td>
+                    <td style={{ ...tdStyle, color: '#191c20', fontWeight: 600 }}>{er > 0 ? `${er}%` : '—'}</td>
                     <td style={tdStyle}>
                       {er > 0 && (
-                        <span style={{ color: rating.color, fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '0.78rem' }}>
+                        <span style={{ color: rating.color, fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700, fontSize: '0.78rem' }}>
                           {rating.label}
                         </span>
                       )}
@@ -218,13 +218,13 @@ export default function KOLs() {
                           alignItems: 'center',
                           gap: '6px',
                           padding: '7px 14px',
-                          background: '#F0EEFF',
-                          color: '#6B2EE8',
+                          background: '#e1e0ff',
+                          color: '#6728e4',
                           borderRadius: '8px',
                           border: 'none',
                           cursor: 'pointer',
                           fontSize: '0.78rem',
-                          fontFamily: 'Syne, sans-serif',
+                          fontFamily: "'Plus Jakarta Sans', sans-serif",
                           fontWeight: 700,
                         }}
                       >
@@ -237,7 +237,7 @@ export default function KOLs() {
             </tbody>
           </table>
         </div>
-        <div style={{ padding: '12px 16px', borderTop: '1px solid #F0EEFF', color: '#8B87A8', fontSize: '0.78rem', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
+        <div style={{ padding: '12px 16px', borderTop: '1px solid #e1e0ff', color: '#777683', fontSize: '0.78rem', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
           {kols.length} KOL ditemukan
         </div>
       </div>

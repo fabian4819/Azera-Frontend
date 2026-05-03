@@ -40,9 +40,9 @@ const categories = ['Beauty', 'F&B', 'Fashion', 'Tech', 'Fitness', 'Home & Livin
 const thStyle: React.CSSProperties = {
   padding: '14px 16px',
   textAlign: 'left',
-  fontFamily: 'Syne, sans-serif',
+  fontFamily: "'Plus Jakarta Sans', sans-serif",
   fontWeight: 700,
-  color: '#120E28',
+  color: '#191c20',
   fontSize: '0.78rem',
   whiteSpace: 'nowrap',
   letterSpacing: '0.04em',
@@ -51,7 +51,7 @@ const thStyle: React.CSSProperties = {
 const tdStyle: React.CSSProperties = {
   padding: '14px 16px',
   fontSize: '0.875rem',
-  color: '#5B5780',
+  color: '#464652',
   fontFamily: 'Plus Jakarta Sans, sans-serif',
 };
 
@@ -59,19 +59,19 @@ const modalInputStyle: React.CSSProperties = {
   width: '100%',
   padding: '11px 14px',
   borderRadius: '10px',
-  border: '1.5px solid #E0DCFF',
+  border: '1.5px solid #c7c8cf',
   fontSize: '0.875rem',
   outline: 'none',
   fontFamily: 'Plus Jakarta Sans, sans-serif',
   background: 'white',
-  color: '#120E28',
+  color: '#191c20',
 };
 
 const labelStyle: React.CSSProperties = {
   display: 'block',
   fontWeight: 600,
   fontSize: '0.8rem',
-  color: '#120E28',
+  color: '#191c20',
   marginBottom: '5px',
   fontFamily: 'Plus Jakarta Sans, sans-serif',
 };
@@ -171,11 +171,11 @@ export default function PortfolioManager() {
       </div>
 
       {/* Table */}
-      <div style={{ background: 'white', borderRadius: '16px', border: '1px solid #F0EEFF', overflow: 'hidden', boxShadow: '0 2px 12px rgba(107,46,232,0.06)' }}>
+      <div style={{ background: 'white', borderRadius: '16px', border: '1px solid #e1e0ff', overflow: 'hidden', boxShadow: '0 2px 12px rgba(107,46,232,0.06)' }}>
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem' }}>
             <thead>
-              <tr style={{ background: '#F8F7FF', borderBottom: '1px solid #F0EEFF' }}>
+              <tr style={{ background: '#f8f9ff', borderBottom: '1px solid #e1e0ff' }}>
                 {['Brand', 'Hashtag', 'Kategori', 'KOL', 'Reach', 'ER%', 'Featured', 'Tanggal', 'Aksi'].map((h) => (
                   <th key={h} style={thStyle}>{h}</th>
                 ))}
@@ -189,22 +189,22 @@ export default function PortfolioManager() {
               ) : items.map((item, i) => (
                 <tr
                   key={item._id}
-                  style={{ borderBottom: '1px solid #F0EEFF', background: i % 2 === 0 ? 'white' : '#FDFCFF', transition: 'background 0.15s' }}
+                  style={{ borderBottom: '1px solid #e1e0ff', background: i % 2 === 0 ? 'white' : '#fcfcff', transition: 'background 0.15s' }}
                   onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.background = '#F8F6FF')}
-                  onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.background = i % 2 === 0 ? 'white' : '#FDFCFF')}
+                  onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.background = i % 2 === 0 ? 'white' : '#fcfcff')}
                 >
-                  <td style={{ ...tdStyle, fontWeight: 600, color: '#120E28' }}>{item.brand}</td>
+                  <td style={{ ...tdStyle, fontWeight: 600, color: '#191c20' }}>{item.brand}</td>
                   <td style={tdStyle}>{item.hashtag}</td>
                   <td style={tdStyle}>
-                    <span style={{ background: '#F0EEFF', color: '#6B2EE8', borderRadius: '999px', padding: '3px 10px', fontSize: '0.72rem', fontFamily: 'Syne, sans-serif', fontWeight: 700 }}>
+                    <span style={{ background: '#e1e0ff', color: '#6728e4', borderRadius: '999px', padding: '3px 10px', fontSize: '0.72rem', fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700 }}>
                       {item.category}
                     </span>
                   </td>
                   <td style={tdStyle}>{item.kolCount}</td>
                   <td style={tdStyle}>{item.reach}</td>
-                  <td style={{ ...tdStyle, color: '#10B981', fontFamily: 'Syne, sans-serif', fontWeight: 700 }}>{item.engagement}%</td>
+                  <td style={{ ...tdStyle, color: '#10B981', fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700 }}>{item.engagement}%</td>
                   <td style={tdStyle}>
-                    <span style={{ color: item.featured ? '#10B981' : '#8B87A8', fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '0.78rem' }}>
+                    <span style={{ color: item.featured ? '#10B981' : '#777683', fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700, fontSize: '0.78rem' }}>
                       {item.featured ? 'Ya' : 'Tidak'}
                     </span>
                   </td>
@@ -213,13 +213,13 @@ export default function PortfolioManager() {
                     <div style={{ display: 'flex', gap: '6px' }}>
                       <button
                         onClick={() => openEdit(item)}
-                        style={{ padding: '7px', background: '#F0EEFF', border: 'none', borderRadius: '8px', cursor: 'pointer', color: '#6B2EE8', display: 'flex' }}
+                        style={{ padding: '7px', background: '#e1e0ff', border: 'none', borderRadius: '8px', cursor: 'pointer', color: '#6728e4', display: 'flex' }}
                       >
                         <Edit2 size={14} />
                       </button>
                       <button
                         onClick={() => setDeleteConfirm(item._id)}
-                        style={{ padding: '7px', background: '#FEE2E2', border: 'none', borderRadius: '8px', cursor: 'pointer', color: '#EF4444', display: 'flex' }}
+                        style={{ padding: '7px', background: '#ffdad6', border: 'none', borderRadius: '8px', cursor: 'pointer', color: '#ba1a1a', display: 'flex' }}
                       >
                         <Trash2 size={14} />
                       </button>
@@ -237,12 +237,12 @@ export default function PortfolioManager() {
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
           <div style={{ background: 'white', borderRadius: '20px', padding: '32px', width: '100%', maxWidth: '560px', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-              <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: '1.1rem', color: '#120E28' }}>
+              <h3 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800, fontSize: '1.1rem', color: '#191c20' }}>
                 {editId ? 'Edit Portfolio' : 'Tambah Portfolio'}
               </h3>
               <button
                 onClick={() => setShowModal(false)}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#8B87A8', padding: '4px', display: 'flex' }}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#777683', padding: '4px', display: 'flex' }}
               >
                 <X size={20} />
               </button>
@@ -280,8 +280,8 @@ export default function PortfolioManager() {
 
             <div style={{ marginBottom: '14px' }}>
               <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
-                <input type="checkbox" checked={form.featured} onChange={(e) => setForm({ ...form, featured: e.target.checked })} style={{ width: '16px', height: '16px', accentColor: '#6B2EE8' }} />
-                <span style={{ fontWeight: 600, fontSize: '0.875rem', color: '#120E28' }}>Tampilkan di featured homepage</span>
+                <input type="checkbox" checked={form.featured} onChange={(e) => setForm({ ...form, featured: e.target.checked })} style={{ width: '16px', height: '16px', accentColor: '#6728e4' }} />
+                <span style={{ fontWeight: 600, fontSize: '0.875rem', color: '#191c20' }}>Tampilkan di featured homepage</span>
               </label>
             </div>
 
@@ -312,7 +312,7 @@ export default function PortfolioManager() {
             <div style={{ display: 'flex', gap: '12px' }}>
               <button
                 onClick={() => setShowModal(false)}
-                style={{ flex: 1, padding: '12px', borderRadius: '10px', border: '1.5px solid #E0DCFF', background: 'white', cursor: 'pointer', fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 600, color: '#8B87A8' }}
+                style={{ flex: 1, padding: '12px', borderRadius: '10px', border: '1.5px solid #c7c8cf', background: 'white', cursor: 'pointer', fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 600, color: '#777683' }}
               >
                 Batal
               </button>
@@ -328,25 +328,25 @@ export default function PortfolioManager() {
       {deleteConfirm && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
           <div style={{ background: 'white', borderRadius: '20px', padding: '32px', maxWidth: '380px', width: '100%', textAlign: 'center', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' }}>
-            <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: '#FEE2E2', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
-              <Trash2 size={24} color="#EF4444" />
+            <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: '#ffdad6', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+              <Trash2 size={24} color="#ba1a1a" />
             </div>
-            <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: '1.1rem', color: '#120E28', marginBottom: '8px' }}>
+            <h3 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800, fontSize: '1.1rem', color: '#191c20', marginBottom: '8px' }}>
               Hapus Portfolio?
             </h3>
-            <p style={{ color: '#8B87A8', fontSize: '0.875rem', marginBottom: '24px', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
+            <p style={{ color: '#777683', fontSize: '0.875rem', marginBottom: '24px', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
               Portfolio ini akan dihapus permanen dan tidak bisa dikembalikan.
             </p>
             <div style={{ display: 'flex', gap: '12px' }}>
               <button
                 onClick={() => setDeleteConfirm(null)}
-                style={{ flex: 1, padding: '12px', borderRadius: '10px', border: '1.5px solid #E0DCFF', background: 'white', cursor: 'pointer', fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 600, color: '#8B87A8' }}
+                style={{ flex: 1, padding: '12px', borderRadius: '10px', border: '1.5px solid #c7c8cf', background: 'white', cursor: 'pointer', fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 600, color: '#777683' }}
               >
                 Batal
               </button>
               <button
                 onClick={() => deleteItem(deleteConfirm)}
-                style={{ flex: 1, padding: '12px', borderRadius: '10px', border: 'none', background: '#EF4444', color: 'white', cursor: 'pointer', fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 700 }}
+                style={{ flex: 1, padding: '12px', borderRadius: '10px', border: 'none', background: '#ba1a1a', color: 'white', cursor: 'pointer', fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 700 }}
               >
                 Hapus
               </button>

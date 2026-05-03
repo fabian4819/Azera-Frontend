@@ -21,9 +21,9 @@ const statusOptions = ['', 'new', 'reviewed', 'contacted'];
 const thStyle: React.CSSProperties = {
   padding: '14px 16px',
   textAlign: 'left',
-  fontFamily: 'Syne, sans-serif',
+  fontFamily: "'Plus Jakarta Sans', sans-serif",
   fontWeight: 700,
-  color: '#120E28',
+  color: '#191c20',
   fontSize: '0.78rem',
   whiteSpace: 'nowrap',
   letterSpacing: '0.04em',
@@ -32,21 +32,21 @@ const thStyle: React.CSSProperties = {
 const tdStyle: React.CSSProperties = {
   padding: '14px 16px',
   fontSize: '0.875rem',
-  color: '#5B5780',
+  color: '#464652',
   whiteSpace: 'nowrap',
-  fontFamily: 'Plus Jakarta Sans, sans-serif',
+  fontFamily: "'Plus Jakarta Sans', sans-serif",
 };
 
 const controlStyle: React.CSSProperties = {
   padding: '10px 14px',
   borderRadius: '10px',
-  border: '1.5px solid #E0DCFF',
+  border: '1.5px solid #c7c8cf',
   fontSize: '0.875rem',
   outline: 'none',
-  fontFamily: 'Plus Jakarta Sans, sans-serif',
+  fontFamily: "'Plus Jakarta Sans', sans-serif",
   background: 'white',
   cursor: 'pointer',
-  color: '#120E28',
+  color: '#191c20',
 };
 
 export default function Brands() {
@@ -100,7 +100,7 @@ export default function Brands() {
           <div style={{ position: 'relative', flex: 1 }}>
             <Search
               size={16}
-              style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#8B87A8' }}
+              style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#777683' }}
             />
             <input
               value={search}
@@ -131,7 +131,7 @@ export default function Brands() {
               alignItems: 'center',
               justifyContent: 'center',
               padding: '10px',
-              color: '#8B87A8',
+              color: '#777683',
             }}
           >
             <RefreshCw size={16} />
@@ -140,11 +140,11 @@ export default function Brands() {
       </div>
 
       {/* Table */}
-      <div style={{ background: 'white', borderRadius: '16px', border: '1px solid #F0EEFF', overflow: 'hidden', boxShadow: '0 2px 12px rgba(107,46,232,0.06)' }}>
+      <div style={{ background: 'white', borderRadius: '16px', border: '1px solid #e1e0ff', overflow: 'hidden', boxShadow: '0 2px 12px rgba(107,46,232,0.06)' }}>
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem' }}>
             <thead>
-              <tr style={{ background: '#F8F7FF', borderBottom: '1px solid #F0EEFF' }}>
+              <tr style={{ background: '#f8f9ff', borderBottom: '1px solid #e1e0ff' }}>
                 {['Brand', 'PIC', 'WhatsApp', 'Kategori', 'Paket', 'Budget', 'Status', 'Tanggal', 'Aksi'].map((h) => (
                   <th key={h} style={thStyle}>{h}</th>
                 ))}
@@ -168,26 +168,26 @@ export default function Brands() {
                   <tr
                     key={b._id}
                     style={{
-                      borderBottom: '1px solid #F0EEFF',
-                      background: i % 2 === 0 ? 'white' : '#FDFCFF',
+                      borderBottom: '1px solid #e1e0ff',
+                      background: i % 2 === 0 ? 'white' : '#fcfcff',
                       transition: 'background 0.15s',
                     }}
                     onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.background = '#F8F6FF')}
-                    onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.background = i % 2 === 0 ? 'white' : '#FDFCFF')}
+                    onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.background = i % 2 === 0 ? 'white' : '#fcfcff')}
                   >
-                    <td style={{ ...tdStyle, fontWeight: 600, color: '#120E28' }}>{b.namaBrand}</td>
+                    <td style={{ ...tdStyle, fontWeight: 600, color: '#191c20' }}>{b.namaBrand}</td>
                     <td style={tdStyle}>{b.namaPIC}</td>
                     <td style={tdStyle}>{b.whatsapp}</td>
                     <td style={tdStyle}>{b.kategori}</td>
                     <td style={tdStyle}>
                       <span
                         style={{
-                          background: '#F0EEFF',
-                          color: '#6B2EE8',
+                          background: '#e1e0ff',
+                          color: '#6728e4',
                           borderRadius: '999px',
                           padding: '3px 10px',
                           fontSize: '0.72rem',
-                          fontFamily: 'Syne, sans-serif',
+                          fontFamily: "'Plus Jakarta Sans', sans-serif",
                           fontWeight: 700,
                           textTransform: 'capitalize',
                         }}
@@ -206,13 +206,13 @@ export default function Brands() {
                           alignItems: 'center',
                           gap: '6px',
                           padding: '7px 14px',
-                          background: '#F0EEFF',
-                          color: '#6B2EE8',
+                          background: '#e1e0ff',
+                          color: '#6728e4',
                           borderRadius: '8px',
                           border: 'none',
                           cursor: 'pointer',
                           fontSize: '0.78rem',
-                          fontFamily: 'Syne, sans-serif',
+                          fontFamily: "'Plus Jakarta Sans', sans-serif",
                           fontWeight: 700,
                         }}
                       >
@@ -229,10 +229,10 @@ export default function Brands() {
         <div
           style={{
             padding: '12px 16px',
-            borderTop: '1px solid #F0EEFF',
-            color: '#8B87A8',
+            borderTop: '1px solid #e1e0ff',
+            color: '#777683',
             fontSize: '0.78rem',
-            fontFamily: 'Plus Jakarta Sans, sans-serif',
+            fontFamily: "'Plus Jakarta Sans', sans-serif",
           }}
         >
           {brands.length} hasil ditemukan

@@ -13,42 +13,26 @@ export default function FAQ() {
   const toggle = (i: number) => setOpenIndex((prev) => (prev === i ? null : i));
 
   return (
-    <section style={{ background: '#FAFAFA', padding: '128px 24px' }} ref={ref}>
-      <div style={{ maxWidth: '760px', margin: '0 auto' }}>
-        {/* Header */}
+    <section className="section-py" style={{ background: '#ffffff', position: 'relative', overflow: 'hidden' }} ref={ref}>
+      <div className="blob" style={{ width: '300px', height: '300px', background: '#e1e0ff', opacity: 0.2, top: '20%', right: '3%' }} />
+      <div className="blob" style={{ width: '250px', height: '250px', background: '#ffd9e1', opacity: 0.15, bottom: '15%', left: '3%' }} />
+
+      <div style={{ maxWidth: '760px', margin: '0 auto', padding: '0 24px', position: 'relative', zIndex: 1 }}>
         <motion.div
           style={{ textAlign: 'center', marginBottom: '72px' }}
           initial={{ opacity: 0, y: 24 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6, ease: easeOut }}
         >
-          <span className="section-label" style={{ display: 'inline-block', marginBottom: '16px' }}>
-            FAQ
-          </span>
-          <h2
-            style={{
-              fontFamily: 'Syne, sans-serif',
-              fontWeight: 800,
-              fontSize: 'clamp(2rem, 5vw, 3.5rem)',
-              color: '#120E28',
-              lineHeight: 1.15,
-            }}
-          >
+          <span className="section-label" style={{ marginBottom: '16px' }}>FAQ</span>
+          <h2 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800, fontSize: 'clamp(2rem, 5vw, 3.5rem)', color: '#191c20', lineHeight: 1.15 }}>
             Pertanyaan yang{' '}
-            <span
-              style={{
-                background: 'linear-gradient(135deg, #6B2EE8, #E8197A)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-              }}
-            >
+            <span style={{ background: 'linear-gradient(135deg, #6728e4, #ff81aa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
               Sering Ditanya.
             </span>
           </h2>
         </motion.div>
 
-        {/* Accordion */}
         <div style={{ display: 'flex', flexDirection: 'column' }}>
           {faqs.map((faq, i) => {
             const isOpen = openIndex === i;
@@ -58,64 +42,26 @@ export default function FAQ() {
                 initial={{ opacity: 0, y: 16 }}
                 animate={isInView ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.5, ease: easeOut, delay: i * 0.07 }}
-                style={{
-                  borderBottom: '1px solid rgba(107,46,232,0.1)',
-                  position: 'relative',
-                }}
+                style={{ borderBottom: '1px solid rgba(103,40,228,0.08)', position: 'relative' }}
               >
-                {/* Active left accent bar */}
                 {isOpen && (
-                  <div
-                    style={{
-                      position: 'absolute',
-                      left: '-24px',
-                      top: 0,
-                      bottom: 0,
-                      width: '3px',
-                      background: 'linear-gradient(180deg, #6B2EE8, #E8197A)',
-                      borderRadius: '0 2px 2px 0',
-                    }}
-                  />
+                  <div style={{ position: 'absolute', left: '-24px', top: 0, bottom: 0, width: '3px', background: 'linear-gradient(180deg, #6728e4, #ff81aa)', borderRadius: '0 2px 2px 0' }} />
                 )}
-
-                {/* Question row */}
                 <button
                   onClick={() => toggle(i)}
                   style={{
-                    width: '100%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    gap: '16px',
-                    padding: '24px 0',
-                    background: 'none',
-                    border: 'none',
-                    cursor: 'pointer',
-                    textAlign: 'left',
+                    width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    gap: '16px', padding: '24px 0', background: 'none', border: 'none',
+                    cursor: 'pointer', textAlign: 'left',
                   }}
                 >
-                  <span
-                    style={{
-                      fontFamily: 'Syne, sans-serif',
-                      fontWeight: 700,
-                      fontSize: '1rem',
-                      color: isOpen ? '#6B2EE8' : '#120E28',
-                      transition: 'color 0.2s',
-                      lineHeight: 1.4,
-                    }}
-                  >
+                  <span style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700, fontSize: '1rem', color: isOpen ? '#6728e4' : '#191c20', transition: 'color 0.2s', lineHeight: 1.4 }}>
                     {faq.question}
                   </span>
-                  <motion.div
-                    animate={{ rotate: isOpen ? 180 : 0 }}
-                    transition={{ duration: 0.25 }}
-                    style={{ flexShrink: 0, color: isOpen ? '#6B2EE8' : '#8B87A8' }}
-                  >
+                  <motion.div animate={{ rotate: isOpen ? 180 : 0 }} transition={{ duration: 0.25 }} style={{ flexShrink: 0, color: isOpen ? '#6728e4' : '#777683' }}>
                     <ChevronDown size={20} />
                   </motion.div>
                 </button>
-
-                {/* Answer */}
                 <AnimatePresence initial={false}>
                   {isOpen && (
                     <motion.div
@@ -125,15 +71,7 @@ export default function FAQ() {
                       transition={{ duration: 0.3, ease: easeOut }}
                       style={{ overflow: 'hidden' }}
                     >
-                      <p
-                        style={{
-                          color: '#5B5780',
-                          fontSize: '0.925rem',
-                          lineHeight: 1.8,
-                          fontFamily: 'Plus Jakarta Sans, sans-serif',
-                          paddingBottom: '24px',
-                        }}
-                      >
+                      <p style={{ color: '#464652', fontSize: '0.925rem', lineHeight: 1.8, fontFamily: "'Plus Jakarta Sans', sans-serif", paddingBottom: '24px' }}>
                         {faq.answer}
                       </p>
                     </motion.div>

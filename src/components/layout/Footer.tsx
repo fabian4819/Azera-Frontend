@@ -1,30 +1,29 @@
 import { Link } from 'react-router-dom';
-import { Camera, Mail, ExternalLink } from 'lucide-react';
+import { Camera, ExternalLink, Mail } from 'lucide-react';
 
 export default function Footer() {
   return (
-    <footer style={{ background: '#08060F', position: 'relative', overflow: 'hidden' }}>
-      {/* Top content */}
+    <footer style={{ background: '#f0f1f5', position: 'relative', overflow: 'hidden' }}>
       <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '80px 24px 0', position: 'relative', zIndex: 1 }}>
         <div
+          className="footer-grid"
           style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(4, 1fr)',
             gap: '48px',
           }}
-          className="footer-grid"
         >
-          {/* Column 1: Logo + tagline */}
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
               <img src="/icon.png" alt="Azera" style={{ height: '32px', objectFit: 'contain' }} />
               <span
                 style={{
-                  fontFamily: 'Syne, sans-serif',
-                  fontWeight: 800,
+                  fontFamily: "'Plus Jakarta Sans', sans-serif",
+                  fontWeight: 900,
+                  fontStyle: 'italic',
                   fontSize: '1.1rem',
-                  color: '#FFFFFF',
-                  letterSpacing: '0.12em',
+                  color: '#15157d',
+                  letterSpacing: '-0.02em',
                 }}
               >
                 AZERA
@@ -32,24 +31,24 @@ export default function Footer() {
             </div>
             <p
               style={{
-                color: '#8B87A8',
+                color: '#464652',
                 fontSize: '0.875rem',
                 lineHeight: 1.7,
                 maxWidth: '220px',
+                fontFamily: "'Plus Jakarta Sans', sans-serif",
               }}
             >
               Platform KOL campaign agency terpercaya di Indonesia. Kami menghubungkan brand dengan ribuan KOL terkurasi.
             </p>
           </div>
 
-          {/* Column 2: Platform links */}
           <div>
             <h4
               style={{
-                fontFamily: 'Syne, sans-serif',
+                fontFamily: "'Plus Jakarta Sans', sans-serif",
                 fontWeight: 700,
                 fontSize: '0.8rem',
-                color: '#FFFFFF',
+                color: '#15157d',
                 letterSpacing: '0.1em',
                 textTransform: 'uppercase',
                 marginBottom: '20px',
@@ -68,13 +67,14 @@ export default function Footer() {
                   key={item.to + item.label}
                   to={item.to}
                   style={{
-                    color: '#8B87A8',
+                    color: '#464652',
                     fontSize: '0.875rem',
                     textDecoration: 'none',
                     transition: 'color 0.2s',
+                    fontFamily: "'Plus Jakarta Sans', sans-serif",
                   }}
-                  onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = '#EDE9F8')}
-                  onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = '#8B87A8')}
+                  onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = '#6728e4')}
+                  onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = '#464652')}
                 >
                   {item.label}
                 </Link>
@@ -82,14 +82,13 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Column 3: Social */}
           <div>
             <h4
               style={{
-                fontFamily: 'Syne, sans-serif',
+                fontFamily: "'Plus Jakarta Sans', sans-serif",
                 fontWeight: 700,
                 fontSize: '0.8rem',
-                color: '#FFFFFF',
+                color: '#15157d',
                 letterSpacing: '0.1em',
                 textTransform: 'uppercase',
                 marginBottom: '20px',
@@ -103,65 +102,40 @@ export default function Footer() {
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '10px',
-                  color: '#8B87A8',
-                  fontSize: '0.875rem',
-                  textDecoration: 'none',
-                  transition: 'color 0.2s',
+                  display: 'flex', alignItems: 'center', gap: '10px', color: '#464652',
+                  fontSize: '0.875rem', textDecoration: 'none', transition: 'color 0.2s',
+                  fontFamily: "'Plus Jakarta Sans', sans-serif",
                 }}
-                onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = '#EDE9F8')}
-                onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = '#8B87A8')}
+                onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = '#6728e4')}
+                onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = '#464652')}
               >
-                <Camera size={15} />
-                Instagram
+                <Camera size={15} /> Instagram
               </a>
-              <a
-                href="#"
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '10px',
-                  color: '#8B87A8',
-                  fontSize: '0.875rem',
-                  textDecoration: 'none',
-                  transition: 'color 0.2s',
-                }}
-                onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = '#EDE9F8')}
-                onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = '#8B87A8')}
-              >
-                <ExternalLink size={15} />
-                TikTok
-              </a>
-              <a
-                href="#"
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '10px',
-                  color: '#8B87A8',
-                  fontSize: '0.875rem',
-                  textDecoration: 'none',
-                  transition: 'color 0.2s',
-                }}
-                onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = '#EDE9F8')}
-                onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = '#8B87A8')}
-              >
-                <ExternalLink size={15} />
-                LinkedIn
-              </a>
+              {['TikTok', 'LinkedIn'].map((platform) => (
+                <a
+                  key={platform}
+                  href="#"
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: '10px', color: '#464652',
+                    fontSize: '0.875rem', textDecoration: 'none', transition: 'color 0.2s',
+                    fontFamily: "'Plus Jakarta Sans', sans-serif",
+                  }}
+                  onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = '#6728e4')}
+                  onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = '#464652')}
+                >
+                  <ExternalLink size={15} /> {platform}
+                </a>
+              ))}
             </div>
           </div>
 
-          {/* Column 4: Contact */}
           <div>
             <h4
               style={{
-                fontFamily: 'Syne, sans-serif',
+                fontFamily: "'Plus Jakarta Sans', sans-serif",
                 fontWeight: 700,
                 fontSize: '0.8rem',
-                color: '#FFFFFF',
+                color: '#15157d',
                 letterSpacing: '0.1em',
                 textTransform: 'uppercase',
                 marginBottom: '20px',
@@ -175,66 +149,49 @@ export default function Footer() {
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '10px',
-                  color: '#8B87A8',
-                  fontSize: '0.875rem',
-                  textDecoration: 'none',
-                  transition: 'color 0.2s',
+                  display: 'flex', alignItems: 'center', gap: '10px', color: '#464652',
+                  fontSize: '0.875rem', textDecoration: 'none', transition: 'color 0.2s',
+                  fontFamily: "'Plus Jakarta Sans', sans-serif",
                 }}
-                onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = '#EDE9F8')}
-                onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = '#8B87A8')}
+                onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = '#6728e4')}
+                onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = '#464652')}
               >
-                <ExternalLink size={15} />
-                WhatsApp
+                <ExternalLink size={15} /> WhatsApp
               </a>
               <a
                 href="mailto:hello@azerakol.id"
                 style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '10px',
-                  color: '#8B87A8',
-                  fontSize: '0.875rem',
-                  textDecoration: 'none',
-                  transition: 'color 0.2s',
+                  display: 'flex', alignItems: 'center', gap: '10px', color: '#464652',
+                  fontSize: '0.875rem', textDecoration: 'none', transition: 'color 0.2s',
+                  fontFamily: "'Plus Jakarta Sans', sans-serif",
                 }}
-                onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = '#EDE9F8')}
-                onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = '#8B87A8')}
+                onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = '#6728e4')}
+                onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = '#464652')}
               >
-                <Mail size={15} />
-                hello@azerakol.id
+                <Mail size={15} /> hello@azerakol.id
               </a>
             </div>
           </div>
         </div>
 
-        {/* Gradient divider */}
         <div
           style={{
             height: '1px',
-            background: 'linear-gradient(90deg, transparent, #6B2EE8, #E8197A, #38C6F0, transparent)',
-            opacity: 0.4,
-            margin: '56px 0 0',
+            background: 'linear-gradient(90deg, transparent, #c7c8cf, transparent)',
+            margin: '48px 0 0',
           }}
         />
       </div>
 
-      {/* Big AZERA watermark + copyright */}
-      <div style={{ position: 'relative', textAlign: 'center', overflow: 'hidden' }}>
-        {/* Giant text */}
+      <div style={{ position: 'relative', textAlign: 'center', overflow: 'hidden', paddingBottom: '20px' }}>
         <div
           style={{
-            fontFamily: 'Syne, sans-serif',
+            fontFamily: "'Plus Jakarta Sans', sans-serif",
             fontWeight: 900,
-            fontSize: 'clamp(6rem, 18vw, 18rem)',
+            fontSize: 'clamp(6rem, 18vw, 14rem)',
             lineHeight: 0.85,
-            background: 'linear-gradient(135deg, #6B2EE8, #E8197A)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text',
-            opacity: 0.12,
+            color: '#15157d',
+            opacity: 0.04,
             userSelect: 'none',
             pointerEvents: 'none',
             padding: '20px 0 0',
@@ -242,18 +199,8 @@ export default function Footer() {
         >
           AZERA
         </div>
-
-        {/* Copyright overlay */}
-        <div
-          style={{
-            position: 'absolute',
-            bottom: '20px',
-            left: 0,
-            right: 0,
-            textAlign: 'center',
-          }}
-        >
-          <p style={{ color: '#8B87A8', fontSize: '0.78rem', letterSpacing: '0.05em' }}>
+        <div style={{ position: 'absolute', bottom: '20px', left: 0, right: 0, textAlign: 'center' }}>
+          <p style={{ color: '#777683', fontSize: '0.78rem', letterSpacing: '0.05em', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
             &copy; {new Date().getFullYear()} Azera KOL Agency. All rights reserved.
           </p>
         </div>

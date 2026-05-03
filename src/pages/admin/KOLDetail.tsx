@@ -45,7 +45,7 @@ const cardStyle: React.CSSProperties = {
   background: 'white',
   borderRadius: '16px',
   padding: '24px',
-  border: '1px solid #F0EEFF',
+  border: '1px solid #e1e0ff',
   boxShadow: '0 2px 12px rgba(107,46,232,0.05)',
 };
 
@@ -53,12 +53,12 @@ const inputStyle: React.CSSProperties = {
   width: '100%',
   padding: '11px 14px',
   borderRadius: '10px',
-  border: '1.5px solid #E0DCFF',
+  border: '1.5px solid #c7c8cf',
   fontSize: '0.875rem',
   outline: 'none',
   fontFamily: 'Plus Jakarta Sans, sans-serif',
   background: 'white',
-  color: '#120E28',
+  color: '#191c20',
   resize: 'vertical' as const,
 };
 
@@ -113,7 +113,7 @@ export default function KOLDetail() {
     }
   };
 
-  if (loading) return <div style={{ textAlign: 'center', padding: '80px', color: '#8B87A8', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>Memuat...</div>;
+  if (loading) return <div style={{ textAlign: 'center', padding: '80px', color: '#777683', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>Memuat...</div>;
   if (!kol) return null;
 
   const sm = kol.socialMedia || {};
@@ -122,9 +122,9 @@ export default function KOLDetail() {
   const ytVR = sm.youtube ? calcViewRate(sm.youtube.subscribers || 0, sm.youtube.avgViews || 0) : 0;
 
   const StatCard = ({ label, value, color }: { label: string; value: string | number; color?: string }) => (
-    <div style={{ background: '#F8F7FF', borderRadius: '10px', padding: '14px', textAlign: 'center', border: '1px solid #F0EEFF' }}>
-      <p style={{ fontFamily: 'Syne, sans-serif', fontSize: '1.1rem', fontWeight: 800, color: color || '#120E28' }}>{value}</p>
-      <p style={{ fontSize: '0.72rem', color: '#8B87A8', marginTop: '2px', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>{label}</p>
+    <div style={{ background: '#f8f9ff', borderRadius: '10px', padding: '14px', textAlign: 'center', border: '1px solid #e1e0ff' }}>
+      <p style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: '1.1rem', fontWeight: 800, color: color || '#191c20' }}>{value}</p>
+      <p style={{ fontSize: '0.72rem', color: '#777683', marginTop: '2px', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>{label}</p>
     </div>
   );
 
@@ -132,7 +132,7 @@ export default function KOLDetail() {
     <div>
       <button
         onClick={() => navigate('/admin/kols')}
-        style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'none', border: 'none', cursor: 'pointer', color: '#8B87A8', fontSize: '0.875rem', marginBottom: '24px', padding: 0, fontFamily: 'Plus Jakarta Sans, sans-serif' }}
+        style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'none', border: 'none', cursor: 'pointer', color: '#777683', fontSize: '0.875rem', marginBottom: '24px', padding: 0, fontFamily: 'Plus Jakarta Sans, sans-serif' }}
       >
         <ArrowLeft size={16} />
         Kembali ke KOLs
@@ -144,7 +144,7 @@ export default function KOLDetail() {
           {/* Profile card */}
           <div style={cardStyle}>
             {/* Top gradient bar */}
-            <div style={{ height: '3px', background: 'linear-gradient(135deg, #6B2EE8, #E8197A)', borderRadius: '2px', marginBottom: '24px' }} />
+            <div style={{ height: '3px', background: 'linear-gradient(135deg, #6728e4, #ff81aa)', borderRadius: '2px', marginBottom: '24px' }} />
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px' }}>
               {kol.fotoProfil ? (
@@ -159,11 +159,11 @@ export default function KOLDetail() {
                     width: '64px',
                     height: '64px',
                     borderRadius: '50%',
-                    background: 'linear-gradient(135deg, #6B2EE8, #E8197A)',
+                    background: 'linear-gradient(135deg, #6728e4, #ff81aa)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    fontFamily: 'Syne, sans-serif',
+                    fontFamily: "'Plus Jakarta Sans', sans-serif",
                     fontWeight: 800,
                     fontSize: '1.5rem',
                     color: 'white',
@@ -174,10 +174,10 @@ export default function KOLDetail() {
                 </div>
               )}
               <div>
-                <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: '1.3rem', color: '#120E28' }}>
+                <h2 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800, fontSize: '1.3rem', color: '#191c20' }}>
                   {kol.namaLengkap}
                 </h2>
-                <p style={{ color: '#8B87A8', fontSize: '0.875rem', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
+                <p style={{ color: '#777683', fontSize: '0.875rem', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
                   {kol.kota} · {kol.jenisKelamin}
                 </p>
                 <div style={{ marginTop: '6px' }}><StatusBadge status={kol.status} /></div>
@@ -191,21 +191,21 @@ export default function KOLDetail() {
                 { label: 'Lahir', val: kol.tanggalLahir ? new Date(kol.tanggalLahir).toLocaleDateString('id-ID') : '—' },
               ].map((f) => (
                 <div key={f.label} style={{ fontSize: '0.8rem' }}>
-                  <p style={{ color: '#8B87A8', marginBottom: '2px', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>{f.label}</p>
-                  <p style={{ fontWeight: 600, color: '#120E28', fontFamily: 'Plus Jakarta Sans, sans-serif', wordBreak: 'break-all' }}>{f.val}</p>
+                  <p style={{ color: '#777683', marginBottom: '2px', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>{f.label}</p>
+                  <p style={{ fontWeight: 600, color: '#191c20', fontFamily: 'Plus Jakarta Sans, sans-serif', wordBreak: 'break-all' }}>{f.val}</p>
                 </div>
               ))}
             </div>
 
             <div>
-              <p style={{ fontSize: '0.7rem', fontFamily: 'Syne, sans-serif', fontWeight: 700, color: '#8B87A8', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+              <p style={{ fontSize: '0.7rem', fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700, color: '#777683', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
                 Niche
               </p>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
                 {(kol.niche || []).map((n) => (
                   <span
                     key={n}
-                    style={{ background: '#F0EEFF', color: '#6B2EE8', borderRadius: '999px', padding: '4px 12px', fontSize: '0.78rem', fontFamily: 'Syne, sans-serif', fontWeight: 700 }}
+                    style={{ background: '#e1e0ff', color: '#6728e4', borderRadius: '999px', padding: '4px 12px', fontSize: '0.78rem', fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700 }}
                   >
                     {n}
                   </span>
@@ -216,10 +216,10 @@ export default function KOLDetail() {
 
           {/* Instagram */}
           {sm.instagram && (
-            <div style={{ ...cardStyle, border: '1px solid #FEE2E2' }}>
+            <div style={{ ...cardStyle, border: '1px solid #ffdad6' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
-                <Camera size={18} color="#E8197A" />
-                <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, color: '#E8197A' }}>
+                <Camera size={18} color="#ff81aa" />
+                <h3 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700, color: '#ff81aa' }}>
                   Instagram — @{sm.instagram.username}
                 </h3>
               </div>
@@ -236,7 +236,7 @@ export default function KOLDetail() {
           {sm.tiktok && (
             <div style={{ ...cardStyle, border: '1px solid #BBF7D0' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
-                <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, color: '#065F46' }}>
+                <h3 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700, color: '#065F46' }}>
                   TikTok — @{sm.tiktok.username}
                 </h3>
               </div>
@@ -254,7 +254,7 @@ export default function KOLDetail() {
             <div style={{ ...cardStyle, border: '1px solid #FED7AA' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
                 <Play size={18} color="#C2410C" />
-                <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, color: '#C2410C' }}>
+                <h3 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700, color: '#C2410C' }}>
                   YouTube — {sm.youtube.channel}
                 </h3>
               </div>
@@ -269,25 +269,25 @@ export default function KOLDetail() {
           {/* Additional info */}
           {(kol.rateCard || kol.portfolioLink || kol.pengalaman) && (
             <div style={cardStyle}>
-              <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '1rem', color: '#120E28', marginBottom: '16px' }}>
+              <h3 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700, fontSize: '1rem', color: '#191c20', marginBottom: '16px' }}>
                 Informasi Tambahan
               </h3>
               {kol.rateCard && (
-                <p style={{ marginBottom: '8px', fontSize: '0.875rem', color: '#120E28', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
+                <p style={{ marginBottom: '8px', fontSize: '0.875rem', color: '#191c20', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
                   <strong>Rate Card:</strong> {kol.rateCard}
                 </p>
               )}
               {kol.portfolioLink && (
                 <p style={{ marginBottom: '8px', fontSize: '0.875rem', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
-                  <strong style={{ color: '#120E28' }}>Portfolio:</strong>{' '}
-                  <a href={kol.portfolioLink} target="_blank" rel="noopener noreferrer" style={{ color: '#6B2EE8' }}>
+                  <strong style={{ color: '#191c20' }}>Portfolio:</strong>{' '}
+                  <a href={kol.portfolioLink} target="_blank" rel="noopener noreferrer" style={{ color: '#6728e4' }}>
                     {kol.portfolioLink}
                   </a>
                 </p>
               )}
               {kol.pengalaman && (
-                <p style={{ fontSize: '0.875rem', color: '#8B87A8', lineHeight: 1.7, fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
-                  <strong style={{ color: '#120E28' }}>Pengalaman:</strong> {kol.pengalaman}
+                <p style={{ fontSize: '0.875rem', color: '#777683', lineHeight: 1.7, fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
+                  <strong style={{ color: '#191c20' }}>Pengalaman:</strong> {kol.pengalaman}
                 </p>
               )}
             </div>
@@ -297,12 +297,12 @@ export default function KOLDetail() {
         {/* Right: Curation */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <div style={cardStyle}>
-            <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '1rem', color: '#120E28', marginBottom: '20px' }}>
+            <h3 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700, fontSize: '1rem', color: '#191c20', marginBottom: '20px' }}>
               Kurasi KOL
             </h3>
 
             <div style={{ marginBottom: '16px' }}>
-              <label style={{ display: 'block', fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 600, fontSize: '0.8rem', color: '#120E28', marginBottom: '6px' }}>
+              <label style={{ display: 'block', fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 600, fontSize: '0.8rem', color: '#191c20', marginBottom: '6px' }}>
                 Catatan Kurasi
               </label>
               <textarea
@@ -315,7 +315,7 @@ export default function KOLDetail() {
             </div>
 
             <div style={{ marginBottom: keputusan === 'rejected' ? '16px' : '20px' }}>
-              <label style={{ display: 'block', fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 600, fontSize: '0.8rem', color: '#120E28', marginBottom: '6px' }}>
+              <label style={{ display: 'block', fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 600, fontSize: '0.8rem', color: '#191c20', marginBottom: '6px' }}>
                 Keputusan
               </label>
               <select
@@ -331,7 +331,7 @@ export default function KOLDetail() {
 
             {keputusan === 'rejected' && (
               <div style={{ marginBottom: '20px' }}>
-                <label style={{ display: 'block', fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 600, fontSize: '0.8rem', color: '#120E28', marginBottom: '6px' }}>
+                <label style={{ display: 'block', fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 600, fontSize: '0.8rem', color: '#191c20', marginBottom: '6px' }}>
                   Alasan Penolakan
                 </label>
                 <textarea
@@ -339,7 +339,7 @@ export default function KOLDetail() {
                   onChange={(e) => setAlasan(e.target.value)}
                   rows={3}
                   placeholder="Tuliskan alasan penolakan..."
-                  style={{ ...inputStyle, borderColor: '#EF4444' }}
+                  style={{ ...inputStyle, borderColor: '#ba1a1a' }}
                 />
               </div>
             )}
@@ -386,7 +386,7 @@ export default function KOLDetail() {
                   alignItems: 'center',
                   justifyContent: 'center',
                   gap: '8px',
-                  background: '#EF4444',
+                  background: '#ba1a1a',
                   color: 'white',
                   borderRadius: '10px',
                   padding: '12px',

@@ -30,196 +30,53 @@ export default function AdminLogin() {
   };
 
   const inputStyle: React.CSSProperties = {
-    width: '100%',
-    padding: '13px 16px',
-    borderRadius: '12px',
-    border: '1.5px solid #E0DCFF',
-    fontSize: '0.9rem',
-    outline: 'none',
-    fontFamily: 'Plus Jakarta Sans, sans-serif',
-    color: '#120E28',
-    background: 'white',
-    transition: 'border-color 0.2s',
+    width: '100%', padding: '13px 16px', borderRadius: '12px',
+    border: '1.5px solid #c7c8cf', fontSize: '0.9rem', outline: 'none',
+    fontFamily: "'Plus Jakarta Sans', sans-serif", color: '#191c20',
+    background: 'white', transition: 'border-color 0.2s',
   };
+
+  const f = "'Plus Jakarta Sans', sans-serif";
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex' }}>
-      {/* Left: Dark brand panel */}
-      <div
-        style={{
-          flex: 1,
-          background: '#08060F',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: '60px 40px',
-          position: 'relative',
-          overflow: 'hidden',
-        }}
-        className="login-left"
-      >
-        {/* Orbs */}
-        <div className="orb" style={{ width: '400px', height: '400px', background: '#6B2EE8', top: '-150px', left: '-100px' }} />
-        <div className="orb" style={{ width: '300px', height: '300px', background: '#E8197A', bottom: '-100px', right: '-50px' }} />
-
+      <div className="login-left" style={{ flex: 1, background: '#15157d', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '60px 40px', position: 'relative', overflow: 'hidden' }}>
+        <div className="blob-lg" style={{ width: '500px', height: '500px', background: '#814bfe', opacity: 0.3, top: '-200px', left: '-150px' }} />
+        <div className="blob-lg" style={{ width: '400px', height: '400px', background: '#ff81aa', opacity: 0.25, bottom: '-150px', right: '-100px' }} />
         <div style={{ position: 'relative', zIndex: 1, textAlign: 'center' }}>
-          {/* Giant AZERA */}
-          <div
-            style={{
-              fontFamily: 'Syne, sans-serif',
-              fontWeight: 900,
-              fontSize: 'clamp(5rem, 12vw, 10rem)',
-              background: 'linear-gradient(135deg, #6B2EE8, #E8197A)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
-              lineHeight: 0.9,
-              marginBottom: '24px',
-            }}
-          >
-            AZERA
-          </div>
-          <p
-            style={{
-              color: '#8B87A8',
-              fontSize: '1rem',
-              fontFamily: 'Plus Jakarta Sans, sans-serif',
-              lineHeight: 1.7,
-              maxWidth: '300px',
-            }}
-          >
+          <div style={{ fontFamily: f, fontWeight: 900, fontStyle: 'italic', fontSize: 'clamp(5rem, 12vw, 10rem)', background: 'linear-gradient(135deg, #9da1ff, #ff81aa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', lineHeight: 0.9, marginBottom: '24px' }}>AZERA</div>
+          <p style={{ color: 'rgba(157,161,255,0.8)', fontSize: '1rem', fontFamily: f, lineHeight: 1.7, maxWidth: '300px' }}>
             Platform manajemen kampanye KOL untuk tim Azera.
           </p>
         </div>
       </div>
 
-      {/* Right: Login form */}
-      <div
-        style={{
-          width: '480px',
-          background: 'white',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: '60px 48px',
-        }}
-        className="login-right"
-      >
-        {/* Logo */}
+      <div className="login-right" style={{ width: '480px', background: 'white', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '60px 48px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '48px' }}>
           <img src="/icon.png" alt="Azera" style={{ height: '36px', objectFit: 'contain' }} />
-          <span style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: '1.2rem', color: '#120E28', letterSpacing: '0.1em' }}>
-            AZERA
-          </span>
+          <span style={{ fontFamily: f, fontWeight: 900, fontStyle: 'italic', fontSize: '1.2rem', color: '#15157d', letterSpacing: '-0.02em' }}>AZERA</span>
         </div>
-
         <div style={{ width: '100%', maxWidth: '360px' }}>
-          <h1
-            style={{
-              fontFamily: 'Syne, sans-serif',
-              fontWeight: 800,
-              fontSize: '1.8rem',
-              color: '#120E28',
-              marginBottom: '8px',
-            }}
-          >
-            Masuk
-          </h1>
-          <p style={{ color: '#8B87A8', fontSize: '0.875rem', marginBottom: '32px', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
-            Masukkan kredensial admin kamu.
-          </p>
-
+          <h1 style={{ fontFamily: f, fontWeight: 800, fontSize: '1.8rem', color: '#191c20', marginBottom: '8px' }}>Masuk</h1>
+          <p style={{ color: '#777683', fontSize: '0.875rem', marginBottom: '32px', fontFamily: f }}>Masukkan kredensial admin kamu.</p>
           {error && (
-            <div
-              style={{
-                background: '#FEE2E2',
-                color: '#B91C1C',
-                borderRadius: '12px',
-                padding: '12px 16px',
-                fontSize: '0.875rem',
-                marginBottom: '20px',
-                fontFamily: 'Plus Jakarta Sans, sans-serif',
-              }}
-            >
-              {error}
-            </div>
+            <div style={{ background: '#ffdad6', color: '#ba1a1a', borderRadius: '12px', padding: '12px 16px', fontSize: '0.875rem', marginBottom: '20px', fontFamily: f }}>{error}</div>
           )}
-
           <form onSubmit={handleSubmit}>
             <div style={{ marginBottom: '16px' }}>
-              <label
-                style={{
-                  display: 'block',
-                  fontWeight: 600,
-                  fontSize: '0.875rem',
-                  color: '#120E28',
-                  marginBottom: '6px',
-                  fontFamily: 'Plus Jakarta Sans, sans-serif',
-                }}
-              >
-                Email
-              </label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@azerakol.id"
-                required
-                style={inputStyle}
-              />
+              <label style={{ display: 'block', fontWeight: 600, fontSize: '0.875rem', color: '#191c20', marginBottom: '6px', fontFamily: f }}>Email</label>
+              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="admin@azerakol.id" required style={inputStyle} />
             </div>
-
             <div style={{ marginBottom: '32px' }}>
-              <label
-                style={{
-                  display: 'block',
-                  fontWeight: 600,
-                  fontSize: '0.875rem',
-                  color: '#120E28',
-                  marginBottom: '6px',
-                  fontFamily: 'Plus Jakarta Sans, sans-serif',
-                }}
-              >
-                Password
-              </label>
+              <label style={{ display: 'block', fontWeight: 600, fontSize: '0.875rem', color: '#191c20', marginBottom: '6px', fontFamily: f }}>Password</label>
               <div style={{ position: 'relative' }}>
-                <input
-                  type={showPass ? 'text' : 'password'}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  required
-                  style={{ ...inputStyle, paddingRight: '44px' }}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPass(!showPass)}
-                  style={{
-                    position: 'absolute',
-                    right: '14px',
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    background: 'none',
-                    border: 'none',
-                    cursor: 'pointer',
-                    color: '#8B87A8',
-                    padding: 0,
-                    display: 'flex',
-                  }}
-                >
+                <input type={showPass ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" required style={{ ...inputStyle, paddingRight: '44px' }} />
+                <button type="button" onClick={() => setShowPass(!showPass)} style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#777683', padding: 0, display: 'flex' }}>
                   {showPass ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
             </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="btn-primary"
-              style={{ width: '100%', justifyContent: 'center', fontSize: '1rem', padding: '14px', opacity: loading ? 0.7 : 1 }}
-            >
+            <button type="submit" disabled={loading} className="btn-primary" style={{ width: '100%', justifyContent: 'center', fontSize: '1rem', padding: '14px', opacity: loading ? 0.7 : 1 }}>
               {loading ? 'Masuk...' : 'Masuk'}
             </button>
           </form>
@@ -227,10 +84,7 @@ export default function AdminLogin() {
       </div>
 
       <style>{`
-        @media (max-width: 768px) {
-          .login-left { display: none !important; }
-          .login-right { width: 100% !important; }
-        }
+        @media (max-width: 768px) { .login-left { display: none !important; } .login-right { width: 100% !important; } }
       `}</style>
     </div>
   );
