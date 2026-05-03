@@ -1,64 +1,61 @@
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { Users, Building2, Star } from 'lucide-react';
+import { Users, Building2, Star, ChevronDown } from 'lucide-react';
 
-const floatAnim = (delay: number) => ({
-  animate: { y: [0, -10, 0] },
-  transition: { duration: 3, repeat: Infinity, delay, ease: 'easeInOut' as const },
-});
+const statCards = [
+  { icon: Users,     value: '20K+', label: 'KOL Aktif',        rotate: '-4deg',  delay: 0.3 },
+  { icon: Building2, value: '100+', label: 'Brand Partner',    rotate: '3deg',   delay: 0.45 },
+  { icon: Star,      value: '98%',  label: 'Tingkat Kepuasan', rotate: '-2deg',  delay: 0.6 },
+];
+
+const easeOut = [0.16, 1, 0.3, 1] as const;
 
 export default function Hero() {
   return (
     <section
       style={{
-        background: '#0F0A2E',
         minHeight: '100vh',
+        background: '#08060F',
         position: 'relative',
         overflow: 'hidden',
         display: 'flex',
         alignItems: 'center',
-        paddingTop: '80px',
+        paddingTop: '72px',
       }}
     >
       {/* Background orbs */}
+      <div className="orb" style={{ width: '600px', height: '600px', background: '#6B2EE8', top: '-200px', left: '-150px' }} />
+      <div className="orb" style={{ width: '500px', height: '500px', background: '#E8197A', bottom: '-150px', right: '-100px' }} />
+      <div className="orb" style={{ width: '300px', height: '300px', background: '#38C6F0', top: '-50px', right: '20%', opacity: 0.2 }} />
+
+      {/* Giant AZERA watermark */}
       <div
-        className="orb"
         style={{
-          width: '500px',
-          height: '500px',
-          background: 'rgba(107,46,232,0.35)',
-          top: '-100px',
-          left: '-150px',
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          fontFamily: 'Syne, sans-serif',
+          fontWeight: 900,
+          fontSize: 'clamp(8rem, 25vw, 22rem)',
+          color: 'white',
+          opacity: 0.04,
+          pointerEvents: 'none',
+          userSelect: 'none',
+          whiteSpace: 'nowrap',
+          zIndex: 0,
         }}
-      />
-      <div
-        className="orb"
-        style={{
-          width: '400px',
-          height: '400px',
-          background: 'rgba(232,25,122,0.25)',
-          bottom: '-80px',
-          right: '-100px',
-        }}
-      />
-      <div
-        className="orb"
-        style={{
-          width: '300px',
-          height: '300px',
-          background: 'rgba(56,198,240,0.15)',
-          top: '30%',
-          right: '20%',
-        }}
-      />
+      >
+        AZERA
+      </div>
 
       <div
         style={{
-          maxWidth: '1200px',
+          maxWidth: '1280px',
           margin: '0 auto',
           padding: '80px 24px',
           display: 'grid',
-          gridTemplateColumns: '1fr 1fr',
+          gridTemplateColumns: '3fr 2fr',
           gap: '64px',
           alignItems: 'center',
           position: 'relative',
@@ -67,78 +64,71 @@ export default function Hero() {
         }}
         className="hero-grid"
       >
-        {/* Left: Text content */}
+        {/* Left content */}
         <div>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
+          <motion.span
+            className="section-label"
+            style={{ display: 'inline-block', marginBottom: '20px' }}
+            initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
+            transition={{ duration: 0.6, ease: easeOut }}
           >
-            <span className="section-label" style={{ color: '#38C6F0', marginBottom: '20px', display: 'block' }}>
-              KOL Campaign Engine for Growing Brands
-            </span>
-          </motion.div>
+            KOL Campaign Engine
+          </motion.span>
 
           <motion.h1
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
             style={{
-              fontSize: 'clamp(2.5rem, 5vw, 4.5rem)',
-              fontWeight: 800,
-              color: 'white',
-              lineHeight: 1.1,
-              letterSpacing: '-0.02em',
+              fontFamily: 'Syne, sans-serif',
+              fontWeight: 900,
+              fontSize: 'clamp(3rem, 8vw, 7rem)',
+              color: '#EDE9F8',
+              lineHeight: 1.0,
               marginBottom: '24px',
             }}
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, ease: easeOut, delay: 0.1 }}
           >
             We{' '}
-            <span className="pill-label" style={{ fontSize: 'clamp(1.5rem, 3vw, 2.5rem)' }}>
-              Scale
+            <span
+              style={{
+                background: 'linear-gradient(135deg, #6B2EE8, #E8197A)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+              }}
+            >
+              Scale Brands
             </span>{' '}
-            Brands Through The Power Of KOL Community.
+            Through KOL Power.
           </motion.h1>
 
           <motion.p
+            style={{
+              color: '#8B87A8',
+              fontSize: '1.05rem',
+              lineHeight: 1.75,
+              maxWidth: '520px',
+              marginBottom: '40px',
+              fontFamily: 'Plus Jakarta Sans, sans-serif',
+            }}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            style={{
-              color: '#8B87B0',
-              fontSize: '1.1rem',
-              lineHeight: 1.7,
-              marginBottom: '40px',
-              maxWidth: '480px',
-            }}
+            transition={{ duration: 0.6, ease: easeOut, delay: 0.2 }}
           >
-            20,000+ Nano &amp; Micro KOL siap amplify brand kamu di seluruh Indonesia.
+            Azera menghubungkan brand kamu dengan ribuan KOL terkurasi di seluruh Indonesia. Kampanye lebih efisien, hasil lebih terukur.
           </motion.p>
 
           <motion.div
+            style={{ display: 'flex', gap: '14px', flexWrap: 'wrap' }}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}
+            transition={{ duration: 0.6, ease: easeOut, delay: 0.3 }}
           >
-            <Link to="/brand" className="btn-primary">
-              Mulai Kampanye
+            <Link to="/brand/form" className="btn-primary" style={{ fontSize: '1rem', padding: '15px 32px' }}>
+              Mulai Kampanye →
             </Link>
-            <Link
-              to="/kol"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                border: '1.5px solid rgba(255,255,255,0.5)',
-                color: 'white',
-                background: 'transparent',
-                borderRadius: '999px',
-                padding: '13px 28px',
-                fontWeight: 600,
-                fontSize: '0.95rem',
-                textDecoration: 'none',
-                transition: 'all 0.2s',
-              }}
-            >
+            <Link to="/kol/register" className="btn-outline" style={{ fontSize: '1rem', padding: '14px 32px' }}>
               Daftar KOL
             </Link>
           </motion.div>
@@ -146,154 +136,95 @@ export default function Hero() {
 
         {/* Right: Floating stat cards */}
         <div
-          style={{
-            position: 'relative',
-            height: '420px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-          className="hero-right"
+          style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: '16px', alignItems: 'flex-end' }}
+          className="hero-cards"
         >
-          {/* Center glow circle */}
-          <div
-            style={{
-              width: '280px',
-              height: '280px',
-              borderRadius: '50%',
-              background: 'radial-gradient(circle, rgba(107,46,232,0.3) 0%, transparent 70%)',
-              position: 'absolute',
-            }}
-          />
-          <div
-            style={{
-              width: '220px',
-              height: '220px',
-              borderRadius: '50%',
-              border: '1px solid rgba(107,46,232,0.3)',
-              position: 'absolute',
-            }}
-          />
-          <div
-            style={{
-              width: '320px',
-              height: '320px',
-              borderRadius: '50%',
-              border: '1px dashed rgba(107,46,232,0.15)',
-              position: 'absolute',
-            }}
-          />
-
-          {/* Stat card 1 - 20K+ KOL */}
-          <motion.div
-            className="floating-card"
-            style={{
-              position: 'absolute',
-              top: '30px',
-              left: '-20px',
-              transform: 'rotate(-6deg)',
-              minWidth: '140px',
-            }}
-            {...floatAnim(0)}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <div
+          {statCards.map(({ icon: Icon, value, label, rotate, delay }) => (
+            <motion.div
+              key={label}
+              initial={{ opacity: 0, x: 40 }}
+              animate={{ opacity: 1, x: 0, rotate }}
+              transition={{ duration: 0.7, ease: easeOut, delay }}
+              style={{ width: '100%', maxWidth: '260px' }}
+            >
+              <motion.div
+                animate={{ y: [0, -8, 0] }}
+                transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut', delay: delay * 2 }}
                 style={{
-                  width: '36px',
-                  height: '36px',
-                  borderRadius: '10px',
-                  background: '#F0EEFF',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
+                  background: 'rgba(255,255,255,0.04)',
+                  backdropFilter: 'blur(20px)',
+                  WebkitBackdropFilter: 'blur(20px)',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  borderRadius: '20px',
+                  padding: '24px',
+                  position: 'relative',
+                  overflow: 'hidden',
                 }}
               >
-                <Users size={18} color="#6B2EE8" />
-              </div>
-              <div>
-                <p style={{ fontWeight: 800, fontSize: '1.1rem', color: '#1A1040' }}>20K+</p>
-                <p style={{ fontSize: '0.75rem', color: '#8B87B0' }}>KOL Aktif</p>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Stat card 2 - 100+ Brand */}
-          <motion.div
-            className="floating-card"
-            style={{
-              position: 'absolute',
-              top: '60px',
-              right: '-30px',
-              transform: 'rotate(5deg)',
-              minWidth: '145px',
-            }}
-            {...floatAnim(1)}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <div
-                style={{
-                  width: '36px',
-                  height: '36px',
-                  borderRadius: '10px',
-                  background: '#FFF0F7',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                <Building2 size={18} color="#E8197A" />
-              </div>
-              <div>
-                <p style={{ fontWeight: 800, fontSize: '1.1rem', color: '#1A1040' }}>100+</p>
-                <p style={{ fontSize: '0.75rem', color: '#8B87B0' }}>Brand Partner</p>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Stat card 3 - 98% Satisfaction */}
-          <motion.div
-            className="floating-card"
-            style={{
-              position: 'absolute',
-              bottom: '60px',
-              right: '0px',
-              transform: 'rotate(-3deg)',
-              minWidth: '160px',
-            }}
-            {...floatAnim(2)}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <div
-                style={{
-                  width: '36px',
-                  height: '36px',
-                  borderRadius: '10px',
-                  background: '#F0FDF4',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                <Star size={18} color="#10B981" />
-              </div>
-              <div>
-                <p style={{ fontWeight: 800, fontSize: '1.1rem', color: '#1A1040' }}>98%</p>
-                <p style={{ fontSize: '0.75rem', color: '#8B87B0' }}>Satisfaction</p>
-              </div>
-            </div>
-          </motion.div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                  <div
+                    style={{
+                      width: '44px',
+                      height: '44px',
+                      borderRadius: '12px',
+                      background: 'linear-gradient(135deg, #6B2EE8, #E8197A)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0,
+                    }}
+                  >
+                    <Icon size={20} color="white" />
+                  </div>
+                  <div>
+                    <p
+                      style={{
+                        fontFamily: 'Syne, sans-serif',
+                        fontWeight: 900,
+                        fontSize: '1.6rem',
+                        color: '#FFFFFF',
+                        lineHeight: 1,
+                      }}
+                    >
+                      {value}
+                    </p>
+                    <p style={{ color: '#8B87A8', fontSize: '0.8rem', marginTop: '2px', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
+                      {label}
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
+            </motion.div>
+          ))}
         </div>
       </div>
 
+      {/* Scroll indicator */}
+      <motion.div
+        style={{
+          position: 'absolute',
+          bottom: '32px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: '8px',
+          color: '#8B87A8',
+        }}
+        animate={{ y: [0, 8, 0] }}
+        transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+      >
+        <span style={{ fontSize: '0.65rem', letterSpacing: '0.15em', textTransform: 'uppercase', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
+          Scroll
+        </span>
+        <ChevronDown size={18} />
+      </motion.div>
+
       <style>{`
         @media (max-width: 768px) {
-          .hero-grid {
-            grid-template-columns: 1fr !important;
-            gap: 40px !important;
-          }
-          .hero-right {
-            height: 240px !important;
-          }
+          .hero-grid { grid-template-columns: 1fr !important; gap: 40px !important; }
+          .hero-cards { display: none !important; }
         }
       `}</style>
     </section>

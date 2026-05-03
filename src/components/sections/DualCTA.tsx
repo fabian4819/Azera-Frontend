@@ -1,157 +1,176 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight } from 'lucide-react';
+import { motion, useInView } from 'framer-motion';
+import { useRef } from 'react';
+
+const easeOut = [0.16, 1, 0.3, 1] as const;
 
 export default function DualCTA() {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: '-80px' });
+
   return (
-    <section>
+    <section ref={ref} style={{ background: '#08060F' }}>
       <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: '1fr 1fr',
-        }}
-        className="dual-cta-grid"
+        style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', minHeight: '480px' }}
+        className="dualcta-grid"
       >
-        {/* Left: Brand */}
-        <div
+        {/* Left: Brand CTA */}
+        <motion.div
+          initial={{ opacity: 0, x: -30 }}
+          animate={isInView ? { opacity: 1, x: 0 } : {}}
+          transition={{ duration: 0.7, ease: easeOut }}
           style={{
-            background: '#0F0A2E',
-            padding: '80px 64px',
+            background: '#0D0920',
+            padding: '80px 60px',
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'center',
             position: 'relative',
             overflow: 'hidden',
           }}
+          className="dualcta-left"
         >
-          <div
-            style={{
-              position: 'absolute',
-              width: '300px',
-              height: '300px',
-              borderRadius: '50%',
-              background: 'rgba(107,46,232,0.25)',
-              filter: 'blur(80px)',
-              top: '-100px',
-              left: '-100px',
-            }}
-          />
+          {/* Subtle orb */}
+          <div className="orb" style={{ width: '300px', height: '300px', background: '#6B2EE8', bottom: '-100px', left: '-100px', opacity: 0.2 }} />
+
           <div style={{ position: 'relative', zIndex: 1 }}>
-            <span
-              style={{
-                display: 'inline-block',
-                background: 'rgba(107,46,232,0.3)',
-                color: '#A78BFA',
-                borderRadius: '999px',
-                padding: '6px 16px',
-                fontSize: '0.8rem',
-                fontWeight: 600,
-                marginBottom: '20px',
-              }}
-            >
+            <span className="section-label" style={{ display: 'inline-block', marginBottom: '16px' }}>
               Untuk Brand
             </span>
             <h2
               style={{
-                fontSize: 'clamp(1.8rem, 3vw, 2.8rem)',
+                fontFamily: 'Syne, sans-serif',
                 fontWeight: 800,
-                color: 'white',
-                lineHeight: 1.2,
+                fontSize: 'clamp(1.8rem, 4vw, 3rem)',
+                color: '#FFFFFF',
+                lineHeight: 1.15,
                 marginBottom: '16px',
               }}
             >
-              Saya Brand
+              Siap Mulai Kampanye KOL?
             </h2>
-            <p style={{ color: '#8B87B0', fontSize: '1rem', lineHeight: 1.7, marginBottom: '32px', maxWidth: '360px' }}>
-              Scale bisnis kamu dengan kekuatan KOL community. Mulai kampanye hari ini dan jangkau jutaan konsumen potensial.
+            <p
+              style={{
+                color: '#8B87A8',
+                fontSize: '0.95rem',
+                lineHeight: 1.75,
+                marginBottom: '36px',
+                fontFamily: 'Plus Jakarta Sans, sans-serif',
+                maxWidth: '380px',
+              }}
+            >
+              Konsultasi gratis dengan tim Azera. Kami bantu tentukan strategi, pilih KOL, dan jalankan kampanye yang tepat sasaran.
             </p>
-            <Link to="/brand" className="btn-primary" style={{ alignSelf: 'flex-start', gap: '10px' }}>
-              Mulai Kampanye
-              <ArrowRight size={18} />
+            <Link to="/brand/form" className="btn-primary" style={{ alignSelf: 'flex-start', fontSize: '1rem', padding: '14px 32px' }}>
+              Mulai Kampanye →
             </Link>
           </div>
-        </div>
+        </motion.div>
 
-        {/* Right: KOL */}
+        {/* Vertical separator */}
         <div
+          className="dualcta-sep"
           style={{
-            background: 'linear-gradient(135deg, #6B2EE8 0%, #E8197A 100%)',
-            padding: '80px 64px',
+            position: 'absolute',
+            top: 0,
+            bottom: 0,
+            left: '50%',
+            width: '1px',
+            background: 'linear-gradient(180deg, transparent, #6B2EE8, #E8197A, transparent)',
+            opacity: 0.4,
+            zIndex: 10,
+          }}
+        />
+
+        {/* Right: KOL CTA */}
+        <motion.div
+          initial={{ opacity: 0, x: 30 }}
+          animate={isInView ? { opacity: 1, x: 0 } : {}}
+          transition={{ duration: 0.7, ease: easeOut, delay: 0.1 }}
+          style={{
+            background: 'linear-gradient(135deg, #6B2EE8, #E8197A)',
+            padding: '80px 60px',
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'center',
             position: 'relative',
             overflow: 'hidden',
           }}
+          className="dualcta-right"
         >
-          <div
-            style={{
-              position: 'absolute',
-              width: '300px',
-              height: '300px',
-              borderRadius: '50%',
-              background: 'rgba(255,255,255,0.1)',
-              filter: 'blur(80px)',
-              bottom: '-100px',
-              right: '-100px',
-            }}
-          />
+          {/* Subtle orb */}
+          <div className="orb" style={{ width: '300px', height: '300px', background: 'rgba(255,255,255,0.3)', top: '-100px', right: '-100px', opacity: 0.15 }} />
+
           <div style={{ position: 'relative', zIndex: 1 }}>
             <span
               style={{
-                display: 'inline-block',
-                background: 'rgba(255,255,255,0.2)',
-                color: 'white',
-                borderRadius: '999px',
-                padding: '6px 16px',
-                fontSize: '0.8rem',
+                fontFamily: 'Plus Jakarta Sans, sans-serif',
+                fontSize: '0.7rem',
                 fontWeight: 600,
-                marginBottom: '20px',
+                textTransform: 'uppercase',
+                letterSpacing: '0.15em',
+                color: 'rgba(255,255,255,0.7)',
+                display: 'inline-block',
+                marginBottom: '16px',
               }}
             >
               Untuk KOL
             </span>
             <h2
               style={{
-                fontSize: 'clamp(1.8rem, 3vw, 2.8rem)',
+                fontFamily: 'Syne, sans-serif',
                 fontWeight: 800,
-                color: 'white',
-                lineHeight: 1.2,
+                fontSize: 'clamp(1.8rem, 4vw, 3rem)',
+                color: '#FFFFFF',
+                lineHeight: 1.15,
                 marginBottom: '16px',
               }}
             >
-              Saya KOL
+              Bergabung dengan Azera Network
             </h2>
-            <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: '1rem', lineHeight: 1.7, marginBottom: '32px', maxWidth: '360px' }}>
-              Bergabung dengan komunitas 20,000+ KOL Azera. Dapatkan brand deal, campaign brief, dan dukungan penuh dari tim kami.
+            <p
+              style={{
+                color: 'rgba(255,255,255,0.8)',
+                fontSize: '0.95rem',
+                lineHeight: 1.75,
+                marginBottom: '36px',
+                fontFamily: 'Plus Jakarta Sans, sans-serif',
+                maxWidth: '380px',
+              }}
+            >
+              Daftar gratis, dapatkan akses ke ratusan peluang kolaborasi brand ternama di Indonesia. Tim kami siap mendukung perjalanan kariermu.
             </p>
             <Link
               to="/kol/register"
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '10px',
-                background: 'white',
-                color: '#1A1040',
+                gap: '8px',
+                padding: '14px 32px',
                 borderRadius: '999px',
-                padding: '14px 28px',
+                background: 'white',
+                color: '#6B2EE8',
+                fontFamily: 'Plus Jakarta Sans, sans-serif',
                 fontWeight: 700,
-                fontSize: '0.95rem',
+                fontSize: '1rem',
                 textDecoration: 'none',
-                transition: 'transform 0.2s',
+                transition: 'all 0.2s',
                 alignSelf: 'flex-start',
               }}
             >
-              Bergabung Sekarang
-              <ArrowRight size={18} />
+              Bergabung KOL →
             </Link>
           </div>
-        </div>
+        </motion.div>
       </div>
 
       <style>{`
+        .dualcta-grid { position: relative; }
         @media (max-width: 768px) {
-          .dual-cta-grid { grid-template-columns: 1fr !important; }
-          .dual-cta-grid > div { padding: 60px 32px !important; }
+          .dualcta-grid { grid-template-columns: 1fr !important; }
+          .dualcta-left { padding: 64px 32px !important; }
+          .dualcta-right { padding: 64px 32px !important; }
+          .dualcta-sep { display: none !important; }
         }
       `}</style>
     </section>

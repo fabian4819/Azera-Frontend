@@ -18,6 +18,37 @@ interface Brand {
 
 const statusOptions = ['', 'new', 'reviewed', 'contacted'];
 
+const thStyle: React.CSSProperties = {
+  padding: '14px 16px',
+  textAlign: 'left',
+  fontFamily: 'Syne, sans-serif',
+  fontWeight: 700,
+  color: '#120E28',
+  fontSize: '0.78rem',
+  whiteSpace: 'nowrap',
+  letterSpacing: '0.04em',
+};
+
+const tdStyle: React.CSSProperties = {
+  padding: '14px 16px',
+  fontSize: '0.875rem',
+  color: '#5B5780',
+  whiteSpace: 'nowrap',
+  fontFamily: 'Plus Jakarta Sans, sans-serif',
+};
+
+const controlStyle: React.CSSProperties = {
+  padding: '10px 14px',
+  borderRadius: '10px',
+  border: '1.5px solid #E0DCFF',
+  fontSize: '0.875rem',
+  outline: 'none',
+  fontFamily: 'Plus Jakarta Sans, sans-serif',
+  background: 'white',
+  cursor: 'pointer',
+  color: '#120E28',
+};
+
 export default function Brands() {
   const [brands, setBrands] = useState<Brand[]>([]);
   const [loading, setLoading] = useState(true);
@@ -49,23 +80,33 @@ export default function Brands() {
     fetchBrands();
   };
 
-  const formatDate = (d: string) => new Date(d).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+  const formatDate = (d: string) =>
+    new Date(d).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
 
   return (
     <div>
       {/* Filter bar */}
-      <div style={{ display: 'flex', gap: '12px', marginBottom: '24px', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between' }}>
+      <div
+        style={{
+          display: 'flex',
+          gap: '12px',
+          marginBottom: '24px',
+          flexWrap: 'wrap',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+        }}
+      >
         <form onSubmit={handleSearch} style={{ display: 'flex', gap: '10px', flex: 1, minWidth: '240px' }}>
           <div style={{ position: 'relative', flex: 1 }}>
-            <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#8B87B0' }} />
+            <Search
+              size={16}
+              style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#8B87A8' }}
+            />
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Cari brand atau PIC..."
-              style={{
-                width: '100%', padding: '10px 14px 10px 36px', borderRadius: '10px',
-                border: '1.5px solid #E0DCFF', fontSize: '0.875rem', outline: 'none', fontFamily: 'inherit',
-              }}
+              style={{ ...controlStyle, width: '100%', paddingLeft: '36px' }}
             />
           </div>
           <button type="submit" className="btn-primary" style={{ padding: '10px 20px', fontSize: '0.875rem' }}>
@@ -74,75 +115,126 @@ export default function Brands() {
         </form>
 
         <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            style={{ padding: '10px 14px', borderRadius: '10px', border: '1.5px solid #E0DCFF', fontSize: '0.875rem', outline: 'none', fontFamily: 'inherit', background: 'white', cursor: 'pointer' }}
-          >
+          <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} style={controlStyle}>
             <option value="">Semua Status</option>
             {statusOptions.filter(Boolean).map((s) => (
-              <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>
+              <option key={s} value={s}>
+                {s.charAt(0).toUpperCase() + s.slice(1)}
+              </option>
             ))}
           </select>
-          <button onClick={fetchBrands} style={{ padding: '10px', borderRadius: '10px', border: '1.5px solid #E0DCFF', background: 'white', cursor: 'pointer', color: '#8B87B0', display: 'flex' }}>
+          <button
+            onClick={fetchBrands}
+            style={{
+              ...controlStyle,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '10px',
+              color: '#8B87A8',
+            }}
+          >
             <RefreshCw size={16} />
           </button>
         </div>
       </div>
 
       {/* Table */}
-      <div style={{ background: 'white', borderRadius: '16px', border: '1px solid #F0EEFF', overflow: 'hidden' }}>
+      <div style={{ background: 'white', borderRadius: '16px', border: '1px solid #F0EEFF', overflow: 'hidden', boxShadow: '0 2px 12px rgba(107,46,232,0.06)' }}>
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem' }}>
             <thead>
               <tr style={{ background: '#F8F7FF', borderBottom: '1px solid #F0EEFF' }}>
                 {['Brand', 'PIC', 'WhatsApp', 'Kategori', 'Paket', 'Budget', 'Status', 'Tanggal', 'Aksi'].map((h) => (
-                  <th key={h} style={{ padding: '14px 16px', textAlign: 'left', fontWeight: 700, color: '#1A1040', fontSize: '0.8rem', whiteSpace: 'nowrap' }}>{h}</th>
+                  <th key={h} style={thStyle}>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={9} style={{ textAlign: 'center', padding: '48px', color: '#8B87B0' }}>Memuat...</td>
+                  <td colSpan={9} style={{ ...tdStyle, textAlign: 'center', padding: '48px' }}>
+                    Memuat...
+                  </td>
                 </tr>
               ) : brands.length === 0 ? (
                 <tr>
-                  <td colSpan={9} style={{ textAlign: 'center', padding: '48px', color: '#8B87B0' }}>Belum ada data brand.</td>
-                </tr>
-              ) : brands.map((b, i) => (
-                <tr key={b._id} style={{ borderBottom: '1px solid #F0EEFF', background: i % 2 === 0 ? 'white' : '#FAFAFA' }}>
-                  <td style={{ padding: '14px 16px', fontWeight: 600, color: '#1A1040', whiteSpace: 'nowrap' }}>{b.namaBrand}</td>
-                  <td style={{ padding: '14px 16px', color: '#8B87B0', whiteSpace: 'nowrap' }}>{b.namaPIC}</td>
-                  <td style={{ padding: '14px 16px', color: '#8B87B0', whiteSpace: 'nowrap' }}>{b.whatsapp}</td>
-                  <td style={{ padding: '14px 16px', color: '#8B87B0', whiteSpace: 'nowrap' }}>{b.kategori}</td>
-                  <td style={{ padding: '14px 16px', whiteSpace: 'nowrap' }}>
-                    <span style={{ background: '#F0EEFF', color: '#6B2EE8', borderRadius: '999px', padding: '3px 10px', fontSize: '0.75rem', fontWeight: 600, textTransform: 'capitalize' }}>
-                      {b.paket}
-                    </span>
-                  </td>
-                  <td style={{ padding: '14px 16px', color: '#8B87B0', whiteSpace: 'nowrap' }}>{b.budget}</td>
-                  <td style={{ padding: '14px 16px' }}><StatusBadge status={b.status} /></td>
-                  <td style={{ padding: '14px 16px', color: '#8B87B0', whiteSpace: 'nowrap' }}>{formatDate(b.createdAt)}</td>
-                  <td style={{ padding: '14px 16px' }}>
-                    <button
-                      onClick={() => navigate(`/admin/brands/${b._id}`)}
-                      style={{
-                        display: 'flex', alignItems: 'center', gap: '6px', padding: '7px 14px',
-                        background: '#F0EEFF', color: '#6B2EE8', borderRadius: '8px', border: 'none',
-                        cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600,
-                      }}
-                    >
-                      <Eye size={14} />
-                      View
-                    </button>
+                  <td colSpan={9} style={{ ...tdStyle, textAlign: 'center', padding: '48px' }}>
+                    Belum ada data brand.
                   </td>
                 </tr>
-              ))}
+              ) : (
+                brands.map((b, i) => (
+                  <tr
+                    key={b._id}
+                    style={{
+                      borderBottom: '1px solid #F0EEFF',
+                      background: i % 2 === 0 ? 'white' : '#FDFCFF',
+                      transition: 'background 0.15s',
+                    }}
+                    onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.background = '#F8F6FF')}
+                    onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.background = i % 2 === 0 ? 'white' : '#FDFCFF')}
+                  >
+                    <td style={{ ...tdStyle, fontWeight: 600, color: '#120E28' }}>{b.namaBrand}</td>
+                    <td style={tdStyle}>{b.namaPIC}</td>
+                    <td style={tdStyle}>{b.whatsapp}</td>
+                    <td style={tdStyle}>{b.kategori}</td>
+                    <td style={tdStyle}>
+                      <span
+                        style={{
+                          background: '#F0EEFF',
+                          color: '#6B2EE8',
+                          borderRadius: '999px',
+                          padding: '3px 10px',
+                          fontSize: '0.72rem',
+                          fontFamily: 'Syne, sans-serif',
+                          fontWeight: 700,
+                          textTransform: 'capitalize',
+                        }}
+                      >
+                        {b.paket}
+                      </span>
+                    </td>
+                    <td style={tdStyle}>{b.budget}</td>
+                    <td style={tdStyle}><StatusBadge status={b.status} /></td>
+                    <td style={tdStyle}>{formatDate(b.createdAt)}</td>
+                    <td style={tdStyle}>
+                      <button
+                        onClick={() => navigate(`/admin/brands/${b._id}`)}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          padding: '7px 14px',
+                          background: '#F0EEFF',
+                          color: '#6B2EE8',
+                          borderRadius: '8px',
+                          border: 'none',
+                          cursor: 'pointer',
+                          fontSize: '0.78rem',
+                          fontFamily: 'Syne, sans-serif',
+                          fontWeight: 700,
+                        }}
+                      >
+                        <Eye size={14} />
+                        View
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
-        <div style={{ padding: '14px 16px', borderTop: '1px solid #F0EEFF', color: '#8B87B0', fontSize: '0.8rem' }}>
+        <div
+          style={{
+            padding: '12px 16px',
+            borderTop: '1px solid #F0EEFF',
+            color: '#8B87A8',
+            fontSize: '0.78rem',
+            fontFamily: 'Plus Jakarta Sans, sans-serif',
+          }}
+        >
           {brands.length} hasil ditemukan
         </div>
       </div>

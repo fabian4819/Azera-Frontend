@@ -10,18 +10,18 @@ const navLinks = [
 ];
 
 export default function Navbar() {
-  const [scrolled, setScrolled] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 80);
-    window.addEventListener('scroll', onScroll);
+    const onScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
   useEffect(() => {
-    setMobileOpen(false);
+    setMenuOpen(false);
   }, [location.pathname]);
 
   const isActive = (to: string) => {
@@ -30,182 +30,190 @@ export default function Navbar() {
   };
 
   return (
-    <nav
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        zIndex: 50,
-        transition: 'all 0.3s ease',
-        background: scrolled ? 'white' : 'transparent',
-        boxShadow: scrolled ? '0 2px 20px rgba(0,0,0,0.08)' : 'none',
-      }}
-    >
-      <div
+    <>
+      <nav
         style={{
-          maxWidth: '1200px',
-          margin: '0 auto',
-          padding: '0 24px',
-          height: '72px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          zIndex: 1000,
+          background: scrolled ? 'rgba(8,6,15,0.92)' : 'rgba(8,6,15,0.7)',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+          transition: 'background 0.3s ease',
         }}
       >
-        {/* Logo */}
-        <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}>
-          <img src="/icon.png" alt="Azera icon" style={{ height: '36px', width: '36px', objectFit: 'contain' }} />
-          <span
-            style={{
-              fontWeight: 800,
-              fontSize: '1.25rem',
-              color: scrolled ? '#1A1040' : 'white',
-              letterSpacing: '0.05em',
-            }}
-          >
-            AZERA
-          </span>
-        </Link>
-
-        {/* Desktop nav links */}
+        {/* Gradient bottom line */}
         <div
           style={{
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: '1px',
+            background: 'linear-gradient(90deg, transparent, #6B2EE8, #E8197A, #38C6F0, transparent)',
+            opacity: 0.6,
+          }}
+        />
+
+        <div
+          style={{
+            maxWidth: '1280px',
+            margin: '0 auto',
+            padding: '0 24px',
+            height: '72px',
             display: 'flex',
             alignItems: 'center',
-            gap: '8px',
+            justifyContent: 'space-between',
+            gap: '32px',
           }}
-          className="hidden-mobile"
         >
-          {navLinks.map((link) => (
-            <Link
-              key={link.to}
-              to={link.to}
-              style={{
-                padding: '8px 16px',
-                borderRadius: '8px',
-                fontWeight: 500,
-                fontSize: '0.95rem',
-                textDecoration: 'none',
-                color: isActive(link.to)
-                  ? '#6B2EE8'
-                  : scrolled
-                  ? '#1A1040'
-                  : 'rgba(255,255,255,0.85)',
-                transition: 'color 0.2s',
-              }}
-            >
-              {link.label}
-            </Link>
-          ))}
-        </div>
-
-        {/* Desktop CTAs */}
-        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }} className="hidden-mobile">
+          {/* Logo */}
           <Link
-            to="/kol"
+            to="/"
             style={{
-              display: 'inline-flex',
+              display: 'flex',
               alignItems: 'center',
-              border: `1.5px solid ${scrolled ? '#6B2EE8' : 'white'}`,
-              color: scrolled ? '#6B2EE8' : 'white',
-              background: 'transparent',
-              borderRadius: '999px',
-              padding: '9px 20px',
-              fontWeight: 600,
-              fontSize: '0.875rem',
+              gap: '10px',
               textDecoration: 'none',
-              transition: 'all 0.2s',
+              flexShrink: 0,
             }}
           >
-            Daftar KOL
-          </Link>
-          <Link
-            to="/brand"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              background: scrolled ? '#0F0A2E' : 'white',
-              color: scrolled ? 'white' : '#1A1040',
-              borderRadius: '999px',
-              padding: '9px 20px',
-              fontWeight: 600,
-              fontSize: '0.875rem',
-              textDecoration: 'none',
-              border: 'none',
-              transition: 'all 0.2s',
-            }}
-          >
-            Saya Brand
-          </Link>
-        </div>
-
-        {/* Mobile hamburger */}
-        <button
-          onClick={() => setMobileOpen(!mobileOpen)}
-          style={{
-            display: 'none',
-            background: 'none',
-            border: 'none',
-            cursor: 'pointer',
-            color: scrolled ? '#1A1040' : 'white',
-            padding: '8px',
-          }}
-          className="show-mobile"
-        >
-          {mobileOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
-      </div>
-
-      {/* Mobile dropdown */}
-      {mobileOpen && (
-        <div
-          style={{
-            background: 'white',
-            borderTop: '1px solid #F0EEFF',
-            padding: '16px 24px 24px',
-            boxShadow: '0 8px 24px rgba(0,0,0,0.1)',
-          }}
-          className="show-mobile"
-        >
-          {navLinks.map((link) => (
-            <Link
-              key={link.to}
-              to={link.to}
+            <img src="/icon.png" alt="Azera" style={{ height: '32px', objectFit: 'contain' }} />
+            <span
               style={{
-                display: 'block',
-                padding: '12px 0',
-                fontWeight: 500,
-                fontSize: '1rem',
-                textDecoration: 'none',
-                color: isActive(link.to) ? '#6B2EE8' : '#1A1040',
-                borderBottom: '1px solid #F0EEFF',
+                fontFamily: 'Syne, sans-serif',
+                fontWeight: 800,
+                fontSize: '1.15rem',
+                color: '#FFFFFF',
+                letterSpacing: '0.12em',
               }}
             >
-              {link.label}
-            </Link>
-          ))}
-          <div style={{ display: 'flex', gap: '12px', marginTop: '16px', flexWrap: 'wrap' }}>
-            <Link to="/kol" className="btn-outline" style={{ padding: '10px 20px', fontSize: '0.875rem' }}>
+              AZERA
+            </span>
+          </Link>
+
+          {/* Center nav — desktop */}
+          <div
+            className="navbar-links"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+              flex: 1,
+              justifyContent: 'center',
+            }}
+          >
+            {navLinks.map((link) => {
+              const active = isActive(link.to);
+              return (
+                <Link
+                  key={link.to}
+                  to={link.to}
+                  style={{
+                    padding: '8px 16px',
+                    borderRadius: '8px',
+                    fontFamily: 'Plus Jakarta Sans, sans-serif',
+                    fontWeight: active ? 700 : 500,
+                    fontSize: '0.9rem',
+                    textDecoration: 'none',
+                    transition: 'all 0.2s',
+                    color: active ? 'transparent' : 'rgba(255,255,255,0.6)',
+                    background: active ? 'linear-gradient(135deg, #6B2EE8, #E8197A)' : 'transparent',
+                    WebkitBackgroundClip: active ? 'text' : 'unset',
+                    WebkitTextFillColor: active ? 'transparent' : 'unset',
+                    backgroundClip: active ? 'text' : 'unset',
+                  }}
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
+          </div>
+
+          {/* Right CTAs — desktop */}
+          <div
+            className="navbar-ctas"
+            style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}
+          >
+            <Link to="/kol/register" className="btn-ghost" style={{ fontSize: '0.85rem', padding: '9px 16px' }}>
               Daftar KOL
             </Link>
-            <Link to="/brand" className="btn-dark" style={{ padding: '10px 20px', fontSize: '0.875rem' }}>
+            <Link to="/brand/form" className="btn-primary" style={{ fontSize: '0.85rem', padding: '9px 20px' }}>
               Saya Brand
             </Link>
           </div>
+
+          {/* Hamburger — mobile */}
+          <button
+            className="navbar-hamburger"
+            onClick={() => setMenuOpen((v) => !v)}
+            style={{
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              color: 'rgba(255,255,255,0.8)',
+              padding: '4px',
+              display: 'none',
+            }}
+            aria-label="Toggle menu"
+          >
+            {menuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
         </div>
-      )}
+
+        {/* Mobile slide-down menu */}
+        {menuOpen && (
+          <div
+            style={{
+              background: 'rgba(8,6,15,0.98)',
+              backdropFilter: 'blur(20px)',
+              WebkitBackdropFilter: 'blur(20px)',
+              borderTop: '1px solid rgba(255,255,255,0.06)',
+              padding: '20px 24px 28px',
+            }}
+          >
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginBottom: '20px' }}>
+              {navLinks.map((link) => (
+                <Link
+                  key={link.to}
+                  to={link.to}
+                  style={{
+                    padding: '12px 16px',
+                    borderRadius: '10px',
+                    fontFamily: 'Plus Jakarta Sans, sans-serif',
+                    fontWeight: isActive(link.to) ? 700 : 500,
+                    fontSize: '1rem',
+                    textDecoration: 'none',
+                    color: isActive(link.to) ? '#FFFFFF' : 'rgba(255,255,255,0.6)',
+                    background: isActive(link.to) ? 'rgba(107,46,232,0.15)' : 'transparent',
+                    transition: 'all 0.2s',
+                  }}
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <Link to="/kol/register" className="btn-outline" style={{ justifyContent: 'center' }}>
+                Daftar KOL
+              </Link>
+              <Link to="/brand/form" className="btn-primary" style={{ justifyContent: 'center' }}>
+                Saya Brand
+              </Link>
+            </div>
+          </div>
+        )}
+      </nav>
 
       <style>{`
-        @media (min-width: 768px) {
-          .hidden-mobile { display: flex !important; }
-          .show-mobile { display: none !important; }
-        }
-        @media (max-width: 767px) {
-          .hidden-mobile { display: none !important; }
-          .show-mobile { display: flex !important; }
+        @media (max-width: 768px) {
+          .navbar-links { display: none !important; }
+          .navbar-ctas { display: none !important; }
+          .navbar-hamburger { display: flex !important; }
         }
       `}</style>
-    </nav>
+    </>
   );
 }

@@ -1,89 +1,135 @@
 import { useEffect, useRef, useState } from 'react';
 import { useInView } from 'framer-motion';
 
-interface StatItem {
-  value: number;
-  suffix: string;
-  label: string;
-}
-
-const stats: StatItem[] = [
-  { value: 20000, suffix: '+', label: 'KOL Aktif' },
-  { value: 100, suffix: '+', label: 'Brand Partner' },
-  { value: 500, suffix: '+', label: 'Kampanye Sukses' },
-  { value: 98, suffix: '%', label: 'Tingkat Kepuasan' },
+const stats = [
+  { value: 20000, suffix: '', label: 'KOL Aktif', display: '20K+' },
+  { value: 100,   suffix: '+', label: 'Brand Partner', display: '100+' },
+  { value: 500,   suffix: '+', label: 'Kampanye Sukses', display: '500+' },
+  { value: 98,    suffix: '%', label: 'Tingkat Kepuasan', display: '98%' },
 ];
 
-function CountUp({ target, suffix, active }: { target: number; suffix: string; active: boolean }) {
+function CountUp({ target, suffix, started }: { target: number; suffix: string; started: boolean }) {
   const [count, setCount] = useState(0);
+  const rafRef = useRef<number>(0);
 
   useEffect(() => {
-    if (!active) return;
-    const duration = 2000;
-    const steps = 60;
-    const increment = target / steps;
-    let current = 0;
-    const timer = setInterval(() => {
-      current += increment;
-      if (current >= target) {
-        setCount(target);
-        clearInterval(timer);
-      } else {
-        setCount(Math.floor(current));
-      }
-    }, duration / steps);
-    return () => clearInterval(timer);
-  }, [active, target]);
+    if (!started) return;
+    const duration = 1800;
+    const start = performance.now();
 
-  const formatted = count >= 1000 ? (count / 1000).toFixed(0) + 'K' : count.toString();
+    const tick = (now: number) => {
+      const elapsed = now - start;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setCount(Math.round(eased * target));
+      if (progress < 1) {
+        rafRef.current = requestAnimationFrame(tick);
+      }
+    };
+    rafRef.current = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(rafRef.current);
+  }, [started, target]);
+
+  const display =
+    target === 20000
+      ? count >= 1000
+        ? `${Math.round(count / 1000)}K`
+        : count.toString()
+      : count.toString();
 
   return (
-    <span className="gradient-text" style={{ fontSize: 'clamp(2.5rem, 5vw, 3.5rem)', fontWeight: 900, lineHeight: 1 }}>
-      {formatted}{suffix}
+    <span>
+      {display}
+      {suffix}
     </span>
   );
 }
 
 export default function Stats() {
   const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: '-80px' });
+  const isInView = useInView(ref, { once: true, margin: '-80px' });
 
   return (
-    <section style={{ background: '#1C1545', padding: '64px 24px' }} ref={ref}>
+    <section
+      ref={ref}
+      style={{ background: '#08060F', padding: '80px 24px', position: 'relative', overflow: 'hidden' }}
+    >
+      {/* Top gradient line */}
       <div
         style={{
-          maxWidth: '1200px',
-          margin: '0 auto',
-          display: 'grid',
-          gridTemplateColumns: 'repeat(4, 1fr)',
-          gap: '0',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          height: '1px',
+          background: 'linear-gradient(90deg, transparent, #6B2EE8, #E8197A, #38C6F0, transparent)',
+          opacity: 0.5,
         }}
-        className="stats-grid"
-      >
-        {stats.map((stat, index) => (
-          <div
-            key={stat.label}
-            style={{
-              textAlign: 'center',
-              padding: '24px 32px',
-              borderRight: index < stats.length - 1 ? '1px solid rgba(255,255,255,0.1)' : 'none',
-            }}
-            className="stat-item"
-          >
-            <CountUp target={stat.value} suffix={stat.suffix} active={inView} />
-            <p style={{ color: '#8B87B0', fontSize: '0.9rem', marginTop: '8px', fontWeight: 500 }}>
-              {stat.label}
-            </p>
-          </div>
-        ))}
+      />
+      {/* Bottom gradient line */}
+      <div
+        style={{
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: '1px',
+          background: 'linear-gradient(90deg, transparent, #6B2EE8, #E8197A, #38C6F0, transparent)',
+          opacity: 0.5,
+        }}
+      />
+
+      <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(4, 1fr)',
+          }}
+          className="stats-grid"
+        >
+          {stats.map((stat, i) => (
+            <div
+              key={stat.label}
+              style={{
+                textAlign: 'center',
+                padding: '20px 32px',
+                borderRight: i < stats.length - 1 ? '1px solid rgba(107,46,232,0.2)' : 'none',
+              }}
+            >
+              <p
+                style={{
+                  fontFamily: 'Syne, sans-serif',
+                  fontWeight: 900,
+                  fontSize: 'clamp(2.5rem, 6vw, 4rem)',
+                  lineHeight: 1,
+                  marginBottom: '8px',
+                  background: 'linear-gradient(135deg, #6B2EE8, #E8197A)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
+                }}
+              >
+                <CountUp target={stat.value} suffix={stat.suffix} started={isInView} />
+              </p>
+              <p
+                style={{
+                  color: '#8B87A8',
+                  fontSize: '0.875rem',
+                  fontFamily: 'Plus Jakarta Sans, sans-serif',
+                  letterSpacing: '0.04em',
+                }}
+              >
+                {stat.label}
+              </p>
+            </div>
+          ))}
+        </div>
       </div>
 
       <style>{`
-        @media (max-width: 768px) {
+        @media (max-width: 640px) {
           .stats-grid { grid-template-columns: repeat(2, 1fr) !important; }
-          .stat-item { border-right: none !important; border-bottom: 1px solid rgba(255,255,255,0.1); }
-          .stat-item:nth-child(odd) { border-right: 1px solid rgba(255,255,255,0.1) !important; }
-          .stat-item:nth-last-child(-n+2) { border-bottom: none; }
+          .stats-grid > div { border-right: none !important; border-bottom: 1px solid rgba(107,46,232,0.2); }
         }
       `}</style>
     </section>

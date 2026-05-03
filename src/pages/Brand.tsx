@@ -1,58 +1,106 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { CheckCircle2, Star, Zap } from 'lucide-react';
+import { CheckCircle2, Camera, Play, ExternalLink } from 'lucide-react';
 import { packages } from '../data/packages';
 
-const platformColors: Record<string, { bg: string; color: string }> = {
-  Instagram: { bg: '#FFF0F7', color: '#E8197A' },
-  TikTok: { bg: '#F0FDF4', color: '#065F46' },
-  YouTube: { bg: '#FFF7ED', color: '#C2410C' },
-  'All platforms': { bg: '#F0EEFF', color: '#6B2EE8' },
-  Live: { bg: '#FEF3C7', color: '#92400E' },
+const platformIcons: Record<string, React.ReactNode> = {
+  Instagram: <Camera size={13} />,
+  TikTok: <ExternalLink size={13} />,
+  YouTube: <Play size={13} />,
+  'All platforms': <ExternalLink size={13} />,
+  Live: <ExternalLink size={13} />,
 };
+
+const easeOut = [0.16, 1, 0.3, 1] as const;
 
 export default function Brand() {
   return (
-    <div style={{ background: '#F2F0FF', minHeight: '100vh', paddingTop: '80px' }}>
-      {/* Hero */}
-      <div style={{ background: '#0F0A2E', padding: '80px 24px 100px', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
-        <div className="orb" style={{ width: '400px', height: '400px', background: 'rgba(107,46,232,0.3)', top: '-150px', left: '-100px' }} />
-        <div className="orb" style={{ width: '300px', height: '300px', background: 'rgba(232,25,122,0.2)', bottom: '-100px', right: '-80px' }} />
-        <div style={{ position: 'relative', zIndex: 1 }}>
-          <span className="section-label" style={{ color: '#38C6F0', display: 'block', marginBottom: '16px' }}>
-            Paket Kampanye KOL
+    <div style={{ background: '#FAFAFA', minHeight: '100vh' }}>
+      {/* Dark hero */}
+      <div
+        style={{
+          background: '#08060F',
+          padding: '140px 24px 100px',
+          textAlign: 'center',
+          position: 'relative',
+          overflow: 'hidden',
+        }}
+      >
+        <div className="orb" style={{ width: '400px', height: '400px', background: '#6B2EE8', top: '-150px', left: '10%' }} />
+        <div className="orb" style={{ width: '300px', height: '300px', background: '#E8197A', bottom: '-100px', right: '10%' }} />
+
+        <div style={{ position: 'relative', zIndex: 1, maxWidth: '680px', margin: '0 auto' }}>
+          <span className="section-label" style={{ display: 'inline-block', marginBottom: '16px' }}>
+            Untuk Brand
           </span>
-          <h1 style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)', fontWeight: 800, color: 'white', lineHeight: 1.2, marginBottom: '16px' }}>
-            Pilih Paket yang <span className="gradient-text">Tepat</span>
-          </h1>
-          <p style={{ color: '#8B87B0', fontSize: '1.05rem', maxWidth: '500px', margin: '0 auto' }}>
-            Dari brand baru hingga perusahaan besar — kami punya paket yang sesuai.
-          </p>
+          <motion.h1
+            style={{
+              fontFamily: 'Syne, sans-serif',
+              fontWeight: 900,
+              fontSize: 'clamp(2.5rem, 6vw, 5rem)',
+              color: '#EDE9F8',
+              lineHeight: 1.05,
+              marginBottom: '20px',
+            }}
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, ease: easeOut }}
+          >
+            Pilih Paket{' '}
+            <span
+              style={{
+                background: 'linear-gradient(135deg, #6B2EE8, #E8197A)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+              }}
+            >
+              Kampanye
+            </span>{' '}
+            Kamu.
+          </motion.h1>
+          <motion.p
+            style={{
+              color: '#8B87A8',
+              fontSize: '1.05rem',
+              lineHeight: 1.75,
+              fontFamily: 'Plus Jakarta Sans, sans-serif',
+            }}
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: easeOut, delay: 0.15 }}
+          >
+            Dari kampanye skala kecil hingga massive KOL campaign — Azera punya solusi untuk setiap kebutuhan brand.
+          </motion.p>
         </div>
+
+        {/* Bottom wave shape */}
+        <div
+          style={{
+            position: 'absolute',
+            bottom: -1,
+            left: 0,
+            right: 0,
+            height: '40px',
+            background: '#FAFAFA',
+            borderRadius: '50% 50% 0 0 / 40px 40px 0 0',
+          }}
+        />
       </div>
 
       {/* Package cards */}
-      <div style={{ maxWidth: '1200px', margin: '-40px auto 80px', padding: '0 24px' }}>
+      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '80px 24px 100px' }}>
         <div
-          style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px' }}
-          className="packages-grid"
+          style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '28px', alignItems: 'start' }}
+          className="brand-grid"
         >
-          {packages.map((pkg, index) => (
+          {packages.map((pkg, i) => (
             <motion.div
               key={pkg.id}
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-              style={{
-                background: 'white',
-                borderRadius: '24px',
-                padding: '36px 28px',
-                border: pkg.popular ? '2px solid #6B2EE8' : '1px solid #F0EEFF',
-                boxShadow: pkg.popular ? '0 8px 40px rgba(107,46,232,0.2)' : '0 4px 24px rgba(107,46,232,0.06)',
-                position: 'relative',
-                display: 'flex',
-                flexDirection: 'column',
-              }}
+              transition={{ duration: 0.6, ease: easeOut, delay: i * 0.12 }}
+              style={{ position: 'relative' }}
             >
               {/* Popular badge */}
               {pkg.popular && (
@@ -62,108 +110,172 @@ export default function Brand() {
                     top: '-14px',
                     left: '50%',
                     transform: 'translateX(-50%)',
-                    background: 'linear-gradient(90deg, #6B2EE8, #E8197A)',
+                    background: 'linear-gradient(135deg, #6B2EE8, #E8197A)',
                     color: 'white',
                     borderRadius: '999px',
-                    padding: '6px 20px',
-                    fontSize: '0.75rem',
+                    padding: '5px 18px',
+                    fontSize: '0.68rem',
                     fontWeight: 700,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px',
+                    fontFamily: 'Syne, sans-serif',
+                    letterSpacing: '0.1em',
                     whiteSpace: 'nowrap',
+                    zIndex: 10,
                   }}
                 >
-                  <Star size={12} fill="white" />
                   MOST POPULAR
                 </div>
               )}
 
-              {/* Package name */}
-              <div style={{ marginBottom: '24px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                  <div
+              <div
+                style={{
+                  background: 'white',
+                  borderRadius: '24px',
+                  overflow: 'hidden',
+                  boxShadow: pkg.popular
+                    ? '0 8px 48px rgba(107,46,232,0.2), 0 0 0 2px #6B2EE8'
+                    : '0 4px 24px rgba(107,46,232,0.07)',
+                  border: pkg.popular ? '1px solid #6B2EE8' : '1px solid rgba(107,46,232,0.06)',
+                  transition: 'all 0.3s ease',
+                }}
+              >
+                {/* Top gradient accent */}
+                <div
+                  style={{
+                    height: '3px',
+                    background:
+                      i === 0
+                        ? 'linear-gradient(90deg, #6B2EE8, #7C3AFF)'
+                        : i === 1
+                        ? 'linear-gradient(90deg, #6B2EE8, #E8197A)'
+                        : 'linear-gradient(90deg, #E8197A, #38C6F0)',
+                  }}
+                />
+
+                <div style={{ padding: '36px 32px' }}>
+                  {/* Package name */}
+                  <p
                     style={{
-                      width: '36px',
-                      height: '36px',
-                      borderRadius: '10px',
-                      background: pkg.popular ? 'linear-gradient(135deg, #6B2EE8, #E8197A)' : '#F0EEFF',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
+                      fontFamily: 'Syne, sans-serif',
+                      fontWeight: 800,
+                      fontSize: '1.4rem',
+                      color: '#120E28',
+                      marginBottom: '4px',
                     }}
                   >
-                    <Zap size={16} color={pkg.popular ? 'white' : '#6B2EE8'} />
-                  </div>
-                  <h3 style={{ fontWeight: 800, fontSize: '1.3rem', color: '#1A1040' }}>{pkg.name}</h3>
-                </div>
-                <p style={{ fontSize: '2rem', fontWeight: 900, color: '#6B2EE8', lineHeight: 1 }}>{pkg.price}</p>
-                <p style={{ fontSize: '0.8rem', color: '#8B87B0', marginTop: '4px' }}>per kampanye</p>
-              </div>
+                    {pkg.name}
+                  </p>
 
-              {/* KOL count */}
-              <div style={{ background: '#F2F0FF', borderRadius: '12px', padding: '12px 16px', marginBottom: '16px' }}>
-                <p style={{ fontSize: '0.8rem', color: '#8B87B0', marginBottom: '2px' }}>Jumlah KOL</p>
-                <p style={{ fontWeight: 700, color: '#1A1040' }}>{pkg.kolRange}</p>
-              </div>
+                  {/* Price */}
+                  <p
+                    style={{
+                      fontFamily: 'Syne, sans-serif',
+                      fontWeight: 900,
+                      fontSize: '1.8rem',
+                      background: 'linear-gradient(135deg, #6B2EE8, #E8197A)',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                      backgroundClip: 'text',
+                      marginBottom: '20px',
+                      lineHeight: 1.2,
+                    }}
+                  >
+                    {pkg.price}
+                  </p>
 
-              {/* Reach */}
-              <div style={{ background: '#F2F0FF', borderRadius: '12px', padding: '12px 16px', marginBottom: '16px' }}>
-                <p style={{ fontSize: '0.8rem', color: '#8B87B0', marginBottom: '2px' }}>Est. Reach</p>
-                <p style={{ fontWeight: 700, color: '#1A1040' }}>{pkg.reach}</p>
-              </div>
-
-              {/* Platforms */}
-              <div style={{ marginBottom: '24px' }}>
-                <p style={{ fontSize: '0.8rem', color: '#8B87B0', marginBottom: '8px' }}>Platform</p>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-                  {pkg.platforms.map((p) => (
+                  {/* KOL count + reach */}
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '16px' }}>
                     <span
-                      key={p}
                       style={{
-                        background: platformColors[p]?.bg || '#F0EEFF',
-                        color: platformColors[p]?.color || '#6B2EE8',
+                        background: '#F0EEFF',
+                        color: '#6B2EE8',
                         borderRadius: '999px',
-                        padding: '4px 10px',
-                        fontSize: '0.75rem',
-                        fontWeight: 600,
+                        padding: '5px 14px',
+                        fontSize: '0.78rem',
+                        fontWeight: 700,
+                        fontFamily: 'Syne, sans-serif',
                       }}
                     >
-                      {p}
+                      {pkg.kolRange}
                     </span>
-                  ))}
+                    <span
+                      style={{
+                        background: '#F0FFF4',
+                        color: '#065F46',
+                        borderRadius: '999px',
+                        padding: '5px 14px',
+                        fontSize: '0.78rem',
+                        fontWeight: 700,
+                        fontFamily: 'Syne, sans-serif',
+                      }}
+                    >
+                      {pkg.reach} reach
+                    </span>
+                  </div>
+
+                  {/* Platform badges */}
+                  <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '24px' }}>
+                    {pkg.platforms.map((p) => (
+                      <span
+                        key={p}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          background: '#F8F7FF',
+                          color: '#5B5780',
+                          borderRadius: '6px',
+                          padding: '4px 10px',
+                          fontSize: '0.72rem',
+                          fontWeight: 600,
+                        }}
+                      >
+                        {platformIcons[p]}
+                        {p}
+                      </span>
+                    ))}
+                  </div>
+
+                  {/* Divider */}
+                  <div style={{ height: '1px', background: '#F0EEFF', marginBottom: '24px' }} />
+
+                  {/* Features */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '32px' }}>
+                    {pkg.features.map((f) => (
+                      <div key={f} style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+                        <CheckCircle2
+                          size={16}
+                          color="#6B2EE8"
+                          style={{ flexShrink: 0, marginTop: '1px' }}
+                        />
+                        <span style={{ color: '#5B5780', fontSize: '0.875rem', lineHeight: 1.5, fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
+                          {f}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* CTA */}
+                  <Link
+                    to={`/brand/form?paket=${pkg.slug}`}
+                    className="btn-primary"
+                    style={{ width: '100%', justifyContent: 'center', fontSize: '0.95rem' }}
+                  >
+                    Konsultasi Gratis →
+                  </Link>
                 </div>
               </div>
-
-              {/* Features */}
-              <div style={{ flex: 1, marginBottom: '28px' }}>
-                <p style={{ fontSize: '0.8rem', color: '#8B87B0', marginBottom: '12px', fontWeight: 600 }}>Termasuk:</p>
-                <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                  {pkg.features.map((f) => (
-                    <li key={f} style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', fontSize: '0.875rem', color: '#1A1040' }}>
-                      <CheckCircle2 size={16} color="#10B981" style={{ flexShrink: 0, marginTop: '2px' }} />
-                      {f}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              {/* CTA */}
-              <Link
-                to={`/brand/form?paket=${pkg.slug}`}
-                className={pkg.popular ? 'btn-primary' : 'btn-outline'}
-                style={{ width: '100%', justifyContent: 'center', textAlign: 'center' }}
-              >
-                Konsultasi Gratis
-              </Link>
             </motion.div>
           ))}
         </div>
       </div>
 
       <style>{`
-        @media (max-width: 768px) { .packages-grid { grid-template-columns: 1fr !important; } }
-        @media (min-width: 769px) and (max-width: 1024px) { .packages-grid { grid-template-columns: repeat(2, 1fr) !important; } }
+        @media (max-width: 900px) {
+          .brand-grid { grid-template-columns: 1fr !important; max-width: 480px; margin: 0 auto; }
+        }
+        @media (min-width: 901px) and (max-width: 1100px) {
+          .brand-grid { grid-template-columns: repeat(2, 1fr) !important; }
+        }
       `}</style>
     </div>
   );

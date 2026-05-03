@@ -1,151 +1,272 @@
 import { Link } from 'react-router-dom';
-import { Music2, Mail, Globe } from 'lucide-react';
+import { Camera, Mail, ExternalLink } from 'lucide-react';
 
 export default function Footer() {
   return (
-    <footer style={{ background: '#F2F0FF', position: 'relative', overflow: 'hidden' }}>
-      {/* Main footer content */}
-      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '64px 24px 32px' }}>
+    <footer style={{ background: '#08060F', position: 'relative', overflow: 'hidden' }}>
+      {/* Top content */}
+      <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '80px 24px 0', position: 'relative', zIndex: 1 }}>
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+            gridTemplateColumns: 'repeat(4, 1fr)',
             gap: '48px',
-            marginBottom: '48px',
           }}
+          className="footer-grid"
         >
           {/* Column 1: Logo + tagline */}
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
-              <img src="/icon.png" alt="Azera" style={{ height: '36px', objectFit: 'contain' }} />
-              <span style={{ fontWeight: 800, fontSize: '1.2rem', color: '#1A1040', letterSpacing: '0.05em' }}>
+              <img src="/icon.png" alt="Azera" style={{ height: '32px', objectFit: 'contain' }} />
+              <span
+                style={{
+                  fontFamily: 'Syne, sans-serif',
+                  fontWeight: 800,
+                  fontSize: '1.1rem',
+                  color: '#FFFFFF',
+                  letterSpacing: '0.12em',
+                }}
+              >
                 AZERA
               </span>
             </div>
-            <p style={{ color: '#8B87B0', fontSize: '0.9rem', lineHeight: 1.7, maxWidth: '220px' }}>
-              Scale Brands. Amplify Impact.
-            </p>
-            <p style={{ color: '#8B87B0', fontSize: '0.85rem', marginTop: '8px', lineHeight: 1.6 }}>
-              KOL Campaign Engine for Growing Brands — connecting you with 20,000+ Nano & Micro KOL across Indonesia.
+            <p
+              style={{
+                color: '#8B87A8',
+                fontSize: '0.875rem',
+                lineHeight: 1.7,
+                maxWidth: '220px',
+              }}
+            >
+              Platform KOL campaign agency terpercaya di Indonesia. Kami menghubungkan brand dengan ribuan KOL terkurasi.
             </p>
           </div>
 
-          {/* Column 2: Links */}
+          {/* Column 2: Platform links */}
           <div>
-            <h4 style={{ fontWeight: 700, fontSize: '0.9rem', color: '#1A1040', marginBottom: '16px', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+            <h4
+              style={{
+                fontFamily: 'Syne, sans-serif',
+                fontWeight: 700,
+                fontSize: '0.8rem',
+                color: '#FFFFFF',
+                letterSpacing: '0.1em',
+                textTransform: 'uppercase',
+                marginBottom: '20px',
+              }}
+            >
               Platform
             </h4>
-            <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               {[
-                { label: 'Brand', to: '/brand' },
-                { label: 'KOL', to: '/kol' },
+                { label: 'Untuk Brand', to: '/brand' },
+                { label: 'Untuk KOL', to: '/kol' },
                 { label: 'Portfolio', to: '/portfolio' },
-                { label: 'Daftar KOL', to: '/kol/register' },
-                { label: 'Mulai Kampanye', to: '/brand/form' },
-              ].map((link) => (
-                <li key={link.to}>
-                  <Link
-                    to={link.to}
-                    style={{ color: '#8B87B0', textDecoration: 'none', fontSize: '0.9rem', transition: 'color 0.2s' }}
-                    onMouseEnter={(e) => (e.currentTarget.style.color = '#6B2EE8')}
-                    onMouseLeave={(e) => (e.currentTarget.style.color = '#8B87B0')}
-                  >
-                    {link.label}
-                  </Link>
-                </li>
+                { label: 'Paket & Harga', to: '/brand' },
+              ].map((item) => (
+                <Link
+                  key={item.to + item.label}
+                  to={item.to}
+                  style={{
+                    color: '#8B87A8',
+                    fontSize: '0.875rem',
+                    textDecoration: 'none',
+                    transition: 'color 0.2s',
+                  }}
+                  onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = '#EDE9F8')}
+                  onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = '#8B87A8')}
+                >
+                  {item.label}
+                </Link>
               ))}
-            </ul>
+            </div>
           </div>
 
           {/* Column 3: Social */}
           <div>
-            <h4 style={{ fontWeight: 700, fontSize: '0.9rem', color: '#1A1040', marginBottom: '16px', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
-              Social Media
+            <h4
+              style={{
+                fontFamily: 'Syne, sans-serif',
+                fontWeight: 700,
+                fontSize: '0.8rem',
+                color: '#FFFFFF',
+                letterSpacing: '0.1em',
+                textTransform: 'uppercase',
+                marginBottom: '20px',
+              }}
+            >
+              Social
             </h4>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {[
-                { icon: <span style={{ fontSize: '14px' }}>📸</span>, label: '@azerakol.id', href: 'https://www.instagram.com/azerakol.id/' },
-                { icon: <Music2 size={16} />, label: '@azerakol.id', href: '#' },
-                { icon: <span style={{ fontSize: '14px' }}>💼</span>, label: 'Azera KOL', href: '#' },
-              ].map((social) => (
-                <a
-                  key={social.label}
-                  href={social.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '10px',
-                    color: '#8B87B0',
-                    textDecoration: 'none',
-                    fontSize: '0.9rem',
-                    transition: 'color 0.2s',
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = '#6B2EE8')}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = '#8B87B0')}
-                >
-                  {social.icon}
-                  {social.label}
-                </a>
-              ))}
+              <a
+                href="https://www.instagram.com/azerakol.id/"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  color: '#8B87A8',
+                  fontSize: '0.875rem',
+                  textDecoration: 'none',
+                  transition: 'color 0.2s',
+                }}
+                onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = '#EDE9F8')}
+                onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = '#8B87A8')}
+              >
+                <Camera size={15} />
+                Instagram
+              </a>
+              <a
+                href="#"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  color: '#8B87A8',
+                  fontSize: '0.875rem',
+                  textDecoration: 'none',
+                  transition: 'color 0.2s',
+                }}
+                onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = '#EDE9F8')}
+                onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = '#8B87A8')}
+              >
+                <ExternalLink size={15} />
+                TikTok
+              </a>
+              <a
+                href="#"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  color: '#8B87A8',
+                  fontSize: '0.875rem',
+                  textDecoration: 'none',
+                  transition: 'color 0.2s',
+                }}
+                onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = '#EDE9F8')}
+                onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = '#8B87A8')}
+              >
+                <ExternalLink size={15} />
+                LinkedIn
+              </a>
             </div>
           </div>
 
           {/* Column 4: Contact */}
           <div>
-            <h4 style={{ fontWeight: 700, fontSize: '0.9rem', color: '#1A1040', marginBottom: '16px', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+            <h4
+              style={{
+                fontFamily: 'Syne, sans-serif',
+                fontWeight: 700,
+                fontSize: '0.8rem',
+                color: '#FFFFFF',
+                letterSpacing: '0.1em',
+                textTransform: 'uppercase',
+                marginBottom: '20px',
+              }}
+            >
               Kontak
             </h4>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               <a
-                href="https://azerakol.id"
+                href="https://wa.me/6288201586126"
                 target="_blank"
                 rel="noopener noreferrer"
-                style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#8B87B0', textDecoration: 'none', fontSize: '0.9rem' }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  color: '#8B87A8',
+                  fontSize: '0.875rem',
+                  textDecoration: 'none',
+                  transition: 'color 0.2s',
+                }}
+                onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = '#EDE9F8')}
+                onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = '#8B87A8')}
               >
-                <Globe size={16} />
-                azerakol.id
+                <ExternalLink size={15} />
+                WhatsApp
               </a>
               <a
                 href="mailto:hello@azerakol.id"
-                style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#8B87B0', textDecoration: 'none', fontSize: '0.9rem' }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  color: '#8B87A8',
+                  fontSize: '0.875rem',
+                  textDecoration: 'none',
+                  transition: 'color 0.2s',
+                }}
+                onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = '#EDE9F8')}
+                onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = '#8B87A8')}
               >
-                <Mail size={16} />
+                <Mail size={15} />
                 hello@azerakol.id
               </a>
             </div>
           </div>
         </div>
 
-        {/* Divider */}
-        <div style={{ borderTop: '1px solid #E0DCFF', paddingTop: '24px', display: 'flex', justifyContent: 'center', alignItems: 'center', position: 'relative' }}>
-          <p style={{ color: '#8B87B0', fontSize: '0.85rem', textAlign: 'center', position: 'relative', zIndex: 1 }}>
-            © 2026 Azera. All rights reserved.
+        {/* Gradient divider */}
+        <div
+          style={{
+            height: '1px',
+            background: 'linear-gradient(90deg, transparent, #6B2EE8, #E8197A, #38C6F0, transparent)',
+            opacity: 0.4,
+            margin: '56px 0 0',
+          }}
+        />
+      </div>
+
+      {/* Big AZERA watermark + copyright */}
+      <div style={{ position: 'relative', textAlign: 'center', overflow: 'hidden' }}>
+        {/* Giant text */}
+        <div
+          style={{
+            fontFamily: 'Syne, sans-serif',
+            fontWeight: 900,
+            fontSize: 'clamp(6rem, 18vw, 18rem)',
+            lineHeight: 0.85,
+            background: 'linear-gradient(135deg, #6B2EE8, #E8197A)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
+            opacity: 0.12,
+            userSelect: 'none',
+            pointerEvents: 'none',
+            padding: '20px 0 0',
+          }}
+        >
+          AZERA
+        </div>
+
+        {/* Copyright overlay */}
+        <div
+          style={{
+            position: 'absolute',
+            bottom: '20px',
+            left: 0,
+            right: 0,
+            textAlign: 'center',
+          }}
+        >
+          <p style={{ color: '#8B87A8', fontSize: '0.78rem', letterSpacing: '0.05em' }}>
+            &copy; {new Date().getFullYear()} Azera KOL Agency. All rights reserved.
           </p>
         </div>
       </div>
 
-      {/* Giant AZERA watermark */}
-      <div
-        style={{
-          position: 'absolute',
-          bottom: '-20px',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          fontSize: 'clamp(80px, 15vw, 160px)',
-          fontWeight: 900,
-          color: '#6B2EE8',
-          opacity: 0.06,
-          letterSpacing: '-0.02em',
-          whiteSpace: 'nowrap',
-          userSelect: 'none',
-          pointerEvents: 'none',
-          lineHeight: 1,
-        }}
-      >
-        AZERA
-      </div>
+      <style>{`
+        @media (max-width: 900px) {
+          .footer-grid { grid-template-columns: repeat(2, 1fr) !important; }
+        }
+        @media (max-width: 560px) {
+          .footer-grid { grid-template-columns: 1fr !important; }
+        }
+      `}</style>
     </footer>
   );
 }

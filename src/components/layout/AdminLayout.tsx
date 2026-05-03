@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation, Outlet } from 'react-router-dom';
-import { Building2, Users, ImageIcon, LogOut, Menu } from 'lucide-react';
+import { Building2, Users, ImageIcon, LogOut, Menu, X } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 
 const navItems = [
@@ -28,13 +28,39 @@ export default function AdminLayout() {
   const SidebarContent = () => (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       {/* Logo */}
-      <div style={{ padding: '24px 20px', borderBottom: '1px solid #F0EEFF' }}>
-        <Link to="/admin/brands" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}>
-          <img src="/icon.png" alt="Azera" style={{ height: '32px', objectFit: 'contain' }} />
-          <span style={{ fontWeight: 800, fontSize: '1.1rem', color: '#1A1040', letterSpacing: '0.05em' }}>
+      <div
+        style={{
+          padding: '24px 20px',
+          borderBottom: '1px solid #F0EEFF',
+        }}
+      >
+        <Link
+          to="/admin/brands"
+          style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}
+        >
+          <img src="/icon.png" alt="Azera" style={{ height: '30px', objectFit: 'contain' }} />
+          <span
+            style={{
+              fontFamily: 'Syne, sans-serif',
+              fontWeight: 800,
+              fontSize: '1.05rem',
+              color: '#120E28',
+              letterSpacing: '0.08em',
+            }}
+          >
             AZERA
           </span>
-          <span style={{ fontSize: '0.7rem', background: '#F0EEFF', color: '#6B2EE8', borderRadius: '4px', padding: '2px 6px', fontWeight: 600 }}>
+          <span
+            style={{
+              fontSize: '0.65rem',
+              background: 'linear-gradient(135deg, #6B2EE8, #E8197A)',
+              color: 'white',
+              borderRadius: '4px',
+              padding: '2px 7px',
+              fontWeight: 700,
+              letterSpacing: '0.06em',
+            }}
+          >
             ADMIN
           </span>
         </Link>
@@ -57,11 +83,14 @@ export default function AdminLayout() {
                 borderRadius: '10px',
                 marginBottom: '4px',
                 textDecoration: 'none',
-                fontWeight: active ? 600 : 500,
+                fontFamily: 'Plus Jakarta Sans, sans-serif',
+                fontWeight: active ? 700 : 500,
                 fontSize: '0.9rem',
-                color: active ? '#6B2EE8' : '#8B87B0',
+                color: active ? '#6B2EE8' : '#8B87A8',
                 background: active ? '#F0EEFF' : 'transparent',
                 transition: 'all 0.2s',
+                position: 'relative',
+                borderLeft: active ? '3px solid #6B2EE8' : '3px solid transparent',
               }}
             >
               <Icon size={18} />
@@ -71,7 +100,7 @@ export default function AdminLayout() {
         })}
       </nav>
 
-      {/* Divider + Logout */}
+      {/* Logout */}
       <div style={{ padding: '16px 12px', borderTop: '1px solid #F0EEFF' }}>
         <button
           onClick={logout}
@@ -85,6 +114,7 @@ export default function AdminLayout() {
             border: 'none',
             background: 'transparent',
             cursor: 'pointer',
+            fontFamily: 'Plus Jakarta Sans, sans-serif',
             fontWeight: 500,
             fontSize: '0.9rem',
             color: '#EF4444',
@@ -115,14 +145,7 @@ export default function AdminLayout() {
 
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
-        <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            zIndex: 40,
-            display: 'flex',
-          }}
-        >
+        <div style={{ position: 'fixed', inset: 0, zIndex: 40, display: 'flex' }}>
           <div
             style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.4)' }}
             onClick={() => setSidebarOpen(false)}
@@ -136,6 +159,14 @@ export default function AdminLayout() {
               boxShadow: '4px 0 24px rgba(0,0,0,0.1)',
             }}
           >
+            <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '16px' }}>
+              <button
+                onClick={() => setSidebarOpen(false)}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#8B87A8' }}
+              >
+                <X size={20} />
+              </button>
+            </div>
             <SidebarContent />
           </aside>
         </div>
@@ -165,25 +196,37 @@ export default function AdminLayout() {
                 background: 'none',
                 border: 'none',
                 cursor: 'pointer',
-                color: '#8B87B0',
+                color: '#8B87A8',
                 padding: '4px',
               }}
               className="admin-hamburger"
             >
               <Menu size={22} />
             </button>
-            <h1 style={{ fontWeight: 700, fontSize: '1.1rem', color: '#1A1040' }}>
+            <h1
+              style={{
+                fontFamily: 'Syne, sans-serif',
+                fontWeight: 700,
+                fontSize: '1.05rem',
+                color: '#120E28',
+              }}
+            >
               {pageTitle}
             </h1>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <div style={{ textAlign: 'right' }}>
-              <p style={{ fontWeight: 600, fontSize: '0.875rem', color: '#1A1040' }}>
+              <p
+                style={{
+                  fontFamily: 'Plus Jakarta Sans, sans-serif',
+                  fontWeight: 600,
+                  fontSize: '0.875rem',
+                  color: '#120E28',
+                }}
+              >
                 {admin?.name || 'Admin'}
               </p>
-              <p style={{ fontSize: '0.75rem', color: '#8B87B0' }}>
-                {admin?.email || ''}
-              </p>
+              <p style={{ fontSize: '0.72rem', color: '#8B87A8' }}>{admin?.email || ''}</p>
             </div>
             <div
               style={{
@@ -195,8 +238,10 @@ export default function AdminLayout() {
                 alignItems: 'center',
                 justifyContent: 'center',
                 color: 'white',
+                fontFamily: 'Syne, sans-serif',
                 fontWeight: 700,
-                fontSize: '0.875rem',
+                fontSize: '0.9rem',
+                flexShrink: 0,
               }}
             >
               {(admin?.name?.[0] || 'A').toUpperCase()}
@@ -209,17 +254,6 @@ export default function AdminLayout() {
           <Outlet />
         </main>
       </div>
-
-      <style>{`
-        @media (min-width: 768px) {
-          .admin-sidebar-desktop { display: block !important; }
-          .admin-hamburger { display: none !important; }
-        }
-        @media (max-width: 767px) {
-          .admin-sidebar-desktop { display: none !important; }
-          .admin-hamburger { display: flex !important; }
-        }
-      `}</style>
     </div>
   );
 }

@@ -39,12 +39,51 @@ function ERBadge({ er }: { er: number }) {
   const rating = erRating(er);
   if (er === 0) return null;
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '8px', padding: '8px 14px', borderRadius: '10px', background: '#F2F0FF' }}>
-      <span style={{ fontWeight: 700, fontSize: '1rem', color: rating.color }}>{er}%</span>
-      <span style={{ fontSize: '0.8rem', color: rating.color, fontWeight: 600 }}>ER — {rating.label}</span>
+    <div
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: '8px',
+        marginTop: '10px',
+        padding: '8px 16px',
+        borderRadius: '10px',
+        background: 'linear-gradient(135deg, #6B2EE8, #E8197A)',
+      }}
+    >
+      <span style={{ fontFamily: 'Syne, sans-serif', fontWeight: 900, fontSize: '1rem', color: 'white' }}>{er}%</span>
+      <span style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.85)', fontWeight: 600, fontFamily: 'Plus Jakarta Sans, sans-serif' }}>ER — {rating.label}</span>
     </div>
   );
 }
+
+const inputStyle = (err?: boolean): React.CSSProperties => ({
+  width: '100%',
+  padding: '11px 14px',
+  borderRadius: '12px',
+  border: `1.5px solid ${err ? '#EF4444' : '#E0DCFF'}`,
+  fontSize: '0.875rem',
+  color: '#120E28',
+  background: 'white',
+  outline: 'none',
+  fontFamily: 'Plus Jakarta Sans, sans-serif',
+  transition: 'border-color 0.2s',
+});
+
+const labelStyle: React.CSSProperties = {
+  display: 'block',
+  fontWeight: 600,
+  fontSize: '0.8rem',
+  color: '#120E28',
+  marginBottom: '5px',
+  fontFamily: 'Plus Jakarta Sans, sans-serif',
+};
+
+const errStyle: React.CSSProperties = {
+  color: '#EF4444',
+  fontSize: '0.75rem',
+  marginTop: '3px',
+  fontFamily: 'Plus Jakarta Sans, sans-serif',
+};
 
 export default function KOLRegister() {
   const [submitted, setSubmitted] = useState(false);
@@ -58,7 +97,6 @@ export default function KOLRegister() {
   });
 
   const watchAll = watch();
-
   const igER = calcEngagement(watchAll.ig_followers || 0, watchAll.ig_avgLike || 0, watchAll.ig_avgComment || 0);
   const ttER = calcEngagement(watchAll.tt_followers || 0, watchAll.tt_avgLike || 0, watchAll.tt_avgComment || 0);
   const ytVR = calcViewRate(watchAll.yt_subscribers || 0, watchAll.yt_avgViews || 0);
@@ -100,13 +138,45 @@ export default function KOLRegister() {
 
   if (submitted) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#F2F0FF', padding: '24px', paddingTop: '100px' }}>
+      <div
+        style={{
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: '#F2F0FF',
+          padding: '24px',
+          paddingTop: '100px',
+        }}
+      >
         <div style={{ textAlign: 'center', maxWidth: '480px' }}>
-          <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: '#D1FAE5', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px' }}>
-            <CheckCircle2 size={40} color="#10B981" />
+          <div
+            style={{
+              width: '80px',
+              height: '80px',
+              borderRadius: '50%',
+              background: 'linear-gradient(135deg, #6B2EE8, #E8197A)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 24px',
+              boxShadow: '0 0 40px rgba(107,46,232,0.4)',
+            }}
+          >
+            <CheckCircle2 size={40} color="white" />
           </div>
-          <h2 style={{ fontWeight: 800, fontSize: '1.8rem', color: '#1A1040', marginBottom: '12px' }}>Pendaftaran Berhasil!</h2>
-          <p style={{ color: '#8B87B0', lineHeight: 1.7 }}>
+          <h2
+            style={{
+              fontFamily: 'Syne, sans-serif',
+              fontWeight: 800,
+              fontSize: '1.8rem',
+              color: '#120E28',
+              marginBottom: '12px',
+            }}
+          >
+            Pendaftaran Berhasil!
+          </h2>
+          <p style={{ color: '#5B5780', lineHeight: 1.7, fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
             Profil kamu sedang kami review. Tim Azera akan menghubungi kamu dalam 1–3 hari kerja via WhatsApp.
           </p>
         </div>
@@ -114,34 +184,65 @@ export default function KOLRegister() {
     );
   }
 
-  const inputStyle = (err?: boolean) => ({
-    width: '100%', padding: '11px 14px', borderRadius: '10px',
-    border: `1.5px solid ${err ? '#EF4444' : '#E0DCFF'}`,
-    fontSize: '0.875rem', color: '#1A1040', background: 'white',
-    outline: 'none', fontFamily: 'inherit',
-  });
-  const labelStyle = { display: 'block', fontWeight: 600, fontSize: '0.8rem', color: '#1A1040', marginBottom: '5px' };
-  const errStyle = { color: '#EF4444', fontSize: '0.75rem', marginTop: '3px' };
-  const sectionTitle = (title: string) => (
-    <h3 style={{ fontWeight: 700, fontSize: '1rem', color: '#6B2EE8', marginBottom: '20px', paddingBottom: '10px', borderBottom: '1px solid #F0EEFF', marginTop: '8px' }}>
+  const SectionTitle = ({ title }: { title: string }) => (
+    <p
+      style={{
+        fontFamily: 'Syne, sans-serif',
+        fontWeight: 700,
+        fontSize: '1rem',
+        background: 'linear-gradient(135deg, #6B2EE8, #E8197A)',
+        WebkitBackgroundClip: 'text',
+        WebkitTextFillColor: 'transparent',
+        backgroundClip: 'text',
+        marginBottom: '20px',
+        paddingBottom: '12px',
+        borderBottom: '1px solid #F0EEFF',
+        marginTop: '8px',
+      }}
+    >
       {title}
-    </h3>
+    </p>
   );
 
   return (
     <div style={{ background: '#F2F0FF', minHeight: '100vh', paddingTop: '80px' }}>
       <div style={{ maxWidth: '760px', margin: '0 auto', padding: '48px 24px 80px' }}>
         <div style={{ textAlign: 'center', marginBottom: '40px' }}>
-          <span className="section-label" style={{ display: 'block', marginBottom: '12px' }}>Daftar KOL</span>
-          <h1 style={{ fontSize: 'clamp(1.8rem, 4vw, 2.5rem)', fontWeight: 800, color: '#1A1040' }}>
-            Bergabung dengan <span className="gradient-text">Azera Network</span>
+          <span className="section-label" style={{ display: 'inline-block', marginBottom: '12px' }}>
+            Daftar KOL
+          </span>
+          <h1
+            style={{
+              fontFamily: 'Syne, sans-serif',
+              fontWeight: 900,
+              fontSize: 'clamp(1.8rem, 4vw, 2.8rem)',
+              color: '#120E28',
+              lineHeight: 1.15,
+            }}
+          >
+            Bergabung dengan{' '}
+            <span
+              style={{
+                background: 'linear-gradient(135deg, #6B2EE8, #E8197A)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+              }}
+            >
+              Azera Network
+            </span>
           </h1>
-          <p style={{ color: '#8B87B0', marginTop: '10px' }}>Daftar gratis — tim kami akan review profil dan menghubungi kamu.</p>
+          <p style={{ color: '#5B5780', marginTop: '10px', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
+            Daftar gratis — tim kami akan review profil dan menghubungi kamu.
+          </p>
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} style={{ background: 'white', borderRadius: '24px', padding: '40px', boxShadow: '0 4px 24px rgba(107,46,232,0.08)' }}>
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          style={{ background: 'white', borderRadius: '24px', padding: '40px', boxShadow: '0 4px 24px rgba(107,46,232,0.08)' }}
+        >
           {/* Section 1: Basic Info */}
-          {sectionTitle('1. Informasi Dasar')}
+          <SectionTitle title="1. Informasi Dasar" />
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }} className="form-2col">
             <div>
@@ -188,31 +289,58 @@ export default function KOLRegister() {
           </div>
 
           <div style={{ marginBottom: '28px' }}>
-            <label style={labelStyle}>Niche Konten * <span style={{ fontWeight: 400, color: '#8B87B0' }}>(bisa lebih dari 1)</span></label>
+            <label style={labelStyle}>
+              Niche Konten *{' '}
+              <span style={{ fontWeight: 400, color: '#8B87A8' }}>(bisa lebih dari 1)</span>
+            </label>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-              {niches.map((n) => (
-                <button key={n} type="button" onClick={() => toggleNiche(n)}
-                  style={{
-                    padding: '7px 14px', borderRadius: '999px', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s',
-                    border: `1.5px solid ${niches_.includes(n) ? '#6B2EE8' : '#E0DCFF'}`,
-                    background: niches_.includes(n) ? '#F0EEFF' : 'white',
-                    color: niches_.includes(n) ? '#6B2EE8' : '#8B87B0',
-                  }}
-                >{n}</button>
-              ))}
+              {niches.map((n) => {
+                const selected = niches_.includes(n);
+                return (
+                  <button
+                    key={n}
+                    type="button"
+                    onClick={() => toggleNiche(n)}
+                    style={{
+                      padding: '8px 16px',
+                      borderRadius: '999px',
+                      border: 'none',
+                      background: selected ? 'linear-gradient(135deg, #6B2EE8, #E8197A)' : '#F0EEFF',
+                      color: selected ? 'white' : '#6B2EE8',
+                      fontSize: '0.8rem',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      transition: 'all 0.2s',
+                      fontFamily: 'Plus Jakarta Sans, sans-serif',
+                    }}
+                  >
+                    {n}
+                  </button>
+                );
+              })}
             </div>
             {errors.niche && <p style={errStyle}>{errors.niche.message as string}</p>}
           </div>
 
           {/* Section 2: Social Media */}
-          {sectionTitle('2. Media Sosial')}
-          <p style={{ color: '#8B87B0', fontSize: '0.85rem', marginBottom: '20px' }}>Isi minimal 1 platform.</p>
+          <SectionTitle title="2. Media Sosial" />
+          <p style={{ color: '#8B87A8', fontSize: '0.85rem', marginBottom: '20px', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
+            Isi minimal 1 platform.
+          </p>
 
           {/* Instagram */}
-          <div style={{ background: '#FFF0F7', borderRadius: '14px', padding: '20px', marginBottom: '16px' }}>
+          <div
+            style={{
+              background: '#FFF5FB',
+              border: '1px solid rgba(232,25,122,0.12)',
+              borderRadius: '16px',
+              padding: '20px',
+              marginBottom: '16px',
+            }}
+          >
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
               <Camera size={18} color="#E8197A" />
-              <p style={{ fontWeight: 700, color: '#E8197A', fontSize: '0.9rem' }}>Instagram</p>
+              <p style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, color: '#E8197A', fontSize: '0.9rem' }}>Instagram</p>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }} className="form-2col">
               <div style={{ gridColumn: '1 / -1' }}>
@@ -221,24 +349,32 @@ export default function KOLRegister() {
               </div>
               <div>
                 <label style={labelStyle}>Followers</label>
-                <input {...register('ig_followers')} type="number" placeholder="10000" style={inputStyle()} />
+                <input {...register('ig_followers', { valueAsNumber: true })} type="number" placeholder="10000" style={inputStyle()} />
               </div>
               <div>
                 <label style={labelStyle}>Avg. Like</label>
-                <input {...register('ig_avgLike')} type="number" placeholder="500" style={inputStyle()} />
+                <input {...register('ig_avgLike', { valueAsNumber: true })} type="number" placeholder="500" style={inputStyle()} />
               </div>
               <div style={{ gridColumn: '1 / -1' }}>
                 <label style={labelStyle}>Avg. Comment</label>
-                <input {...register('ig_avgComment')} type="number" placeholder="50" style={inputStyle()} />
+                <input {...register('ig_avgComment', { valueAsNumber: true })} type="number" placeholder="50" style={inputStyle()} />
               </div>
             </div>
             <ERBadge er={igER} />
           </div>
 
           {/* TikTok */}
-          <div style={{ background: '#F0FDF4', borderRadius: '14px', padding: '20px', marginBottom: '16px' }}>
+          <div
+            style={{
+              background: '#F0FDF4',
+              border: '1px solid rgba(16,185,129,0.12)',
+              borderRadius: '16px',
+              padding: '20px',
+              marginBottom: '16px',
+            }}
+          >
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
-              <p style={{ fontWeight: 700, color: '#065F46', fontSize: '0.9rem' }}>TikTok</p>
+              <p style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, color: '#065F46', fontSize: '0.9rem' }}>TikTok</p>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }} className="form-2col">
               <div style={{ gridColumn: '1 / -1' }}>
@@ -247,29 +383,37 @@ export default function KOLRegister() {
               </div>
               <div>
                 <label style={labelStyle}>Followers</label>
-                <input {...register('tt_followers')} type="number" placeholder="10000" style={inputStyle()} />
+                <input {...register('tt_followers', { valueAsNumber: true })} type="number" placeholder="10000" style={inputStyle()} />
               </div>
               <div>
                 <label style={labelStyle}>Avg. Like</label>
-                <input {...register('tt_avgLike')} type="number" placeholder="500" style={inputStyle()} />
+                <input {...register('tt_avgLike', { valueAsNumber: true })} type="number" placeholder="500" style={inputStyle()} />
               </div>
               <div>
                 <label style={labelStyle}>Avg. Comment</label>
-                <input {...register('tt_avgComment')} type="number" placeholder="50" style={inputStyle()} />
+                <input {...register('tt_avgComment', { valueAsNumber: true })} type="number" placeholder="50" style={inputStyle()} />
               </div>
               <div>
                 <label style={labelStyle}>Avg. Views</label>
-                <input {...register('tt_avgViews')} type="number" placeholder="5000" style={inputStyle()} />
+                <input {...register('tt_avgViews', { valueAsNumber: true })} type="number" placeholder="5000" style={inputStyle()} />
               </div>
             </div>
             <ERBadge er={ttER} />
           </div>
 
           {/* YouTube */}
-          <div style={{ background: '#FFF7ED', borderRadius: '14px', padding: '20px', marginBottom: '28px' }}>
+          <div
+            style={{
+              background: '#FFF7ED',
+              border: '1px solid rgba(194,65,12,0.12)',
+              borderRadius: '16px',
+              padding: '20px',
+              marginBottom: '28px',
+            }}
+          >
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
               <Play size={18} color="#C2410C" />
-              <p style={{ fontWeight: 700, color: '#C2410C', fontSize: '0.9rem' }}>YouTube</p>
+              <p style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, color: '#C2410C', fontSize: '0.9rem' }}>YouTube</p>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }} className="form-2col">
               <div style={{ gridColumn: '1 / -1' }}>
@@ -278,23 +422,33 @@ export default function KOLRegister() {
               </div>
               <div>
                 <label style={labelStyle}>Subscribers</label>
-                <input {...register('yt_subscribers')} type="number" placeholder="10000" style={inputStyle()} />
+                <input {...register('yt_subscribers', { valueAsNumber: true })} type="number" placeholder="10000" style={inputStyle()} />
               </div>
               <div>
                 <label style={labelStyle}>Avg. Views / Video</label>
-                <input {...register('yt_avgViews')} type="number" placeholder="2000" style={inputStyle()} />
+                <input {...register('yt_avgViews', { valueAsNumber: true })} type="number" placeholder="2000" style={inputStyle()} />
               </div>
             </div>
             {ytVR > 0 && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '8px', padding: '8px 14px', borderRadius: '10px', background: '#FEF3C7' }}>
-                <span style={{ fontWeight: 700, fontSize: '1rem', color: '#92400E' }}>{ytVR}%</span>
-                <span style={{ fontSize: '0.8rem', color: '#92400E', fontWeight: 600 }}>View Rate</span>
+              <div
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  marginTop: '10px',
+                  padding: '8px 16px',
+                  borderRadius: '10px',
+                  background: 'linear-gradient(135deg, #C2410C, #F59E0B)',
+                }}
+              >
+                <span style={{ fontFamily: 'Syne, sans-serif', fontWeight: 900, fontSize: '1rem', color: 'white' }}>{ytVR}%</span>
+                <span style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.85)', fontWeight: 600, fontFamily: 'Plus Jakarta Sans, sans-serif' }}>View Rate</span>
               </div>
             )}
           </div>
 
           {/* Section 3: Additional */}
-          {sectionTitle('3. Informasi Tambahan')}
+          <SectionTitle title="3. Informasi Tambahan" />
 
           <div style={{ marginBottom: '14px' }}>
             <label style={labelStyle}>Rate Card (opsional)</label>
@@ -316,7 +470,7 @@ export default function KOLRegister() {
             />
           </div>
 
-          <div style={{ marginBottom: '32px' }}>
+          <div style={{ marginBottom: '36px' }}>
             <label style={labelStyle}>Foto Profil (opsional)</label>
             <input
               type="file"
@@ -324,23 +478,29 @@ export default function KOLRegister() {
               onChange={(e) => setProfileFile(e.target.files?.[0] || null)}
               style={{ ...inputStyle(), padding: '10px 14px', cursor: 'pointer' }}
             />
-            {profileFile && <p style={{ fontSize: '0.78rem', color: '#10B981', marginTop: '4px' }}>File: {profileFile.name}</p>}
+            {profileFile && (
+              <p style={{ fontSize: '0.78rem', color: '#10B981', marginTop: '4px', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
+                File: {profileFile.name}
+              </p>
+            )}
           </div>
 
           <button
             type="submit"
             disabled={loading}
             className="btn-primary"
-            style={{ width: '100%', justifyContent: 'center', fontSize: '1rem', padding: '16px', opacity: loading ? 0.7 : 1 }}
+            style={{
+              width: '100%',
+              justifyContent: 'center',
+              fontSize: '1rem',
+              padding: '16px',
+              opacity: loading ? 0.7 : 1,
+            }}
           >
             {loading ? 'Mendaftar...' : 'Daftar Sekarang'}
           </button>
         </form>
       </div>
-
-      <style>{`
-        @media (max-width: 640px) { .form-2col { grid-template-columns: 1fr !important; } }
-      `}</style>
     </div>
   );
 }

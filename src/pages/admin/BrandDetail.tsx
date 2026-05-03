@@ -25,6 +25,43 @@ interface BrandData {
 
 const statusOptions = ['new', 'reviewed', 'contacted'];
 
+const labelSmall: React.CSSProperties = {
+  fontSize: '0.7rem',
+  fontFamily: 'Syne, sans-serif',
+  fontWeight: 700,
+  color: '#8B87A8',
+  marginBottom: '4px',
+  textTransform: 'uppercase',
+  letterSpacing: '0.06em',
+};
+
+const valueStyle: React.CSSProperties = {
+  color: '#120E28',
+  fontSize: '0.9rem',
+  fontWeight: 500,
+  fontFamily: 'Plus Jakarta Sans, sans-serif',
+};
+
+const cardStyle: React.CSSProperties = {
+  background: 'white',
+  borderRadius: '16px',
+  padding: '28px',
+  border: '1px solid #F0EEFF',
+  boxShadow: '0 2px 12px rgba(107,46,232,0.05)',
+};
+
+const inputStyle: React.CSSProperties = {
+  width: '100%',
+  padding: '11px 14px',
+  borderRadius: '10px',
+  border: '1.5px solid #E0DCFF',
+  fontSize: '0.875rem',
+  outline: 'none',
+  fontFamily: 'Plus Jakarta Sans, sans-serif',
+  background: 'white',
+  color: '#120E28',
+};
+
 export default function BrandDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -59,13 +96,13 @@ export default function BrandDetail() {
     }
   };
 
-  if (loading) return <div style={{ textAlign: 'center', padding: '80px', color: '#8B87B0' }}>Memuat...</div>;
+  if (loading) return <div style={{ textAlign: 'center', padding: '80px', color: '#8B87A8', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>Memuat...</div>;
   if (!brand) return null;
 
   const Field = ({ label, value }: { label: string; value?: string }) => (
     <div>
-      <p style={{ fontSize: '0.75rem', fontWeight: 700, color: '#8B87B0', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{label}</p>
-      <p style={{ color: '#1A1040', fontSize: '0.9rem', fontWeight: 500 }}>{value || '—'}</p>
+      <p style={labelSmall}>{label}</p>
+      <p style={valueStyle}>{value || '—'}</p>
     </div>
   );
 
@@ -74,21 +111,37 @@ export default function BrandDetail() {
       {/* Back */}
       <button
         onClick={() => navigate('/admin/brands')}
-        style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'none', border: 'none', cursor: 'pointer', color: '#8B87B0', fontSize: '0.875rem', marginBottom: '24px', padding: 0 }}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          background: 'none',
+          border: 'none',
+          cursor: 'pointer',
+          color: '#8B87A8',
+          fontSize: '0.875rem',
+          marginBottom: '24px',
+          padding: 0,
+          fontFamily: 'Plus Jakarta Sans, sans-serif',
+        }}
       >
         <ArrowLeft size={16} />
         Kembali ke Brands
       </button>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: '24px' }} className="detail-grid">
-        {/* Left: Brand info */}
+        {/* Left */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
           {/* Header card */}
-          <div style={{ background: 'white', borderRadius: '16px', padding: '28px', border: '1px solid #F0EEFF' }}>
+          <div style={cardStyle}>
             <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
               <div>
-                <h2 style={{ fontWeight: 800, fontSize: '1.4rem', color: '#1A1040', marginBottom: '4px' }}>{brand.namaBrand}</h2>
-                <p style={{ color: '#8B87B0', fontSize: '0.875rem' }}>
+                {/* Gradient top accent */}
+                <div style={{ width: '40px', height: '3px', background: 'linear-gradient(135deg, #6B2EE8, #E8197A)', borderRadius: '2px', marginBottom: '12px' }} />
+                <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: '1.4rem', color: '#120E28', marginBottom: '4px' }}>
+                  {brand.namaBrand}
+                </h2>
+                <p style={{ color: '#8B87A8', fontSize: '0.8rem', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
                   Diterima {new Date(brand.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
                 </p>
               </div>
@@ -108,31 +161,60 @@ export default function BrandDetail() {
           </div>
 
           {/* Campaign details */}
-          <div style={{ background: 'white', borderRadius: '16px', padding: '28px', border: '1px solid #F0EEFF' }}>
-            <h3 style={{ fontWeight: 700, fontSize: '1rem', color: '#1A1040', marginBottom: '20px' }}>Detail Kampanye</h3>
+          <div style={cardStyle}>
+            <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '1rem', color: '#120E28', marginBottom: '20px' }}>
+              Detail Kampanye
+            </h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <Field label="Target Audience" value={brand.targetAudience} />
               <div>
-                <p style={{ fontSize: '0.75rem', fontWeight: 700, color: '#8B87B0', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Tujuan</p>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                <p style={labelSmall}>Tujuan</p>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '6px' }}>
                   {(brand.tujuan || []).map((t) => (
-                    <span key={t} style={{ background: '#F0EEFF', color: '#6B2EE8', borderRadius: '999px', padding: '4px 12px', fontSize: '0.8rem', fontWeight: 600 }}>{t}</span>
+                    <span
+                      key={t}
+                      style={{
+                        background: '#F0EEFF',
+                        color: '#6B2EE8',
+                        borderRadius: '999px',
+                        padding: '4px 12px',
+                        fontSize: '0.78rem',
+                        fontFamily: 'Syne, sans-serif',
+                        fontWeight: 700,
+                      }}
+                    >
+                      {t}
+                    </span>
                   ))}
                 </div>
               </div>
               <div>
-                <p style={{ fontSize: '0.75rem', fontWeight: 700, color: '#8B87B0', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Deskripsi</p>
-                <p style={{ color: '#1A1040', fontSize: '0.9rem', lineHeight: 1.7 }}>{brand.deskripsi}</p>
+                <p style={labelSmall}>Deskripsi</p>
+                <p style={{ color: '#120E28', fontSize: '0.9rem', lineHeight: 1.7, fontFamily: 'Plus Jakarta Sans, sans-serif', marginTop: '4px' }}>
+                  {brand.deskripsi}
+                </p>
               </div>
             </div>
           </div>
 
-          {/* WA quick link */}
+          {/* WA link */}
           <a
             href={`https://wa.me/${brand.whatsapp.replace(/\D/g, '')}`}
             target="_blank"
             rel="noopener noreferrer"
-            style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#25D366', color: 'white', borderRadius: '12px', padding: '14px 20px', fontWeight: 600, fontSize: '0.9rem', textDecoration: 'none' }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              background: '#25D366',
+              color: 'white',
+              borderRadius: '12px',
+              padding: '14px 20px',
+              fontFamily: 'Plus Jakarta Sans, sans-serif',
+              fontWeight: 700,
+              fontSize: '0.9rem',
+              textDecoration: 'none',
+            }}
           >
             <ExternalLink size={16} />
             Hubungi via WhatsApp
@@ -141,30 +223,38 @@ export default function BrandDetail() {
 
         {/* Right: Status + notes */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <div style={{ background: 'white', borderRadius: '16px', padding: '24px', border: '1px solid #F0EEFF' }}>
-            <h3 style={{ fontWeight: 700, fontSize: '1rem', color: '#1A1040', marginBottom: '20px' }}>Update Status</h3>
+          <div style={cardStyle}>
+            <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '1rem', color: '#120E28', marginBottom: '20px' }}>
+              Update Status
+            </h3>
 
             <div style={{ marginBottom: '16px' }}>
-              <label style={{ display: 'block', fontWeight: 600, fontSize: '0.8rem', color: '#1A1040', marginBottom: '6px' }}>Status</label>
+              <label style={{ display: 'block', fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 600, fontSize: '0.8rem', color: '#120E28', marginBottom: '6px' }}>
+                Status
+              </label>
               <select
                 value={status}
                 onChange={(e) => setStatus(e.target.value)}
-                style={{ width: '100%', padding: '11px 14px', borderRadius: '10px', border: '1.5px solid #E0DCFF', fontSize: '0.875rem', outline: 'none', fontFamily: 'inherit', background: 'white', cursor: 'pointer' }}
+                style={{ ...inputStyle, cursor: 'pointer' }}
               >
                 {statusOptions.map((s) => (
-                  <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>
+                  <option key={s} value={s}>
+                    {s.charAt(0).toUpperCase() + s.slice(1)}
+                  </option>
                 ))}
               </select>
             </div>
 
             <div style={{ marginBottom: '20px' }}>
-              <label style={{ display: 'block', fontWeight: 600, fontSize: '0.8rem', color: '#1A1040', marginBottom: '6px' }}>Catatan Internal</label>
+              <label style={{ display: 'block', fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 600, fontSize: '0.8rem', color: '#120E28', marginBottom: '6px' }}>
+                Catatan Internal
+              </label>
               <textarea
                 value={catatan}
                 onChange={(e) => setCatatan(e.target.value)}
                 rows={5}
                 placeholder="Tambahkan catatan internal..."
-                style={{ width: '100%', padding: '11px 14px', borderRadius: '10px', border: '1.5px solid #E0DCFF', fontSize: '0.875rem', outline: 'none', fontFamily: 'inherit', resize: 'vertical' }}
+                style={{ ...inputStyle, resize: 'vertical' }}
               />
             </div>
 
@@ -179,15 +269,6 @@ export default function BrandDetail() {
           </div>
         </div>
       </div>
-
-      <style>{`
-        @media (max-width: 900px) {
-          .detail-grid { grid-template-columns: 1fr !important; }
-        }
-        @media (max-width: 640px) {
-          .detail-fields { grid-template-columns: 1fr !important; }
-        }
-      `}</style>
     </div>
   );
 }
