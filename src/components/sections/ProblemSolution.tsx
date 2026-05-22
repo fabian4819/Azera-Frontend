@@ -1,7 +1,7 @@
 import { useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
 import { AlertCircle, CheckCircle2 } from 'lucide-react';
-import { ease, fadeUp, fadeLeft, fadeRight, stagger, useParallax } from '../../lib/motion';
+import { fadeUp, fadeLeft, fadeRight, stagger, useParallax } from '../../lib/motion';
 
 const problems = [
   { title: 'KOL Tidak Relevan', desc: 'Susah menemukan KOL yang benar-benar sesuai dengan niche dan target audiens brand.' },
@@ -14,11 +14,6 @@ const solutions = [
   { title: 'Budget Transparan', desc: 'Paket harga jelas, laporan terukur, dan ROI yang bisa diprediksi dari awal kampanye.' },
   { title: 'End-to-End Management', desc: 'Tim Azera menangani seluruh proses — dari briefing hingga laporan akhir kampanye.' },
 ];
-
-const cardVariants = {
-  hidden: { opacity: 0, y: 24 },
-  show:   { opacity: 1, y: 0, transition: { duration: 0.55, ease } },
-};
 
 export default function ProblemSolution() {
   const ref = useRef(null);

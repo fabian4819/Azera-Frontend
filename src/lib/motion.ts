@@ -1,6 +1,7 @@
 import { useRef } from 'react';
 import { useScroll, useTransform } from 'framer-motion';
-import type { MotionValue, RefObject } from 'framer-motion';
+import type { MotionValue } from 'framer-motion';
+import type { RefObject } from 'react';
 
 export const ease = [0.16, 1, 0.3, 1] as const;
 
