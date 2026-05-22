@@ -1,6 +1,7 @@
-import { motion, useInView } from 'framer-motion';
 import { useRef } from 'react';
+import { motion, useInView } from 'framer-motion';
 import { AlertCircle, CheckCircle2 } from 'lucide-react';
+import { ease, fadeUp, fadeLeft, fadeRight, stagger, useParallax } from '../../lib/motion';
 
 const problems = [
   { title: 'KOL Tidak Relevan', desc: 'Susah menemukan KOL yang benar-benar sesuai dengan niche dan target audiens brand.' },
@@ -14,23 +15,35 @@ const solutions = [
   { title: 'End-to-End Management', desc: 'Tim Azera menangani seluruh proses — dari briefing hingga laporan akhir kampanye.' },
 ];
 
-const easeOut = [0.16, 1, 0.3, 1] as const;
+const cardVariants = {
+  hidden: { opacity: 0, y: 24 },
+  show:   { opacity: 1, y: 0, transition: { duration: 0.55, ease } },
+};
 
 export default function ProblemSolution() {
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: '-100px' });
+  const isInView = useInView(ref, { once: true, margin: '-80px' });
+  const { ref: blobRef1, y: blobY1 } = useParallax(50);
+  const { ref: blobRef2, y: blobY2 } = useParallax(-50);
 
   return (
     <section className="section-py" style={{ background: '#ffffff', position: 'relative', overflow: 'hidden' }} ref={ref}>
-      <div className="blob" style={{ width: '400px', height: '400px', background: '#e1e0ff', opacity: 0.25, top: '10%', right: '-100px' }} />
-      <div className="blob" style={{ width: '350px', height: '350px', background: '#ffd9e1', opacity: 0.2, bottom: '10%', left: '-100px' }} />
+      <motion.div
+        ref={blobRef1 as React.RefObject<HTMLDivElement>}
+        style={{ y: blobY1, position: 'absolute', width: '400px', height: '400px', borderRadius: '50%', background: '#e1e0ff', opacity: 0.25, top: '10%', right: '-100px', filter: 'blur(48px)', pointerEvents: 'none' }}
+      />
+      <motion.div
+        ref={blobRef2 as React.RefObject<HTMLDivElement>}
+        style={{ y: blobY2, position: 'absolute', width: '350px', height: '350px', borderRadius: '50%', background: '#ffd9e1', opacity: 0.2, bottom: '10%', left: '-100px', filter: 'blur(40px)', pointerEvents: 'none' }}
+      />
 
       <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 24px', position: 'relative', zIndex: 1 }}>
+        {/* Section header */}
         <motion.div
           style={{ textAlign: 'center', marginBottom: '72px' }}
-          initial={{ opacity: 0, y: 24 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6, ease: easeOut }}
+          variants={fadeUp(0)}
+          initial="hidden"
+          animate={isInView ? 'show' : 'hidden'}
         >
           <span className="section-label" style={{ marginBottom: '16px' }}>Pain Points & Solusi</span>
           <h2 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800, fontSize: 'clamp(2rem, 5vw, 3.5rem)', color: '#191c20', lineHeight: 1.15 }}>
@@ -43,22 +56,21 @@ export default function ProblemSolution() {
         </motion.div>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }} className="ps-grid">
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          {/* Problems — slide from left */}
+          <motion.div
+            style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}
+            variants={stagger(0.1, 0.1)}
+            initial="hidden"
+            animate={isInView ? 'show' : 'hidden'}
+          >
             <motion.p
               style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700, fontSize: '0.8rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#ba1a1a', marginBottom: '8px' }}
-              initial={{ opacity: 0, x: -20 }}
-              animate={isInView ? { opacity: 1, x: 0 } : {}}
-              transition={{ duration: 0.5, ease: easeOut, delay: 0.1 }}
+              variants={fadeLeft(0)}
             >
               Masalah
             </motion.p>
-            {problems.map((p, i) => (
-              <motion.div
-                key={p.title}
-                initial={{ opacity: 0, x: -30 }}
-                animate={isInView ? { opacity: 1, x: 0 } : {}}
-                transition={{ duration: 0.6, ease: easeOut, delay: 0.15 + i * 0.1 }}
-              >
+            {problems.map((p) => (
+              <motion.div key={p.title} variants={fadeLeft(0)} whileHover={{ x: 4, transition: { duration: 0.2 } }}>
                 <div className="glass-panel" style={{ padding: '24px', borderLeft: '3px solid #ffb1c6' }}>
                   <div style={{ display: 'flex', alignItems: 'flex-start', gap: '14px' }}>
                     <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#ffdad6', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
@@ -72,24 +84,23 @@ export default function ProblemSolution() {
                 </div>
               </motion.div>
             ))}
-          </div>
+          </motion.div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          {/* Solutions — slide from right */}
+          <motion.div
+            style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}
+            variants={stagger(0.1, 0.15)}
+            initial="hidden"
+            animate={isInView ? 'show' : 'hidden'}
+          >
             <motion.p
               style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700, fontSize: '0.8rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#6728e4', marginBottom: '8px' }}
-              initial={{ opacity: 0, x: 20 }}
-              animate={isInView ? { opacity: 1, x: 0 } : {}}
-              transition={{ duration: 0.5, ease: easeOut, delay: 0.1 }}
+              variants={fadeRight(0)}
             >
               Solusi Azera
             </motion.p>
-            {solutions.map((s, i) => (
-              <motion.div
-                key={s.title}
-                initial={{ opacity: 0, x: 30 }}
-                animate={isInView ? { opacity: 1, x: 0 } : {}}
-                transition={{ duration: 0.6, ease: easeOut, delay: 0.15 + i * 0.1 }}
-              >
+            {solutions.map((s) => (
+              <motion.div key={s.title} variants={fadeRight(0)} whileHover={{ x: -4, transition: { duration: 0.2 } }}>
                 <div className="glass-panel" style={{ padding: '24px', borderLeft: '3px solid #814bfe' }}>
                   <div style={{ display: 'flex', alignItems: 'flex-start', gap: '14px' }}>
                     <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'linear-gradient(135deg, #6728e4, #814bfe)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
@@ -103,7 +114,7 @@ export default function ProblemSolution() {
                 </div>
               </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
       </div>
 
