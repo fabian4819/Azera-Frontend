@@ -99,7 +99,7 @@ function absoluteUrl(path) {
 }
 
 function fallbackContent(route) {
-  return `<main>
+  return `<main data-seo-fallback>
         <h1>${route.fallbackHeading || route.title}</h1>
         <p>${route.fallbackBody || route.description}</p>
         <p>AzeraKOL adalah KOL agency dan influencer marketing partner untuk brand, KOL, dan kreator Indonesia.</p>
