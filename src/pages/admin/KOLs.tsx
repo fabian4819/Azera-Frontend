@@ -67,6 +67,7 @@ export default function KOLs() {
   const navigate = useNavigate();
 
   const fetchKOLs = async () => {
+    await Promise.resolve();
     setLoading(true);
     try {
       const params: Record<string, string> = {};
@@ -83,7 +84,12 @@ export default function KOLs() {
   };
 
   useEffect(() => {
-    fetchKOLs();
+    const timeoutId = window.setTimeout(() => {
+      void fetchKOLs();
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [statusFilter, platformFilter]);
 
   const getPlatforms = (sm: KOLItem['socialMedia']) => {

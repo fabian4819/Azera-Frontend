@@ -17,7 +17,7 @@ export const faqs: FAQItem[] = [
   {
     question: 'Platform apa saja yang didukung?',
     answer:
-      'Azera mendukung semua platform utama: Instagram (Feed, Story, Reels), TikTok, YouTube, dan Live Streaming. Paket Starter mencakup Instagram dan TikTok, Growth menambahkan YouTube, sementara paket Scale mencakup semua platform termasuk Live Streaming KOL.',
+      'AzeraKOL mendukung semua platform utama: Instagram (Feed, Story, Reels), TikTok, YouTube, dan Live Streaming. Paket Starter mencakup Instagram dan TikTok, Growth menambahkan YouTube, sementara paket Scale mencakup semua platform termasuk Live Streaming KOL.',
   },
   {
     question: 'Bagaimana cara pembayaran?',

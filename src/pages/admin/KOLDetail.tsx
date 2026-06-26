@@ -62,6 +62,15 @@ const inputStyle: React.CSSProperties = {
   resize: 'vertical' as const,
 };
 
+function StatCard({ label, value, color }: { label: string; value: string | number; color?: string }) {
+  return (
+    <div style={{ background: '#f8f9ff', borderRadius: '10px', padding: '14px', textAlign: 'center', border: '1px solid #e1e0ff' }}>
+      <p style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: '1.1rem', fontWeight: 800, color: color || '#191c20' }}>{value}</p>
+      <p style={{ fontSize: '0.72rem', color: '#777683', marginTop: '2px', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>{label}</p>
+    </div>
+  );
+}
+
 export default function KOLDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -120,13 +129,6 @@ export default function KOLDetail() {
   const igER = sm.instagram ? calcEngagement(sm.instagram.followers || 0, sm.instagram.avgLike || 0, sm.instagram.avgComment || 0) : 0;
   const ttER = sm.tiktok ? calcEngagement(sm.tiktok.followers || 0, sm.tiktok.avgLike || 0, sm.tiktok.avgComment || 0) : 0;
   const ytVR = sm.youtube ? calcViewRate(sm.youtube.subscribers || 0, sm.youtube.avgViews || 0) : 0;
-
-  const StatCard = ({ label, value, color }: { label: string; value: string | number; color?: string }) => (
-    <div style={{ background: '#f8f9ff', borderRadius: '10px', padding: '14px', textAlign: 'center', border: '1px solid #e1e0ff' }}>
-      <p style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: '1.1rem', fontWeight: 800, color: color || '#191c20' }}>{value}</p>
-      <p style={{ fontSize: '0.72rem', color: '#777683', marginTop: '2px', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>{label}</p>
-    </div>
-  );
 
   return (
     <div>

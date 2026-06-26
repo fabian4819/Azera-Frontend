@@ -5,14 +5,14 @@ import { DollarSign, Headphones, Network, TrendingUp, ChevronRight, Zap, Sparkle
 
 const benefits = [
   { icon: DollarSign, title: 'Brand Deals Eksklusif', desc: 'Akses ke ratusan brand ternama yang mencari KOL terkurasi. Dapatkan kolaborasi yang sesuai dengan niche dan nilai brand-mu.' },
-  { icon: Headphones, title: 'Campaign Support', desc: 'Tim Azera mendampingi setiap tahap campaign — dari briefing hingga pelaporan. Kamu tinggal fokus bikin konten.' },
+  { icon: Headphones, title: 'Campaign Support', desc: 'Tim AzeraKOL mendampingi setiap tahap campaign — dari briefing hingga pelaporan. Kamu tinggal fokus bikin konten.' },
   { icon: Network, title: 'KOL Network', desc: 'Bergabung dengan komunitas 20K+ KOL aktif Indonesia. Sharing knowledge, tips, dan peluang kolaborasi sesama kreator.' },
   { icon: TrendingUp, title: 'Growth Opportunities', desc: 'Track record dan portofolio kampanye yang terbangun akan membuka pintu untuk kolaborasi lebih besar di masa depan.' },
 ];
 
 const steps = [
   { num: '01', title: 'Daftar', desc: 'Isi form pendaftaran gratis dengan data profil dan media sosialmu.' },
-  { num: '02', title: 'Review', desc: 'Tim Azera akan meninjau profil dalam 1–3 hari kerja.' },
+  { num: '02', title: 'Review', desc: 'Tim AzeraKOL akan meninjau profil dalam 1–3 hari kerja.' },
   { num: '03', title: 'Campaign', desc: 'Mulai terima tawaran kolaborasi brand yang sesuai dengan nichemu.' },
 ];
 
@@ -41,7 +41,7 @@ export default function KOL() {
               initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, ease: easeOut, delay: 0.1 }}>
               Bergabung dengan{' '}
               <span style={{ background: 'linear-gradient(135deg, #9da1ff, #ff81aa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
-                Azera Network
+                AzeraKOL Network
               </span>
             </motion.h1>
             <motion.p style={{ color: 'rgba(157,161,255,0.8)', fontSize: '1.05rem', lineHeight: 1.75, marginBottom: '40px', fontFamily: "'Plus Jakarta Sans', sans-serif", maxWidth: '500px' }}
@@ -78,7 +78,7 @@ export default function KOL() {
             <span className="section-label" style={{ marginBottom: '14px' }}>Manfaat</span>
             <h2 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800, fontSize: 'clamp(1.8rem, 4vw, 3rem)', color: '#191c20' }}>
               Kenapa Bergabung{' '}
-              <span className="gradient-text">Azera?</span>
+              <span className="gradient-text">AzeraKOL?</span>
             </h2>
           </motion.div>
           <div className="kol-benefits-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '24px' }}>
@@ -107,7 +107,7 @@ export default function KOL() {
             20.000+
           </p>
           <p style={{ color: 'rgba(157,161,255,0.7)', fontSize: '1rem', fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 500 }}>
-            KOL aktif telah bergabung di Azera Network
+            KOL aktif telah bergabung di AzeraKOL Network
           </p>
         </div>
       </div>

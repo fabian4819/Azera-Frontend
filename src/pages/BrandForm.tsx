@@ -133,8 +133,8 @@ export default function BrandForm() {
           <div style={{ position: 'sticky', top: '96px' }} className="brandform-panel">
             <div className="glass-panel" style={{ padding: '28px', marginBottom: '20px', background: 'white' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
-                <img src="/icon.png" alt="Azera" style={{ height: '28px' }} />
-                <span style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 900, fontStyle: 'italic', fontSize: '1rem', color: '#15157d', letterSpacing: '-0.02em' }}>AZERA</span>
+                <img src="/icon.png" alt="AzeraKOL" style={{ height: '28px' }} />
+                <span style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 900, fontStyle: 'italic', fontSize: '1rem', color: '#15157d', letterSpacing: '-0.02em' }}>AZERAKOL</span>
               </div>
               <p style={{ color: '#464652', fontSize: '0.85rem', lineHeight: 1.7, marginBottom: '20px', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
                 Konsultasi gratis, tidak ada biaya di awal. Tim kami siap membantu merencanakan kampanye terbaik untuk brand kamu.
@@ -179,7 +179,7 @@ export default function BrandForm() {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }} className="form-2col">
               <div>
                 <label style={labelStyle}>Nama Brand *</label>
-                <input {...register('namaBrand')} placeholder="Azera Beauty" style={inputStyle(!!errors.namaBrand)} onFocus={(e) => Object.assign(e.target.style, inputFocus)} onBlur={(e) => Object.assign(e.target.style, { boxShadow: 'none' })} />
+                <input {...register('namaBrand')} placeholder="AzeraKOL Beauty" style={inputStyle(!!errors.namaBrand)} onFocus={(e) => Object.assign(e.target.style, inputFocus)} onBlur={(e) => Object.assign(e.target.style, { boxShadow: 'none' })} />
                 {errors.namaBrand && <p style={errorStyle}>{errors.namaBrand.message}</p>}
               </div>
               <div>

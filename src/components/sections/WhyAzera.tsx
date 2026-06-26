@@ -29,7 +29,7 @@ export default function WhyAzera() {
           <span className="section-label" style={{ marginBottom: '16px' }}>Keunggulan Kami</span>
           <h2 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800, fontSize: 'clamp(2rem, 5vw, 3.5rem)', color: '#191c20', lineHeight: 1.15 }}>
             Why{' '}
-            <span className="pill-label" style={{ fontSize: '0.7rem', verticalAlign: 'middle' }}>Azera?</span>
+            <span className="pill-label" style={{ fontSize: '0.7rem', verticalAlign: 'middle' }}>AzeraKOL?</span>
           </h2>
         </motion.div>
 

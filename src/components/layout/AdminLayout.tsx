@@ -15,32 +15,23 @@ const pageTitles: Record<string, string> = {
   '/admin/portfolio': 'Portfolio Manager',
 };
 
-export default function AdminLayout() {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const location = useLocation();
-  const { admin, logout } = useAuth();
-
-  const pageTitle =
-    pageTitles[location.pathname] ||
-    Object.entries(pageTitles).find(([key]) => location.pathname.startsWith(key))?.[1] ||
-    'Admin Panel';
-
-  const SidebarContent = () => (
+function SidebarContent({ pathname, onNavigate, onLogout }: { pathname: string; onNavigate: () => void; onLogout: () => void }) {
+  return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       <div style={{ padding: '24px 20px', borderBottom: '1px solid #e1e0ff' }}>
         <Link to="/admin/brands" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}>
-          <img src="/icon.png" alt="Azera" style={{ height: '30px', objectFit: 'contain' }} />
-          <span style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 900, fontStyle: 'italic', fontSize: '1.05rem', color: '#15157d', letterSpacing: '-0.02em' }}>AZERA</span>
+          <img src="/icon.png" alt="AzeraKOL" style={{ height: '30px', objectFit: 'contain' }} />
+          <span style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 900, fontStyle: 'italic', fontSize: '1.05rem', color: '#15157d', letterSpacing: '-0.02em' }}>AZERAKOL</span>
           <span style={{ fontSize: '0.65rem', background: 'linear-gradient(135deg, #6728e4, #814bfe)', color: 'white', borderRadius: '4px', padding: '2px 7px', fontWeight: 700, letterSpacing: '0.06em', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>ADMIN</span>
         </Link>
       </div>
 
       <nav style={{ flex: 1, padding: '16px 12px' }}>
         {navItems.map(({ label, to, icon: Icon }) => {
-          const active = location.pathname === to || location.pathname.startsWith(to + '/');
+          const active = pathname === to || pathname.startsWith(to + '/');
           return (
             <Link
-              key={to} to={to} onClick={() => setSidebarOpen(false)}
+              key={to} to={to} onClick={onNavigate}
               style={{
                 display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 14px',
                 borderRadius: '10px', marginBottom: '4px', textDecoration: 'none',
@@ -59,7 +50,7 @@ export default function AdminLayout() {
 
       <div style={{ padding: '16px 12px', borderTop: '1px solid #e1e0ff' }}>
         <button
-          onClick={logout}
+          onClick={onLogout}
           style={{
             display: 'flex', alignItems: 'center', gap: '12px', width: '100%',
             padding: '12px 14px', borderRadius: '10px', border: 'none', background: 'transparent',
@@ -73,11 +64,22 @@ export default function AdminLayout() {
       </div>
     </div>
   );
+}
+
+export default function AdminLayout() {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const location = useLocation();
+  const { admin, logout } = useAuth();
+
+  const pageTitle =
+    pageTitles[location.pathname] ||
+    Object.entries(pageTitles).find(([key]) => location.pathname.startsWith(key))?.[1] ||
+    'Admin Panel';
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: '#f8f9ff' }}>
       <aside style={{ width: '256px', background: 'white', borderRight: '1px solid #c7c8cf', flexShrink: 0 }} className="admin-sidebar-desktop">
-        <SidebarContent />
+        <SidebarContent pathname={location.pathname} onNavigate={() => setSidebarOpen(false)} onLogout={logout} />
       </aside>
 
       {sidebarOpen && (
@@ -89,7 +91,7 @@ export default function AdminLayout() {
                 <X size={20} />
               </button>
             </div>
-            <SidebarContent />
+            <SidebarContent pathname={location.pathname} onNavigate={() => setSidebarOpen(false)} onLogout={logout} />
           </aside>
         </div>
       )}

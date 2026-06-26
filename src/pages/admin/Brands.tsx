@@ -57,6 +57,7 @@ export default function Brands() {
   const navigate = useNavigate();
 
   const fetchBrands = async () => {
+    await Promise.resolve();
     setLoading(true);
     try {
       const params: Record<string, string> = {};
@@ -72,7 +73,12 @@ export default function Brands() {
   };
 
   useEffect(() => {
-    fetchBrands();
+    const timeoutId = window.setTimeout(() => {
+      void fetchBrands();
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [statusFilter]);
 
   const handleSearch = (e: React.FormEvent) => {

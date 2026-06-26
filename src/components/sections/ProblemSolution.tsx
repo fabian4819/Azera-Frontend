@@ -12,7 +12,7 @@ const problems = [
 const solutions = [
   { title: 'Matching Berbasis Data', desc: 'Algoritma kami mencocokkan brand dengan KOL berdasarkan demografi, engagement, dan performa nyata.' },
   { title: 'Budget Transparan', desc: 'Paket harga jelas, laporan terukur, dan ROI yang bisa diprediksi dari awal kampanye.' },
-  { title: 'End-to-End Management', desc: 'Tim Azera menangani seluruh proses — dari briefing hingga laporan akhir kampanye.' },
+  { title: 'End-to-End Management', desc: 'Tim AzeraKOL menangani seluruh proses — dari briefing hingga laporan akhir kampanye.' },
 ];
 
 export default function ProblemSolution() {
@@ -92,7 +92,7 @@ export default function ProblemSolution() {
               style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700, fontSize: '0.8rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#6728e4', marginBottom: '8px' }}
               variants={fadeRight(0)}
             >
-              Solusi Azera
+              Solusi AzeraKOL
             </motion.p>
             {solutions.map((s) => (
               <motion.div key={s.title} variants={fadeRight(0)} whileHover={{ x: -4, transition: { duration: 0.2 } }}>

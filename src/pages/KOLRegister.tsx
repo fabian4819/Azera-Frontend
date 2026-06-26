@@ -66,9 +66,8 @@ export default function KOLRegister() {
   const [loading, setLoading] = useState(false);
   const [profileFile, setProfileFile] = useState<File | null>(null);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<FormData>({
-    resolver: zodResolver(schema) as any,
+    resolver: zodResolver(schema),
     defaultValues: { niche: [] },
   });
 
@@ -83,8 +82,7 @@ export default function KOLRegister() {
     else setValue('niche', [...niches_, val]);
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: FormData) => {
     setLoading(true);
     try {
       const formData = new FormData();
@@ -120,7 +118,7 @@ export default function KOLRegister() {
             Pendaftaran Berhasil!
           </h2>
           <p style={{ color: '#464652', lineHeight: 1.7, fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-            Profil kamu sedang kami review. Tim Azera akan menghubungi kamu dalam 1–3 hari kerja via WhatsApp.
+            Profil kamu sedang kami review. Tim AzeraKOL akan menghubungi kamu dalam 1–3 hari kerja via WhatsApp.
           </p>
         </div>
       </div>
@@ -142,7 +140,7 @@ export default function KOLRegister() {
           <span className="section-label" style={{ marginBottom: '12px' }}>Daftar KOL</span>
           <h1 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800, fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', color: '#191c20', lineHeight: 1.15 }}>
             Bergabung dengan{' '}
-            <span className="gradient-text">Azera Network</span>
+            <span className="gradient-text">AzeraKOL Network</span>
           </h1>
           <p style={{ color: '#464652', marginTop: '10px', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
             Daftar gratis — tim kami akan review profil dan menghubungi kamu.

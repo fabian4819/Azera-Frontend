@@ -36,7 +36,7 @@ export default function OurOffer() {
             Kamu.
           </h2>
           <p style={{ color: '#464652', fontSize: '1rem', lineHeight: 1.7, maxWidth: '500px', margin: '0 auto', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-            Dari puluhan hingga ratusan KOL — Azera menyediakan solusi kampanye end-to-end untuk setiap skala brand.
+            Dari puluhan hingga ratusan KOL — AzeraKOL menyediakan solusi kampanye end-to-end untuk setiap skala brand.
           </p>
         </motion.div>
 

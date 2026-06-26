@@ -3,9 +3,9 @@ import { motion, useInView } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Quote } from 'lucide-react';
 
 const testimonials = [
-  { quote: 'Azera benar-benar mengubah cara kami menjalankan kampanye KOL. Prosesnya profesional, hasilnya terukur, dan tim mereka sangat responsif.', name: 'Sari Dewi', role: 'Marketing Manager, BeautyX', initials: 'SD' },
-  { quote: 'Dalam 3 minggu kampanye dengan Azera, reach kami meningkat 4x lipat dan konversi penjualan naik 60%. Luar biasa efektif!', name: 'Budi Santoso', role: 'CEO, FreshFood Indonesia', initials: 'BS' },
-  { quote: 'Kami sudah coba beberapa agency KOL sebelumnya, tapi Azera benar-benar berbeda. Data-driven, transparan, dan hasil kampanye melampaui ekspektasi.', name: 'Rini Larasati', role: 'Brand Director, StyleHub', initials: 'RL' },
+  { quote: 'AzeraKOL benar-benar mengubah cara kami menjalankan kampanye KOL. Prosesnya profesional, hasilnya terukur, dan tim mereka sangat responsif.', name: 'Sari Dewi', role: 'Marketing Manager, BeautyX', initials: 'SD' },
+  { quote: 'Dalam 3 minggu kampanye dengan AzeraKOL, reach kami meningkat 4x lipat dan konversi penjualan naik 60%. Luar biasa efektif!', name: 'Budi Santoso', role: 'CEO, FreshFood Indonesia', initials: 'BS' },
+  { quote: 'Kami sudah coba beberapa agency KOL sebelumnya, tapi AzeraKOL benar-benar berbeda. Data-driven, transparan, dan hasil kampanye melampaui ekspektasi.', name: 'Rini Larasati', role: 'Brand Director, StyleHub', initials: 'RL' },
 ];
 
 const gradients = [

@@ -20,10 +20,6 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  useEffect(() => {
-    setMenuOpen(false);
-  }, [location.pathname]);
-
   const isActive = (to: string) => {
     if (to === '/') return location.pathname === '/';
     return location.pathname.startsWith(to);
@@ -70,7 +66,7 @@ export default function Navbar() {
               flexShrink: 0,
             }}
           >
-            <img src="/icon.png" alt="Azera" style={{ height: '28px', objectFit: 'contain' }} />
+            <img src="/icon.png" alt="AzeraKOL" style={{ height: '28px', objectFit: 'contain' }} />
             <span
               style={{
                 fontFamily: "'Plus Jakarta Sans', sans-serif",
@@ -81,7 +77,7 @@ export default function Navbar() {
                 letterSpacing: '-0.02em',
               }}
             >
-              AZERA
+              AZERAKOL
             </span>
           </Link>
 
@@ -99,6 +95,7 @@ export default function Navbar() {
               <Link
                 key={link.to}
                 to={link.to}
+                onClick={() => setMenuOpen(false)}
                 style={{
                   padding: '8px 16px',
                   borderRadius: '8px',
@@ -196,10 +193,10 @@ export default function Navbar() {
             ))}
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            <Link to="/kol/register" className="btn-outline" style={{ justifyContent: 'center' }}>
+            <Link to="/kol/register" className="btn-outline" onClick={() => setMenuOpen(false)} style={{ justifyContent: 'center' }}>
               Daftar KOL
             </Link>
-            <Link to="/brand/form" className="btn-primary" style={{ justifyContent: 'center' }}>
+            <Link to="/brand/form" className="btn-primary" onClick={() => setMenuOpen(false)} style={{ justifyContent: 'center' }}>
               Saya Brand
             </Link>
           </div>

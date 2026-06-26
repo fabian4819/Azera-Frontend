@@ -1,7 +1,7 @@
 import { faqs } from '../data/faq';
 
 export const SITE_URL = (import.meta.env.VITE_SITE_URL || 'https://azerakol.id').replace(/\/$/, '');
-export const SITE_NAME = 'Azera';
+export const SITE_NAME = 'AzeraKOL';
 export const DEFAULT_IMAGE = `${SITE_URL}/logo.png`;
 
 export type JsonLd = Record<string, unknown> | Record<string, unknown>[];
@@ -19,9 +19,10 @@ const organizationJsonLd = {
   '@context': 'https://schema.org',
   '@type': 'Organization',
   name: SITE_NAME,
+  alternateName: ['Azera KOL', 'Azera', 'azerakol'],
   url: SITE_URL,
   logo: DEFAULT_IMAGE,
-  description: 'Azera membantu brand menjalankan kampanye KOL dan influencer marketing dengan jaringan kreator terkurasi di Indonesia.',
+  description: 'AzeraKOL membantu brand menjalankan kampanye KOL dan influencer marketing dengan jaringan kreator terkurasi di Indonesia.',
 };
 
 const websiteJsonLd = {
@@ -60,7 +61,7 @@ const kolServiceJsonLd = {
 const creatorNetworkJsonLd = {
   '@context': 'https://schema.org',
   '@type': 'Service',
-  name: 'Azera KOL Network',
+  name: 'AzeraKOL Creator Network',
   provider: organizationJsonLd,
   areaServed: {
     '@type': 'Country',
@@ -73,9 +74,9 @@ const creatorNetworkJsonLd = {
 const portfolioJsonLd = {
   '@context': 'https://schema.org',
   '@type': 'CollectionPage',
-  name: 'Portfolio Kampanye KOL Azera',
+  name: 'Portfolio Kampanye KOL AzeraKOL',
   url: `${SITE_URL}/portfolio`,
-  description: 'Portfolio kampanye KOL dan influencer marketing yang dijalankan Azera bersama brand di berbagai kategori.',
+  description: 'Portfolio kampanye KOL dan influencer marketing yang dijalankan AzeraKOL bersama brand di berbagai kategori.',
 };
 
 const breadcrumb = (items: Array<{ name: string; path: string }>) => ({
@@ -91,45 +92,45 @@ const breadcrumb = (items: Array<{ name: string; path: string }>) => ({
 
 export const seoByPath: Record<string, SEOConfig> = {
   '/': {
-    title: 'Azera | Jasa KOL Management & Influencer Marketing Indonesia',
+    title: 'AzeraKOL | Jasa KOL Management & Influencer Marketing Indonesia',
     description:
-      'Azera membantu brand menjalankan kampanye KOL dan influencer marketing di Indonesia melalui jaringan 20K+ kreator terkurasi untuk Instagram, TikTok, YouTube, dan live streaming.',
+      'AzeraKOL membantu brand menjalankan kampanye KOL dan influencer marketing di Indonesia melalui jaringan 20K+ kreator terkurasi untuk Instagram, TikTok, YouTube, dan live streaming.',
     path: '/',
-    keywords: 'jasa KOL management, KOL agency Indonesia, influencer marketing agency, campaign KOL, nano KOL, micro influencer Indonesia',
+    keywords: 'azerakol, AzeraKOL, Azera KOL, jasa KOL management, KOL agency Indonesia, influencer marketing agency, campaign KOL, nano KOL, micro influencer Indonesia',
     jsonLd: [organizationJsonLd, websiteJsonLd, faqJsonLd, kolServiceJsonLd],
   },
   '/brand': {
-    title: 'Paket Campaign KOL untuk Brand | Azera',
+    title: 'Paket Campaign KOL untuk Brand | AzeraKOL',
     description:
-      'Pilih paket campaign KOL untuk brand Anda. Azera mengelola strategi, shortlist kreator, eksekusi konten, dan laporan performa kampanye influencer marketing.',
+      'Pilih paket campaign KOL untuk brand Anda. AzeraKOL mengelola strategi, shortlist kreator, eksekusi konten, dan laporan performa kampanye influencer marketing.',
     path: '/brand',
     keywords: 'paket campaign KOL, jasa influencer marketing, KOL campaign brand, campaign TikTok, campaign Instagram, brand activation Indonesia',
     jsonLd: [kolServiceJsonLd, breadcrumb([{ name: 'Home', path: '/' }, { name: 'Brand', path: '/brand' }])],
   },
   '/brand/form': {
-    title: 'Konsultasi Campaign KOL Gratis | Azera',
-    description: 'Isi brief campaign brand Anda untuk mendapatkan rekomendasi paket KOL dan konsultasi influencer marketing dari tim Azera.',
+    title: 'Konsultasi Campaign KOL Gratis | AzeraKOL',
+    description: 'Isi brief campaign brand Anda untuk mendapatkan rekomendasi paket KOL dan konsultasi influencer marketing dari tim AzeraKOL.',
     path: '/brand/form',
     noindex: true,
   },
   '/kol': {
-    title: 'Daftar KOL & Creator Network Indonesia | Azera',
+    title: 'Daftar KOL & Creator Network Indonesia | AzeraKOL',
     description:
-      'Bergabung gratis dengan Azera KOL Network untuk mendapatkan peluang kolaborasi brand terpercaya, campaign support, dan akses komunitas kreator Indonesia.',
+      'Bergabung gratis dengan AzeraKOL Creator Network untuk mendapatkan peluang kolaborasi brand terpercaya, campaign support, dan akses komunitas kreator Indonesia.',
     path: '/kol',
     keywords: 'daftar KOL, daftar influencer Indonesia, creator network Indonesia, KOL network, peluang kolaborasi brand',
     jsonLd: [creatorNetworkJsonLd, breadcrumb([{ name: 'Home', path: '/' }, { name: 'KOL', path: '/kol' }])],
   },
   '/kol/register': {
-    title: 'Form Pendaftaran KOL | Azera',
-    description: 'Daftar sebagai KOL atau creator di Azera Network untuk mulai menerima peluang campaign dari brand terpercaya.',
+    title: 'Form Pendaftaran KOL | AzeraKOL',
+    description: 'Daftar sebagai KOL atau creator di AzeraKOL Network untuk mulai menerima peluang campaign dari brand terpercaya.',
     path: '/kol/register',
     noindex: true,
   },
   '/portfolio': {
-    title: 'Portfolio Campaign KOL & Influencer Marketing | Azera',
+    title: 'Portfolio Campaign KOL & Influencer Marketing | AzeraKOL',
     description:
-      'Lihat hasil kampanye KOL Azera bersama brand dari kategori beauty, F&B, fashion, tech, fitness, dan home living dengan data reach dan engagement.',
+      'Lihat hasil kampanye KOL AzeraKOL bersama brand dari kategori beauty, F&B, fashion, tech, fitness, dan home living dengan data reach dan engagement.',
     path: '/portfolio',
     keywords: 'portfolio KOL campaign, case study influencer marketing, hasil campaign KOL, campaign brand Indonesia',
     jsonLd: [portfolioJsonLd, breadcrumb([{ name: 'Home', path: '/' }, { name: 'Portfolio', path: '/portfolio' }])],
@@ -141,8 +142,8 @@ export const defaultSeo: SEOConfig = seoByPath['/'];
 export function getSeoForPath(pathname: string): SEOConfig {
   if (pathname.startsWith('/admin')) {
     return {
-      title: 'Admin | Azera',
-      description: 'Area administrasi Azera.',
+      title: 'Admin | AzeraKOL',
+      description: 'Area administrasi AzeraKOL.',
       path: pathname,
       noindex: true,
     };

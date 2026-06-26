@@ -44,17 +44,17 @@ export default function AdminLogin() {
         <div className="blob-lg" style={{ width: '500px', height: '500px', background: '#814bfe', opacity: 0.3, top: '-200px', left: '-150px' }} />
         <div className="blob-lg" style={{ width: '400px', height: '400px', background: '#ff81aa', opacity: 0.25, bottom: '-150px', right: '-100px' }} />
         <div style={{ position: 'relative', zIndex: 1, textAlign: 'center' }}>
-          <div style={{ fontFamily: f, fontWeight: 900, fontStyle: 'italic', fontSize: 'clamp(5rem, 12vw, 10rem)', background: 'linear-gradient(135deg, #9da1ff, #ff81aa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', lineHeight: 0.9, marginBottom: '24px' }}>AZERA</div>
+          <div style={{ fontFamily: f, fontWeight: 900, fontStyle: 'italic', fontSize: 'clamp(5rem, 12vw, 10rem)', background: 'linear-gradient(135deg, #9da1ff, #ff81aa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', lineHeight: 0.9, marginBottom: '24px' }}>AZERAKOL</div>
           <p style={{ color: 'rgba(157,161,255,0.8)', fontSize: '1rem', fontFamily: f, lineHeight: 1.7, maxWidth: '300px' }}>
-            Platform manajemen kampanye KOL untuk tim Azera.
+            Platform manajemen kampanye KOL untuk tim AzeraKOL.
           </p>
         </div>
       </div>
 
       <div className="login-right" style={{ width: '480px', background: 'white', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '60px 48px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '48px' }}>
-          <img src="/icon.png" alt="Azera" style={{ height: '36px', objectFit: 'contain' }} />
-          <span style={{ fontFamily: f, fontWeight: 900, fontStyle: 'italic', fontSize: '1.2rem', color: '#15157d', letterSpacing: '-0.02em' }}>AZERA</span>
+          <img src="/icon.png" alt="AzeraKOL" style={{ height: '36px', objectFit: 'contain' }} />
+          <span style={{ fontFamily: f, fontWeight: 900, fontStyle: 'italic', fontSize: '1.2rem', color: '#15157d', letterSpacing: '-0.02em' }}>AZERAKOL</span>
         </div>
         <div style={{ width: '100%', maxWidth: '360px' }}>
           <h1 style={{ fontFamily: f, fontWeight: 800, fontSize: '1.8rem', color: '#191c20', marginBottom: '8px' }}>Masuk</h1>

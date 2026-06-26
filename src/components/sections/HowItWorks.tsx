@@ -3,9 +3,9 @@ import { useRef } from 'react';
 import { Target, Users, Rocket, TrendingUp } from 'lucide-react';
 
 const steps = [
-  { number: '01', icon: Target, title: 'Plan', desc: 'Diskusi kebutuhan kampanye, target audiens, dan tujuan bisnis brand kamu bersama tim Azera.' },
+  { number: '01', icon: Target, title: 'Plan', desc: 'Diskusi kebutuhan kampanye, target audiens, dan tujuan bisnis brand kamu bersama tim AzeraKOL.' },
   { number: '02', icon: Users, title: 'Match', desc: 'Kami menseleksi dan menyajikan shortlist KOL yang paling relevan berdasarkan data.' },
-  { number: '03', icon: Rocket, title: 'Execute', desc: 'Tim Azera mengelola seluruh proses dari briefing KOL, review konten, hingga publikasi.' },
+  { number: '03', icon: Rocket, title: 'Execute', desc: 'Tim AzeraKOL mengelola seluruh proses dari briefing KOL, review konten, hingga publikasi.' },
   { number: '04', icon: TrendingUp, title: 'Scale', desc: 'Analisis performa kampanye secara real-time dan optimalkan untuk hasil yang maksimal.' },
 ];
 

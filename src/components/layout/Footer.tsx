@@ -15,7 +15,7 @@ export default function Footer() {
         >
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
-              <img src="/icon.png" alt="Azera" style={{ height: '32px', objectFit: 'contain' }} />
+              <img src="/icon.png" alt="AzeraKOL" style={{ height: '32px', objectFit: 'contain' }} />
               <span
                 style={{
                   fontFamily: "'Plus Jakarta Sans', sans-serif",
@@ -26,7 +26,7 @@ export default function Footer() {
                   letterSpacing: '-0.02em',
                 }}
               >
-                AZERA
+                AZERAKOL
               </span>
             </div>
             <p
@@ -38,7 +38,7 @@ export default function Footer() {
                 fontFamily: "'Plus Jakarta Sans', sans-serif",
               }}
             >
-              Platform KOL campaign agency terpercaya di Indonesia. Kami menghubungkan brand dengan ribuan KOL terkurasi.
+              AzeraKOL adalah platform KOL campaign agency terpercaya di Indonesia. Kami menghubungkan brand dengan ribuan KOL terkurasi.
             </p>
           </div>
 
@@ -197,11 +197,11 @@ export default function Footer() {
             padding: '20px 0 0',
           }}
         >
-          AZERA
+          AZERAKOL
         </div>
         <div style={{ position: 'absolute', bottom: '20px', left: 0, right: 0, textAlign: 'center' }}>
           <p style={{ color: '#777683', fontSize: '0.78rem', letterSpacing: '0.05em', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-            &copy; {new Date().getFullYear()} Azera KOL Agency. All rights reserved.
+            &copy; {new Date().getFullYear()} AzeraKOL Agency. All rights reserved.
           </p>
         </div>
       </div>

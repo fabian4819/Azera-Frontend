@@ -20,7 +20,7 @@ export function buildBrandWALink(data: BrandFormData): string {
     ? data.tujuan.join(', ')
     : data.tujuan;
 
-  const message = `Halo Azera! Saya ingin konsultasi kampanye KOL 🚀
+  const message = `Halo AzeraKOL! Saya ingin konsultasi kampanye KOL 🚀
 
 *Detail Brand:*
 • Nama Brand: ${data.namaBrand}

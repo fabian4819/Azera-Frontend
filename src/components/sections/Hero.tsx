@@ -21,7 +21,7 @@ const statCards = [
     icon: Users,
     value: '100+',
     label: 'BRAND PARTNER',
-    desc: 'Brand terkemuka yang telah mempercayakan kampanye ke Azera.',
+    desc: 'Brand terkemuka yang telah mempercayakan kampanye ke AzeraKOL.',
     iconBg: '#6728e4',
     valueColor: '#6728e4',
     iconPlacement: 'top-center' as const,
@@ -120,7 +120,7 @@ export default function Hero() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, ease, delay: 0.22 }}
         >
-          Azera membantu brand menjalankan campaign KOL dan influencer marketing di Indonesia melalui jaringan nano, micro, dan macro creator terkurasi untuk Instagram, TikTok, YouTube, dan live streaming.
+          AzeraKOL membantu brand menjalankan campaign KOL dan influencer marketing di Indonesia melalui jaringan nano, micro, dan macro creator terkurasi untuk Instagram, TikTok, YouTube, dan live streaming.
         </motion.p>
 
         <motion.div

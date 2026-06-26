@@ -6,16 +6,17 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = join(__dirname, '..');
 const dist = join(root, 'dist');
 const siteUrl = (process.env.VITE_SITE_URL || 'https://azerakol.id').replace(/\/$/, '');
-const siteName = 'Azera';
+const siteName = 'AzeraKOL';
 const defaultImage = `${siteUrl}/logo.png`;
 
 const organizationJsonLd = {
   '@context': 'https://schema.org',
   '@type': 'Organization',
   name: siteName,
+  alternateName: ['Azera KOL', 'Azera', 'azerakol'],
   url: siteUrl,
   logo: defaultImage,
-  description: 'Azera membantu brand menjalankan kampanye KOL dan influencer marketing dengan jaringan kreator terkurasi di Indonesia.',
+  description: 'AzeraKOL membantu brand menjalankan kampanye KOL dan influencer marketing dengan jaringan kreator terkurasi di Indonesia.',
 };
 
 const kolServiceJsonLd = {
@@ -31,7 +32,7 @@ const kolServiceJsonLd = {
 const creatorNetworkJsonLd = {
   '@context': 'https://schema.org',
   '@type': 'Service',
-  name: 'Azera KOL Network',
+  name: 'AzeraKOL Creator Network',
   provider: organizationJsonLd,
   areaServed: { '@type': 'Country', name: 'Indonesia' },
   serviceType: 'KOL network and creator partnership platform',
@@ -41,43 +42,43 @@ const creatorNetworkJsonLd = {
 const routes = [
   {
     path: '/',
-    title: 'Azera | Jasa KOL Management & Influencer Marketing Indonesia',
-    description: 'Azera membantu brand menjalankan kampanye KOL dan influencer marketing di Indonesia melalui jaringan 20K+ kreator terkurasi untuk Instagram, TikTok, YouTube, dan live streaming.',
-    keywords: 'jasa KOL management, KOL agency Indonesia, influencer marketing agency, campaign KOL, nano KOL, micro influencer Indonesia',
+    title: 'AzeraKOL | Jasa KOL Management & Influencer Marketing Indonesia',
+    description: 'AzeraKOL membantu brand menjalankan kampanye KOL dan influencer marketing di Indonesia melalui jaringan 20K+ kreator terkurasi untuk Instagram, TikTok, YouTube, dan live streaming.',
+    keywords: 'azerakol, AzeraKOL, Azera KOL, jasa KOL management, KOL agency Indonesia, influencer marketing agency, campaign KOL, nano KOL, micro influencer Indonesia',
     jsonLd: [organizationJsonLd, { '@context': 'https://schema.org', '@type': 'WebSite', name: siteName, url: siteUrl }, kolServiceJsonLd],
   },
   {
     path: '/brand',
-    title: 'Paket Campaign KOL untuk Brand | Azera',
-    description: 'Pilih paket campaign KOL untuk brand Anda. Azera mengelola strategi, shortlist kreator, eksekusi konten, dan laporan performa kampanye influencer marketing.',
+    title: 'Paket Campaign KOL untuk Brand | AzeraKOL',
+    description: 'Pilih paket campaign KOL untuk brand Anda. AzeraKOL mengelola strategi, shortlist kreator, eksekusi konten, dan laporan performa kampanye influencer marketing.',
     keywords: 'paket campaign KOL, jasa influencer marketing, KOL campaign brand, campaign TikTok, campaign Instagram, brand activation Indonesia',
     jsonLd: [kolServiceJsonLd],
   },
   {
     path: '/brand/form',
-    title: 'Konsultasi Campaign KOL Gratis | Azera',
-    description: 'Isi brief campaign brand Anda untuk mendapatkan rekomendasi paket KOL dan konsultasi influencer marketing dari tim Azera.',
+    title: 'Konsultasi Campaign KOL Gratis | AzeraKOL',
+    description: 'Isi brief campaign brand Anda untuk mendapatkan rekomendasi paket KOL dan konsultasi influencer marketing dari tim AzeraKOL.',
     robots: 'noindex, nofollow',
   },
   {
     path: '/kol',
-    title: 'Daftar KOL & Creator Network Indonesia | Azera',
-    description: 'Bergabung gratis dengan Azera KOL Network untuk mendapatkan peluang kolaborasi brand terpercaya, campaign support, dan akses komunitas kreator Indonesia.',
+    title: 'Daftar KOL & Creator Network Indonesia | AzeraKOL',
+    description: 'Bergabung gratis dengan AzeraKOL Creator Network untuk mendapatkan peluang kolaborasi brand terpercaya, campaign support, dan akses komunitas kreator Indonesia.',
     keywords: 'daftar KOL, daftar influencer Indonesia, creator network Indonesia, KOL network, peluang kolaborasi brand',
     jsonLd: [creatorNetworkJsonLd],
   },
   {
     path: '/kol/register',
-    title: 'Form Pendaftaran KOL | Azera',
-    description: 'Daftar sebagai KOL atau creator di Azera Network untuk mulai menerima peluang campaign dari brand terpercaya.',
+    title: 'Form Pendaftaran KOL | AzeraKOL',
+    description: 'Daftar sebagai KOL atau creator di AzeraKOL Network untuk mulai menerima peluang campaign dari brand terpercaya.',
     robots: 'noindex, nofollow',
   },
   {
     path: '/portfolio',
-    title: 'Portfolio Campaign KOL & Influencer Marketing | Azera',
-    description: 'Lihat hasil kampanye KOL Azera bersama brand dari kategori beauty, F&B, fashion, tech, fitness, dan home living dengan data reach dan engagement.',
+    title: 'Portfolio Campaign KOL & Influencer Marketing | AzeraKOL',
+    description: 'Lihat hasil kampanye KOL AzeraKOL bersama brand dari kategori beauty, F&B, fashion, tech, fitness, dan home living dengan data reach dan engagement.',
     keywords: 'portfolio KOL campaign, case study influencer marketing, hasil campaign KOL, campaign brand Indonesia',
-    jsonLd: [{ '@context': 'https://schema.org', '@type': 'CollectionPage', name: 'Portfolio Kampanye KOL Azera', url: `${siteUrl}/portfolio` }],
+    jsonLd: [{ '@context': 'https://schema.org', '@type': 'CollectionPage', name: 'Portfolio Kampanye KOL AzeraKOL', url: `${siteUrl}/portfolio` }],
   },
 ];
 
@@ -88,7 +89,7 @@ function absoluteUrl(path) {
 function replaceMeta(html, route) {
   const canonical = absoluteUrl(route.path);
   const robots = route.robots || 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1';
-  const keywords = route.keywords || 'Azera, KOL agency Indonesia, influencer marketing Indonesia';
+  const keywords = route.keywords || 'AzeraKOL, Azera KOL, azerakol, KOL agency Indonesia, influencer marketing Indonesia';
 
   let next = html
     .replace(/<title>.*?<\/title>/, `<title>${route.title}</title>`)

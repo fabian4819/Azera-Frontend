@@ -88,6 +88,7 @@ export default function PortfolioManager() {
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
 
   const fetchItems = async () => {
+    await Promise.resolve();
     setLoading(true);
     try {
       const res = await api.get('/admin/portfolio');
@@ -99,7 +100,13 @@ export default function PortfolioManager() {
     }
   };
 
-  useEffect(() => { fetchItems(); }, []);
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      void fetchItems();
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
+  }, []);
 
   const openAdd = () => {
     setEditId(null);

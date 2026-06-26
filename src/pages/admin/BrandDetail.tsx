@@ -62,6 +62,15 @@ const inputStyle: React.CSSProperties = {
   color: '#191c20',
 };
 
+function Field({ label, value }: { label: string; value?: string }) {
+  return (
+    <div>
+      <p style={labelSmall}>{label}</p>
+      <p style={valueStyle}>{value || '—'}</p>
+    </div>
+  );
+}
+
 export default function BrandDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -98,13 +107,6 @@ export default function BrandDetail() {
 
   if (loading) return <div style={{ textAlign: 'center', padding: '80px', color: '#777683', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>Memuat...</div>;
   if (!brand) return null;
-
-  const Field = ({ label, value }: { label: string; value?: string }) => (
-    <div>
-      <p style={labelSmall}>{label}</p>
-      <p style={valueStyle}>{value || '—'}</p>
-    </div>
-  );
 
   return (
     <div>

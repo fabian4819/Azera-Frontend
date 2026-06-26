@@ -50,7 +50,7 @@ export default function Brand() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: easeOut, delay: 0.15 }}
           >
-            Dari kampanye skala kecil hingga massive KOL campaign — Azera punya solusi untuk setiap kebutuhan brand.
+            Dari kampanye skala kecil hingga massive KOL campaign — AzeraKOL punya solusi untuk setiap kebutuhan brand.
           </motion.p>
         </div>
       </div>

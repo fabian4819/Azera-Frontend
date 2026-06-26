@@ -35,7 +35,7 @@ export default function DualCTA() {
             Siap Mulai Kampanye KOL?
           </h2>
           <p style={{ color: 'rgba(157,161,255,0.8)', fontSize: '0.95rem', lineHeight: 1.75, marginBottom: '36px', fontFamily: "'Plus Jakarta Sans', sans-serif", maxWidth: '380px' }}>
-            Konsultasi gratis dengan tim Azera. Kami bantu tentukan strategi, pilih KOL, dan jalankan kampanye yang tepat sasaran.
+            Konsultasi gratis dengan tim AzeraKOL. Kami bantu tentukan strategi, pilih KOL, dan jalankan kampanye yang tepat sasaran.
           </p>
           <Link to="/brand/form" className="btn-primary" style={{ alignSelf: 'flex-start', fontSize: '1rem', padding: '14px 32px', gap: '10px' }}>
             <Sparkles size={18} />
@@ -67,7 +67,7 @@ export default function DualCTA() {
             Untuk KOL
           </span>
           <h2 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800, fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', color: '#ffffff', lineHeight: 1.15, marginBottom: '16px' }}>
-            Bergabung dengan Azera Network
+            Bergabung dengan AzeraKOL Network
           </h2>
           <p style={{ color: 'rgba(255,255,255,0.85)', fontSize: '0.95rem', lineHeight: 1.75, marginBottom: '36px', fontFamily: "'Plus Jakarta Sans', sans-serif", maxWidth: '380px' }}>
             Daftar gratis, dapatkan akses ke ratusan peluang kolaborasi brand ternama di Indonesia. Tim kami siap mendukung perjalanan kariermu.
