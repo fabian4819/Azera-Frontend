@@ -1,0 +1,22 @@
+{
+  "name": "Azera",
+  "short_name": "Azera",
+  "description": "Jasa KOL management dan influencer marketing untuk brand dan kreator Indonesia.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f8f9ff",
+  "theme_color": "#6728e4",
+  "icons": [
+    {
+      "src": "/icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

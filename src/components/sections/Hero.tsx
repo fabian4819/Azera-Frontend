@@ -98,7 +98,7 @@ export default function Hero() {
         >
           <Zap size={14} color="#a78bfa" fill="#a78bfa" />
           <span style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700, fontSize: '0.72rem', color: '#fff', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
-            The Future Is Kinetic
+            KOL Agency Indonesia
           </span>
         </motion.div>
 
@@ -108,9 +108,9 @@ export default function Hero() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease, delay: 0.1 }}
         >
-          We Scale Brands Through{' '}
+          Jasa KOL Management untuk{' '}
           <em style={{ fontStyle: 'italic', background: 'linear-gradient(135deg, #6728e4, #9b5de5)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
-            KOL Power.
+            Brand Growth.
           </em>
         </motion.h1>
 
@@ -120,7 +120,7 @@ export default function Hero() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, ease, delay: 0.22 }}
         >
-          Kami membantu kreator dan brand bertransformasi melalui strategi digital yang dinamis, cepat, dan penuh ledakan kreativitas untuk menguasai pasar masa depan.
+          Azera membantu brand menjalankan campaign KOL dan influencer marketing di Indonesia melalui jaringan nano, micro, dan macro creator terkurasi untuk Instagram, TikTok, YouTube, dan live streaming.
         </motion.p>
 
         <motion.div

@@ -1,7 +1,8 @@
+import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import Navbar from './components/layout/Navbar';
 import Footer from './components/layout/Footer';
-import AdminLayout from './components/layout/AdminLayout';
+import SEOManager from './components/SEOManager';
 
 // Public pages
 import Landing from './pages/Landing';
@@ -11,13 +12,18 @@ import KOL from './pages/KOL';
 import KOLRegister from './pages/KOLRegister';
 import Portfolio from './pages/Portfolio';
 
-// Admin pages
-import AdminLogin from './pages/admin/Login';
-import Brands from './pages/admin/Brands';
-import BrandDetail from './pages/admin/BrandDetail';
-import KOLs from './pages/admin/KOLs';
-import KOLDetail from './pages/admin/KOLDetail';
-import PortfolioManager from './pages/admin/PortfolioManager';
+// Admin pages are not SEO targets, so keep them out of the initial public bundle.
+const AdminLayout = lazy(() => import('./components/layout/AdminLayout'));
+const AdminLogin = lazy(() => import('./pages/admin/Login'));
+const Brands = lazy(() => import('./pages/admin/Brands'));
+const BrandDetail = lazy(() => import('./pages/admin/BrandDetail'));
+const KOLs = lazy(() => import('./pages/admin/KOLs'));
+const KOLDetail = lazy(() => import('./pages/admin/KOLDetail'));
+const PortfolioManager = lazy(() => import('./pages/admin/PortfolioManager'));
+
+function RouteFallback() {
+  return <div style={{ minHeight: '100vh', background: '#f8f9ff' }} />;
+}
 
 function PublicLayout() {
   return (
@@ -40,33 +46,36 @@ function ProtectedRoute() {
 export default function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        {/* Public routes with Navbar + Footer */}
-        <Route element={<PublicLayout />}>
-          <Route path="/" element={<Landing />} />
-          <Route path="/brand" element={<Brand />} />
-          <Route path="/brand/form" element={<BrandForm />} />
-          <Route path="/kol" element={<KOL />} />
-          <Route path="/kol/register" element={<KOLRegister />} />
-          <Route path="/portfolio" element={<Portfolio />} />
-        </Route>
+      <SEOManager />
+      <Suspense fallback={<RouteFallback />}>
+        <Routes>
+          {/* Public routes with Navbar + Footer */}
+          <Route element={<PublicLayout />}>
+            <Route path="/" element={<Landing />} />
+            <Route path="/brand" element={<Brand />} />
+            <Route path="/brand/form" element={<BrandForm />} />
+            <Route path="/kol" element={<KOL />} />
+            <Route path="/kol/register" element={<KOLRegister />} />
+            <Route path="/portfolio" element={<Portfolio />} />
+          </Route>
 
-        {/* Admin login — no layout */}
-        <Route path="/admin/login" element={<AdminLogin />} />
+          {/* Admin login — no layout */}
+          <Route path="/admin/login" element={<AdminLogin />} />
 
-        {/* Admin protected routes */}
-        <Route path="/admin" element={<ProtectedRoute />}>
-          <Route index element={<Navigate to="/admin/brands" replace />} />
-          <Route path="brands" element={<Brands />} />
-          <Route path="brands/:id" element={<BrandDetail />} />
-          <Route path="kols" element={<KOLs />} />
-          <Route path="kols/:id" element={<KOLDetail />} />
-          <Route path="portfolio" element={<PortfolioManager />} />
-        </Route>
+          {/* Admin protected routes */}
+          <Route path="/admin" element={<ProtectedRoute />}>
+            <Route index element={<Navigate to="/admin/brands" replace />} />
+            <Route path="brands" element={<Brands />} />
+            <Route path="brands/:id" element={<BrandDetail />} />
+            <Route path="kols" element={<KOLs />} />
+            <Route path="kols/:id" element={<KOLDetail />} />
+            <Route path="portfolio" element={<PortfolioManager />} />
+          </Route>
 
-        {/* Catch-all */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+          {/* Catch-all */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Suspense>
     </BrowserRouter>
   );
 }
