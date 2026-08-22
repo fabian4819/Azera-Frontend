@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Sparkles, Copy, Check, ThumbsUp, ThumbsDown } from 'lucide-react';
 import api from '../../lib/api';
+import CampaignAnalyticsFinance from './CampaignAnalyticsFinance';
 
 interface Social { platform: string; username: string; followers: number }
 interface Creator {
@@ -249,6 +250,8 @@ export default function CampaignDetail() {
               </div>
             )}
           </div>
+
+          <CampaignAnalyticsFinance campaignId={campaign._id} />
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>

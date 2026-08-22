@@ -12,6 +12,7 @@ import KOL from './pages/KOL';
 import KOLRegister from './pages/KOLRegister';
 import Portfolio from './pages/Portfolio';
 import CampaignApply from './pages/CampaignApply';
+import InvoicePayment from './pages/InvoicePayment';
 
 // Admin pages are not SEO targets, so keep them out of the initial public bundle.
 const AdminLayout = lazy(() => import('./components/layout/AdminLayout'));
@@ -24,6 +25,7 @@ const PortfolioManager = lazy(() => import('./pages/admin/PortfolioManager'));
 const Campaigns = lazy(() => import('./pages/admin/Campaigns'));
 const CampaignNew = lazy(() => import('./pages/admin/CampaignNew'));
 const CampaignDetail = lazy(() => import('./pages/admin/CampaignDetail'));
+const Import = lazy(() => import('./pages/admin/Import'));
 
 // Talent Portal — creator-facing, juga bukan target SEO
 const TalentLayout = lazy(() => import('./components/layout/TalentLayout'));
@@ -76,6 +78,9 @@ export default function App() {
             <Route path="/apply/:slug" element={<CampaignApply />} />
           </Route>
 
+          {/* Invoice payment — halaman publik transaksional, tanpa Navbar/Footer marketing */}
+          <Route path="/invoice/:id" element={<InvoicePayment />} />
+
           {/* Admin login — no layout */}
           <Route path="/admin/login" element={<AdminLogin />} />
 
@@ -85,6 +90,7 @@ export default function App() {
             <Route path="campaigns" element={<Campaigns />} />
             <Route path="campaigns/new" element={<CampaignNew />} />
             <Route path="campaigns/:id" element={<CampaignDetail />} />
+            <Route path="import" element={<Import />} />
             <Route path="brands" element={<Brands />} />
             <Route path="brands/:id" element={<BrandDetail />} />
             <Route path="kols" element={<KOLs />} />
