@@ -11,6 +11,7 @@ import BrandForm from './pages/BrandForm';
 import KOL from './pages/KOL';
 import KOLRegister from './pages/KOLRegister';
 import Portfolio from './pages/Portfolio';
+import CampaignApply from './pages/CampaignApply';
 
 // Admin pages are not SEO targets, so keep them out of the initial public bundle.
 const AdminLayout = lazy(() => import('./components/layout/AdminLayout'));
@@ -20,6 +21,15 @@ const BrandDetail = lazy(() => import('./pages/admin/BrandDetail'));
 const KOLs = lazy(() => import('./pages/admin/KOLs'));
 const KOLDetail = lazy(() => import('./pages/admin/KOLDetail'));
 const PortfolioManager = lazy(() => import('./pages/admin/PortfolioManager'));
+const Campaigns = lazy(() => import('./pages/admin/Campaigns'));
+const CampaignNew = lazy(() => import('./pages/admin/CampaignNew'));
+const CampaignDetail = lazy(() => import('./pages/admin/CampaignDetail'));
+
+// Talent Portal — creator-facing, juga bukan target SEO
+const TalentLayout = lazy(() => import('./components/layout/TalentLayout'));
+const TalentLogin = lazy(() => import('./pages/talent/TalentLogin'));
+const TalentCampaigns = lazy(() => import('./pages/talent/TalentCampaigns'));
+const TalentCampaignDetail = lazy(() => import('./pages/talent/TalentCampaignDetail'));
 
 function RouteFallback() {
   return <div style={{ minHeight: '100vh', background: '#f8f9ff' }} />;
@@ -43,6 +53,12 @@ function ProtectedRoute() {
   return <AdminLayout />;
 }
 
+function ProtectedTalentRoute() {
+  const token = localStorage.getItem('azera_creator_token');
+  if (!token) return <Navigate to="/talent/login" replace />;
+  return <TalentLayout />;
+}
+
 export default function App() {
   return (
     <BrowserRouter>
@@ -57,6 +73,7 @@ export default function App() {
             <Route path="/kol" element={<KOL />} />
             <Route path="/kol/register" element={<KOLRegister />} />
             <Route path="/portfolio" element={<Portfolio />} />
+            <Route path="/apply/:slug" element={<CampaignApply />} />
           </Route>
 
           {/* Admin login — no layout */}
@@ -64,12 +81,25 @@ export default function App() {
 
           {/* Admin protected routes */}
           <Route path="/admin" element={<ProtectedRoute />}>
-            <Route index element={<Navigate to="/admin/brands" replace />} />
+            <Route index element={<Navigate to="/admin/campaigns" replace />} />
+            <Route path="campaigns" element={<Campaigns />} />
+            <Route path="campaigns/new" element={<CampaignNew />} />
+            <Route path="campaigns/:id" element={<CampaignDetail />} />
             <Route path="brands" element={<Brands />} />
             <Route path="brands/:id" element={<BrandDetail />} />
             <Route path="kols" element={<KOLs />} />
             <Route path="kols/:id" element={<KOLDetail />} />
             <Route path="portfolio" element={<PortfolioManager />} />
+          </Route>
+
+          {/* Talent Portal login — no layout */}
+          <Route path="/talent/login" element={<TalentLogin />} />
+
+          {/* Talent Portal protected routes */}
+          <Route path="/talent" element={<ProtectedTalentRoute />}>
+            <Route index element={<Navigate to="/talent/campaigns" replace />} />
+            <Route path="campaigns" element={<TalentCampaigns />} />
+            <Route path="campaigns/:id" element={<TalentCampaignDetail />} />
           </Route>
 
           {/* Catch-all */}

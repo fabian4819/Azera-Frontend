@@ -1,15 +1,17 @@
 import { useState } from 'react';
 import { Link, useLocation, Outlet } from 'react-router-dom';
-import { Building2, Users, ImageIcon, LogOut, Menu, X } from 'lucide-react';
+import { Building2, Users, ImageIcon, Megaphone, LogOut, Menu, X } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 
 const navItems = [
+  { label: 'Campaigns', to: '/admin/campaigns', icon: Megaphone },
   { label: 'Brands', to: '/admin/brands', icon: Building2 },
   { label: 'KOLs', to: '/admin/kols', icon: Users },
   { label: 'Portfolio', to: '/admin/portfolio', icon: ImageIcon },
 ];
 
 const pageTitles: Record<string, string> = {
+  '/admin/campaigns': 'Campaigns',
   '/admin/brands': 'Brand Submissions',
   '/admin/kols': 'KOL Submissions',
   '/admin/portfolio': 'Portfolio Manager',
@@ -19,7 +21,7 @@ function SidebarContent({ pathname, onNavigate, onLogout }: { pathname: string; 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       <div style={{ padding: '24px 20px', borderBottom: '1px solid #e1e0ff' }}>
-        <Link to="/admin/brands" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}>
+        <Link to="/admin/campaigns" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}>
           <img src="/icon.png" alt="AzeraKOL" style={{ height: '30px', objectFit: 'contain' }} />
           <span style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 900, fontStyle: 'italic', fontSize: '1.05rem', color: '#15157d', letterSpacing: '-0.02em' }}>AZERAKOL</span>
           <span style={{ fontSize: '0.65rem', background: 'linear-gradient(135deg, #6728e4, #814bfe)', color: 'white', borderRadius: '4px', padding: '2px 7px', fontWeight: 700, letterSpacing: '0.06em', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>ADMIN</span>
