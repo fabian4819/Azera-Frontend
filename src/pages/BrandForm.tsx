@@ -15,6 +15,8 @@ const schema = z.object({
   website: z.string().optional(),
   kategori: z.string().min(1, 'Kategori wajib dipilih'),
   paket: z.string().min(1, 'Paket wajib dipilih'),
+  campaignName: z.string().min(2, 'Nama campaign wajib diisi'),
+  platforms: z.array(z.string()).min(1, 'Pilih minimal 1 platform'),
   targetAudience: z.string().min(5, 'Target audience wajib diisi'),
   budget: z.string().min(1, 'Budget wajib dipilih'),
   tujuan: z.array(z.string()).min(1, 'Pilih minimal 1 tujuan'),
@@ -29,6 +31,7 @@ const kategoriOptions = ['Beauty & Skincare', 'Food & Beverage', 'Fashion', 'Tec
 const budgetOptions = ['< Rp 5 Juta', 'Rp 5–15 Juta', 'Rp 15–40 Juta', 'Rp 40–100 Juta', '> Rp 100 Juta'];
 const durasiOptions = ['1 Minggu', '2 Minggu', '1 Bulan', '2 Bulan', '3 Bulan+'];
 const paketOptions = ['starter', 'growth', 'scale'];
+const platformOptions = ['Instagram', 'TikTok', 'Threads', 'X'];
 
 const inputStyle = (hasError?: boolean): React.CSSProperties => ({
   width: '100%', padding: '12px 16px', borderRadius: '12px',
@@ -59,7 +62,7 @@ export default function BrandForm() {
 
   const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
-    defaultValues: { tujuan: [] },
+    defaultValues: { tujuan: [], platforms: [] },
   });
 
   useEffect(() => {
@@ -70,11 +73,18 @@ export default function BrandForm() {
   }, [searchParams, setValue]);
 
   const tujuanVal = watch('tujuan');
+  const platformsVal = watch('platforms');
 
   const toggleTujuan = (val: string) => {
     const current = tujuanVal || [];
     if (current.includes(val)) setValue('tujuan', current.filter((v) => v !== val));
     else setValue('tujuan', [...current, val]);
+  };
+
+  const togglePlatform = (val: string) => {
+    const current = platformsVal || [];
+    if (current.includes(val)) setValue('platforms', current.filter((v) => v !== val));
+    else setValue('platforms', [...current, val]);
   };
 
   const onSubmit = async (data: FormData) => {
@@ -216,6 +226,11 @@ export default function BrandForm() {
             </div>
 
             <p style={sectionTitleStyle}>Detail Kampanye</p>
+            <div style={{ marginBottom: '16px' }}>
+              <label style={labelStyle}>Nama Campaign *</label>
+              <input {...register('campaignName')} placeholder="mis. Launching Serum Baru" style={inputStyle(!!errors.campaignName)} onFocus={(e) => Object.assign(e.target.style, inputFocus)} onBlur={(e) => Object.assign(e.target.style, { boxShadow: 'none' })} />
+              {errors.campaignName && <p style={errorStyle}>{errors.campaignName.message}</p>}
+            </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }} className="form-2col">
               <div>
                 <label style={labelStyle}>Paket *</label>
@@ -235,6 +250,29 @@ export default function BrandForm() {
                 </select>
                 {errors.budget && <p style={errorStyle}>{errors.budget.message}</p>}
               </div>
+            </div>
+            <div style={{ marginBottom: '16px' }}>
+              <label style={labelStyle}>Platform * <span style={{ fontWeight: 400, color: '#777683' }}>(bisa lebih dari 1)</span></label>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                {platformOptions.map((p) => {
+                  const selected = platformsVal?.includes(p);
+                  return (
+                    <button
+                      key={p} type="button" onClick={() => togglePlatform(p)}
+                      style={{
+                        padding: '8px 16px', borderRadius: '999px', border: 'none',
+                        background: selected ? 'linear-gradient(135deg, #6728e4, #814bfe)' : '#e1e0ff',
+                        color: selected ? 'white' : '#6728e4',
+                        fontSize: '0.82rem', fontWeight: 600, cursor: 'pointer',
+                        transition: 'all 0.2s', fontFamily: "'Plus Jakarta Sans', sans-serif",
+                      }}
+                    >
+                      {p}
+                    </button>
+                  );
+                })}
+              </div>
+              {errors.platforms && <p style={errorStyle}>{errors.platforms.message as string}</p>}
             </div>
             <div style={{ marginBottom: '16px' }}>
               <label style={labelStyle}>Target Audience *</label>

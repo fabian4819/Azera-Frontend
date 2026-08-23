@@ -1,107 +1,143 @@
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { CheckCircle2, Camera, Play, Zap } from 'lucide-react';
-import { calcEngagement, calcViewRate, erRating } from '../utils/engagement';
+import { useEffect, useState } from 'react';
+import { CheckCircle2, Camera, Music2, AtSign, Hash, Zap } from 'lucide-react';
 import api from '../lib/api';
 
-const niches = ['Beauty', 'Fashion', 'Food & Beverage', 'Travel', 'Tech', 'Fitness', 'Parenting', 'Gaming', 'Finance', 'Education', 'Lifestyle', 'Entertainment'];
+const niches = ['Beauty', 'Fashion', 'Food & Beverage', 'Travel', 'Tech', 'Fitness', 'Parenting', 'Gaming', 'Finance', 'Education', 'Lifestyle', 'Entertainment', 'Yang lain'];
+const contentStyles = ['Review', 'Tutorial', 'Challenge / Trend', 'Daily Vlog', 'Storytelling', 'Talking Head', 'GRWM', 'Before & After', 'Comedy', 'Unboxing', 'Cinematic', 'ASMR', 'Voice Over', 'Live Streaming', 'Podcast / Interview', 'Foto Estetik', 'UGC Style', 'Yang lain'];
+const activities = [
+  { value: 'kol', label: 'KOL (Key Opinion Leader)', desc: 'Audiensmu mengikuti rekomendasi/opinimu dan itu memengaruhi keputusan mereka.' },
+  { value: 'koc', label: 'KOC (Key Opinion Consumer)', desc: 'Membagikan pengalaman pakai produk secara autentik sebagai konsumen.' },
+  { value: 'ugc', label: 'UGC Creator', desc: 'Membuat konten untuk brand tanpa harus dipublikasikan di akun pribadi.' },
+  { value: 'affiliator', label: 'Affiliator', desc: 'Mempromosikan produk lewat link affiliate, dapat komisi dari penjualan.' },
+  { value: 'live_streamer', label: 'Live Streamer', desc: 'Siaran langsung untuk interaksi dengan audiens atau bantu penjualan.' },
+];
+const socialPlatforms = [
+  { value: 'instagram', label: 'Instagram', icon: Camera, color: '#ff81aa' },
+  { value: 'tiktok', label: 'TikTok', icon: Music2, color: '#10B981' },
+  { value: 'threads', label: 'Threads', icon: AtSign, color: '#464652' },
+  { value: 'x', label: 'X', icon: Hash, color: '#191c20' },
+];
 
-const schema = z.object({
-  namaLengkap: z.string().min(2, 'Nama wajib diisi'),
-  whatsapp: z.string().min(8, 'WhatsApp wajib diisi'),
-  email: z.string().email('Email tidak valid'),
-  kota: z.string().min(2, 'Kota wajib diisi'),
-  tanggalLahir: z.string().min(1, 'Tanggal lahir wajib diisi'),
-  jenisKelamin: z.string().min(1, 'Jenis kelamin wajib dipilih'),
-  niche: z.array(z.string()).min(1, 'Pilih minimal 1 niche'),
-  ig_username: z.string().optional(),
-  ig_followers: z.number().optional(),
-  ig_avgLike: z.number().optional(),
-  ig_avgComment: z.number().optional(),
-  tt_username: z.string().optional(),
-  tt_followers: z.number().optional(),
-  tt_avgLike: z.number().optional(),
-  tt_avgComment: z.number().optional(),
-  tt_avgViews: z.number().optional(),
-  yt_channel: z.string().optional(),
-  yt_subscribers: z.number().optional(),
-  yt_avgViews: z.number().optional(),
-  rateCard: z.string().optional(),
-  portfolioLink: z.string().optional(),
-  pengalaman: z.string().optional(),
-});
+const WILAYAH_API = 'https://www.emsifa.com/api-wilayah-indonesia/api';
 
-type FormData = z.infer<typeof schema>;
+interface WilayahOption { id: string; name: string }
 
-function ERBadge({ er, color = '#6728e4' }: { er: number; color?: string }) {
-  const rating = erRating(er);
-  if (er === 0) return null;
-  return (
-    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', marginTop: '10px', padding: '8px 16px', borderRadius: '10px', background: `linear-gradient(135deg, ${color}, #814bfe)` }}>
-      <span style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800, fontSize: '1rem', color: 'white' }}>{er}%</span>
-      <span style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.85)', fontWeight: 600, fontFamily: "'Plus Jakarta Sans', sans-serif" }}>ER — {rating.label}</span>
-    </div>
-  );
-}
-
-const inputStyle = (err?: boolean): React.CSSProperties => ({
-  width: '100%', padding: '11px 14px', borderRadius: '12px',
-  border: `1.5px solid ${err ? '#ba1a1a' : '#c7c8cf'}`,
-  fontSize: '0.875rem', color: '#191c20', background: 'white',
-  outline: 'none', fontFamily: "'Plus Jakarta Sans', sans-serif",
-  transition: 'border-color 0.2s',
-});
+const inputStyle: React.CSSProperties = {
+  width: '100%', padding: '11px 14px', borderRadius: '12px', border: '1.5px solid #c7c8cf',
+  fontSize: '0.875rem', color: '#191c20', background: 'white', outline: 'none',
+  fontFamily: "'Plus Jakarta Sans', sans-serif",
+};
 
 const labelStyle: React.CSSProperties = {
   display: 'block', fontWeight: 600, fontSize: '0.8rem', color: '#191c20',
   marginBottom: '5px', fontFamily: "'Plus Jakarta Sans', sans-serif",
 };
 
-const errStyle: React.CSSProperties = { color: '#ba1a1a', fontSize: '0.75rem', marginTop: '3px', fontFamily: "'Plus Jakarta Sans', sans-serif" };
+const SectionTitle = ({ title }: { title: string }) => (
+  <p style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700, fontSize: '1rem', color: '#6728e4', marginBottom: '20px', paddingBottom: '12px', borderBottom: '1px solid #e1e0ff', marginTop: '8px' }}>
+    {title}
+  </p>
+);
+
+const Pill = ({ label, selected, onClick }: { label: string; selected: boolean; onClick: () => void }) => (
+  <button type="button" onClick={onClick} style={{
+    padding: '8px 16px', borderRadius: '999px', border: 'none',
+    background: selected ? 'linear-gradient(135deg, #6728e4, #814bfe)' : '#e1e0ff',
+    color: selected ? 'white' : '#6728e4', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer',
+    fontFamily: "'Plus Jakarta Sans', sans-serif",
+  }}>
+    {label}
+  </button>
+);
+
+interface SocialState { username: string; profileUrl: string; followers: string }
 
 export default function KOLRegister() {
   const [submitted, setSubmitted] = useState(false);
+  const [alreadyExists, setAlreadyExists] = useState(false);
+  const [submitError, setSubmitError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [profileFile, setProfileFile] = useState<File | null>(null);
 
-  const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<FormData>({
-    resolver: zodResolver(schema),
-    defaultValues: { niche: [] },
-  });
+  const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [gender, setGender] = useState('');
+  const [provinces, setProvinces] = useState<WilayahOption[]>([]);
+  const [cities, setCities] = useState<WilayahOption[]>([]);
+  const [province, setProvince] = useState('');
+  const [city, setCity] = useState('');
+  const [socials, setSocials] = useState<Record<string, SocialState>>({});
+  const [selectedActivities, setSelectedActivities] = useState<string[]>([]);
+  const [selectedNiches, setSelectedNiches] = useState<string[]>([]);
+  const [nicheOther, setNicheOther] = useState('');
+  const [selectedStyles, setSelectedStyles] = useState<string[]>([]);
+  const [styleOther, setStyleOther] = useState('');
+  const [bankName, setBankName] = useState('');
+  const [accountNumber, setAccountNumber] = useState('');
+  const [accountName, setAccountName] = useState('');
+  const [npwp, setNpwp] = useState('');
+  const [mediaKitUrl, setMediaKitUrl] = useState('');
 
-  const watchAll = watch();
-  const igER = calcEngagement(watchAll.ig_followers || 0, watchAll.ig_avgLike || 0, watchAll.ig_avgComment || 0);
-  const ttER = calcEngagement(watchAll.tt_followers || 0, watchAll.tt_avgLike || 0, watchAll.tt_avgComment || 0);
-  const ytVR = calcViewRate(watchAll.yt_subscribers || 0, watchAll.yt_avgViews || 0);
+  useEffect(() => {
+    fetch(`${WILAYAH_API}/provinces.json`)
+      .then((res) => res.json())
+      .then((data: WilayahOption[]) => setProvinces(data))
+      .catch(() => setProvinces([]));
+  }, []);
 
-  const niches_ = watchAll.niche || [];
-  const toggleNiche = (val: string) => {
-    if (niches_.includes(val)) setValue('niche', niches_.filter((n) => n !== val));
-    else setValue('niche', [...niches_, val]);
+  const onProvinceChange = (provinceId: string) => {
+    setProvince(provinceId);
+    setCity('');
+    setCities([]);
+    if (!provinceId) return;
+    fetch(`${WILAYAH_API}/regencies/${provinceId}.json`)
+      .then((res) => res.json())
+      .then((data: WilayahOption[]) => setCities(data))
+      .catch(() => setCities([]));
   };
 
-  const onSubmit = async (data: FormData) => {
+  const toggle = (list: string[], setList: (v: string[]) => void, val: string) => {
+    if (list.includes(val)) setList(list.filter((v) => v !== val));
+    else setList([...list, val]);
+  };
+
+  const setSocialField = (platform: string, field: keyof SocialState, value: string) => {
+    setSocials((prev) => ({ ...prev, [platform]: { ...prev[platform], [field]: value } }));
+  };
+
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitError('');
+    if (!name || !phone || !gender) {
+      setSubmitError('Nama, nomor WA, dan jenis kelamin wajib diisi.');
+      return;
+    }
     setLoading(true);
     try {
-      const formData = new FormData();
-      const { ig_username, ig_followers, ig_avgLike, ig_avgComment, tt_username, tt_followers, tt_avgLike, tt_avgComment, tt_avgViews, yt_channel, yt_subscribers, yt_avgViews, ...rest } = data;
-      const socialMedia = {
-        instagram: ig_username ? { username: ig_username, followers: ig_followers, avgLike: ig_avgLike, avgComment: ig_avgComment } : null,
-        tiktok: tt_username ? { username: tt_username, followers: tt_followers, avgLike: tt_avgLike, avgComment: tt_avgComment, avgViews: tt_avgViews } : null,
-        youtube: yt_channel ? { channel: yt_channel, subscribers: yt_subscribers, avgViews: yt_avgViews } : null,
-      };
-      Object.entries(rest).forEach(([k, v]) => {
-        if (Array.isArray(v)) formData.append(k, JSON.stringify(v));
-        else if (v !== undefined) formData.append(k, String(v));
+      const socialsPayload = Object.entries(socials)
+        .filter(([, v]) => v?.username)
+        .map(([platform, v]) => ({ platform, username: v.username, profileUrl: v.profileUrl || '', followers: Number(v.followers) || 0 }));
+
+      const provinceName = provinces.find((p) => p.id === province)?.name || '';
+      const cityName = cities.find((c) => c.id === city)?.name || '';
+
+      const res = await api.post('/creators/register', {
+        name, phone, gender,
+        domicile: { province: provinceName, city: cityName },
+        socials: socialsPayload,
+        activities: selectedActivities,
+        niches: selectedNiches.filter((n) => n !== 'Yang lain'),
+        nicheOther: selectedNiches.includes('Yang lain') ? nicheOther : undefined,
+        contentStyles: selectedStyles.filter((s) => s !== 'Yang lain'),
+        contentStyleOther: selectedStyles.includes('Yang lain') ? styleOther : undefined,
+        bankAccount: bankName ? { bankName, accountNumber, accountName } : undefined,
+        npwp: npwp || undefined,
+        mediaKitUrl: mediaKitUrl || undefined,
       });
-      formData.append('socialMedia', JSON.stringify(socialMedia));
-      if (profileFile) formData.append('fotoProfil', profileFile);
-      await api.post('/kols', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+      if (res.data.alreadyExists) setAlreadyExists(true);
       setSubmitted(true);
-    } catch {
-      alert('Terjadi kesalahan. Silakan coba lagi.');
+    } catch (err: unknown) {
+      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      setSubmitError(message || 'Terjadi kesalahan. Silakan coba lagi.');
     } finally {
       setLoading(false);
     }
@@ -115,21 +151,17 @@ export default function KOLRegister() {
             <CheckCircle2 size={40} color="white" />
           </div>
           <h2 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800, fontSize: '1.8rem', color: '#191c20', marginBottom: '12px' }}>
-            Pendaftaran Berhasil!
+            {alreadyExists ? 'Kamu Sudah Terdaftar' : 'Pendaftaran Berhasil!'}
           </h2>
           <p style={{ color: '#464652', lineHeight: 1.7, fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-            Profil kamu sedang kami review. Tim AzeraKOL akan menghubungi kamu dalam 1–3 hari kerja via WhatsApp.
+            {alreadyExists
+              ? 'Nomor WhatsApp kamu sudah terdaftar sebelumnya. Tim AzeraKOL akan segera menghubungi.'
+              : 'Profil kamu sedang kami review. Tim AzeraKOL akan menghubungi kamu dalam 1–3 hari kerja via WhatsApp.'}
           </p>
         </div>
       </div>
     );
   }
-
-  const SectionTitle = ({ title }: { title: string }) => (
-    <p style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700, fontSize: '1rem', color: '#6728e4', marginBottom: '20px', paddingBottom: '12px', borderBottom: '1px solid #e1e0ff', marginTop: '8px' }}>
-      {title}
-    </p>
-  );
 
   return (
     <div style={{ background: '#f8f9ff', minHeight: '100vh', paddingTop: '80px', position: 'relative', overflow: 'hidden' }}>
@@ -146,141 +178,106 @@ export default function KOLRegister() {
             Daftar gratis — tim kami akan review profil dan menghubungi kamu.
           </p>
         </div>
-        <form onSubmit={handleSubmit(onSubmit)} style={{ background: 'white', borderRadius: '24px', padding: '40px', boxShadow: '0 4px 24px rgba(0,0,0,0.06)' }}>
-          <SectionTitle title="1. Informasi Dasar" />
+
+        <form onSubmit={onSubmit} style={{ background: 'white', borderRadius: '24px', padding: '40px', boxShadow: '0 4px 24px rgba(0,0,0,0.06)' }}>
+          <SectionTitle title="1. Data Diri" />
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }} className="form-2col">
             <div>
               <label style={labelStyle}>Nama Lengkap *</label>
-              <input {...register('namaLengkap')} placeholder="Nama lengkap" style={inputStyle(!!errors.namaLengkap)} />
-              {errors.namaLengkap && <p style={errStyle}>{errors.namaLengkap.message}</p>}
+              <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Nama lengkap" style={inputStyle} />
             </div>
             <div>
-              <label style={labelStyle}>WhatsApp *</label>
-              <input {...register('whatsapp')} placeholder="08xxxxxxxxxx" style={inputStyle(!!errors.whatsapp)} />
-              {errors.whatsapp && <p style={errStyle}>{errors.whatsapp.message}</p>}
+              <label style={labelStyle}>Nomor WhatsApp *</label>
+              <input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="08xxxxxxxxxx" style={inputStyle} />
             </div>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }} className="form-2col">
-            <div>
-              <label style={labelStyle}>Email *</label>
-              <input {...register('email')} type="email" placeholder="email@domain.com" style={inputStyle(!!errors.email)} />
-              {errors.email && <p style={errStyle}>{errors.email.message}</p>}
-            </div>
-            <div>
-              <label style={labelStyle}>Kota *</label>
-              <input {...register('kota')} placeholder="Jakarta" style={inputStyle(!!errors.kota)} />
-              {errors.kota && <p style={errStyle}>{errors.kota.message}</p>}
-            </div>
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '20px' }} className="form-2col">
-            <div>
-              <label style={labelStyle}>Tanggal Lahir *</label>
-              <input {...register('tanggalLahir')} type="date" style={inputStyle(!!errors.tanggalLahir)} />
-              {errors.tanggalLahir && <p style={errStyle}>{errors.tanggalLahir.message}</p>}
-            </div>
-            <div>
-              <label style={labelStyle}>Jenis Kelamin *</label>
-              <select {...register('jenisKelamin')} style={inputStyle(!!errors.jenisKelamin)}>
-                <option value="">Pilih</option>
-                <option value="Laki-laki">Laki-laki</option>
-                <option value="Perempuan">Perempuan</option>
-                <option value="Prefer not to say">Prefer not to say</option>
-              </select>
-              {errors.jenisKelamin && <p style={errStyle}>{errors.jenisKelamin.message}</p>}
-            </div>
-          </div>
-          <div style={{ marginBottom: '28px' }}>
-            <label style={labelStyle}>Niche Konten * <span style={{ fontWeight: 400, color: '#777683' }}>(bisa lebih dari 1)</span></label>
+          <div style={{ marginBottom: '14px' }}>
+            <label style={labelStyle}>Jenis Kelamin *</label>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-              {niches.map((n) => {
-                const selected = niches_.includes(n);
-                return (
-                  <button key={n} type="button" onClick={() => toggleNiche(n)}
-                    style={{
-                      padding: '8px 16px', borderRadius: '999px', border: 'none',
-                      background: selected ? 'linear-gradient(135deg, #6728e4, #814bfe)' : '#e1e0ff',
-                      color: selected ? 'white' : '#6728e4',
-                      fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer',
-                      transition: 'all 0.2s', fontFamily: "'Plus Jakarta Sans', sans-serif",
-                    }}>
-                    {n}
-                  </button>
-                );
-              })}
+              <Pill label="Laki-laki" selected={gender === 'male'} onClick={() => setGender('male')} />
+              <Pill label="Perempuan (Hijab)" selected={gender === 'female_hijab'} onClick={() => setGender('female_hijab')} />
+              <Pill label="Perempuan (Non-Hijab)" selected={gender === 'female_non_hijab'} onClick={() => setGender('female_non_hijab')} />
             </div>
-            {errors.niche && <p style={errStyle}>{errors.niche.message as string}</p>}
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '28px' }} className="form-2col">
+            <div>
+              <label style={labelStyle}>Provinsi</label>
+              <select value={province} onChange={(e) => onProvinceChange(e.target.value)} style={inputStyle}>
+                <option value="">Pilih provinsi</option>
+                {provinces.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+              </select>
+            </div>
+            <div>
+              <label style={labelStyle}>Kota/Kabupaten</label>
+              <select value={city} onChange={(e) => setCity(e.target.value)} disabled={!province} style={inputStyle}>
+                <option value="">{province ? 'Pilih kota/kabupaten' : 'Pilih provinsi dulu'}</option>
+                {cities.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+              </select>
+            </div>
           </div>
 
           <SectionTitle title="2. Media Sosial" />
           <p style={{ color: '#777683', fontSize: '0.85rem', marginBottom: '20px', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>Isi minimal 1 platform.</p>
-
-          {/* Instagram card */}
-          <div style={{ background: '#fdf2f8', border: '1px solid rgba(255,129,170,0.15)', borderRadius: '16px', padding: '20px', marginBottom: '16px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
-              <Camera size={18} color="#ff81aa" />
-              <p style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700, color: '#ff81aa', fontSize: '0.9rem' }}>Instagram</p>
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }} className="form-2col">
-              <div style={{ gridColumn: '1 / -1' }}><label style={labelStyle}>Username</label><input {...register('ig_username')} placeholder="@username" style={inputStyle()} /></div>
-              <div><label style={labelStyle}>Followers</label><input {...register('ig_followers', { valueAsNumber: true })} type="number" placeholder="10000" style={inputStyle()} /></div>
-              <div><label style={labelStyle}>Avg. Like</label><input {...register('ig_avgLike', { valueAsNumber: true })} type="number" placeholder="500" style={inputStyle()} /></div>
-              <div style={{ gridColumn: '1 / -1' }}><label style={labelStyle}>Avg. Comment</label><input {...register('ig_avgComment', { valueAsNumber: true })} type="number" placeholder="50" style={inputStyle()} /></div>
-            </div>
-            <ERBadge er={igER} color="#ff81aa" />
-          </div>
-
-          {/* TikTok card */}
-          <div style={{ background: '#f0fdf4', border: '1px solid rgba(16,185,129,0.12)', borderRadius: '16px', padding: '20px', marginBottom: '16px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
-              <p style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700, color: '#10B981', fontSize: '0.9rem' }}>TikTok</p>
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }} className="form-2col">
-              <div style={{ gridColumn: '1 / -1' }}><label style={labelStyle}>Username</label><input {...register('tt_username')} placeholder="@username" style={inputStyle()} /></div>
-              <div><label style={labelStyle}>Followers</label><input {...register('tt_followers', { valueAsNumber: true })} type="number" placeholder="10000" style={inputStyle()} /></div>
-              <div><label style={labelStyle}>Avg. Like</label><input {...register('tt_avgLike', { valueAsNumber: true })} type="number" placeholder="500" style={inputStyle()} /></div>
-              <div><label style={labelStyle}>Avg. Comment</label><input {...register('tt_avgComment', { valueAsNumber: true })} type="number" placeholder="50" style={inputStyle()} /></div>
-              <div><label style={labelStyle}>Avg. Views</label><input {...register('tt_avgViews', { valueAsNumber: true })} type="number" placeholder="5000" style={inputStyle()} /></div>
-            </div>
-            <ERBadge er={ttER} color="#10B981" />
-          </div>
-
-          {/* YouTube card */}
-          <div style={{ background: '#fff7ed', border: '1px solid rgba(194,65,12,0.12)', borderRadius: '16px', padding: '20px', marginBottom: '28px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
-              <Play size={18} color="#C2410C" />
-              <p style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700, color: '#C2410C', fontSize: '0.9rem' }}>YouTube</p>
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }} className="form-2col">
-              <div style={{ gridColumn: '1 / -1' }}><label style={labelStyle}>Channel Name</label><input {...register('yt_channel')} placeholder="Nama Channel" style={inputStyle()} /></div>
-              <div><label style={labelStyle}>Subscribers</label><input {...register('yt_subscribers', { valueAsNumber: true })} type="number" placeholder="10000" style={inputStyle()} /></div>
-              <div><label style={labelStyle}>Avg. Views / Video</label><input {...register('yt_avgViews', { valueAsNumber: true })} type="number" placeholder="2000" style={inputStyle()} /></div>
-            </div>
-            {ytVR > 0 && (
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', marginTop: '10px', padding: '8px 16px', borderRadius: '10px', background: 'linear-gradient(135deg, #C2410C, #F59E0B)' }}>
-                <span style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800, fontSize: '1rem', color: 'white' }}>{ytVR}%</span>
-                <span style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.85)', fontWeight: 600, fontFamily: "'Plus Jakarta Sans', sans-serif" }}>View Rate</span>
+          {socialPlatforms.map(({ value, label, icon: Icon, color }) => (
+            <div key={value} style={{ background: '#f8f9ff', border: `1px solid ${color}22`, borderRadius: '16px', padding: '20px', marginBottom: '16px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
+                <Icon size={18} color={color} />
+                <p style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700, color, fontSize: '0.9rem' }}>{label}</p>
               </div>
-            )}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }} className="form-2col">
+                <div><label style={labelStyle}>Username</label><input value={socials[value]?.username || ''} onChange={(e) => setSocialField(value, 'username', e.target.value)} placeholder="@username" style={inputStyle} /></div>
+                <div><label style={labelStyle}>Followers</label><input value={socials[value]?.followers || ''} onChange={(e) => setSocialField(value, 'followers', e.target.value)} type="number" placeholder="10000" style={inputStyle} /></div>
+                <div style={{ gridColumn: '1 / -1' }}><label style={labelStyle}>Link Profil</label><input value={socials[value]?.profileUrl || ''} onChange={(e) => setSocialField(value, 'profileUrl', e.target.value)} placeholder="https://..." style={inputStyle} /></div>
+              </div>
+            </div>
+          ))}
+
+          <SectionTitle title="3. Aktivitas Sebagai Creator" />
+          <p style={{ color: '#777683', fontSize: '0.85rem', marginBottom: '16px', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>Bisa pilih lebih dari 1.</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '28px' }}>
+            {activities.map((a) => {
+              const selected = selectedActivities.includes(a.value);
+              return (
+                <button key={a.value} type="button" onClick={() => toggle(selectedActivities, setSelectedActivities, a.value)}
+                  style={{ textAlign: 'left', padding: '14px 16px', borderRadius: '12px', border: selected ? '1.5px solid #6728e4' : '1.5px solid #e1e0ff', background: selected ? '#f0eeff' : 'white', cursor: 'pointer' }}>
+                  <p style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700, fontSize: '0.85rem', color: selected ? '#6728e4' : '#191c20', marginBottom: '2px' }}>{a.label}</p>
+                  <p style={{ fontSize: '0.78rem', color: '#777683', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>{a.desc}</p>
+                </button>
+              );
+            })}
           </div>
 
-          <SectionTitle title="3. Informasi Tambahan" />
-          <div style={{ marginBottom: '14px' }}>
-            <label style={labelStyle}>Rate Card (opsional)</label>
-            <input {...register('rateCard')} placeholder="Rp 500.000 / posting" style={inputStyle()} />
+          <SectionTitle title="4. Niche Konten" />
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: selectedNiches.includes('Yang lain') ? '12px' : '28px' }}>
+            {niches.map((n) => <Pill key={n} label={n} selected={selectedNiches.includes(n)} onClick={() => toggle(selectedNiches, setSelectedNiches, n)} />)}
+          </div>
+          {selectedNiches.includes('Yang lain') && (
+            <input value={nicheOther} onChange={(e) => setNicheOther(e.target.value)} placeholder="Sebutkan niche lain..." style={{ ...inputStyle, marginBottom: '28px' }} />
+          )}
+
+          <SectionTitle title="5. Gaya Konten" />
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: selectedStyles.includes('Yang lain') ? '12px' : '28px' }}>
+            {contentStyles.map((s) => <Pill key={s} label={s} selected={selectedStyles.includes(s)} onClick={() => toggle(selectedStyles, setSelectedStyles, s)} />)}
+          </div>
+          {selectedStyles.includes('Yang lain') && (
+            <input value={styleOther} onChange={(e) => setStyleOther(e.target.value)} placeholder="Sebutkan gaya konten lain..." style={{ ...inputStyle, marginBottom: '28px' }} />
+          )}
+
+          <SectionTitle title="6. Info Tambahan (opsional)" />
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }} className="form-2col">
+            <div><label style={labelStyle}>Nama Bank</label><input value={bankName} onChange={(e) => setBankName(e.target.value)} placeholder="BCA" style={inputStyle} /></div>
+            <div><label style={labelStyle}>Nomor Rekening</label><input value={accountNumber} onChange={(e) => setAccountNumber(e.target.value)} placeholder="1234567890" style={inputStyle} /></div>
           </div>
           <div style={{ marginBottom: '14px' }}>
-            <label style={labelStyle}>Portfolio / Contoh Konten (opsional)</label>
-            <input {...register('portfolioLink')} placeholder="https://link-portfolio.com" style={inputStyle()} />
+            <label style={labelStyle}>Nama Pemilik Rekening</label>
+            <input value={accountName} onChange={(e) => setAccountName(e.target.value)} placeholder="Sesuai buku tabungan" style={inputStyle} />
           </div>
-          <div style={{ marginBottom: '14px' }}>
-            <label style={labelStyle}>Pengalaman Kolaborasi (opsional)</label>
-            <textarea {...register('pengalaman')} rows={3} placeholder="Ceritakan pengalaman kolaborasi sebelumnya..." style={{ ...inputStyle(), resize: 'vertical' }} />
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '36px' }} className="form-2col">
+            <div><label style={labelStyle}>NPWP (opsional)</label><input value={npwp} onChange={(e) => setNpwp(e.target.value)} placeholder="Opsional" style={inputStyle} /></div>
+            <div><label style={labelStyle}>Link Media Kit</label><input value={mediaKitUrl} onChange={(e) => setMediaKitUrl(e.target.value)} placeholder="https://..." style={inputStyle} /></div>
           </div>
-          <div style={{ marginBottom: '36px' }}>
-            <label style={labelStyle}>Foto Profil (opsional)</label>
-            <input type="file" accept="image/*" onChange={(e) => setProfileFile(e.target.files?.[0] || null)} style={{ ...inputStyle(), padding: '10px 14px', cursor: 'pointer' }} />
-            {profileFile && <p style={{ fontSize: '0.78rem', color: '#10B981', marginTop: '4px', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>File: {profileFile.name}</p>}
-          </div>
+
+          {submitError && <p style={{ color: '#ba1a1a', fontSize: '0.85rem', marginBottom: '16px', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>{submitError}</p>}
 
           <button type="submit" disabled={loading} className="btn-primary" style={{ width: '100%', justifyContent: 'center', fontSize: '1rem', padding: '16px', opacity: loading ? 0.7 : 1 }}>
             <Zap size={18} />

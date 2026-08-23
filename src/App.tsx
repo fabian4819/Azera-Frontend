@@ -11,6 +11,7 @@ import BrandForm from './pages/BrandForm';
 import KOL from './pages/KOL';
 import KOLRegister from './pages/KOLRegister';
 import Portfolio from './pages/Portfolio';
+import CaseStudyDetail from './pages/CaseStudyDetail';
 import CampaignApply from './pages/CampaignApply';
 import InvoicePayment from './pages/InvoicePayment';
 
@@ -29,6 +30,8 @@ const Import = lazy(() => import('./pages/admin/Import'));
 const WhatsApp = lazy(() => import('./pages/admin/WhatsApp'));
 const WaTemplates = lazy(() => import('./pages/admin/WaTemplates'));
 const Broadcast = lazy(() => import('./pages/admin/Broadcast'));
+const Creators = lazy(() => import('./pages/admin/Creators'));
+const CreatorDetail = lazy(() => import('./pages/admin/CreatorDetail'));
 
 // Talent Portal — creator-facing, juga bukan target SEO
 const TalentLayout = lazy(() => import('./components/layout/TalentLayout'));
@@ -78,6 +81,7 @@ export default function App() {
             <Route path="/kol" element={<KOL />} />
             <Route path="/kol/register" element={<KOLRegister />} />
             <Route path="/portfolio" element={<Portfolio />} />
+            <Route path="/portfolio/case-study/:id" element={<CaseStudyDetail />} />
             <Route path="/apply/:slug" element={<CampaignApply />} />
           </Route>
 
@@ -101,6 +105,8 @@ export default function App() {
             <Route path="brands/:id" element={<BrandDetail />} />
             <Route path="kols" element={<KOLs />} />
             <Route path="kols/:id" element={<KOLDetail />} />
+            <Route path="creators" element={<Creators />} />
+            <Route path="creators/:id" element={<CreatorDetail />} />
             <Route path="portfolio" element={<PortfolioManager />} />
           </Route>
 

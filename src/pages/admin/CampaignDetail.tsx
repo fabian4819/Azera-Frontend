@@ -4,6 +4,7 @@ import { ArrowLeft, Sparkles, Copy, Check, ThumbsUp, ThumbsDown, Send, MessageCi
 import api from '../../lib/api';
 import CampaignAnalyticsFinance from './CampaignAnalyticsFinance';
 import WorkflowTracker from './WorkflowTracker';
+import AssetLibrary from './AssetLibrary';
 
 const REMINDER_OPTIONS = [
   { trigger: 'reminder_draft', label: 'Reminder Draft' },
@@ -355,6 +356,8 @@ export default function CampaignDetail() {
           <WorkflowTracker campaignId={campaign._id} />
 
           <CampaignAnalyticsFinance campaignId={campaign._id} />
+
+          <AssetLibrary campaignId={campaign._id} />
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>

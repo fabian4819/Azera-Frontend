@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Users, Eye, TrendingUp } from 'lucide-react';
+import { Users, Eye, TrendingUp, ArrowRight } from 'lucide-react';
 import api from '../lib/api';
 
 interface PortfolioItem {
@@ -12,6 +13,14 @@ interface PortfolioItem {
   reach: string;
   engagement: number;
   featured?: boolean;
+}
+
+interface CaseStudy {
+  id: string;
+  headline: string;
+  brandName?: string;
+  campaignName?: string;
+  highlightStats: { views: number; engagementRate: number; totalPosts: number };
 }
 
 const placeholders: PortfolioItem[] = [
@@ -36,11 +45,15 @@ const allCategories = ['Semua', 'Beauty', 'F&B', 'Fashion', 'Tech', 'Fitness', '
 
 export default function Portfolio() {
   const [items, setItems] = useState<PortfolioItem[]>(placeholders);
+  const [caseStudies, setCaseStudies] = useState<CaseStudy[]>([]);
   const [activeCategory, setActiveCategory] = useState('Semua');
 
   useEffect(() => {
     api.get('/portfolio')
       .then((res) => { if (res.data?.length) setItems(res.data); })
+      .catch(() => {});
+    api.get('/portfolio/case-studies')
+      .then((res) => setCaseStudies(res.data))
       .catch(() => {});
   }, []);
 
@@ -86,6 +99,35 @@ export default function Portfolio() {
             );
           })}
         </div>
+
+        {caseStudies.length > 0 && (
+          <div style={{ marginBottom: '56px', position: 'relative', zIndex: 1 }}>
+            <h2 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800, fontSize: '1.5rem', color: '#191c20', marginBottom: '20px', textAlign: 'center' }}>
+              Case Study Terbaru
+            </h2>
+            <div className="portfolio-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px' }}>
+              {caseStudies.map((cs, index) => (
+                <motion.div key={cs.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: index * 0.06 }}>
+                  <Link to={`/portfolio/case-study/${cs.id}`} style={{ textDecoration: 'none' }}>
+                    <div className="glass-panel card-hover" style={{ padding: '24px', background: 'white' }}>
+                      {cs.brandName && (
+                        <span style={{ background: '#e1e0ff', color: '#6728e4', borderRadius: '999px', padding: '3px 10px', fontSize: '0.7rem', fontWeight: 600, fontFamily: "'Plus Jakarta Sans', sans-serif" }}>{cs.brandName}</span>
+                      )}
+                      <h3 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700, fontSize: '1rem', color: '#191c20', margin: '12px 0' }}>{cs.headline}</h3>
+                      <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '14px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#777683', fontSize: '0.78rem' }}><Eye size={13} />{cs.highlightStats.views.toLocaleString('id-ID')}</div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#10B981', fontSize: '0.78rem' }}><TrendingUp size={13} />{cs.highlightStats.engagementRate}% ER</div>
+                      </div>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#6728e4', fontSize: '0.82rem', fontWeight: 700, fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+                        Lihat Detail <ArrowRight size={13} />
+                      </span>
+                    </div>
+                  </Link>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div className="portfolio-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px', position: 'relative', zIndex: 1 }}>
           {filtered.map((item, index) => (
