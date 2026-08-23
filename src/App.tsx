@@ -26,6 +26,7 @@ const Campaigns = lazy(() => import('./pages/admin/Campaigns'));
 const CampaignNew = lazy(() => import('./pages/admin/CampaignNew'));
 const CampaignDetail = lazy(() => import('./pages/admin/CampaignDetail'));
 const Import = lazy(() => import('./pages/admin/Import'));
+const WhatsApp = lazy(() => import('./pages/admin/WhatsApp'));
 
 // Talent Portal — creator-facing, juga bukan target SEO
 const TalentLayout = lazy(() => import('./components/layout/TalentLayout'));
@@ -91,6 +92,7 @@ export default function App() {
             <Route path="campaigns/new" element={<CampaignNew />} />
             <Route path="campaigns/:id" element={<CampaignDetail />} />
             <Route path="import" element={<Import />} />
+            <Route path="whatsapp" element={<WhatsApp />} />
             <Route path="brands" element={<Brands />} />
             <Route path="brands/:id" element={<BrandDetail />} />
             <Route path="kols" element={<KOLs />} />
