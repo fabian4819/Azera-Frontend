@@ -1,8 +1,16 @@
 import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Sparkles, Copy, Check, ThumbsUp, ThumbsDown } from 'lucide-react';
+import { useParams, useNavigate, Link } from 'react-router-dom';
+import { ArrowLeft, Sparkles, Copy, Check, ThumbsUp, ThumbsDown, Send, MessageCircle, Megaphone } from 'lucide-react';
 import api from '../../lib/api';
 import CampaignAnalyticsFinance from './CampaignAnalyticsFinance';
+
+const REMINDER_OPTIONS = [
+  { trigger: 'reminder_draft', label: 'Reminder Draft' },
+  { trigger: 'reminder_upload', label: 'Reminder Upload' },
+  { trigger: 'reminder_revision', label: 'Reminder Revisi' },
+  { trigger: 'reminder_insight', label: 'Reminder Insight' },
+  { trigger: 'reminder_payment_creator', label: 'Reminder Pembayaran' },
+];
 
 interface Social { platform: string; username: string; followers: number }
 interface Creator {
@@ -16,7 +24,7 @@ interface Application {
 interface Campaign {
   _id: string; name: string; objective: string; briefContent?: string; deliverables: string[];
   budget: number; criteria: { niches: string[]; minFollowers?: number; provinces: string[]; platforms: string[] };
-  status: string; workflowStage: string; applyOpen: boolean; applySlug: string;
+  status: string; workflowStage: string; applyOpen: boolean; applySlug: string; waGroupLink?: string;
 }
 
 const cardStyle: React.CSSProperties = {
@@ -55,6 +63,11 @@ export default function CampaignDetail() {
   const [copied, setCopied] = useState(false);
   const [decidingId, setDecidingId] = useState<string | null>(null);
   const [lastPassword, setLastPassword] = useState<{ name: string; password: string } | null>(null);
+  const [waGroupLinkDraft, setWaGroupLinkDraft] = useState('');
+  const [sendingBrief, setSendingBrief] = useState(false);
+  const [remindingId, setRemindingId] = useState<string | null>(null);
+  const [actionMessage, setActionMessage] = useState('');
+  const [actionError, setActionError] = useState('');
 
   const load = async () => {
     try {
@@ -64,6 +77,7 @@ export default function CampaignDetail() {
       ]);
       setCampaign(cRes.data);
       setBriefDraft(cRes.data.briefContent || '');
+      setWaGroupLinkDraft(cRes.data.waGroupLink || '');
       setApplications(aRes.data);
     } catch {
       navigate('/admin/campaigns');
@@ -136,6 +150,62 @@ export default function CampaignDetail() {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const saveWaGroupLink = async () => {
+    setActionError('');
+    try {
+      const res = await api.patch(`/admin/campaigns/${id}`, { waGroupLink: waGroupLinkDraft });
+      setCampaign(res.data);
+      setActionMessage('Link grup WA disimpan.');
+      setTimeout(() => setActionMessage(''), 2500);
+    } catch (err: unknown) {
+      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      setActionError(message || 'Gagal menyimpan link grup.');
+    }
+  };
+
+  const changeStatus = async (status: string) => {
+    setActionError('');
+    try {
+      const res = await api.patch(`/admin/campaigns/${id}`, { status });
+      setCampaign(res.data);
+      setActionMessage(`Status campaign diubah ke ${status}.`);
+      setTimeout(() => setActionMessage(''), 2500);
+    } catch (err: unknown) {
+      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      setActionError(message || 'Gagal mengubah status.');
+    }
+  };
+
+  const sendBrief = async () => {
+    setSendingBrief(true);
+    setActionError('');
+    try {
+      const res = await api.post(`/admin/campaigns/${id}/send-brief`);
+      setActionMessage(`Brief terkirim ke ${res.data.sent} creator.`);
+      setTimeout(() => setActionMessage(''), 3000);
+    } catch (err: unknown) {
+      const data = (err as { response?: { data?: { error?: string; message?: string } } })?.response?.data;
+      setActionError(data?.error || data?.message || 'Gagal mengirim brief.');
+    } finally {
+      setSendingBrief(false);
+    }
+  };
+
+  const sendReminder = async (appId: string, trigger: string) => {
+    setRemindingId(appId);
+    setActionError('');
+    try {
+      await api.post(`/admin/applications/${appId}/remind`, { trigger });
+      setActionMessage('Reminder terkirim.');
+      setTimeout(() => setActionMessage(''), 2500);
+    } catch (err: unknown) {
+      const data = (err as { response?: { data?: { error?: string; message?: string } } })?.response?.data;
+      setActionError(data?.error || data?.message || 'Gagal mengirim reminder.');
+    } finally {
+      setRemindingId(null);
+    }
+  };
+
   if (loading) return <div style={{ textAlign: 'center', padding: '80px', color: '#777683' }}>Memuat...</div>;
   if (!campaign) return null;
 
@@ -148,6 +218,18 @@ export default function CampaignDetail() {
         <ArrowLeft size={16} />
         Kembali ke Campaigns
       </button>
+
+      {actionMessage && (
+        <div style={{ background: '#d1fae5', color: '#065F46', borderRadius: '10px', padding: '12px 16px', marginBottom: '16px', fontSize: '0.82rem', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+          {actionMessage}
+        </div>
+      )}
+      {actionError && (
+        <div style={{ background: '#ffdad6', color: '#ba1a1a', borderRadius: '10px', padding: '12px 16px', marginBottom: '16px', fontSize: '0.82rem', fontFamily: "'Plus Jakarta Sans', sans-serif", display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px' }}>
+          <span>{actionError}</span>
+          <button onClick={() => setActionError('')} style={{ background: 'none', border: 'none', color: '#ba1a1a', cursor: 'pointer', fontWeight: 700, flexShrink: 0 }}>✕</button>
+        </div>
+      )}
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: '24px' }} className="detail-grid">
         <div>
@@ -187,9 +269,14 @@ export default function CampaignDetail() {
               placeholder="Brief belum dibuat — klik Generate dengan AI, atau tulis manual di sini."
               style={{ width: '100%', padding: '14px', borderRadius: '12px', border: '1.5px solid #c7c8cf', fontSize: '0.875rem', color: '#191c20', fontFamily: "'Plus Jakarta Sans', sans-serif", resize: 'vertical', outline: 'none', marginBottom: '12px' }}
             />
-            <button onClick={saveBrief} disabled={saving} style={{ padding: '9px 18px', borderRadius: '10px', border: '1.5px solid #6728e4', background: 'white', color: '#6728e4', fontWeight: 700, fontSize: '0.82rem', cursor: 'pointer', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-              {saving ? 'Menyimpan...' : 'Simpan Brief'}
-            </button>
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button onClick={saveBrief} disabled={saving} style={{ padding: '9px 18px', borderRadius: '10px', border: '1.5px solid #6728e4', background: 'white', color: '#6728e4', fontWeight: 700, fontSize: '0.82rem', cursor: 'pointer', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+                {saving ? 'Menyimpan...' : 'Simpan Brief'}
+              </button>
+              <button onClick={sendBrief} disabled={sendingBrief || !campaign.briefContent} className="btn-primary" style={{ padding: '9px 18px', fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: '6px', opacity: sendingBrief || !campaign.briefContent ? 0.6 : 1 }}>
+                <Send size={14} /> {sendingBrief ? 'Mengirim...' : 'Kirim Brief ke Creator'}
+              </button>
+            </div>
           </div>
 
           <div style={cardStyle}>
@@ -200,7 +287,7 @@ export default function CampaignDetail() {
               <div style={{ background: '#d1fae5', borderRadius: '12px', padding: '14px 16px', marginBottom: '16px' }}>
                 <p style={{ fontSize: '0.82rem', color: '#065F46', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
                   <strong>{lastPassword.name}</strong> diterima — password Talent Portal: <code style={{ background: 'white', padding: '2px 8px', borderRadius: '6px' }}>{lastPassword.password}</code>
-                  <br />Sampaikan ke creator via WhatsApp (otomatis di Modul 4).
+                  <br />Sudah otomatis terkirim ke creator via WhatsApp.
                 </p>
               </div>
             )}
@@ -244,6 +331,19 @@ export default function CampaignDetail() {
                           </button>
                         </div>
                       )}
+                      {a.status === 'accepted' && (
+                        <select
+                          value=""
+                          disabled={remindingId === a._id}
+                          onChange={(e) => { if (e.target.value) sendReminder(a._id, e.target.value); e.target.value = ''; }}
+                          style={{ padding: '6px 10px', borderRadius: '8px', border: '1.5px solid #c7c8cf', fontSize: '0.76rem', fontFamily: "'Plus Jakarta Sans', sans-serif", color: '#464652', cursor: 'pointer' }}
+                        >
+                          <option value="">{remindingId === a._id ? 'Mengirim...' : 'Kirim Reminder...'}</option>
+                          {REMINDER_OPTIONS.map((r) => (
+                            <option key={r.trigger} value={r.trigger}>{r.label}</option>
+                          ))}
+                        </select>
+                      )}
                     </div>
                   );
                 })}
@@ -255,6 +355,44 @@ export default function CampaignDetail() {
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div style={cardStyle}>
+            <p style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700, fontSize: '1rem', color: '#191c20', marginBottom: '14px' }}>Status Campaign</p>
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '10px' }}>
+              {campaign.status === 'draft' && (
+                <button onClick={() => changeStatus('active')} className="btn-primary" style={{ padding: '8px 14px', fontSize: '0.78rem' }}>Mulai Campaign</button>
+              )}
+              {campaign.status === 'active' && (
+                <button onClick={() => changeStatus('completed')} className="btn-primary" style={{ padding: '8px 14px', fontSize: '0.78rem' }}>Tandai Selesai</button>
+              )}
+              <span style={{ background: '#eceef3', color: '#464652', borderRadius: '999px', padding: '6px 12px', fontSize: '0.75rem', fontWeight: 700, textTransform: 'capitalize' }}>{campaign.status}</span>
+            </div>
+            <p style={{ fontSize: '0.72rem', color: '#8a8a99' }}>Mengubah status ke Active/Completed otomatis kirim notifikasi WA ke client.</p>
+          </div>
+
+          <div style={cardStyle}>
+            <p style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700, fontSize: '1rem', color: '#191c20', marginBottom: '14px' }}>Link Grup WA</p>
+            <input
+              value={waGroupLinkDraft}
+              onChange={(e) => setWaGroupLinkDraft(e.target.value)}
+              placeholder="https://chat.whatsapp.com/..."
+              style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1.5px solid #c7c8cf', fontSize: '0.8rem', fontFamily: "'Plus Jakarta Sans', sans-serif", marginBottom: '10px', boxSizing: 'border-box' }}
+            />
+            <button onClick={saveWaGroupLink} style={{ width: '100%', padding: '8px', borderRadius: '8px', border: '1.5px solid #6728e4', background: 'white', color: '#6728e4', fontWeight: 700, fontSize: '0.78rem', cursor: 'pointer', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+              Simpan
+            </button>
+            <p style={{ fontSize: '0.72rem', color: '#8a8a99', marginTop: '8px' }}>Dikirim otomatis ke creator saat diterima.</p>
+          </div>
+
+          <div style={cardStyle}>
+            <p style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700, fontSize: '1rem', color: '#191c20', marginBottom: '14px' }}>WhatsApp</p>
+            <Link to={`/admin/campaigns/${id}/broadcast`} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '9px 12px', borderRadius: '8px', border: '1.5px solid #c7c8cf', color: '#464652', fontSize: '0.8rem', fontWeight: 600, textDecoration: 'none', marginBottom: '8px', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+              <Megaphone size={14} /> Broadcast Campaign Ini
+            </Link>
+            <Link to="/admin/wa-templates" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '9px 12px', borderRadius: '8px', border: '1.5px solid #c7c8cf', color: '#464652', fontSize: '0.8rem', fontWeight: 600, textDecoration: 'none', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+              <MessageCircle size={14} /> Edit Template Pesan
+            </Link>
+          </div>
+
           <div style={cardStyle}>
             <p style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700, fontSize: '1rem', color: '#191c20', marginBottom: '16px' }}>Pendaftaran</p>
             <button

@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { Link, useLocation, Outlet } from 'react-router-dom';
-import { Building2, Users, ImageIcon, Megaphone, Upload, MessageCircle, LogOut, Menu, X } from 'lucide-react';
+import { Building2, Users, ImageIcon, Megaphone, Upload, MessageCircle, MessageSquareText, LogOut, Menu, X } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 
 const navItems = [
   { label: 'Campaigns', to: '/admin/campaigns', icon: Megaphone },
   { label: 'Import Data', to: '/admin/import', icon: Upload },
   { label: 'WhatsApp', to: '/admin/whatsapp', icon: MessageCircle },
+  { label: 'Template Pesan', to: '/admin/wa-templates', icon: MessageSquareText },
   { label: 'Brands', to: '/admin/brands', icon: Building2 },
   { label: 'KOLs', to: '/admin/kols', icon: Users },
   { label: 'Portfolio', to: '/admin/portfolio', icon: ImageIcon },
@@ -16,6 +17,7 @@ const pageTitles: Record<string, string> = {
   '/admin/campaigns': 'Campaigns',
   '/admin/import': 'Import Data Historis',
   '/admin/whatsapp': 'WhatsApp',
+  '/admin/wa-templates': 'Template Pesan WhatsApp',
   '/admin/brands': 'Brand Submissions',
   '/admin/kols': 'KOL Submissions',
   '/admin/portfolio': 'Portfolio Manager',
