@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, Sparkles, Copy, Check, ThumbsUp, ThumbsDown, Send, MessageCircle, Megaphone } from 'lucide-react';
 import api from '../../lib/api';
 import CampaignAnalyticsFinance from './CampaignAnalyticsFinance';
+import WorkflowTracker from './WorkflowTracker';
 
 const REMINDER_OPTIONS = [
   { trigger: 'reminder_draft', label: 'Reminder Draft' },
@@ -350,6 +351,8 @@ export default function CampaignDetail() {
               </div>
             )}
           </div>
+
+          <WorkflowTracker campaignId={campaign._id} />
 
           <CampaignAnalyticsFinance campaignId={campaign._id} />
         </div>
