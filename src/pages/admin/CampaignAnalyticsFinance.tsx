@@ -1,6 +1,39 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Fragment } from 'react';
 import { Sparkles, RefreshCw, FileText, ImageIcon, Plus, Trash2, ExternalLink } from 'lucide-react';
 import api from '../../lib/api';
+
+/** AI insight text hanya pakai **bold** dan "- " bullet — render itu saja, bukan full markdown parser. */
+function renderBoldSegments(line: string) {
+  const parts = line.split(/(\*\*[^*]+\*\*)/g);
+  return parts.map((part, i) =>
+    part.startsWith('**') && part.endsWith('**')
+      ? <strong key={i}>{part.slice(2, -2)}</strong>
+      : <Fragment key={i}>{part}</Fragment>
+  );
+}
+
+function renderInsightText(text: string) {
+  return text.split('\n').map((line, i) => {
+    const trimmed = line.trimStart();
+    const heading = trimmed.match(/^(#{1,6})\s+(.*)/);
+    if (heading) {
+      return (
+        <div key={i} style={{ fontWeight: 800, fontSize: heading[1].length <= 3 ? '0.95rem' : '0.88rem', marginTop: i === 0 ? 0 : '10px', color: '#191c20' }}>
+          {renderBoldSegments(heading[2])}
+        </div>
+      );
+    }
+    if (trimmed.startsWith('- ')) {
+      return (
+        <div key={i} style={{ display: 'flex', gap: '8px', paddingLeft: '4px' }}>
+          <span>•</span>
+          <span>{renderBoldSegments(trimmed.slice(2))}</span>
+        </div>
+      );
+    }
+    return <div key={i}>{line ? renderBoldSegments(line) : ' '}</div>;
+  });
+}
 
 const f = "'Plus Jakarta Sans', sans-serif";
 const cardStyle: React.CSSProperties = {
@@ -288,9 +321,9 @@ export default function CampaignAnalyticsFinance({ campaignId }: { campaignId: s
             <Sparkles size={14} /> {insightLoading ? 'Menganalisis...' : 'Generate Insight'}
           </button>
         </div>
-        <p style={{ fontSize: '0.85rem', color: '#464652', fontFamily: f, lineHeight: 1.6, whiteSpace: 'pre-wrap', background: '#f5f3ff', borderRadius: '10px', padding: '14px' }}>
-          {aiInsight || 'Belum ada insight — klik Generate Insight.'}
-        </p>
+        <div style={{ fontSize: '0.85rem', color: '#464652', fontFamily: f, lineHeight: 1.6, background: '#f5f3ff', borderRadius: '10px', padding: '14px' }}>
+          {aiInsight ? renderInsightText(aiInsight) : 'Belum ada insight — klik Generate Insight.'}
+        </div>
       </div>
 
       {/* Finance */}
