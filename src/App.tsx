@@ -1,5 +1,6 @@
 import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
+import { Agentation } from 'agentation';
 import Navbar from './components/layout/Navbar';
 import Footer from './components/layout/Footer';
 import SEOManager from './components/SEOManager';
@@ -124,6 +125,7 @@ export default function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Suspense>
+      {import.meta.env.DEV && <Agentation />}
     </BrowserRouter>
   );
 }
