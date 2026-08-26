@@ -103,15 +103,15 @@ export default function BrandForm() {
 
   if (submitted) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8f9ff', padding: '24px', paddingTop: '100px' }}>
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--surface)', padding: '24px', paddingTop: '100px' }}>
         <div style={{ textAlign: 'center', maxWidth: '480px' }}>
-          <div className="kinetic-glow" style={{ width: '80px', height: '80px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px' }}>
+          <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px' }}>
             <CheckCircle2 size={40} color="white" />
           </div>
-          <h2 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800, fontSize: '1.8rem', color: '#191c20', marginBottom: '12px' }}>
+          <h2 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800, fontSize: '1.8rem', color: 'var(--on-background)', marginBottom: '12px' }}>
             Terima kasih!
           </h2>
-          <p style={{ color: '#464652', lineHeight: 1.7, marginBottom: '32px', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+          <p style={{ color: 'var(--on-surface-variant)', lineHeight: 1.7, marginBottom: '32px' }}>
             Form kamu sudah kami terima. Kami akan segera menghubungi kamu via WhatsApp untuk konsultasi lebih lanjut.
           </p>
           <button onClick={() => navigate('/')} className="btn-primary" style={{ margin: '0 auto' }}>
@@ -123,31 +123,28 @@ export default function BrandForm() {
   }
 
   return (
-    <div style={{ background: '#f8f9ff', minHeight: '100vh', paddingTop: '80px', position: 'relative', overflow: 'hidden' }}>
-      <div className="blob" style={{ width: '400px', height: '400px', background: '#e1e0ff', opacity: 0.2, top: '5%', right: '-100px' }} />
-      <div className="blob" style={{ width: '350px', height: '350px', background: '#ffd9e1', opacity: 0.15, bottom: '5%', left: '-100px' }} />
-
-      <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '48px 24px 80px', position: 'relative', zIndex: 1 }}>
+    <div style={{ background: 'var(--surface)', minHeight: '100vh', paddingTop: '80px' }}>
+      <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '48px 24px 80px' }}>
         <div style={{ textAlign: 'center', marginBottom: '48px' }}>
-          <span className="section-label" style={{ marginBottom: '12px' }}>Mulai Kampanye</span>
-          <h1 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800, fontSize: 'clamp(1.8rem, 4vw, 3rem)', color: '#191c20', lineHeight: 1.15 }}>
-            Konsultasi Kampanye{' '}
-            <span className="gradient-text">Gratis</span>
+          <span className="tag-pill tag-pill-navy" style={{ margin: '0 auto 12px' }}>Mulai Campaign</span>
+          <h1 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800, fontSize: 'clamp(1.8rem, 4vw, 3rem)', color: 'var(--on-background)', lineHeight: 1.15 }}>
+            Konsultasi Campaign{' '}
+            <span style={{ color: 'var(--secondary)' }}>Gratis</span>
           </h1>
-          <p style={{ color: '#464652', marginTop: '12px', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+          <p style={{ color: 'var(--on-surface-variant)', marginTop: '12px' }}>
             Isi form di bawah dan tim kami akan menghubungi kamu via WhatsApp.
           </p>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: '300px 1fr', gap: '32px', alignItems: 'start' }} className="brandform-grid">
           <div style={{ position: 'sticky', top: '96px' }} className="brandform-panel">
-            <div className="glass-panel" style={{ padding: '28px', marginBottom: '20px', background: 'white' }}>
+            <div className="bento-card" style={{ padding: '28px', marginBottom: '20px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
                 <img src="/icon.png" alt="AzeraKOL" style={{ height: '28px' }} />
                 <span style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 900, fontStyle: 'italic', fontSize: '1rem', color: '#15157d', letterSpacing: '-0.02em' }}>AZERAKOL</span>
               </div>
               <p style={{ color: '#464652', fontSize: '0.85rem', lineHeight: 1.7, marginBottom: '20px', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-                Konsultasi gratis, tidak ada biaya di awal. Tim kami siap membantu merencanakan kampanye terbaik untuk brand kamu.
+                Konsultasi gratis, tidak ada biaya di awal. Tim kami siap membantu merencanakan campaign terbaik untuk brand kamu.
               </p>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#464652', fontSize: '0.82rem', marginBottom: '10px' }}>
                 <MessageCircle size={15} color="#25D366" />
@@ -162,7 +159,7 @@ export default function BrandForm() {
                 <span>Tidak ada komitmen awal</span>
               </div>
             </div>
-            <div className="kinetic-glow" style={{ borderRadius: '16px', padding: '20px', color: 'white' }}>
+            <div className="bento-card-dark" style={{ padding: '20px' }}>
               <p style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700, marginBottom: '6px' }}>Butuh bantuan?</p>
               <p style={{ fontSize: '0.82rem', opacity: 0.85, marginBottom: '14px' }}>
                 Hubungi kami langsung via WhatsApp
@@ -225,7 +222,7 @@ export default function BrandForm() {
               </div>
             </div>
 
-            <p style={sectionTitleStyle}>Detail Kampanye</p>
+            <p style={sectionTitleStyle}>Detail Campaign</p>
             <div style={{ marginBottom: '16px' }}>
               <label style={labelStyle}>Nama Campaign *</label>
               <input {...register('campaignName')} placeholder="mis. Launching Serum Baru" style={inputStyle(!!errors.campaignName)} onFocus={(e) => Object.assign(e.target.style, inputFocus)} onBlur={(e) => Object.assign(e.target.style, { boxShadow: 'none' })} />
@@ -261,7 +258,7 @@ export default function BrandForm() {
                       key={p} type="button" onClick={() => togglePlatform(p)}
                       style={{
                         padding: '8px 16px', borderRadius: '999px', border: 'none',
-                        background: selected ? 'linear-gradient(135deg, #6728e4, #814bfe)' : '#e1e0ff',
+                        background: selected ? 'var(--secondary)' : 'rgba(103,40,228,0.1)',
                         color: selected ? 'white' : '#6728e4',
                         fontSize: '0.82rem', fontWeight: 600, cursor: 'pointer',
                         transition: 'all 0.2s', fontFamily: "'Plus Jakarta Sans', sans-serif",
@@ -280,7 +277,7 @@ export default function BrandForm() {
               {errors.targetAudience && <p style={errorStyle}>{errors.targetAudience.message}</p>}
             </div>
             <div style={{ marginBottom: '16px' }}>
-              <label style={labelStyle}>Tujuan Kampanye * <span style={{ fontWeight: 400, color: '#777683' }}>(bisa lebih dari 1)</span></label>
+              <label style={labelStyle}>Tujuan Campaign * <span style={{ fontWeight: 400, color: '#777683' }}>(bisa lebih dari 1)</span></label>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
                 {tujuanOptions.map((t) => {
                   const selected = tujuanVal?.includes(t);
@@ -289,7 +286,7 @@ export default function BrandForm() {
                       key={t} type="button" onClick={() => toggleTujuan(t)}
                       style={{
                         padding: '8px 16px', borderRadius: '999px', border: 'none',
-                        background: selected ? 'linear-gradient(135deg, #6728e4, #814bfe)' : '#e1e0ff',
+                        background: selected ? 'var(--secondary)' : 'rgba(103,40,228,0.1)',
                         color: selected ? 'white' : '#6728e4',
                         fontSize: '0.82rem', fontWeight: 600, cursor: 'pointer',
                         transition: 'all 0.2s', fontFamily: "'Plus Jakarta Sans', sans-serif",
@@ -303,7 +300,7 @@ export default function BrandForm() {
               {errors.tujuan && <p style={errorStyle}>{errors.tujuan.message as string}</p>}
             </div>
             <div style={{ marginBottom: '16px' }}>
-              <label style={labelStyle}>Durasi Kampanye *</label>
+              <label style={labelStyle}>Durasi Campaign *</label>
               <select {...register('durasi')} style={inputStyle(!!errors.durasi)}>
                 <option value="">Pilih durasi</option>
                 {durasiOptions.map((d) => <option key={d} value={d}>{d}</option>)}
@@ -311,8 +308,8 @@ export default function BrandForm() {
               {errors.durasi && <p style={errorStyle}>{errors.durasi.message}</p>}
             </div>
             <div style={{ marginBottom: '36px' }}>
-              <label style={labelStyle}>Deskripsi Kampanye *</label>
-              <textarea {...register('deskripsi')} rows={4} placeholder="Ceritakan lebih detail tentang produk, tujuan kampanye, tone of voice, dll." style={{ ...inputStyle(!!errors.deskripsi), resize: 'vertical' }} />
+              <label style={labelStyle}>Deskripsi Campaign *</label>
+              <textarea {...register('deskripsi')} rows={4} placeholder="Ceritakan lebih detail tentang produk, tujuan campaign, tone of voice, dll." style={{ ...inputStyle(!!errors.deskripsi), resize: 'vertical' }} />
               {errors.deskripsi && <p style={errorStyle}>{errors.deskripsi.message}</p>}
             </div>
 
