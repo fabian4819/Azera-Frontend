@@ -4,8 +4,8 @@ import { useInView } from 'framer-motion';
 const stats = [
   { value: 20000, suffix: '', label: 'KOL Aktif', display: '20K+' },
   { value: 100, suffix: '+', label: 'Brand Partner', display: '100+' },
-  { value: 500, suffix: '+', label: 'Kampanye Sukses', display: '500+' },
-  { value: 98, suffix: '%', label: 'Tingkat Kepuasan', display: '98%' },
+  { value: 500, suffix: '+', label: 'Campaign Sukses', display: '500+' },
+  { value: 100, suffix: '%', label: 'Tingkat Kepuasan', display: '100%' },
 ];
 
 function CountUp({ target, suffix, started }: { target: number; suffix: string; started: boolean }) {
@@ -45,11 +45,8 @@ export default function Stats() {
   const isInView = useInView(ref, { once: true, margin: '-80px' });
 
   return (
-    <section ref={ref} style={{ background: '#15157d', padding: '80px 24px', position: 'relative', overflow: 'hidden' }}>
-      <div className="blob" style={{ width: '300px', height: '300px', background: '#814bfe', opacity: 0.25, top: '-100px', left: '10%' }} />
-      <div className="blob" style={{ width: '250px', height: '250px', background: '#ff81aa', opacity: 0.2, bottom: '-80px', right: '10%' }} />
-
-      <div style={{ maxWidth: '1280px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
+    <section ref={ref} style={{ background: 'var(--primary)', padding: '80px 24px' }}>
+      <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
         <div className="stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)' }}>
           {stats.map((stat, i) => (
             <div

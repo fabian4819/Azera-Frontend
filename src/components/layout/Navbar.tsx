@@ -15,7 +15,7 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20);
+    const onScroll = () => setScrolled(window.scrollY > 8);
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
@@ -34,46 +34,33 @@ export default function Navbar() {
           left: '50%',
           transform: 'translateX(-50%)',
           zIndex: 1000,
-          width: '95%',
-          maxWidth: '1280px',
+          width: '92%',
+          maxWidth: '980px',
           borderRadius: '999px',
-          background: scrolled ? 'rgba(255,255,255,0.85)' : 'rgba(255,255,255,0.6)',
-          backdropFilter: 'blur(24px)',
-          WebkitBackdropFilter: 'blur(24px)',
-          border: '1px solid rgba(255,255,255,0.3)',
-          boxShadow: scrolled
-            ? '0 8px 32px rgba(46,49,146,0.15), 0 2px 8px rgba(0,0,0,0.04)'
-            : '0 4px 20px rgba(46,49,146,0.08)',
-          transition: 'all 0.35s cubic-bezier(0.16, 1, 0.3, 1)',
-          padding: '12px 32px',
+          background: '#ffffff',
+          border: '1.5px solid var(--outline-variant)',
+          boxShadow: scrolled ? '0 8px 28px rgba(25,28,32,0.1)' : '0 4px 16px rgba(25,28,32,0.06)',
+          transition: 'box-shadow 0.25s ease',
         }}
       >
         <div
           style={{
+            padding: '10px 20px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
             gap: '24px',
           }}
         >
-          <Link
-            to="/"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '10px',
-              textDecoration: 'none',
-              flexShrink: 0,
-            }}
-          >
-            <img src="/icon.png" alt="AzeraKOL" style={{ height: '28px', objectFit: 'contain' }} />
+          <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none', flexShrink: 0 }}>
+            <img src="/icon.png" alt="AzeraKOL" style={{ height: '26px', objectFit: 'contain' }} />
             <span
               style={{
                 fontFamily: "'Plus Jakarta Sans', sans-serif",
                 fontWeight: 900,
                 fontStyle: 'italic',
-                fontSize: '1.1rem',
-                color: '#15157d',
+                fontSize: '1.05rem',
+                color: 'var(--primary)',
                 letterSpacing: '-0.02em',
               }}
             >
@@ -81,16 +68,7 @@ export default function Navbar() {
             </span>
           </Link>
 
-          <div
-            className="navbar-desktop-links"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '2px',
-              flex: 1,
-              justifyContent: 'center',
-            }}
-          >
+          <div className="navbar-desktop-links" style={{ display: 'flex', alignItems: 'center', gap: '4px', flex: 1, justifyContent: 'center' }}>
             {navLinks.map((link) => (
               <Link
                 key={link.to}
@@ -103,9 +81,8 @@ export default function Navbar() {
                   fontWeight: isActive(link.to) ? 700 : 600,
                   fontSize: '0.9rem',
                   textDecoration: 'none',
-                  transition: 'all 0.2s ease',
-                  color: isActive(link.to) ? '#6728e4' : '#464652',
-                  background: isActive(link.to) ? 'rgba(103,40,228,0.08)' : 'transparent',
+                  transition: 'color 0.2s ease',
+                  color: isActive(link.to) ? 'var(--secondary)' : 'var(--on-surface-variant)',
                   letterSpacing: '-0.01em',
                 }}
               >
@@ -114,22 +91,11 @@ export default function Navbar() {
             ))}
           </div>
 
-          <div
-            className="navbar-desktop-ctas"
-            style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}
-          >
-            <Link
-              to="/kol/register"
-              className="btn-ghost"
-              style={{ fontSize: '0.85rem', padding: '9px 16px', color: '#15157d' }}
-            >
+          <div className="navbar-desktop-ctas" style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
+            <Link to="/kol/register" className="btn-ghost" style={{ fontSize: '0.85rem', padding: '9px 16px', color: 'var(--primary)' }}>
               Daftar KOL
             </Link>
-            <Link
-              to="/brand/form"
-              className="btn-primary"
-              style={{ fontSize: '0.85rem', padding: '9px 20px' }}
-            >
+            <Link to="/brand/form" className="btn-primary" style={{ fontSize: '0.85rem', padding: '9px 20px', boxShadow: 'none' }}>
               Saya Brand
             </Link>
           </div>
@@ -137,55 +103,47 @@ export default function Navbar() {
           <button
             className="navbar-hamburger"
             onClick={() => setMenuOpen((v) => !v)}
-            style={{
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              color: '#15157d',
-              padding: '4px',
-              display: 'none',
-            }}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--primary)', padding: '4px', display: 'none' }}
             aria-label="Toggle menu"
           >
             {menuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
       </nav>
+      <div style={{ height: '88px' }} aria-hidden="true" />
 
       {menuOpen && (
         <div
           style={{
             position: 'fixed',
-            top: '88px',
+            top: '84px',
             left: '50%',
             transform: 'translateX(-50%)',
-            width: '90%',
-            maxWidth: '480px',
-            background: 'rgba(255,255,255,0.95)',
-            backdropFilter: 'blur(24px)',
-            WebkitBackdropFilter: 'blur(24px)',
-            borderRadius: '24px',
-            border: '1px solid rgba(255,255,255,0.3)',
-            boxShadow: '0 20px 60px rgba(46,49,146,0.15)',
-            padding: '20px',
             zIndex: 999,
+            width: '95%',
+            maxWidth: '480px',
+            background: '#ffffff',
+            border: '1.5px solid var(--outline-variant)',
+            borderRadius: '24px',
+            boxShadow: '0 8px 28px rgba(25,28,32,0.1)',
+            padding: '16px 24px 20px',
           }}
         >
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginBottom: '20px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', marginBottom: '16px' }}>
             {navLinks.map((link) => (
               <Link
                 key={link.to}
                 to={link.to}
+                onClick={() => setMenuOpen(false)}
                 style={{
-                  padding: '14px 16px',
-                  borderRadius: '12px',
+                  padding: '12px 14px',
+                  borderRadius: '10px',
                   fontFamily: "'Plus Jakarta Sans', sans-serif",
                   fontWeight: isActive(link.to) ? 700 : 600,
-                  fontSize: '1rem',
+                  fontSize: '0.98rem',
                   textDecoration: 'none',
-                  color: isActive(link.to) ? '#6728e4' : '#191c20',
-                  background: isActive(link.to) ? 'rgba(103,40,228,0.08)' : 'transparent',
-                  transition: 'all 0.2s',
+                  color: isActive(link.to) ? 'var(--secondary)' : 'var(--on-background)',
+                  background: isActive(link.to) ? 'rgba(103,40,228,0.06)' : 'transparent',
                 }}
               >
                 {link.label}

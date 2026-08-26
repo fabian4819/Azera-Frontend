@@ -13,23 +13,17 @@ export default function FAQ() {
   const toggle = (i: number) => setOpenIndex((prev) => (prev === i ? null : i));
 
   return (
-    <section className="section-py" style={{ background: '#ffffff', position: 'relative', overflow: 'hidden' }} ref={ref}>
-      <div className="blob" style={{ width: '300px', height: '300px', background: '#e1e0ff', opacity: 0.2, top: '20%', right: '3%' }} />
-      <div className="blob" style={{ width: '250px', height: '250px', background: '#ffd9e1', opacity: 0.15, bottom: '15%', left: '3%' }} />
-
-      <div style={{ maxWidth: '760px', margin: '0 auto', padding: '0 24px', position: 'relative', zIndex: 1 }}>
+    <section className="section-py" style={{ background: '#ffffff' }} ref={ref}>
+      <div style={{ maxWidth: '760px', margin: '0 auto', padding: '0 24px' }}>
         <motion.div
-          style={{ textAlign: 'center', marginBottom: '72px' }}
+          style={{ textAlign: 'center', marginBottom: '64px' }}
           initial={{ opacity: 0, y: 24 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6, ease: easeOut }}
         >
-          <span className="section-label" style={{ marginBottom: '16px' }}>FAQ</span>
-          <h2 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800, fontSize: 'clamp(2rem, 5vw, 3.5rem)', color: '#191c20', lineHeight: 1.15 }}>
-            Pertanyaan yang{' '}
-            <span style={{ background: 'linear-gradient(135deg, #6728e4, #ff81aa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
-              Sering Ditanya.
-            </span>
+          <span className="tag-pill tag-pill-navy" style={{ marginBottom: '16px' }}>FAQ</span>
+          <h2 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800, fontSize: 'clamp(2rem, 5vw, 3.2rem)', color: 'var(--on-background)', lineHeight: 1.15 }}>
+            Pertanyaan yang Sering Ditanya.
           </h2>
         </motion.div>
 
