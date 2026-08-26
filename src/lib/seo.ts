@@ -22,7 +22,7 @@ const organizationJsonLd = {
   alternateName: ['Azera KOL', 'Azera', 'azerakol'],
   url: SITE_URL,
   logo: DEFAULT_IMAGE,
-  description: 'AzeraKOL membantu brand menjalankan kampanye KOL dan influencer marketing dengan jaringan kreator terkurasi di Indonesia.',
+  description: 'AzeraKOL membantu brand menjalankan campaign KOL dan influencer marketing dengan jaringan kreator terkurasi di Indonesia.',
 };
 
 const websiteJsonLd = {
@@ -55,7 +55,7 @@ const kolServiceJsonLd = {
     name: 'Indonesia',
   },
   serviceType: 'KOL campaign, influencer marketing, creator campaign management',
-  description: 'Layanan KOL management untuk brand yang ingin menjalankan kampanye influencer marketing di Instagram, TikTok, YouTube, dan live streaming.',
+  description: 'Layanan KOL management untuk brand yang ingin menjalankan campaign influencer marketing di Instagram, TikTok, YouTube, dan live streaming.',
 };
 
 const creatorNetworkJsonLd = {
@@ -74,9 +74,9 @@ const creatorNetworkJsonLd = {
 const portfolioJsonLd = {
   '@context': 'https://schema.org',
   '@type': 'CollectionPage',
-  name: 'Portfolio Kampanye KOL AzeraKOL',
+  name: 'Portfolio Campaign KOL AzeraKOL',
   url: `${SITE_URL}/portfolio`,
-  description: 'Portfolio kampanye KOL dan influencer marketing yang dijalankan AzeraKOL bersama brand di berbagai kategori.',
+  description: 'Portfolio campaign KOL dan influencer marketing yang dijalankan AzeraKOL bersama brand di berbagai kategori.',
 };
 
 const breadcrumb = (items: Array<{ name: string; path: string }>) => ({
@@ -94,7 +94,7 @@ export const seoByPath: Record<string, SEOConfig> = {
   '/': {
     title: 'AzeraKOL | Jasa KOL Management & Influencer Marketing Indonesia',
     description:
-      'AzeraKOL membantu brand menjalankan kampanye KOL dan influencer marketing di Indonesia melalui jaringan 20K+ kreator terkurasi untuk Instagram, TikTok, YouTube, dan live streaming.',
+      'AzeraKOL membantu brand menjalankan campaign KOL dan influencer marketing di Indonesia melalui jaringan 20K+ kreator terkurasi untuk Instagram, TikTok, YouTube, dan live streaming.',
     path: '/',
     keywords: 'azerakol, AzeraKOL, Azera KOL, jasa KOL management, KOL agency Indonesia, influencer marketing agency, campaign KOL, nano KOL, micro influencer Indonesia',
     jsonLd: [organizationJsonLd, websiteJsonLd, faqJsonLd, kolServiceJsonLd],
@@ -102,7 +102,7 @@ export const seoByPath: Record<string, SEOConfig> = {
   '/brand': {
     title: 'Paket Campaign KOL untuk Brand | AzeraKOL',
     description:
-      'Pilih paket campaign KOL untuk brand Anda. AzeraKOL mengelola strategi, shortlist kreator, eksekusi konten, dan laporan performa kampanye influencer marketing.',
+      'Pilih paket campaign KOL untuk brand Anda. AzeraKOL mengelola strategi, shortlist kreator, eksekusi konten, dan laporan performa campaign influencer marketing.',
     path: '/brand',
     keywords: 'paket campaign KOL, jasa influencer marketing, KOL campaign brand, campaign TikTok, campaign Instagram, brand activation Indonesia',
     jsonLd: [kolServiceJsonLd, breadcrumb([{ name: 'Home', path: '/' }, { name: 'Brand', path: '/brand' }])],
@@ -130,7 +130,7 @@ export const seoByPath: Record<string, SEOConfig> = {
   '/portfolio': {
     title: 'Portfolio Campaign KOL & Influencer Marketing | AzeraKOL',
     description:
-      'Lihat hasil kampanye KOL AzeraKOL bersama brand dari kategori beauty, F&B, fashion, tech, fitness, dan home living dengan data reach dan engagement.',
+      'Lihat hasil campaign KOL AzeraKOL bersama brand dari kategori beauty, F&B, fashion, tech, fitness, dan home living dengan data reach dan engagement.',
     path: '/portfolio',
     keywords: 'portfolio KOL campaign, case study influencer marketing, hasil campaign KOL, campaign brand Indonesia',
     jsonLd: [portfolioJsonLd, breadcrumb([{ name: 'Home', path: '/' }, { name: 'Portfolio', path: '/portfolio' }])],

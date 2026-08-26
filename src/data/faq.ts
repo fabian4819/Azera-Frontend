@@ -5,14 +5,14 @@ export interface FAQItem {
 
 export const faqs: FAQItem[] = [
   {
-    question: 'Berapa lama proses kampanye berlangsung?',
+    question: 'Berapa lama proses campaign berlangsung?',
     answer:
-      'Durasi kampanye bervariasi tergantung paket yang dipilih. Umumnya, proses dari briefing hingga reporting membutuhkan waktu 2–4 minggu. Paket Starter biasanya 2 minggu, Growth 3 minggu, dan Scale bisa hingga 4–6 minggu tergantung kompleksitas kampanye.',
+      'Durasi campaign bervariasi tergantung paket yang dipilih. Umumnya, proses dari briefing hingga reporting membutuhkan waktu 2–4 minggu. Paket Starter biasanya 2 minggu, Growth 3 minggu, dan Scale bisa hingga 4–6 minggu tergantung kompleksitas campaign.',
   },
   {
     question: 'Apakah saya bisa memilih KOL secara langsung?',
     answer:
-      'Ya! Kami menyediakan shortlist KOL yang sesuai dengan brand Anda berdasarkan niche, demografi audiens, dan tingkat engagement. Anda dapat melakukan review dan memberikan persetujuan sebelum kampanye dimulai. Tim kami akan membantu memastikan KOL yang dipilih benar-benar sesuai dengan tujuan kampanye.',
+      'Ya! Kami menyediakan shortlist KOL yang sesuai dengan brand Anda berdasarkan niche, demografi audiens, dan tingkat engagement. Anda dapat melakukan review dan memberikan persetujuan sebelum campaign dimulai. Tim kami akan membantu memastikan KOL yang dipilih benar-benar sesuai dengan tujuan campaign.',
   },
   {
     question: 'Platform apa saja yang didukung?',
@@ -22,12 +22,12 @@ export const faqs: FAQItem[] = [
   {
     question: 'Bagaimana cara pembayaran?',
     answer:
-      'Pembayaran dilakukan melalui transfer bank (BCA, Mandiri, BNI, BRI) atau virtual account. Sistem pembayaran: 50% DP di awal kampanye dan 50% setelah laporan akhir diserahkan. Kami juga menerima pembayaran melalui sistem NET30 untuk klien korporasi dengan perjanjian tertulis.',
+      'Pembayaran dilakukan melalui transfer bank (BCA, Mandiri, BNI, BRI) atau virtual account. Sistem pembayaran: 50% DP di awal campaign dan 50% setelah laporan akhir diserahkan. Kami juga menerima pembayaran melalui sistem NET30 untuk klien korporasi dengan perjanjian tertulis.',
   },
   {
-    question: 'Apakah ada laporan hasil kampanye?',
+    question: 'Apakah ada laporan hasil campaign?',
     answer:
-      'Tentu! Semua paket menyertakan laporan kampanye. Paket Starter mendapatkan basic campaign report di akhir kampanye. Growth mendapatkan mid-campaign report dan laporan akhir. Scale mendapatkan akses real-time dashboard, laporan berkala, dan laporan komprehensif pasca kampanye dengan analisis performa mendalam.',
+      'Tentu! Semua paket menyertakan laporan campaign. Paket Starter mendapatkan basic campaign report di akhir campaign. Growth mendapatkan mid-campaign report dan laporan akhir. Scale mendapatkan akses real-time dashboard, laporan berkala, dan laporan komprehensif pasca campaign dengan analisis performa mendalam.',
   },
   {
     question: 'Apa bedanya Nano dan Micro KOL?',

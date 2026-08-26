@@ -46,7 +46,7 @@ export default function AdminLogin() {
         <div style={{ position: 'relative', zIndex: 1, textAlign: 'center' }}>
           <div style={{ fontFamily: f, fontWeight: 900, fontStyle: 'italic', fontSize: 'clamp(5rem, 12vw, 10rem)', background: 'linear-gradient(135deg, #9da1ff, #ff81aa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', lineHeight: 0.9, marginBottom: '24px' }}>AZERAKOL</div>
           <p style={{ color: 'rgba(157,161,255,0.8)', fontSize: '1rem', fontFamily: f, lineHeight: 1.7, maxWidth: '300px' }}>
-            Platform manajemen kampanye KOL untuk tim AzeraKOL.
+            Platform manajemen campaign KOL untuk tim AzeraKOL.
           </p>
         </div>
       </div>

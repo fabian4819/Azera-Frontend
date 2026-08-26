@@ -20,7 +20,7 @@ export function buildBrandWALink(data: BrandFormData): string {
     ? data.tujuan.join(', ')
     : data.tujuan;
 
-  const message = `Halo AzeraKOL! Saya ingin konsultasi kampanye KOL 🚀
+  const message = `Halo AzeraKOL! Saya ingin konsultasi campaign KOL 🚀
 
 *Detail Brand:*
 • Nama Brand: ${data.namaBrand}
@@ -29,7 +29,7 @@ export function buildBrandWALink(data: BrandFormData): string {
 • Email: ${data.email}
 • Website: ${data.website || '-'}
 
-*Detail Kampanye:*
+*Detail Campaign:*
 • Kategori: ${data.kategori}
 • Paket: ${data.paket}
 • Target Audience: ${data.targetAudience}

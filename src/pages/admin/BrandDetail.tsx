@@ -165,7 +165,7 @@ export default function BrandDetail() {
           {/* Campaign details */}
           <div style={cardStyle}>
             <h3 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700, fontSize: '1rem', color: '#191c20', marginBottom: '20px' }}>
-              Detail Kampanye
+              Detail Campaign
             </h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <Field label="Target Audience" value={brand.targetAudience} />
