@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, Sparkles, Copy, Check, ThumbsUp, ThumbsDown, Send, MessageCircle, Megaphone } from 'lucide-react';
+import { ArrowLeft, Sparkles, Copy, Check, ThumbsUp, ThumbsDown, Send, MessageCircle, Megaphone, Plus, Trash2 } from 'lucide-react';
 import api from '../../lib/api';
 import CampaignAnalyticsFinance from './CampaignAnalyticsFinance';
 import WorkflowTracker from './WorkflowTracker';
@@ -22,12 +22,21 @@ interface Creator {
 }
 interface Application {
   _id: string; creatorId: Creator; curationResult: string; curationReason?: string; status: string;
+  customAnswers?: Record<string, string | string[]>;
 }
+type CustomFieldType = 'text' | 'textarea' | 'number' | 'select' | 'checkbox';
+interface CustomField { id: string; label: string; type: CustomFieldType; required: boolean; options?: string[] }
 interface Campaign {
   _id: string; name: string; objective: string; briefContent?: string; deliverables: string[];
   budget: number; criteria: { niches: string[]; minFollowers?: number; provinces: string[]; platforms: string[] };
   status: string; workflowStage: string; applyOpen: boolean; applySlug: string; waGroupLink?: string;
+  customFields: CustomField[];
 }
+
+const CUSTOM_FIELD_TYPE_LABELS: Record<CustomFieldType, string> = {
+  text: 'Jawaban Singkat', textarea: 'Paragraf', number: 'Angka',
+  select: 'Pilihan Ganda', checkbox: 'Kotak Centang (multi)',
+};
 
 const cardStyle: React.CSSProperties = {
   background: 'white', borderRadius: '16px', padding: '28px', border: '1px solid #e1e0ff',
@@ -70,6 +79,8 @@ export default function CampaignDetail() {
   const [remindingId, setRemindingId] = useState<string | null>(null);
   const [actionMessage, setActionMessage] = useState('');
   const [actionError, setActionError] = useState('');
+  const [customFieldsDraft, setCustomFieldsDraft] = useState<CustomField[]>([]);
+  const [savingFields, setSavingFields] = useState(false);
 
   const load = async () => {
     try {
@@ -80,6 +91,7 @@ export default function CampaignDetail() {
       setCampaign(cRes.data);
       setBriefDraft(cRes.data.briefContent || '');
       setWaGroupLinkDraft(cRes.data.waGroupLink || '');
+      setCustomFieldsDraft(cRes.data.customFields || []);
       setApplications(aRes.data);
     } catch {
       navigate('/admin/campaigns');
@@ -162,6 +174,38 @@ export default function CampaignDetail() {
     } catch (err: unknown) {
       const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
       setActionError(message || 'Gagal menyimpan link grup.');
+    }
+  };
+
+  const addCustomField = () => {
+    setCustomFieldsDraft((prev) => [
+      ...prev,
+      { id: crypto.randomUUID(), label: '', type: 'text', required: false, options: [] },
+    ]);
+  };
+
+  const updateCustomField = (id: string, patch: Partial<CustomField>) => {
+    setCustomFieldsDraft((prev) => prev.map((f) => (f.id === id ? { ...f, ...patch } : f)));
+  };
+
+  const removeCustomField = (id: string) => {
+    setCustomFieldsDraft((prev) => prev.filter((f) => f.id !== id));
+  };
+
+  const saveCustomFields = async () => {
+    setSavingFields(true);
+    setActionError('');
+    try {
+      const cleaned = customFieldsDraft.filter((f) => f.label.trim());
+      const res = await api.patch(`/admin/campaigns/${id}`, { customFields: cleaned });
+      setCampaign(res.data);
+      setCustomFieldsDraft(res.data.customFields || []);
+      setActionMessage('Form kustom disimpan.');
+      setTimeout(() => setActionMessage(''), 2500);
+    } catch {
+      setActionError('Gagal menyimpan form kustom.');
+    } finally {
+      setSavingFields(false);
     }
   };
 
@@ -315,6 +359,19 @@ export default function CampaignDetail() {
                         </div>
                       </div>
                       {a.curationReason && <p style={{ fontSize: '0.78rem', color: '#464652', marginBottom: '10px', lineHeight: 1.5 }}>{a.curationReason}</p>}
+                      {a.customAnswers && Object.keys(a.customAnswers).length > 0 && campaign.customFields.length > 0 && (
+                        <div style={{ background: '#f8f9ff', borderRadius: '10px', padding: '10px 12px', marginBottom: '10px' }}>
+                          {campaign.customFields.map((f) => {
+                            const val = a.customAnswers?.[f.id];
+                            if (val === undefined || val === '' || (Array.isArray(val) && val.length === 0)) return null;
+                            return (
+                              <p key={f.id} style={{ fontSize: '0.76rem', color: '#464652', marginBottom: '4px' }}>
+                                <strong style={{ color: '#191c20' }}>{f.label}:</strong> {Array.isArray(val) ? val.join(', ') : val}
+                              </p>
+                            );
+                          })}
+                        </div>
+                      )}
                       {a.status === 'pending' && (
                         <div style={{ display: 'flex', gap: '8px' }}>
                           <button
@@ -351,6 +408,65 @@ export default function CampaignDetail() {
                 })}
               </div>
             )}
+          </div>
+
+          <div style={cardStyle}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+              <p style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700, fontSize: '1rem', color: '#191c20' }}>Form Kustom Pendaftaran</p>
+              <button onClick={addCustomField} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '7px 14px', background: '#e1e0ff', color: '#6728e4', borderRadius: '8px', border: 'none', cursor: 'pointer', fontSize: '0.78rem', fontWeight: 700, fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+                <Plus size={14} /> Tambah Pertanyaan
+              </button>
+            </div>
+            <p style={{ fontSize: '0.78rem', color: '#777683', marginBottom: '16px' }}>
+              Pertanyaan tambahan di luar field standar (nama, WA, sosmed, dll) — muncul di bawah form Apply publik campaign ini, ala Google Forms.
+            </p>
+            {customFieldsDraft.length === 0 ? (
+              <p style={{ color: '#777683', fontSize: '0.85rem', textAlign: 'center', padding: '16px' }}>Belum ada pertanyaan tambahan.</p>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '16px' }}>
+                {customFieldsDraft.map((f, i) => (
+                  <div key={f.id} style={{ border: '1.5px solid #e1e0ff', borderRadius: '12px', padding: '14px' }}>
+                    <div style={{ display: 'flex', gap: '8px', marginBottom: '10px' }}>
+                      <input
+                        value={f.label}
+                        onChange={(e) => updateCustomField(f.id, { label: e.target.value })}
+                        placeholder={`Pertanyaan ${i + 1}`}
+                        style={{ flex: 1, padding: '8px 12px', borderRadius: '8px', border: '1.5px solid #c7c8cf', fontSize: '0.85rem', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+                      />
+                      <button onClick={() => removeCustomField(f.id)} style={{ padding: '8px', background: '#ffdad6', border: 'none', borderRadius: '8px', color: '#ba1a1a', cursor: 'pointer', display: 'flex' }}>
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+                      <select
+                        value={f.type}
+                        onChange={(e) => updateCustomField(f.id, { type: e.target.value as CustomFieldType })}
+                        style={{ padding: '7px 10px', borderRadius: '8px', border: '1.5px solid #c7c8cf', fontSize: '0.78rem', fontFamily: "'Plus Jakarta Sans', sans-serif", color: '#464652' }}
+                      >
+                        {(Object.keys(CUSTOM_FIELD_TYPE_LABELS) as CustomFieldType[]).map((t) => (
+                          <option key={t} value={t}>{CUSTOM_FIELD_TYPE_LABELS[t]}</option>
+                        ))}
+                      </select>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.78rem', color: '#464652', fontFamily: "'Plus Jakarta Sans', sans-serif", cursor: 'pointer' }}>
+                        <input type="checkbox" checked={f.required} onChange={(e) => updateCustomField(f.id, { required: e.target.checked })} style={{ accentColor: '#6728e4' }} />
+                        Wajib diisi
+                      </label>
+                    </div>
+                    {(f.type === 'select' || f.type === 'checkbox') && (
+                      <input
+                        value={(f.options || []).join(', ')}
+                        onChange={(e) => updateCustomField(f.id, { options: e.target.value.split(',').map((o) => o.trim()).filter(Boolean) })}
+                        placeholder="Pilihan, dipisah koma (mis. Ya, Tidak, Kadang)"
+                        style={{ width: '100%', marginTop: '10px', padding: '8px 12px', borderRadius: '8px', border: '1.5px solid #c7c8cf', fontSize: '0.8rem', fontFamily: "'Plus Jakarta Sans', sans-serif", boxSizing: 'border-box' }}
+                      />
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+            <button onClick={saveCustomFields} disabled={savingFields} className="btn-primary" style={{ width: '100%', justifyContent: 'center', fontSize: '0.85rem' }}>
+              {savingFields ? 'Menyimpan...' : 'Simpan Form Kustom'}
+            </button>
           </div>
 
           <WorkflowTracker campaignId={campaign._id} />

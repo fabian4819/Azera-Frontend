@@ -19,13 +19,20 @@ const socialPlatforms = [
   { value: 'x', label: 'X', icon: Hash, color: '#191c20' },
 ];
 
+type CustomFieldType = 'text' | 'textarea' | 'number' | 'select' | 'checkbox';
+interface CustomField { id: string; label: string; type: CustomFieldType; required: boolean; options?: string[] }
+
 interface CampaignInfo {
   name: string;
   brand: { namaBrand: string };
   briefContent?: string;
   deliverables: string[];
   criteria: { niches: string[]; platforms: string[] };
+  customFields?: CustomField[];
 }
+
+const WILAYAH_API = 'https://www.emsifa.com/api-wilayah-indonesia/api';
+interface WilayahOption { id: string; name: string }
 
 const inputStyle: React.CSSProperties = {
   width: '100%', padding: '11px 14px', borderRadius: '12px', border: '1.5px solid #c7c8cf',
@@ -68,8 +75,11 @@ export default function CampaignApply() {
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [gender, setGender] = useState('');
+  const [provinces, setProvinces] = useState<WilayahOption[]>([]);
+  const [cities, setCities] = useState<WilayahOption[]>([]);
   const [province, setProvince] = useState('');
   const [city, setCity] = useState('');
+  const [customValues, setCustomValues] = useState<Record<string, string | string[]>>({});
   const [socials, setSocials] = useState<Record<string, SocialState>>({});
   const [selectedActivities, setSelectedActivities] = useState<string[]>([]);
   const [selectedNiches, setSelectedNiches] = useState<string[]>([]);
@@ -88,9 +98,36 @@ export default function CampaignApply() {
       .catch(() => setNotFound(true));
   }, [slug]);
 
+  useEffect(() => {
+    fetch(`${WILAYAH_API}/provinces.json`)
+      .then((res) => res.json())
+      .then((data: WilayahOption[]) => setProvinces(data))
+      .catch(() => setProvinces([]));
+  }, []);
+
+  const onProvinceChange = (provinceId: string) => {
+    setProvince(provinceId);
+    setCity('');
+    setCities([]);
+    if (!provinceId) return;
+    fetch(`${WILAYAH_API}/regencies/${provinceId}.json`)
+      .then((res) => res.json())
+      .then((data: WilayahOption[]) => setCities(data))
+      .catch(() => setCities([]));
+  };
+
   const toggle = (list: string[], setList: (v: string[]) => void, val: string) => {
     if (list.includes(val)) setList(list.filter((v) => v !== val));
     else setList([...list, val]);
+  };
+
+  const setCustomValue = (fieldId: string, value: string | string[]) => {
+    setCustomValues((prev) => ({ ...prev, [fieldId]: value }));
+  };
+
+  const toggleCustomCheckbox = (fieldId: string, option: string) => {
+    const current = (customValues[fieldId] as string[] | undefined) || [];
+    setCustomValue(fieldId, current.includes(option) ? current.filter((v) => v !== option) : [...current, option]);
   };
 
   const setSocialField = (platform: string, field: keyof SocialState, value: string) => {
@@ -104,15 +141,27 @@ export default function CampaignApply() {
       setSubmitError('Nama, nomor WA, dan jenis kelamin wajib diisi.');
       return;
     }
+    const missingCustom = (campaign?.customFields || []).filter((f) => {
+      if (!f.required) return false;
+      const v = customValues[f.id];
+      return v === undefined || v === '' || (Array.isArray(v) && v.length === 0);
+    });
+    if (missingCustom.length > 0) {
+      setSubmitError(`Wajib diisi: ${missingCustom.map((f) => f.label).join(', ')}`);
+      return;
+    }
     setLoading(true);
     try {
       const socialsPayload = Object.entries(socials)
         .filter(([, v]) => v?.username)
         .map(([platform, v]) => ({ platform, username: v.username, profileUrl: v.profileUrl || '', followers: Number(v.followers) || 0 }));
 
+      const provinceName = provinces.find((p) => p.id === province)?.name || '';
+      const cityName = cities.find((c) => c.id === city)?.name || '';
+
       await api.post(`/campaigns/${slug}/apply`, {
         name, phone, gender,
-        domicile: { province, city },
+        domicile: { province: provinceName, city: cityName },
         socials: socialsPayload,
         activities: selectedActivities,
         niches: selectedNiches.filter((n) => n !== 'Yang lain'),
@@ -122,6 +171,7 @@ export default function CampaignApply() {
         bankAccount: bankName ? { bankName, accountNumber, accountName } : undefined,
         npwp: npwp || undefined,
         mediaKitUrl: mediaKitUrl || undefined,
+        customAnswers: customValues,
       });
       setSubmitted(true);
     } catch (err: unknown) {
@@ -203,11 +253,17 @@ export default function CampaignApply() {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '28px' }} className="form-2col">
             <div>
               <label style={labelStyle}>Provinsi</label>
-              <input value={province} onChange={(e) => setProvince(e.target.value)} placeholder="Jawa Tengah" style={inputStyle} />
+              <select value={province} onChange={(e) => onProvinceChange(e.target.value)} style={inputStyle}>
+                <option value="">Pilih provinsi</option>
+                {provinces.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+              </select>
             </div>
             <div>
               <label style={labelStyle}>Kota/Kabupaten</label>
-              <input value={city} onChange={(e) => setCity(e.target.value)} placeholder="Semarang" style={inputStyle} />
+              <select value={city} onChange={(e) => setCity(e.target.value)} disabled={!province} style={inputStyle}>
+                <option value="">{province ? 'Pilih kota/kabupaten' : 'Pilih provinsi dulu'}</option>
+                {cities.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+              </select>
             </div>
           </div>
 
@@ -271,6 +327,39 @@ export default function CampaignApply() {
             <div><label style={labelStyle}>NPWP</label><input value={npwp} onChange={(e) => setNpwp(e.target.value)} placeholder="Opsional" style={inputStyle} /></div>
             <div><label style={labelStyle}>Link Media Kit</label><input value={mediaKitUrl} onChange={(e) => setMediaKitUrl(e.target.value)} placeholder="https://..." style={inputStyle} /></div>
           </div>
+
+          {(campaign.customFields?.length ?? 0) > 0 && (
+            <>
+              <SectionTitle title="7. Pertanyaan Tambahan" />
+              {campaign.customFields!.map((f) => (
+                <div key={f.id} style={{ marginBottom: '20px' }}>
+                  <label style={labelStyle}>{f.label}{f.required && ' *'}</label>
+                  {f.type === 'text' && (
+                    <input value={(customValues[f.id] as string) || ''} onChange={(e) => setCustomValue(f.id, e.target.value)} style={inputStyle} />
+                  )}
+                  {f.type === 'number' && (
+                    <input type="number" value={(customValues[f.id] as string) || ''} onChange={(e) => setCustomValue(f.id, e.target.value)} style={inputStyle} />
+                  )}
+                  {f.type === 'textarea' && (
+                    <textarea value={(customValues[f.id] as string) || ''} onChange={(e) => setCustomValue(f.id, e.target.value)} rows={3} style={{ ...inputStyle, resize: 'vertical' }} />
+                  )}
+                  {f.type === 'select' && (
+                    <select value={(customValues[f.id] as string) || ''} onChange={(e) => setCustomValue(f.id, e.target.value)} style={inputStyle}>
+                      <option value="">Pilih salah satu</option>
+                      {(f.options || []).map((o) => <option key={o} value={o}>{o}</option>)}
+                    </select>
+                  )}
+                  {f.type === 'checkbox' && (
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                      {(f.options || []).map((o) => (
+                        <Pill key={o} label={o} selected={((customValues[f.id] as string[]) || []).includes(o)} onClick={() => toggleCustomCheckbox(f.id, o)} />
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </>
+          )}
 
           {submitError && <p style={{ color: '#ba1a1a', fontSize: '0.85rem', marginBottom: '16px', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>{submitError}</p>}
 
