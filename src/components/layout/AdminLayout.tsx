@@ -10,7 +10,6 @@ const navItems = [
   { label: 'Template Pesan', to: '/admin/wa-templates', icon: MessageSquareText },
   { label: 'Brands', to: '/admin/brands', icon: Building2 },
   { label: 'Creators', to: '/admin/creators', icon: Users },
-  { label: 'KOLs (Lama)', to: '/admin/kols', icon: Users },
   { label: 'Portfolio', to: '/admin/portfolio', icon: ImageIcon },
 ];
 
@@ -21,7 +20,6 @@ const pageTitles: Record<string, string> = {
   '/admin/wa-templates': 'Template Pesan WhatsApp',
   '/admin/brands': 'Brand Submissions',
   '/admin/creators': 'Creator Registrations',
-  '/admin/kols': 'KOL Submissions (Lama)',
   '/admin/portfolio': 'Portfolio Manager',
 };
 

@@ -21,8 +21,6 @@ const AdminLayout = lazy(() => import('./components/layout/AdminLayout'));
 const AdminLogin = lazy(() => import('./pages/admin/Login'));
 const Brands = lazy(() => import('./pages/admin/Brands'));
 const BrandDetail = lazy(() => import('./pages/admin/BrandDetail'));
-const KOLs = lazy(() => import('./pages/admin/KOLs'));
-const KOLDetail = lazy(() => import('./pages/admin/KOLDetail'));
 const PortfolioManager = lazy(() => import('./pages/admin/PortfolioManager'));
 const Campaigns = lazy(() => import('./pages/admin/Campaigns'));
 const CampaignNew = lazy(() => import('./pages/admin/CampaignNew'));
@@ -104,8 +102,6 @@ export default function App() {
             <Route path="campaigns/:id/broadcast" element={<Broadcast />} />
             <Route path="brands" element={<Brands />} />
             <Route path="brands/:id" element={<BrandDetail />} />
-            <Route path="kols" element={<KOLs />} />
-            <Route path="kols/:id" element={<KOLDetail />} />
             <Route path="creators" element={<Creators />} />
             <Route path="creators/:id" element={<CreatorDetail />} />
             <Route path="portfolio" element={<PortfolioManager />} />
