@@ -13,10 +13,10 @@ export default function Landing() {
   return (
     <>
       <Hero />
-      <ProblemSolution />
+      <WhyAzera />
       <Stats />
       <HowItWorks />
-      <WhyAzera />
+      <ProblemSolution />
       <OurOffer />
       <PortfolioPreview />
       <Testimonials />
