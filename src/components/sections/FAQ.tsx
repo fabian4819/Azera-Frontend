@@ -1,9 +1,8 @@
-import { useState, useRef } from 'react';
+import { useRef, useState } from 'react';
 import { motion, AnimatePresence, useInView } from 'framer-motion';
-import { ChevronDown } from 'lucide-react';
+import { Plus } from 'lucide-react';
+import { ease } from '../../lib/motion';
 import { faqs } from '../../data/faq';
-
-const easeOut = [0.16, 1, 0.3, 1] as const;
 
 export default function FAQ() {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
@@ -13,21 +12,23 @@ export default function FAQ() {
   const toggle = (i: number) => setOpenIndex((prev) => (prev === i ? null : i));
 
   return (
-    <section className="section-py" style={{ background: '#ffffff' }} ref={ref}>
-      <div style={{ maxWidth: '760px', margin: '0 auto', padding: '0 24px' }}>
+    <section ref={ref} style={{ background: 'linear-gradient(160deg, #2c1065 0%, #1c0a44 100%)', padding: '100px 24px' }}>
+      <div style={{ maxWidth: '760px', margin: '0 auto' }}>
         <motion.div
-          style={{ textAlign: 'center', marginBottom: '64px' }}
+          style={{ textAlign: 'center', marginBottom: '56px' }}
           initial={{ opacity: 0, y: 24 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6, ease: easeOut }}
+          transition={{ duration: 0.6, ease }}
         >
-          <span className="tag-pill tag-pill-navy" style={{ marginBottom: '16px' }}>FAQ</span>
-          <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 'clamp(2rem, 5vw, 3.2rem)', color: 'var(--on-background)', lineHeight: 1.15 }}>
-            Pertanyaan yang Sering Ditanya.
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.6)', display: 'inline-block', marginBottom: '18px' }}>
+            FAQs
+          </span>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 'clamp(2rem, 4.8vw, 3.2rem)', color: '#c6a5ff', lineHeight: 1.1, letterSpacing: '-0.03em' }}>
+            Bukan sekadar agency biasa.
           </h2>
         </motion.div>
 
-        <div style={{ display: 'flex', flexDirection: 'column' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
           {faqs.map((faq, i) => {
             const isOpen = openIndex === i;
             return (
@@ -35,25 +36,33 @@ export default function FAQ() {
                 key={faq.question}
                 initial={{ opacity: 0, y: 16 }}
                 animate={isInView ? { opacity: 1, y: 0 } : {}}
-                transition={{ duration: 0.5, ease: easeOut, delay: i * 0.07 }}
-                style={{ borderBottom: '1px solid rgba(103,40,228,0.08)', position: 'relative' }}
+                transition={{ duration: 0.5, ease, delay: i * 0.07 }}
+                style={{
+                  background: isOpen ? 'rgba(255,255,255,0.14)' : 'rgba(255,255,255,0.09)',
+                  borderRadius: '22px',
+                  transition: 'background 0.25s ease',
+                }}
               >
-                {isOpen && (
-                  <div style={{ position: 'absolute', left: '-24px', top: 0, bottom: 0, width: '3px', background: 'linear-gradient(180deg, #6728e4, #ff81aa)', borderRadius: '0 2px 2px 0' }} />
-                )}
                 <button
                   onClick={() => toggle(i)}
                   style={{
                     width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                    gap: '16px', padding: '24px 0', background: 'none', border: 'none',
-                    cursor: 'pointer', textAlign: 'left',
+                    gap: '20px', padding: '22px 26px', background: 'none', border: 'none',
+                    cursor: 'pointer', textAlign: 'center',
                   }}
                 >
-                  <span style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: '1rem', color: isOpen ? '#6728e4' : '#191c20', transition: 'color 0.2s', lineHeight: 1.4 }}>
+                  <span style={{ flex: 1, fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.05rem', color: '#fff', lineHeight: 1.4 }}>
                     {faq.question}
                   </span>
-                  <motion.div animate={{ rotate: isOpen ? 180 : 0 }} transition={{ duration: 0.25 }} style={{ flexShrink: 0, color: isOpen ? '#6728e4' : '#777683' }}>
-                    <ChevronDown size={20} />
+                  <motion.div
+                    animate={{ rotate: isOpen ? 45 : 0 }}
+                    transition={{ duration: 0.25, ease }}
+                    style={{
+                      flexShrink: 0, width: '34px', height: '34px', borderRadius: '50%', background: '#fff',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--secondary)',
+                    }}
+                  >
+                    <Plus size={17} />
                   </motion.div>
                 </button>
                 <AnimatePresence initial={false}>
@@ -62,10 +71,10 @@ export default function FAQ() {
                       initial={{ height: 0, opacity: 0 }}
                       animate={{ height: 'auto', opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.3, ease: easeOut }}
+                      transition={{ duration: 0.3, ease }}
                       style={{ overflow: 'hidden' }}
                     >
-                      <p style={{ color: '#464652', fontSize: '0.925rem', lineHeight: 1.8, fontFamily: "var(--font-display)", paddingBottom: '24px' }}>
+                      <p style={{ color: 'rgba(255,255,255,0.72)', fontSize: '0.9rem', lineHeight: 1.75, textAlign: 'center', padding: '0 26px 26px' }}>
                         {faq.answer}
                       </p>
                     </motion.div>
