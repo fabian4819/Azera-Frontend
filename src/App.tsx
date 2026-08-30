@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom
 import { Agentation } from 'agentation';
 import Navbar from './components/layout/Navbar';
 import Footer from './components/layout/Footer';
+import FloatingWhatsApp from './components/layout/FloatingWhatsApp';
 import SEOManager from './components/SEOManager';
 
 // Public pages
@@ -51,6 +52,7 @@ function PublicLayout() {
         <Outlet />
       </main>
       <Footer />
+      <FloatingWhatsApp />
     </>
   );
 }

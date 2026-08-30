@@ -9,21 +9,29 @@ interface BrandData {
   namaBrand: string;
   namaPIC: string;
   whatsapp: string;
-  email: string;
+  email?: string;
   website?: string;
-  kategori: string;
-  paket: string;
+  kategori?: string;
+  paket?: string;
   targetAudience: string;
   budget: string;
   tujuan: string[];
-  durasi: string;
+  jasa?: string;
+  durasi?: string;
   deskripsi: string;
   status: string;
   catatan?: string;
+  source: 'web' | 'whatsapp';
   createdAt: string;
 }
 
 const statusOptions = ['new', 'reviewed', 'contacted'];
+
+const JASA_LABELS: Record<string, string> = {
+  engagement_boost: 'Engagement Boost',
+  kol_marketing: 'KOL Marketing',
+  affiliate_marketing: 'Affiliate Marketing',
+};
 
 const labelSmall: React.CSSProperties = {
   fontSize: '0.7rem',
@@ -144,7 +152,8 @@ export default function BrandDetail() {
                   {brand.namaBrand}
                 </h2>
                 <p style={{ color: '#777683', fontSize: '0.8rem', fontFamily: 'var(--font-display)' }}>
-                  Diterima {new Date(brand.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
+                  Diterima {new Date(brand.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })} via{' '}
+                  {brand.source === 'whatsapp' ? 'WhatsApp Bot' : 'Web'}
                 </p>
               </div>
               <StatusBadge status={brand.status} />
@@ -157,8 +166,9 @@ export default function BrandDetail() {
               <Field label="Website" value={brand.website} />
               <Field label="Kategori" value={brand.kategori} />
               <Field label="Paket" value={brand.paket} />
+              <Field label="Jasa" value={brand.jasa ? JASA_LABELS[brand.jasa] || brand.jasa : undefined} />
               <Field label="Budget" value={brand.budget} />
-              <Field label="Durasi" value={brand.durasi} />
+              <Field label="Durasi / Timeline" value={brand.durasi} />
             </div>
           </div>
 
@@ -169,27 +179,29 @@ export default function BrandDetail() {
             </h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <Field label="Target Audience" value={brand.targetAudience} />
-              <div>
-                <p style={labelSmall}>Tujuan</p>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '6px' }}>
-                  {(brand.tujuan || []).map((t) => (
-                    <span
-                      key={t}
-                      style={{
-                        background: '#e1e0ff',
-                        color: '#6728e4',
-                        borderRadius: '999px',
-                        padding: '4px 12px',
-                        fontSize: '0.78rem',
-                        fontFamily: "var(--font-display)",
-                        fontWeight: 700,
-                      }}
-                    >
-                      {t}
-                    </span>
-                  ))}
+              {brand.tujuan && brand.tujuan.length > 0 && (
+                <div>
+                  <p style={labelSmall}>Tujuan</p>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '6px' }}>
+                    {brand.tujuan.map((t) => (
+                      <span
+                        key={t}
+                        style={{
+                          background: '#e1e0ff',
+                          color: '#6728e4',
+                          borderRadius: '999px',
+                          padding: '4px 12px',
+                          fontSize: '0.78rem',
+                          fontFamily: "var(--font-display)",
+                          fontWeight: 700,
+                        }}
+                      >
+                        {t}
+                      </span>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
               <div>
                 <p style={labelSmall}>Deskripsi</p>
                 <p style={{ color: '#191c20', fontSize: '0.9rem', lineHeight: 1.7, fontFamily: 'var(--font-display)', marginTop: '4px' }}>

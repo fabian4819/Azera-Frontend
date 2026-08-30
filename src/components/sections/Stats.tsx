@@ -1,13 +1,13 @@
-import { useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { motion, useScroll, useTransform, useInView, type MotionValue } from 'framer-motion';
 
 const heading =
   'Campaign KOL bukan sekadar konten. Bersama AzeraKOL, itu jadi pertumbuhan nyata. Bangun kepercayaan, raih target, dan menangkan lebih banyak pasar.';
 
 const stats = [
-  { value: '20K+', desc: 'Creator aktif siap menjalankan campaign brand kamu.' },
-  { value: '500+', desc: 'Campaign berhasil dijalankan dari berbagai niche & industri.' },
-  { value: '100%', desc: 'Tingkat kepuasan klien dari setiap campaign yang kami tangani.' },
+  { target: 20, suffix: 'K+', desc: 'Creator aktif siap menjalankan campaign brand kamu.' },
+  { target: 500, suffix: '+', desc: 'Campaign berhasil dijalankan dari berbagai niche & industri.' },
+  { target: 100, suffix: '%', desc: 'Tingkat kepuasan klien dari setiap campaign yang kami tangani.' },
 ];
 
 function Word({ children, progress, range }: { children: string; progress: MotionValue<number>; range: [number, number] }) {
@@ -17,6 +17,28 @@ function Word({ children, progress, range }: { children: string; progress: Motio
       {children}
     </motion.span>
   );
+}
+
+function CountUp({ target, suffix, started }: { target: number; suffix: string; started: boolean }) {
+  const [count, setCount] = useState(0);
+  const rafRef = useRef(0);
+
+  useEffect(() => {
+    if (!started) return;
+    const duration = 1400;
+    const start = performance.now();
+    const tick = (now: number) => {
+      const elapsed = now - start;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setCount(Math.round(eased * target));
+      if (progress < 1) rafRef.current = requestAnimationFrame(tick);
+    };
+    rafRef.current = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(rafRef.current);
+  }, [started, target]);
+
+  return <span>{count}{suffix}</span>;
 }
 
 export default function Stats() {
@@ -33,7 +55,7 @@ export default function Stats() {
         <div style={{ display: 'grid', gridTemplateColumns: '200px 1fr', gap: '24px' }} className="payoff-grid">
           <div>
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--secondary)' }}>
-              Hasil Nyata
+              The Payoff
             </span>
           </div>
 
@@ -65,13 +87,13 @@ export default function Stats() {
             <div ref={statsRef} style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '32px' }} className="payoff-stats">
               {stats.map((s, i) => (
                 <motion.div
-                  key={s.value}
+                  key={s.desc}
                   initial={{ opacity: 0, y: 18 }}
                   animate={statsInView ? { opacity: 1, y: 0 } : {}}
                   transition={{ duration: 0.5, delay: i * 0.1 }}
                 >
                   <p style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 'clamp(2.4rem, 5vw, 3.4rem)', color: 'var(--secondary)', lineHeight: 1, marginBottom: '14px' }}>
-                    {s.value}
+                    <CountUp target={s.target} suffix={s.suffix} started={statsInView} />
                   </p>
                   <p style={{ color: 'var(--on-surface-variant)', fontSize: '0.95rem', lineHeight: 1.6, maxWidth: '260px' }}>
                     {s.desc}

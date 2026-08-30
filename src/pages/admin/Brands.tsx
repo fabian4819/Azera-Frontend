@@ -9,14 +9,22 @@ interface Brand {
   namaBrand: string;
   namaPIC: string;
   whatsapp: string;
-  kategori: string;
-  paket: string;
+  kategori?: string;
+  paket?: string;
+  jasa?: string;
   budget: string;
   status: string;
+  source: 'web' | 'whatsapp';
   createdAt: string;
 }
 
 const statusOptions = ['', 'new', 'reviewed', 'contacted'];
+
+const JASA_LABELS: Record<string, string> = {
+  engagement_boost: 'Engagement Boost',
+  kol_marketing: 'KOL Marketing',
+  affiliate_marketing: 'Affiliate Marketing',
+};
 
 const thStyle: React.CSSProperties = {
   padding: '14px 16px',
@@ -151,7 +159,7 @@ export default function Brands() {
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem' }}>
             <thead>
               <tr style={{ background: '#f8f9ff', borderBottom: '1px solid #e1e0ff' }}>
-                {['Brand', 'PIC', 'WhatsApp', 'Kategori', 'Paket', 'Budget', 'Status', 'Tanggal', 'Aksi'].map((h) => (
+                {['Brand', 'PIC', 'WhatsApp', 'Kategori', 'Paket', 'Sumber', 'Budget', 'Status', 'Tanggal', 'Aksi'].map((h) => (
                   <th key={h} style={thStyle}>{h}</th>
                 ))}
               </tr>
@@ -159,13 +167,13 @@ export default function Brands() {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={9} style={{ ...tdStyle, textAlign: 'center', padding: '48px' }}>
+                  <td colSpan={10} style={{ ...tdStyle, textAlign: 'center', padding: '48px' }}>
                     Memuat...
                   </td>
                 </tr>
               ) : brands.length === 0 ? (
                 <tr>
-                  <td colSpan={9} style={{ ...tdStyle, textAlign: 'center', padding: '48px' }}>
+                  <td colSpan={10} style={{ ...tdStyle, textAlign: 'center', padding: '48px' }}>
                     Belum ada data brand.
                   </td>
                 </tr>
@@ -184,21 +192,38 @@ export default function Brands() {
                     <td style={{ ...tdStyle, fontWeight: 600, color: '#191c20' }}>{b.namaBrand}</td>
                     <td style={tdStyle}>{b.namaPIC}</td>
                     <td style={tdStyle}>{b.whatsapp}</td>
-                    <td style={tdStyle}>{b.kategori}</td>
+                    <td style={tdStyle}>{b.kategori || (b.jasa && JASA_LABELS[b.jasa]) || '—'}</td>
+                    <td style={tdStyle}>
+                      {b.paket ? (
+                        <span
+                          style={{
+                            background: '#e1e0ff',
+                            color: '#6728e4',
+                            borderRadius: '999px',
+                            padding: '3px 10px',
+                            fontSize: '0.72rem',
+                            fontFamily: "var(--font-display)",
+                            fontWeight: 700,
+                            textTransform: 'capitalize',
+                          }}
+                        >
+                          {b.paket}
+                        </span>
+                      ) : '—'}
+                    </td>
                     <td style={tdStyle}>
                       <span
                         style={{
-                          background: '#e1e0ff',
-                          color: '#6728e4',
+                          background: b.source === 'whatsapp' ? 'rgba(37,211,102,0.14)' : '#f1f0fb',
+                          color: b.source === 'whatsapp' ? '#128c4a' : '#464652',
                           borderRadius: '999px',
                           padding: '3px 10px',
                           fontSize: '0.72rem',
                           fontFamily: "var(--font-display)",
                           fontWeight: 700,
-                          textTransform: 'capitalize',
                         }}
                       >
-                        {b.paket}
+                        {b.source === 'whatsapp' ? 'WhatsApp Bot' : 'Web'}
                       </span>
                     </td>
                     <td style={tdStyle}>{b.budget}</td>
