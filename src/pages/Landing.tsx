@@ -5,7 +5,8 @@ import HowItWorks from '../components/sections/HowItWorks';
 import WhyAzera from '../components/sections/WhyAzera';
 import PortfolioPreview from '../components/sections/PortfolioPreview';
 import Testimonials from '../components/sections/Testimonials';
-import DualCTA from '../components/sections/DualCTA';
+import BrandCTA from '../components/sections/BrandCTA';
+import CreatorCTA from '../components/sections/CreatorCTA';
 import FAQ from '../components/sections/FAQ';
 
 export default function Landing() {
@@ -18,7 +19,8 @@ export default function Landing() {
       <ProblemSolution />
       <PortfolioPreview />
       <Testimonials />
-      <DualCTA />
+      <BrandCTA />
+      <CreatorCTA />
       <FAQ />
     </>
   );
