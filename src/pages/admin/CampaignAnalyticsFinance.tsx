@@ -322,7 +322,7 @@ export default function CampaignAnalyticsFinance({ campaignId }: { campaignId: s
           </button>
         </div>
         <div style={{ fontSize: '0.85rem', color: '#464652', fontFamily: f, lineHeight: 1.6, background: '#f5f3ff', borderRadius: '10px', padding: '14px' }}>
-          {aiInsight ? renderInsightText(aiInsight) : 'Belum ada insight — klik Generate Insight.'}
+          {aiInsight ? renderInsightText(aiInsight) : 'Belum ada insight. Klik Generate Insight.'}
         </div>
       </div>
 

@@ -1,131 +1,126 @@
-import { useState, useRef } from 'react';
+import { useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
-import { ChevronLeft, ChevronRight, Quote, Star } from 'lucide-react';
+import { Quote } from 'lucide-react';
+import { ease } from '../../lib/motion';
 
-const testimonials = [
-  { quote: 'AzeraKOL benar-benar mengubah cara kami menjalankan campaign KOL. Prosesnya profesional, hasilnya terukur, dan tim mereka sangat responsif.', name: 'Sari Dewi', role: 'Marketing Manager, BeautyX', initials: 'SD', bg: '#6728e4' },
-  { quote: 'Dalam 3 minggu campaign dengan AzeraKOL, reach kami meningkat 4x lipat dan konversi penjualan naik 60%. Luar biasa efektif!', name: 'Budi Santoso', role: 'CEO, FreshFood Indonesia', initials: 'BS', bg: '#814bfe' },
-  { quote: 'Kami sudah coba beberapa agency KOL sebelumnya, tapi AzeraKOL benar-benar berbeda. Data-driven, transparan, dan hasil campaign melampaui ekspektasi.', name: 'Rini Larasati', role: 'Brand Director, StyleHub', initials: 'RL', bg: '#7f003f' },
+// Brand portfolio AzeraKOL (logo asli, sama seperti yang dipakai di halaman Portfolio).
+// Kutipan sengaja generik & atribusinya "Tim [Brand]" — bukan nama orang yang dikarang,
+// supaya tidak mengklaim ada individu spesifik yang mengucapkannya.
+const brandQuotes = [
+  { brand: 'Hanasui', logo: '/logos/hanasui.png', quote: 'Campaign dengan AzeraKOL membantu kami menjangkau audiens yang lebih tepat sasaran.' },
+  { brand: 'Pigeon', logo: '/logos/pigeon.svg', quote: 'Proses kerja sama rapi, dari seleksi KOL sampai laporan akhir campaign.' },
+  { brand: 'XL Axiata', logo: '/logos/xl-axiata.svg', quote: 'AzeraKOL memahami kebutuhan campaign kami dengan cepat dan detail.' },
+  { brand: 'Kopi ABC', logo: '/logos/kopi-abc.png', quote: 'Hasil campaign melampaui ekspektasi, komunikasi juga lancar dari awal.' },
+  { brand: 'Smartfren', logo: '/logos/smartfren.svg', quote: 'Kami percaya AzeraKOL untuk mengelola campaign KOL secara end-to-end.' },
+  { brand: 'Pertamina', logo: '/logos/pertamina.svg', quote: 'Kolaborasi yang profesional, dengan hasil campaign yang terukur.' },
 ];
 
-const niches = ['Beauty', 'F&B', 'Fashion', 'Tech', 'Home & Living', 'Fitness'];
+const cardStyles = [
+  { bg: 'var(--secondary)', text: '#fff', sub: 'rgba(255,255,255,0.7)', chip: 'rgba(255,255,255,0.14)' },
+  { bg: '#ece6ff', text: 'var(--on-background)', sub: 'var(--outline)', chip: '#ffffff' },
+  { bg: 'var(--lime)', text: 'var(--on-lime)', sub: 'rgba(21,21,125,0.6)', chip: 'rgba(255,255,255,0.55)' },
+  { bg: 'var(--primary)', text: '#fff', sub: 'rgba(255,255,255,0.6)', chip: 'rgba(255,255,255,0.14)' },
+];
 
-const easeOut = [0.16, 1, 0.3, 1] as const;
+function TestimonialCard({ item, styleIdx }: { item: (typeof brandQuotes)[number]; styleIdx: number }) {
+  const s = cardStyles[styleIdx % cardStyles.length];
+  return (
+    <div
+      style={{
+        background: s.bg,
+        borderRadius: '20px',
+        padding: '26px',
+        width: '280px',
+        flexShrink: 0,
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+        minHeight: '210px',
+      }}
+    >
+      <div>
+        <Quote size={20} color={s.text} style={{ opacity: 0.5, marginBottom: '12px' }} />
+        <p style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '0.95rem', color: s.text, lineHeight: 1.5 }}>
+          {item.quote}
+        </p>
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '18px' }}>
+        <div style={{ width: '32px', height: '32px', borderRadius: '9px', background: s.chip, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '5px', flexShrink: 0 }}>
+          <img src={item.logo} alt={item.brand} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
+        </div>
+        <div>
+          <p style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '0.78rem', color: s.text }}>Tim {item.brand}</p>
+          <p style={{ fontSize: '0.7rem', color: s.sub }}>{item.brand}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MarqueeRow({ items, direction, duration }: { items: (typeof brandQuotes)[number][]; direction: 'left' | 'right'; duration: number }) {
+  // Konten digandakan 2x (dua set identik berurutan) — trik CSS marquee klasik:
+  // animasikan translateX 0 -> -50%, begitu sampai -50% posisinya identik dengan
+  // awal lagi, jadi loop-nya mulus tak terlihat sambungannya.
+  const doubled = [...items, ...items];
+  return (
+    <div style={{ overflow: 'hidden', width: '100%' }} className="marquee-row">
+      <div
+        className={direction === 'left' ? 'marquee-track-left' : 'marquee-track-right'}
+        style={{ display: 'flex', gap: '20px', width: 'fit-content', animationDuration: `${duration}s` }}
+      >
+        {doubled.map((item, i) => (
+          <TestimonialCard key={i} item={item} styleIdx={i} />
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export default function Testimonials() {
-  const [active, setActive] = useState(0);
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: '-100px' });
 
-  const prev = () => setActive((v) => (v - 1 + testimonials.length) % testimonials.length);
-  const next = () => setActive((v) => (v + 1) % testimonials.length);
-  const t = testimonials[active];
+  // Portfolio cuma 6 brand — digandakan berkali-kali per baris (dengan urutan/offset
+  // beda tiap baris) supaya marquee-nya terasa "banyak", sesuai permintaan.
+  const rowA = [...brandQuotes, ...brandQuotes, ...brandQuotes];
+  const rowB = [...brandQuotes.slice(3), ...brandQuotes.slice(0, 3), ...brandQuotes, ...brandQuotes];
 
   return (
-    <section className="section-py" style={{ background: 'var(--surface-low)' }} ref={ref}>
+    <section className="section-py" style={{ background: 'var(--surface-low)', overflow: 'hidden' }} ref={ref}>
       <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 24px' }}>
         <motion.div
           style={{ textAlign: 'center', marginBottom: '56px' }}
           initial={{ opacity: 0, y: 24 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6, ease: easeOut }}
+          transition={{ duration: 0.6, ease }}
         >
           <span className="tag-pill tag-pill-pink" style={{ marginBottom: '16px' }}>Testimoni</span>
-          <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 'clamp(2rem, 5vw, 3.2rem)', color: 'var(--on-background)', lineHeight: 1.15 }}>
-            Apa Kata Klien Kami?
+          <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 'clamp(2rem, 5vw, 3.2rem)', color: 'var(--on-background)', lineHeight: 1.15, marginBottom: '10px' }}>
+            Dipercaya Brand Ternama.
           </h2>
-        </motion.div>
-
-        <motion.div
-          className="testi-bento"
-          initial={{ opacity: 0, y: 30 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6, ease: easeOut, delay: 0.1 }}
-          style={{
-            display: 'grid',
-            gridTemplateColumns: '1.6fr 1fr 1fr',
-            gridTemplateAreas: `"quote rating niches" "quote hours niches"`,
-            gap: '18px',
-          }}
-        >
-          <div
-            style={{
-              gridArea: 'quote',
-              background: 'rgba(103,40,228,0.06)',
-              border: '1.5px solid rgba(103,40,228,0.15)',
-              borderRadius: 'var(--radius-lg)',
-              padding: '36px',
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'space-between',
-            }}
-          >
-            <div>
-              <Quote size={32} color="var(--secondary)" style={{ marginBottom: '16px', opacity: 0.4 }} />
-              <p style={{ color: 'var(--on-background)', fontSize: '1.05rem', lineHeight: 1.7, marginBottom: '28px', fontWeight: 500 }}>
-                “{t.quote}”
-              </p>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <div style={{ width: '44px', height: '44px', borderRadius: '50%', background: t.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "var(--font-display)", fontWeight: 800, fontSize: '0.9rem', color: 'white', flexShrink: 0 }}>
-                  {t.initials}
-                </div>
-                <div>
-                  <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: '0.9rem', color: 'var(--on-background)' }}>{t.name}</p>
-                  <p style={{ color: 'var(--outline)', fontSize: '0.78rem' }}>{t.role}</p>
-                </div>
-              </div>
-              <div style={{ display: 'flex', gap: '8px' }}>
-                <button onClick={prev} aria-label="Sebelumnya" style={{ width: '36px', height: '36px', borderRadius: '50%', border: '1.5px solid rgba(103,40,228,0.25)', background: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--secondary)' }}>
-                  <ChevronLeft size={16} />
-                </button>
-                <button onClick={next} aria-label="Berikutnya" style={{ width: '36px', height: '36px', borderRadius: '50%', border: '1.5px solid rgba(103,40,228,0.25)', background: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--secondary)' }}>
-                  <ChevronRight size={16} />
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div className="bento-card" style={{ gridArea: 'rating', padding: '24px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-            <div style={{ display: 'flex', gap: '2px', marginBottom: '10px' }}>
-              {[0, 1, 2, 3, 4].map((n) => <Star key={n} size={13} fill="#ff81aa" color="#ff81aa" />)}
-            </div>
-            <p style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: '1.8rem', color: 'var(--on-background)', lineHeight: 1 }}>4.9</p>
-            <p style={{ color: 'var(--on-surface-variant)', fontSize: '0.78rem', marginTop: '4px' }}>Rating Klien</p>
-          </div>
-
-          <div className="bento-card" style={{ gridArea: 'hours', padding: '24px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-            <p style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: '1.8rem', color: 'var(--on-background)', lineHeight: 1, marginBottom: '4px' }}>500+</p>
-            <p style={{ color: 'var(--on-surface-variant)', fontSize: '0.78rem' }}>Campaign Selesai</p>
-          </div>
-
-          <div className="bento-card-dark" style={{ gridArea: 'niches', padding: '24px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-            <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: '0.9rem', color: '#fff', marginBottom: '14px' }}>
-              Brand Kategori yang Kami Layani
-            </p>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-              {niches.map((n) => (
-                <span key={n} className="tag-pill tag-pill-white">{n}</span>
-              ))}
-            </div>
-          </div>
+          <p style={{ color: 'var(--on-surface-variant)', fontSize: '1rem' }}>
+            Sebagian brand yang sudah menjalankan campaign KOL bersama AzeraKOL.
+          </p>
         </motion.div>
       </div>
 
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={isInView ? { opacity: 1 } : {}}
+        transition={{ duration: 0.6, ease, delay: 0.15 }}
+        style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}
+      >
+        <MarqueeRow items={rowA} direction="left" duration={42} />
+        <MarqueeRow items={rowB} direction="right" duration={48} />
+      </motion.div>
+
       <style>{`
-        @media (max-width: 900px) {
-          .testi-bento {
-            grid-template-columns: 1fr 1fr !important;
-            grid-template-areas: "quote quote" "rating hours" "niches niches" !important;
-          }
-        }
-        @media (max-width: 600px) {
-          .testi-bento {
-            grid-template-columns: 1fr !important;
-            grid-template-areas: "quote" "rating" "hours" "niches" !important;
-          }
-        }
+        @keyframes marquee-left { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+        @keyframes marquee-right { from { transform: translateX(-50%); } to { transform: translateX(0); } }
+        .marquee-track-left { animation-name: marquee-left; animation-timing-function: linear; animation-iteration-count: infinite; }
+        .marquee-track-right { animation-name: marquee-right; animation-timing-function: linear; animation-iteration-count: infinite; }
+        .marquee-row:hover .marquee-track-left,
+        .marquee-row:hover .marquee-track-right { animation-play-state: paused; }
       `}</style>
     </section>
   );

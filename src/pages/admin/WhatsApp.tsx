@@ -126,7 +126,7 @@ export default function WhatsApp() {
         {status === 'qr' && qr && (
           <div style={{ textAlign: 'center' }}>
             <p style={{ fontFamily: f, fontSize: '0.85rem', color: '#464652', marginBottom: '14px' }}>
-              Scan QR ini dengan WhatsApp (Perangkat Tertaut) — gunakan nomor testing dulu, ganti ke nomor resmi client nanti dengan Logout lalu scan ulang.
+              Scan QR ini dengan WhatsApp (Perangkat Tertaut). Gunakan nomor testing dulu, ganti ke nomor resmi client nanti dengan Logout lalu scan ulang.
             </p>
             <img src={qr} alt="QR WhatsApp" style={{ width: '220px', height: '220px', border: '1px solid #e1e0ff', borderRadius: '12px' }} />
           </div>

@@ -28,7 +28,7 @@ export default function OurOffer() {
             Skalakan Campaign Kamu.
           </h2>
           <p style={{ color: 'var(--on-surface-variant)', fontSize: '1rem', lineHeight: 1.7, maxWidth: '480px', margin: '0 auto' }}>
-            Dari puluhan hingga ratusan KOL — AzeraKOL menyediakan solusi campaign end-to-end untuk setiap skala brand.
+            Dari puluhan hingga ratusan KOL, AzeraKOL menyediakan solusi campaign end-to-end untuk setiap skala brand.
           </p>
         </motion.div>
 
@@ -62,7 +62,7 @@ export default function OurOffer() {
           transition={{ duration: 0.6, ease: easeOut, delay: 0.4 }}
         >
           <p style={{ color: 'var(--on-surface-variant)', fontSize: '1rem', marginBottom: '28px' }}>
-            From 50 to 500+ KOL — End-to-end campaign solution
+            Dari 50 sampai 500+ KOL, solusi campaign end-to-end
           </p>
           <Link to="/brand" className="btn-primary" style={{ fontSize: '1rem' }}>
             Pilih Paket

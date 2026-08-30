@@ -361,7 +361,7 @@ export default function CampaignDetail() {
               value={briefDraft}
               onChange={(e) => setBriefDraft(e.target.value)}
               rows={8}
-              placeholder="Brief belum dibuat — klik Generate dengan AI, atau tulis manual di sini."
+              placeholder="Brief belum dibuat. Klik Generate dengan AI, atau tulis manual di sini."
               style={{ width: '100%', padding: '14px', borderRadius: '12px', border: '1.5px solid #c7c8cf', fontSize: '0.875rem', color: '#191c20', fontFamily: "var(--font-display)", resize: 'vertical', outline: 'none', marginBottom: '12px' }}
             />
             <div style={{ display: 'flex', gap: '10px' }}>
@@ -412,7 +412,7 @@ export default function CampaignDetail() {
           {lastPassword && (
             <div style={{ background: '#d1fae5', borderRadius: '12px', padding: '14px 16px', marginBottom: '16px' }}>
               <p style={{ fontSize: '0.82rem', color: '#065F46', fontFamily: "var(--font-display)" }}>
-                <strong>{lastPassword.name}</strong> diterima — password Talent Portal: <code style={{ background: 'white', padding: '2px 8px', borderRadius: '6px' }}>{lastPassword.password}</code>
+                <strong>{lastPassword.name}</strong> diterima. Password Talent Portal: <code style={{ background: 'white', padding: '2px 8px', borderRadius: '6px' }}>{lastPassword.password}</code>
                 <br />Sudah otomatis terkirim ke creator via WhatsApp.
               </p>
             </div>
@@ -537,7 +537,7 @@ export default function CampaignDetail() {
             </button>
           </div>
           <p style={{ fontSize: '0.78rem', color: '#777683', marginBottom: '16px' }}>
-            Pertanyaan tambahan di luar field standar (nama, WA, sosmed, dll) — muncul di bawah form Apply publik campaign ini, ala Google Forms.
+            Pertanyaan tambahan di luar field standar (nama, WA, sosmed, dll), muncul di bawah form Apply publik campaign ini, ala Google Forms.
           </p>
           {customFieldsDraft.length === 0 ? (
             <p style={{ color: '#777683', fontSize: '0.85rem', textAlign: 'center', padding: '16px' }}>Belum ada pertanyaan tambahan.</p>
@@ -614,7 +614,7 @@ export default function CampaignDetail() {
           <div style={cardStyle}>
             <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: '1rem', color: '#191c20', marginBottom: '8px' }}>Dashboard PIC / Handle-by</p>
             <p style={{ fontSize: '0.78rem', color: '#777683', marginBottom: '14px', lineHeight: 1.5 }}>
-              Link read-only berisi seluruh data campaign ini (pendaftar & progress) — bagikan ke PIC/Handle-by, tidak perlu login.
+              Link read-only berisi seluruh data campaign ini (pendaftar & progress), bagikan ke PIC/Handle-by, tidak perlu login.
             </p>
             <button
               onClick={copyDashboardLink}

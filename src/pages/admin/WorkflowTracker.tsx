@@ -139,7 +139,7 @@ export default function WorkflowTracker({ campaignId }: { campaignId: string }) 
       </div>
 
       <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.78rem', fontFamily: f, color: '#464652', marginBottom: '8px', cursor: 'pointer' }}>
-        <input type="checkbox" checked={override} onChange={(e) => setOverride(e.target.checked)} /> Override (lompat tahap manapun — perlu alasan kalau bukan Owner)
+        <input type="checkbox" checked={override} onChange={(e) => setOverride(e.target.checked)} /> Override (lompat tahap manapun, perlu alasan kalau bukan Owner)
       </label>
       {override && (
         <input
@@ -177,7 +177,7 @@ export default function WorkflowTracker({ campaignId }: { campaignId: string }) 
             <div key={h._id} style={{ fontSize: '0.76rem', color: '#464652', fontFamily: f, borderBottom: '1px solid #f0f0f0', paddingBottom: '6px' }}>
               <strong>{STAGE_LABELS[h.fromStage]}</strong> → <strong>{STAGE_LABELS[h.toStage]}</strong>
               {h.isOverride && <span style={{ color: '#ba1a1a' }}> (override)</span>}
-              {' '}— {h.byUserId?.name || h.byRole} · {new Date(h.createdAt).toLocaleString('id-ID')}
+              {' '}· {h.byUserId?.name || h.byRole} · {new Date(h.createdAt).toLocaleString('id-ID')}
               {h.reason && h.reason !== 'auto' && <div style={{ color: '#8a8a99' }}>Alasan: {h.reason}</div>}
             </div>
           ))}

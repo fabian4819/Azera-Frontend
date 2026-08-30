@@ -111,7 +111,7 @@ export default function CaseStudyDetail() {
       {/* Footer branding — visible in a bottom crop too */}
       <div style={{ background: '#08060F', padding: '32px 24px', textAlign: 'center' }}>
         <p style={{ fontFamily: f, fontWeight: 700, color: 'rgba(255,255,255,0.6)', fontSize: '0.85rem' }}>
-          Scale Brands. Amplify Impact — @azerakol.id
+          Scale Brands. Amplify Impact. @azerakol.id
         </p>
       </div>
     </div>

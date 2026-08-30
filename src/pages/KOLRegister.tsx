@@ -175,7 +175,7 @@ export default function KOLRegister() {
             <span className="gradient-text">AzeraKOL Network</span>
           </h1>
           <p style={{ color: '#464652', marginTop: '10px', fontFamily: "var(--font-display)" }}>
-            Daftar gratis — tim kami akan review profil dan menghubungi kamu.
+            Daftar gratis, tim kami akan review profil dan menghubungi kamu.
           </p>
         </div>
 

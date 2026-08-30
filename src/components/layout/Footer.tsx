@@ -14,7 +14,7 @@ export default function Footer() {
               </span>
             </div>
             <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: '0.85rem', lineHeight: 1.7, maxWidth: '260px', fontFamily: "var(--font-display)" }}>
-              Platform KOL campaign agency terpercaya di Indonesia — menghubungkan brand dengan ribuan KOL terkurasi.
+              Platform KOL campaign agency terpercaya di Indonesia, menghubungkan brand dengan ribuan KOL terkurasi.
             </p>
           </div>
 

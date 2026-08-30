@@ -19,7 +19,7 @@ const solutions = [
   {
     tab: 'End-to-End Management',
     title: 'End-to-End Management',
-    desc: 'Tim AzeraKOL menangani seluruh proses — dari briefing hingga laporan akhir campaign.',
+    desc: 'Tim AzeraKOL menangani seluruh proses, dari briefing hingga laporan akhir campaign.',
     image: '/solutions/management.jpg',
   },
 ];

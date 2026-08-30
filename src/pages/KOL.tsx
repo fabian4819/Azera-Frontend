@@ -5,7 +5,7 @@ import { DollarSign, Headphones, Network, TrendingUp } from 'lucide-react';
 
 const benefits = [
   { icon: DollarSign, title: 'Brand Deals Eksklusif', desc: 'Akses ke ratusan brand ternama yang mencari KOL terkurasi. Dapatkan kolaborasi yang sesuai dengan niche dan nilai brand-mu.', dark: false },
-  { icon: Headphones, title: 'Campaign Support', desc: 'Tim AzeraKOL mendampingi setiap tahap campaign — dari briefing hingga pelaporan. Kamu tinggal fokus bikin konten.', dark: true },
+  { icon: Headphones, title: 'Campaign Support', desc: 'Tim AzeraKOL mendampingi setiap tahap campaign, dari briefing hingga pelaporan. Kamu tinggal fokus bikin konten.', dark: true },
   { icon: Network, title: 'KOL Network', desc: 'Bergabung dengan komunitas 20K+ KOL aktif Indonesia. Sharing knowledge, tips, dan peluang kolaborasi sesama kreator.', dark: false },
   { icon: TrendingUp, title: 'Growth Opportunities', desc: 'Track record dan portofolio campaign yang terbangun akan membuka pintu untuk kolaborasi lebih besar di masa depan.', dark: false },
 ];
@@ -132,7 +132,7 @@ export default function KOL() {
             className="bento-card-dark" style={{ padding: '60px 40px', textAlign: 'center' }}>
             <span className="tag-pill tag-pill-white" style={{ margin: '0 auto 16px' }}>Siap Bergabung?</span>
             <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 'clamp(1.9rem, 4.5vw, 3rem)', color: '#fff', lineHeight: 1.15, marginBottom: '16px' }}>
-              Daftar Sekarang — Gratis!
+              Daftar Sekarang, Gratis!
             </h2>
             <p style={{ color: 'rgba(255,255,255,0.65)', fontSize: '1rem', lineHeight: 1.7, marginBottom: '32px', maxWidth: '480px', margin: '0 auto 32px' }}>
               Tidak ada biaya, tidak ada komitmen. Cukup daftar dan tunggu tim kami menghubungimu.

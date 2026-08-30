@@ -150,7 +150,7 @@ export default function CreatorDetail() {
 
           {scoreBreakdown && (
             <div style={cardStyle}>
-              <p style={{ fontFamily: f, fontWeight: 700, fontSize: '1rem', color: '#191c20', marginBottom: '16px' }}>Performance Score — {scoreBreakdown.overall}</p>
+              <p style={{ fontFamily: f, fontWeight: 700, fontSize: '1rem', color: '#191c20', marginBottom: '16px' }}>Performance Score: {scoreBreakdown.overall}</p>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
                 <div style={{ padding: '14px', background: '#f8f9ff', borderRadius: '10px' }}>
                   <p style={labelSmall}>Reliability (40%)</p>
@@ -233,7 +233,7 @@ export default function CreatorDetail() {
           {creator.bankAccount && (
             <div style={cardStyle}>
               <p style={{ fontFamily: f, fontWeight: 700, fontSize: '1rem', color: '#191c20', marginBottom: '14px' }}>Rekening</p>
-              <p style={{ fontSize: '0.85rem', color: '#191c20' }}>{creator.bankAccount.bankName} — {creator.bankAccount.accountNumber}</p>
+              <p style={{ fontSize: '0.85rem', color: '#191c20' }}>{creator.bankAccount.bankName} · {creator.bankAccount.accountNumber}</p>
               <p style={{ fontSize: '0.85rem', color: '#777683' }}>a.n. {creator.bankAccount.accountName}</p>
             </div>
           )}

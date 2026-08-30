@@ -87,7 +87,7 @@ export default function CampaignDashboard() {
   if (notFound) {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8f9ff' }}>
-        <p style={{ fontFamily: f, color: '#464652' }}>Dashboard tidak ditemukan — link atau kode akses salah.</p>
+        <p style={{ fontFamily: f, color: '#464652' }}>Dashboard tidak ditemukan. Link atau kode akses salah.</p>
       </div>
     );
   }
