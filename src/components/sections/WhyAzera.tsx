@@ -105,10 +105,20 @@ const swap = {
   transition: { duration: 0.3, ease },
 };
 
+// Teks kiri: slide vertikal terarah (bukan fade di tempat) — masuk dari bawah
+// saat maju, dari atas saat mundur, mengikuti arah scroll.
+const textVariants = {
+  enter: (dir: number) => ({ y: dir > 0 ? 36 : -36, opacity: 0 }),
+  center: { y: 0, opacity: 1 },
+  exit: (dir: number) => ({ y: dir > 0 ? -36 : 36, opacity: 0 }),
+};
+
 export default function WhyAzera() {
   const [active, setActive] = useState(0);
+  const [direction, setDirection] = useState(1);
   const [isDesktop, setIsDesktop] = useState(true);
   const sectionRef = useRef<HTMLElement>(null);
+  const activeRef = useRef(0);
 
   useEffect(() => {
     const mq = window.matchMedia('(min-width: 901px)');
@@ -121,7 +131,11 @@ export default function WhyAzera() {
   const { scrollYProgress } = useScroll({ target: sectionRef, offset: ['start start', 'end end'] });
   useMotionValueEvent(scrollYProgress, 'change', (v) => {
     const idx = Math.min(features.length - 1, Math.max(0, Math.floor(v * features.length)));
-    setActive(idx);
+    if (idx !== activeRef.current) {
+      setDirection(idx > activeRef.current ? 1 : -1);
+      activeRef.current = idx;
+      setActive(idx);
+    }
   });
 
   // Mobile: tumpuk biasa (tanpa pinning) — tiap poin + visualnya
@@ -152,9 +166,17 @@ export default function WhyAzera() {
             {/* LEFT — heading (statis) + poin aktif (cross-fade) */}
             <div>
               <HeadingBlock />
-              <div style={{ minHeight: '150px', marginTop: '44px' }}>
-                <AnimatePresence mode="wait">
-                  <motion.div key={active} {...swap}>
+              <div style={{ minHeight: '150px', marginTop: '44px', overflow: 'hidden' }}>
+                <AnimatePresence mode="wait" custom={direction}>
+                  <motion.div
+                    key={active}
+                    custom={direction}
+                    variants={textVariants}
+                    initial="enter"
+                    animate="center"
+                    exit="exit"
+                    transition={{ duration: 0.4, ease }}
+                  >
                     <PointText f={features[active]} />
                   </motion.div>
                 </AnimatePresence>
