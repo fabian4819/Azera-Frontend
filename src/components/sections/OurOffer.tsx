@@ -24,7 +24,7 @@ export default function OurOffer() {
           transition={{ duration: 0.6, ease: easeOut }}
         >
           <span className="tag-pill tag-pill-navy" style={{ marginBottom: '16px' }}>Paket Layanan</span>
-          <h2 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800, fontSize: 'clamp(2rem, 5vw, 3.2rem)', color: 'var(--on-background)', lineHeight: 1.15, marginBottom: '14px' }}>
+          <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 'clamp(2rem, 5vw, 3.2rem)', color: 'var(--on-background)', lineHeight: 1.15, marginBottom: '14px' }}>
             Skalakan Campaign Kamu.
           </h2>
           <p style={{ color: 'var(--on-surface-variant)', fontSize: '1rem', lineHeight: 1.7, maxWidth: '480px', margin: '0 auto' }}>
@@ -45,7 +45,7 @@ export default function OurOffer() {
               <span className={`tag-pill ${tier.tint === 'dark' ? 'tag-pill-white' : tier.tint === 'purple' ? 'tag-pill-purple' : 'tag-pill-pink'}`} style={{ marginBottom: '20px' }}>
                 {tier.label}
               </span>
-              <p style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800, fontSize: '2rem', color: tier.tint === 'dark' ? '#fff' : 'var(--on-background)', lineHeight: 1, marginBottom: '8px' }}>
+              <p style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: '2rem', color: tier.tint === 'dark' ? '#fff' : 'var(--on-background)', lineHeight: 1, marginBottom: '8px' }}>
                 {tier.count}
               </p>
               <p style={{ color: tier.tint === 'dark' ? 'rgba(255,255,255,0.65)' : 'var(--on-surface-variant)', fontSize: '0.85rem', lineHeight: 1.6 }}>

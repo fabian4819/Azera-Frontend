@@ -25,15 +25,15 @@ const complianceLabels: Record<string, { label: string; color: string; bg: strin
 };
 
 const thStyle: React.CSSProperties = {
-  padding: '14px 16px', textAlign: 'left', fontFamily: "'Plus Jakarta Sans', sans-serif",
+  padding: '14px 16px', textAlign: 'left', fontFamily: "var(--font-display)",
   fontWeight: 700, color: '#191c20', fontSize: '0.78rem', whiteSpace: 'nowrap', letterSpacing: '0.04em',
 };
 const tdStyle: React.CSSProperties = {
-  padding: '14px 16px', fontSize: '0.875rem', color: '#464652', whiteSpace: 'nowrap', fontFamily: 'Plus Jakarta Sans, sans-serif',
+  padding: '14px 16px', fontSize: '0.875rem', color: '#464652', whiteSpace: 'nowrap', fontFamily: 'var(--font-display)',
 };
 const controlStyle: React.CSSProperties = {
   padding: '10px 14px', borderRadius: '10px', border: '1.5px solid #c7c8cf', fontSize: '0.875rem',
-  outline: 'none', fontFamily: 'Plus Jakarta Sans, sans-serif', background: 'white', cursor: 'pointer', color: '#191c20',
+  outline: 'none', fontFamily: 'var(--font-display)', background: 'white', cursor: 'pointer', color: '#191c20',
 };
 
 export default function Creators() {
@@ -134,7 +134,7 @@ export default function Creators() {
                     <td style={tdStyle}>
                       <button
                         onClick={() => navigate(`/admin/creators/${c._id}`)}
-                        style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '7px 14px', background: '#e1e0ff', color: '#6728e4', borderRadius: '8px', border: 'none', cursor: 'pointer', fontSize: '0.78rem', fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700 }}
+                        style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '7px 14px', background: '#e1e0ff', color: '#6728e4', borderRadius: '8px', border: 'none', cursor: 'pointer', fontSize: '0.78rem', fontFamily: "var(--font-display)", fontWeight: 700 }}
                       >
                         <Eye size={14} />View
                       </button>
@@ -145,7 +145,7 @@ export default function Creators() {
             </tbody>
           </table>
         </div>
-        <div style={{ padding: '12px 16px', borderTop: '1px solid #e1e0ff', color: '#777683', fontSize: '0.78rem', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
+        <div style={{ padding: '12px 16px', borderTop: '1px solid #e1e0ff', color: '#777683', fontSize: '0.78rem', fontFamily: 'var(--font-display)' }}>
           {filtered.length} creator ditemukan
         </div>
       </div>

@@ -4,7 +4,7 @@ import { useTalentAuth } from '../../hooks/useTalentAuth';
 
 export default function TalentLayout() {
   const { creator, logout } = useTalentAuth();
-  const f = "'Plus Jakarta Sans', sans-serif";
+  const f = "var(--font-display)";
 
   return (
     <div style={{ minHeight: '100vh', background: '#f8f9ff' }}>

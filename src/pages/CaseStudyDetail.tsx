@@ -13,7 +13,7 @@ interface CaseStudy {
   highlightStats: { views: number; engagementRate: number; totalPosts: number; reach: number | null };
 }
 
-const f = "'Plus Jakarta Sans', sans-serif";
+const f = "var(--font-display)";
 
 function formatNumber(n: number) {
   if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M';

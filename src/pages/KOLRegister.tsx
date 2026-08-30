@@ -25,16 +25,16 @@ interface WilayahOption { id: string; name: string }
 const inputStyle: React.CSSProperties = {
   width: '100%', padding: '11px 14px', borderRadius: '12px', border: '1.5px solid #c7c8cf',
   fontSize: '0.875rem', color: '#191c20', background: 'white', outline: 'none',
-  fontFamily: "'Plus Jakarta Sans', sans-serif",
+  fontFamily: "var(--font-display)",
 };
 
 const labelStyle: React.CSSProperties = {
   display: 'block', fontWeight: 600, fontSize: '0.8rem', color: '#191c20',
-  marginBottom: '5px', fontFamily: "'Plus Jakarta Sans', sans-serif",
+  marginBottom: '5px', fontFamily: "var(--font-display)",
 };
 
 const SectionTitle = ({ title }: { title: string }) => (
-  <p style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700, fontSize: '1rem', color: '#6728e4', marginBottom: '20px', paddingBottom: '12px', borderBottom: '1px solid #e1e0ff', marginTop: '8px' }}>
+  <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: '1rem', color: '#6728e4', marginBottom: '20px', paddingBottom: '12px', borderBottom: '1px solid #e1e0ff', marginTop: '8px' }}>
     {title}
   </p>
 );
@@ -44,7 +44,7 @@ const Pill = ({ label, selected, onClick }: { label: string; selected: boolean; 
     padding: '8px 16px', borderRadius: '999px', border: 'none',
     background: selected ? 'linear-gradient(135deg, #6728e4, #814bfe)' : '#e1e0ff',
     color: selected ? 'white' : '#6728e4', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer',
-    fontFamily: "'Plus Jakarta Sans', sans-serif",
+    fontFamily: "var(--font-display)",
   }}>
     {label}
   </button>
@@ -150,10 +150,10 @@ export default function KOLRegister() {
           <div className="kinetic-glow" style={{ width: '80px', height: '80px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px' }}>
             <CheckCircle2 size={40} color="white" />
           </div>
-          <h2 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800, fontSize: '1.8rem', color: '#191c20', marginBottom: '12px' }}>
+          <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: '1.8rem', color: '#191c20', marginBottom: '12px' }}>
             {alreadyExists ? 'Kamu Sudah Terdaftar' : 'Pendaftaran Berhasil!'}
           </h2>
-          <p style={{ color: '#464652', lineHeight: 1.7, fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+          <p style={{ color: '#464652', lineHeight: 1.7, fontFamily: "var(--font-display)" }}>
             {alreadyExists
               ? 'Nomor WhatsApp kamu sudah terdaftar sebelumnya. Tim AzeraKOL akan segera menghubungi.'
               : 'Profil kamu sedang kami review. Tim AzeraKOL akan menghubungi kamu dalam 1–3 hari kerja via WhatsApp.'}
@@ -170,11 +170,11 @@ export default function KOLRegister() {
       <div style={{ maxWidth: '760px', margin: '0 auto', padding: '48px 24px 80px', position: 'relative', zIndex: 1 }}>
         <div style={{ textAlign: 'center', marginBottom: '40px' }}>
           <span className="section-label" style={{ marginBottom: '12px' }}>Daftar KOL</span>
-          <h1 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800, fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', color: '#191c20', lineHeight: 1.15 }}>
+          <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', color: '#191c20', lineHeight: 1.15 }}>
             Bergabung dengan{' '}
             <span className="gradient-text">AzeraKOL Network</span>
           </h1>
-          <p style={{ color: '#464652', marginTop: '10px', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+          <p style={{ color: '#464652', marginTop: '10px', fontFamily: "var(--font-display)" }}>
             Daftar gratis — tim kami akan review profil dan menghubungi kamu.
           </p>
         </div>
@@ -217,12 +217,12 @@ export default function KOLRegister() {
           </div>
 
           <SectionTitle title="2. Media Sosial" />
-          <p style={{ color: '#777683', fontSize: '0.85rem', marginBottom: '20px', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>Isi minimal 1 platform.</p>
+          <p style={{ color: '#777683', fontSize: '0.85rem', marginBottom: '20px', fontFamily: "var(--font-display)" }}>Isi minimal 1 platform.</p>
           {socialPlatforms.map(({ value, label, icon: Icon, color }) => (
             <div key={value} style={{ background: '#f8f9ff', border: `1px solid ${color}22`, borderRadius: '16px', padding: '20px', marginBottom: '16px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
                 <Icon size={18} color={color} />
-                <p style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700, color, fontSize: '0.9rem' }}>{label}</p>
+                <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, color, fontSize: '0.9rem' }}>{label}</p>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }} className="form-2col">
                 <div><label style={labelStyle}>Username</label><input value={socials[value]?.username || ''} onChange={(e) => setSocialField(value, 'username', e.target.value)} placeholder="@username" style={inputStyle} /></div>
@@ -233,15 +233,15 @@ export default function KOLRegister() {
           ))}
 
           <SectionTitle title="3. Aktivitas Sebagai Creator" />
-          <p style={{ color: '#777683', fontSize: '0.85rem', marginBottom: '16px', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>Bisa pilih lebih dari 1.</p>
+          <p style={{ color: '#777683', fontSize: '0.85rem', marginBottom: '16px', fontFamily: "var(--font-display)" }}>Bisa pilih lebih dari 1.</p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '28px' }}>
             {activities.map((a) => {
               const selected = selectedActivities.includes(a.value);
               return (
                 <button key={a.value} type="button" onClick={() => toggle(selectedActivities, setSelectedActivities, a.value)}
                   style={{ textAlign: 'left', padding: '14px 16px', borderRadius: '12px', border: selected ? '1.5px solid #6728e4' : '1.5px solid #e1e0ff', background: selected ? '#f0eeff' : 'white', cursor: 'pointer' }}>
-                  <p style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700, fontSize: '0.85rem', color: selected ? '#6728e4' : '#191c20', marginBottom: '2px' }}>{a.label}</p>
-                  <p style={{ fontSize: '0.78rem', color: '#777683', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>{a.desc}</p>
+                  <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: '0.85rem', color: selected ? '#6728e4' : '#191c20', marginBottom: '2px' }}>{a.label}</p>
+                  <p style={{ fontSize: '0.78rem', color: '#777683', fontFamily: "var(--font-display)" }}>{a.desc}</p>
                 </button>
               );
             })}
@@ -277,7 +277,7 @@ export default function KOLRegister() {
             <div><label style={labelStyle}>Link Media Kit</label><input value={mediaKitUrl} onChange={(e) => setMediaKitUrl(e.target.value)} placeholder="https://..." style={inputStyle} /></div>
           </div>
 
-          {submitError && <p style={{ color: '#ba1a1a', fontSize: '0.85rem', marginBottom: '16px', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>{submitError}</p>}
+          {submitError && <p style={{ color: '#ba1a1a', fontSize: '0.85rem', marginBottom: '16px', fontFamily: "var(--font-display)" }}>{submitError}</p>}
 
           <button type="submit" disabled={loading} className="btn-primary" style={{ width: '100%', justifyContent: 'center', fontSize: '1rem', padding: '16px', opacity: loading ? 0.7 : 1 }}>
             <Zap size={18} />

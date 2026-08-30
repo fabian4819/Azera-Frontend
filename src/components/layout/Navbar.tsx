@@ -56,7 +56,7 @@ export default function Navbar() {
             <img src="/icon.png" alt="AzeraKOL" style={{ height: '26px', objectFit: 'contain' }} />
             <span
               style={{
-                fontFamily: "'Plus Jakarta Sans', sans-serif",
+                fontFamily: "var(--font-display)",
                 fontWeight: 900,
                 fontStyle: 'italic',
                 fontSize: '1.05rem',
@@ -77,7 +77,7 @@ export default function Navbar() {
                 style={{
                   padding: '8px 16px',
                   borderRadius: '8px',
-                  fontFamily: "'Plus Jakarta Sans', sans-serif",
+                  fontFamily: "var(--font-display)",
                   fontWeight: isActive(link.to) ? 700 : 600,
                   fontSize: '0.9rem',
                   textDecoration: 'none',
@@ -138,7 +138,7 @@ export default function Navbar() {
                 style={{
                   padding: '12px 14px',
                   borderRadius: '10px',
-                  fontFamily: "'Plus Jakarta Sans', sans-serif",
+                  fontFamily: "var(--font-display)",
                   fontWeight: isActive(link.to) ? 700 : 600,
                   fontSize: '0.98rem',
                   textDecoration: 'none',

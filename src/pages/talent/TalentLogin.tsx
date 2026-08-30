@@ -31,11 +31,11 @@ export default function TalentLogin() {
   const inputStyle: React.CSSProperties = {
     width: '100%', padding: '13px 16px', borderRadius: '12px',
     border: '1.5px solid #c7c8cf', fontSize: '0.9rem', outline: 'none',
-    fontFamily: "'Plus Jakarta Sans', sans-serif", color: '#191c20',
+    fontFamily: "var(--font-display)", color: '#191c20',
     background: 'white',
   };
 
-  const f = "'Plus Jakarta Sans', sans-serif";
+  const f = "var(--font-display)";
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#15157d', position: 'relative', overflow: 'hidden' }}>

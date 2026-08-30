@@ -57,10 +57,10 @@ export default function Stats() {
                 borderRight: i < stats.length - 1 ? '1px solid rgba(157,161,255,0.2)' : 'none',
               }}
             >
-              <p style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800, fontSize: 'clamp(2.5rem, 6vw, 4rem)', lineHeight: 1, marginBottom: '8px', color: '#9da1ff' }}>
+              <p style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 'clamp(2.5rem, 6vw, 4rem)', lineHeight: 1, marginBottom: '8px', color: '#9da1ff' }}>
                 <CountUp target={stat.value} suffix={stat.suffix} started={isInView} />
               </p>
-              <p style={{ color: 'rgba(157,161,255,0.7)', fontSize: '0.875rem', fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+              <p style={{ color: 'rgba(157,161,255,0.7)', fontSize: '0.875rem', fontFamily: "var(--font-display)", fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
                 {stat.label}
               </p>
             </div>

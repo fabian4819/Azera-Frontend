@@ -40,7 +40,7 @@ const categories = ['Beauty', 'F&B', 'Fashion', 'Tech', 'Fitness', 'Home & Livin
 const thStyle: React.CSSProperties = {
   padding: '14px 16px',
   textAlign: 'left',
-  fontFamily: "'Plus Jakarta Sans', sans-serif",
+  fontFamily: "var(--font-display)",
   fontWeight: 700,
   color: '#191c20',
   fontSize: '0.78rem',
@@ -52,7 +52,7 @@ const tdStyle: React.CSSProperties = {
   padding: '14px 16px',
   fontSize: '0.875rem',
   color: '#464652',
-  fontFamily: 'Plus Jakarta Sans, sans-serif',
+  fontFamily: 'var(--font-display)',
 };
 
 const modalInputStyle: React.CSSProperties = {
@@ -62,7 +62,7 @@ const modalInputStyle: React.CSSProperties = {
   border: '1.5px solid #c7c8cf',
   fontSize: '0.875rem',
   outline: 'none',
-  fontFamily: 'Plus Jakarta Sans, sans-serif',
+  fontFamily: 'var(--font-display)',
   background: 'white',
   color: '#191c20',
 };
@@ -73,7 +73,7 @@ const labelStyle: React.CSSProperties = {
   fontSize: '0.8rem',
   color: '#191c20',
   marginBottom: '5px',
-  fontFamily: 'Plus Jakarta Sans, sans-serif',
+  fontFamily: 'var(--font-display)',
 };
 
 export default function PortfolioManager() {
@@ -203,15 +203,15 @@ export default function PortfolioManager() {
                   <td style={{ ...tdStyle, fontWeight: 600, color: '#191c20' }}>{item.brand}</td>
                   <td style={tdStyle}>{item.hashtag}</td>
                   <td style={tdStyle}>
-                    <span style={{ background: '#e1e0ff', color: '#6728e4', borderRadius: '999px', padding: '3px 10px', fontSize: '0.72rem', fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700 }}>
+                    <span style={{ background: '#e1e0ff', color: '#6728e4', borderRadius: '999px', padding: '3px 10px', fontSize: '0.72rem', fontFamily: "var(--font-display)", fontWeight: 700 }}>
                       {item.category}
                     </span>
                   </td>
                   <td style={tdStyle}>{item.kolCount}</td>
                   <td style={tdStyle}>{item.reach}</td>
-                  <td style={{ ...tdStyle, color: '#10B981', fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700 }}>{item.engagement}%</td>
+                  <td style={{ ...tdStyle, color: '#10B981', fontFamily: "var(--font-display)", fontWeight: 700 }}>{item.engagement}%</td>
                   <td style={tdStyle}>
-                    <span style={{ color: item.featured ? '#10B981' : '#777683', fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700, fontSize: '0.78rem' }}>
+                    <span style={{ color: item.featured ? '#10B981' : '#777683', fontFamily: "var(--font-display)", fontWeight: 700, fontSize: '0.78rem' }}>
                       {item.featured ? 'Ya' : 'Tidak'}
                     </span>
                   </td>
@@ -244,7 +244,7 @@ export default function PortfolioManager() {
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
           <div style={{ background: 'white', borderRadius: '20px', padding: '32px', width: '100%', maxWidth: '560px', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-              <h3 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800, fontSize: '1.1rem', color: '#191c20' }}>
+              <h3 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: '1.1rem', color: '#191c20' }}>
                 {editId ? 'Edit Portfolio' : 'Tambah Portfolio'}
               </h3>
               <button
@@ -286,7 +286,7 @@ export default function PortfolioManager() {
             </div>
 
             <div style={{ marginBottom: '14px' }}>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', fontFamily: 'var(--font-display)' }}>
                 <input type="checkbox" checked={form.featured} onChange={(e) => setForm({ ...form, featured: e.target.checked })} style={{ width: '16px', height: '16px', accentColor: '#6728e4' }} />
                 <span style={{ fontWeight: 600, fontSize: '0.875rem', color: '#191c20' }}>Tampilkan di featured homepage</span>
               </label>
@@ -310,7 +310,7 @@ export default function PortfolioManager() {
                 style={{ ...modalInputStyle, padding: '9px 14px', cursor: 'pointer' }}
               />
               {contentFiles.length > 0 && (
-                <p style={{ fontSize: '0.78rem', color: '#10B981', marginTop: '4px', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
+                <p style={{ fontSize: '0.78rem', color: '#10B981', marginTop: '4px', fontFamily: 'var(--font-display)' }}>
                   {contentFiles.length} file dipilih
                 </p>
               )}
@@ -319,7 +319,7 @@ export default function PortfolioManager() {
             <div style={{ display: 'flex', gap: '12px' }}>
               <button
                 onClick={() => setShowModal(false)}
-                style={{ flex: 1, padding: '12px', borderRadius: '10px', border: '1.5px solid #c7c8cf', background: 'white', cursor: 'pointer', fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 600, color: '#777683' }}
+                style={{ flex: 1, padding: '12px', borderRadius: '10px', border: '1.5px solid #c7c8cf', background: 'white', cursor: 'pointer', fontFamily: 'var(--font-display)', fontWeight: 600, color: '#777683' }}
               >
                 Batal
               </button>
@@ -338,22 +338,22 @@ export default function PortfolioManager() {
             <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: '#ffdad6', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
               <Trash2 size={24} color="#ba1a1a" />
             </div>
-            <h3 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800, fontSize: '1.1rem', color: '#191c20', marginBottom: '8px' }}>
+            <h3 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: '1.1rem', color: '#191c20', marginBottom: '8px' }}>
               Hapus Portfolio?
             </h3>
-            <p style={{ color: '#777683', fontSize: '0.875rem', marginBottom: '24px', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
+            <p style={{ color: '#777683', fontSize: '0.875rem', marginBottom: '24px', fontFamily: 'var(--font-display)' }}>
               Portfolio ini akan dihapus permanen dan tidak bisa dikembalikan.
             </p>
             <div style={{ display: 'flex', gap: '12px' }}>
               <button
                 onClick={() => setDeleteConfirm(null)}
-                style={{ flex: 1, padding: '12px', borderRadius: '10px', border: '1.5px solid #c7c8cf', background: 'white', cursor: 'pointer', fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 600, color: '#777683' }}
+                style={{ flex: 1, padding: '12px', borderRadius: '10px', border: '1.5px solid #c7c8cf', background: 'white', cursor: 'pointer', fontFamily: 'var(--font-display)', fontWeight: 600, color: '#777683' }}
               >
                 Batal
               </button>
               <button
                 onClick={() => deleteItem(deleteConfirm)}
-                style={{ flex: 1, padding: '12px', borderRadius: '10px', border: 'none', background: '#ba1a1a', color: 'white', cursor: 'pointer', fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 700 }}
+                style={{ flex: 1, padding: '12px', borderRadius: '10px', border: 'none', background: '#ba1a1a', color: 'white', cursor: 'pointer', fontFamily: 'var(--font-display)', fontWeight: 700 }}
               >
                 Hapus
               </button>

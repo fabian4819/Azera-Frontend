@@ -37,19 +37,19 @@ const inputStyle = (hasError?: boolean): React.CSSProperties => ({
   width: '100%', padding: '12px 16px', borderRadius: '12px',
   border: `1.5px solid ${hasError ? '#ba1a1a' : '#c7c8cf'}`,
   fontSize: '0.9rem', color: '#191c20', background: 'white',
-  outline: 'none', fontFamily: "'Plus Jakarta Sans', sans-serif",
+  outline: 'none', fontFamily: "var(--font-display)",
   transition: 'border-color 0.2s, box-shadow 0.2s',
 });
 const inputFocus = { boxShadow: '0 0 0 3px rgba(103,40,228,0.12)', borderColor: '#6728e4' };
 
 const labelStyle: React.CSSProperties = {
   display: 'block', fontWeight: 600, fontSize: '0.82rem', color: '#191c20',
-  marginBottom: '6px', fontFamily: "'Plus Jakarta Sans', sans-serif",
+  marginBottom: '6px', fontFamily: "var(--font-display)",
 };
-const errorStyle: React.CSSProperties = { color: '#ba1a1a', fontSize: '0.75rem', marginTop: '4px', fontFamily: "'Plus Jakarta Sans', sans-serif" };
+const errorStyle: React.CSSProperties = { color: '#ba1a1a', fontSize: '0.75rem', marginTop: '4px', fontFamily: "var(--font-display)" };
 
 const sectionTitleStyle: React.CSSProperties = {
-  fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700, fontSize: '1rem',
+  fontFamily: "var(--font-display)", fontWeight: 700, fontSize: '1rem',
   color: '#6728e4', marginBottom: '20px', paddingBottom: '12px',
   borderBottom: '1px solid #e1e0ff', marginTop: '8px',
 };
@@ -108,7 +108,7 @@ export default function BrandForm() {
           <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px' }}>
             <CheckCircle2 size={40} color="white" />
           </div>
-          <h2 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800, fontSize: '1.8rem', color: 'var(--on-background)', marginBottom: '12px' }}>
+          <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: '1.8rem', color: 'var(--on-background)', marginBottom: '12px' }}>
             Terima kasih!
           </h2>
           <p style={{ color: 'var(--on-surface-variant)', lineHeight: 1.7, marginBottom: '32px' }}>
@@ -127,7 +127,7 @@ export default function BrandForm() {
       <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '48px 24px 80px' }}>
         <div style={{ textAlign: 'center', marginBottom: '48px' }}>
           <span className="tag-pill tag-pill-navy" style={{ margin: '0 auto 12px' }}>Mulai Campaign</span>
-          <h1 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800, fontSize: 'clamp(1.8rem, 4vw, 3rem)', color: 'var(--on-background)', lineHeight: 1.15 }}>
+          <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 'clamp(1.8rem, 4vw, 3rem)', color: 'var(--on-background)', lineHeight: 1.15 }}>
             Konsultasi Campaign{' '}
             <span style={{ color: 'var(--secondary)' }}>Gratis</span>
           </h1>
@@ -141,9 +141,9 @@ export default function BrandForm() {
             <div className="bento-card" style={{ padding: '28px', marginBottom: '20px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
                 <img src="/icon.png" alt="AzeraKOL" style={{ height: '28px' }} />
-                <span style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 900, fontStyle: 'italic', fontSize: '1rem', color: '#15157d', letterSpacing: '-0.02em' }}>AZERAKOL</span>
+                <span style={{ fontFamily: "var(--font-display)", fontWeight: 900, fontStyle: 'italic', fontSize: '1rem', color: '#15157d', letterSpacing: '-0.02em' }}>AZERAKOL</span>
               </div>
-              <p style={{ color: '#464652', fontSize: '0.85rem', lineHeight: 1.7, marginBottom: '20px', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+              <p style={{ color: '#464652', fontSize: '0.85rem', lineHeight: 1.7, marginBottom: '20px', fontFamily: "var(--font-display)" }}>
                 Konsultasi gratis, tidak ada biaya di awal. Tim kami siap membantu merencanakan campaign terbaik untuk brand kamu.
               </p>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#464652', fontSize: '0.82rem', marginBottom: '10px' }}>
@@ -160,7 +160,7 @@ export default function BrandForm() {
               </div>
             </div>
             <div className="bento-card-dark" style={{ padding: '20px' }}>
-              <p style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700, marginBottom: '6px' }}>Butuh bantuan?</p>
+              <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, marginBottom: '6px' }}>Butuh bantuan?</p>
               <p style={{ fontSize: '0.82rem', opacity: 0.85, marginBottom: '14px' }}>
                 Hubungi kami langsung via WhatsApp
               </p>
@@ -173,7 +173,7 @@ export default function BrandForm() {
                   background: 'rgba(255,255,255,0.2)', color: 'white',
                   borderRadius: '8px', padding: '9px 16px', fontSize: '0.82rem',
                   fontWeight: 600, textDecoration: 'none',
-                  fontFamily: "'Plus Jakarta Sans', sans-serif",
+                  fontFamily: "var(--font-display)",
                 }}
               >
                 <MessageCircle size={14} /> Chat Sekarang
@@ -261,7 +261,7 @@ export default function BrandForm() {
                         background: selected ? 'var(--secondary)' : 'rgba(103,40,228,0.1)',
                         color: selected ? 'white' : '#6728e4',
                         fontSize: '0.82rem', fontWeight: 600, cursor: 'pointer',
-                        transition: 'all 0.2s', fontFamily: "'Plus Jakarta Sans', sans-serif",
+                        transition: 'all 0.2s', fontFamily: "var(--font-display)",
                       }}
                     >
                       {p}
@@ -289,7 +289,7 @@ export default function BrandForm() {
                         background: selected ? 'var(--secondary)' : 'rgba(103,40,228,0.1)',
                         color: selected ? 'white' : '#6728e4',
                         fontSize: '0.82rem', fontWeight: 600, cursor: 'pointer',
-                        transition: 'all 0.2s', fontFamily: "'Plus Jakarta Sans', sans-serif",
+                        transition: 'all 0.2s', fontFamily: "var(--font-display)",
                       }}
                     >
                       {t}

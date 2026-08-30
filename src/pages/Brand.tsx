@@ -21,7 +21,7 @@ export default function Brand() {
           <span className="tag-pill tag-pill-navy" style={{ margin: '0 auto 18px' }}>Untuk Brand</span>
           <motion.h1
             style={{
-              fontFamily: "'Plus Jakarta Sans', sans-serif",
+              fontFamily: "var(--font-display)",
               fontWeight: 800,
               fontSize: 'clamp(2.4rem, 5.5vw, 4rem)',
               color: 'var(--on-background)',
@@ -69,7 +69,7 @@ export default function Brand() {
                     position: 'absolute', top: '-14px', left: '50%', transform: 'translateX(-50%)',
                     background: 'var(--secondary)', color: 'white', borderRadius: '999px',
                     padding: '6px 20px', fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.1em',
-                    whiteSpace: 'nowrap', zIndex: 10, fontFamily: "'Plus Jakarta Sans', sans-serif",
+                    whiteSpace: 'nowrap', zIndex: 10, fontFamily: "var(--font-display)",
                   }}
                 >
                   MOST POPULAR
@@ -81,10 +81,10 @@ export default function Brand() {
                 style={{ overflow: 'hidden', borderColor: pkg.popular ? 'var(--primary)' : undefined }}
               >
                 <div style={{ padding: '34px 30px' }}>
-                  <p style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800, fontSize: '1.3rem', color: pkg.popular ? '#fff' : 'var(--on-background)', marginBottom: '4px' }}>
+                  <p style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: '1.3rem', color: pkg.popular ? '#fff' : 'var(--on-background)', marginBottom: '4px' }}>
                     {pkg.name}
                   </p>
-                  <p style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800, fontSize: '1.7rem', color: pkg.popular ? '#fff' : 'var(--secondary)', marginBottom: '18px', lineHeight: 1.2 }}>
+                  <p style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: '1.7rem', color: pkg.popular ? '#fff' : 'var(--secondary)', marginBottom: '18px', lineHeight: 1.2 }}>
                     {pkg.price}
                   </p>
 

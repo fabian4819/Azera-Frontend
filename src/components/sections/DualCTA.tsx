@@ -18,7 +18,7 @@ export default function DualCTA() {
         style={{ background: 'var(--primary)', padding: '80px 60px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}
       >
         <span className="tag-pill tag-pill-white" style={{ marginBottom: '18px' }}>Untuk Brand</span>
-        <h2 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800, fontSize: 'clamp(1.8rem, 4vw, 2.6rem)', color: '#ffffff', lineHeight: 1.15, marginBottom: '16px' }}>
+        <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 'clamp(1.8rem, 4vw, 2.6rem)', color: '#ffffff', lineHeight: 1.15, marginBottom: '16px' }}>
           Siap Mulai Campaign KOL?
         </h2>
         <p style={{ color: 'rgba(255,255,255,0.65)', fontSize: '0.95rem', lineHeight: 1.75, marginBottom: '32px', maxWidth: '380px' }}>
@@ -37,7 +37,7 @@ export default function DualCTA() {
         style={{ background: 'var(--secondary)', padding: '80px 60px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}
       >
         <span className="tag-pill tag-pill-white" style={{ marginBottom: '18px' }}>Untuk KOL</span>
-        <h2 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800, fontSize: 'clamp(1.8rem, 4vw, 2.6rem)', color: '#ffffff', lineHeight: 1.15, marginBottom: '16px' }}>
+        <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 'clamp(1.8rem, 4vw, 2.6rem)', color: '#ffffff', lineHeight: 1.15, marginBottom: '16px' }}>
           Bergabung dengan AzeraKOL Network
         </h2>
         <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.95rem', lineHeight: 1.75, marginBottom: '32px', maxWidth: '380px' }}>
@@ -45,7 +45,7 @@ export default function DualCTA() {
         </p>
         <Link
           to="/kol/register"
-          style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '14px 32px', borderRadius: '999px', background: 'white', color: 'var(--secondary)', fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700, fontSize: '1rem', textDecoration: 'none', alignSelf: 'flex-start' }}
+          style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '14px 32px', borderRadius: '999px', background: 'white', color: 'var(--secondary)', fontFamily: "var(--font-display)", fontWeight: 700, fontSize: '1rem', textDecoration: 'none', alignSelf: 'flex-start' }}
         >
           Bergabung KOL
         </Link>

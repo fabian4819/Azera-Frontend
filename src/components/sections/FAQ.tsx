@@ -22,7 +22,7 @@ export default function FAQ() {
           transition={{ duration: 0.6, ease: easeOut }}
         >
           <span className="tag-pill tag-pill-navy" style={{ marginBottom: '16px' }}>FAQ</span>
-          <h2 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800, fontSize: 'clamp(2rem, 5vw, 3.2rem)', color: 'var(--on-background)', lineHeight: 1.15 }}>
+          <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 'clamp(2rem, 5vw, 3.2rem)', color: 'var(--on-background)', lineHeight: 1.15 }}>
             Pertanyaan yang Sering Ditanya.
           </h2>
         </motion.div>
@@ -49,7 +49,7 @@ export default function FAQ() {
                     cursor: 'pointer', textAlign: 'left',
                   }}
                 >
-                  <span style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700, fontSize: '1rem', color: isOpen ? '#6728e4' : '#191c20', transition: 'color 0.2s', lineHeight: 1.4 }}>
+                  <span style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: '1rem', color: isOpen ? '#6728e4' : '#191c20', transition: 'color 0.2s', lineHeight: 1.4 }}>
                     {faq.question}
                   </span>
                   <motion.div animate={{ rotate: isOpen ? 180 : 0 }} transition={{ duration: 0.25 }} style={{ flexShrink: 0, color: isOpen ? '#6728e4' : '#777683' }}>
@@ -65,7 +65,7 @@ export default function FAQ() {
                       transition={{ duration: 0.3, ease: easeOut }}
                       style={{ overflow: 'hidden' }}
                     >
-                      <p style={{ color: '#464652', fontSize: '0.925rem', lineHeight: 1.8, fontFamily: "'Plus Jakarta Sans', sans-serif", paddingBottom: '24px' }}>
+                      <p style={{ color: '#464652', fontSize: '0.925rem', lineHeight: 1.8, fontFamily: "var(--font-display)", paddingBottom: '24px' }}>
                         {faq.answer}
                       </p>
                     </motion.div>

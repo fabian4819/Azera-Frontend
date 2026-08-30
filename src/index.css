@@ -1,5 +1,32 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap');
 @import "tailwindcss";
+
+/* ─── Self-hosted brand fonts (file .ttf ditaruh di client/public/fonts/) ─────
+   Mengikuti referensi pitch.com: display = Mark Pro, body = Eina 03.
+   Taruh file font di client/public/fonts/ dengan nama persis di bawah ini.
+   Kalau punya weight tambahan (mis. Eina Medium/Semibold/Bold), tambahkan
+   @font-face baru dengan font-weight yang sesuai — beri tahu aku file-nya. */
+@font-face {
+  font-family: 'Mark Pro';
+  src: url('/fonts/MarkPro-Bold.ttf') format('truetype');
+  font-weight: 400 900; /* satu file bold dipakai untuk semua weight display (tanpa sintesis) */
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Eina 03';
+  src: url('/fonts/Eina03-Regular.ttf') format('truetype');
+  font-weight: 400 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Eina 03';
+  src: url('/fonts/Eina03-Bold.ttf') format('truetype');
+  font-weight: 600 800;
+  font-style: normal;
+  font-display: swap;
+}
 
 /* ─── Material 3 Design Tokens ───────────────────── */
 :root {
@@ -47,6 +74,23 @@
 
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* Font families (referensi pitch.com): display=Mark Pro, body=Eina 03, mono=Space Mono */
+  --font-display: 'Mark Pro', system-ui, -apple-system, sans-serif;
+  --font-body: 'Eina 03', system-ui, -apple-system, sans-serif;
+  --font-mono: 'Space Mono', ui-monospace, 'SF Mono', monospace;
+
+  /* ─── Aksen lime + colored-glow (mengikuti pitch.com) ───────────
+     Lime jadi "pop accent" di atas basis ungu-navy — dipakai hemat
+     (CTA utama, highlight, satu tag) supaya tetap menonjol. */
+  --lime: #c4ee87;
+  --lime-strong: #b3e768;
+  --on-lime: #15157d;
+  /* Bayangan BERWARNA (bukan abu-abu) — tanda khas pitch */
+  --shadow-pitch: 0 20px 60px -20px rgba(198, 165, 255, 0.45);
+  --shadow-lime: 0 18px 50px -18px rgba(196, 238, 135, 0.65);
+  /* Easing reveal khas pitch (easeOutQuint) */
+  --ease-reveal: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 /* ─── Base Reset ───────────────────────────────── */
@@ -61,7 +105,7 @@ html {
 }
 
 body {
-  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  font-family: var(--font-body);
   font-weight: 400;
   color: var(--on-background);
   background: var(--surface);
@@ -159,7 +203,7 @@ input, textarea, select {
   border: none;
   background: linear-gradient(135deg, var(--secondary), var(--secondary-container));
   color: var(--text-white);
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: var(--font-display);
   font-weight: 700;
   font-size: 0.95rem;
   cursor: pointer;
@@ -195,6 +239,56 @@ input, textarea, select {
   transform: none;
 }
 
+/* Lime CTA — aksen pop khas pitch (lime bg + teks navy) */
+.btn-lime {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 32px;
+  border-radius: var(--radius-full);
+  border: none;
+  background: var(--lime);
+  color: var(--on-lime);
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: transform 0.35s var(--ease-spring), box-shadow 0.35s var(--ease-spring), background 0.2s ease;
+  box-shadow: var(--shadow-lime);
+  white-space: nowrap;
+  text-decoration: none;
+}
+.btn-lime:hover {
+  transform: translateY(-2px) scale(1.03);
+  background: var(--lime-strong);
+  box-shadow: 0 22px 60px -16px rgba(196, 238, 135, 0.8);
+}
+.btn-lime:active { transform: scale(0.97); }
+
+/* Outline terang — untuk tombol sekunder di atas background gelap (hero) */
+.btn-outline-white {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 13px 30px;
+  border-radius: var(--radius-full);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1.5px solid rgba(255, 255, 255, 0.4);
+  color: #fff;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 0.25s ease, border-color 0.25s ease, transform 0.25s ease;
+  white-space: nowrap;
+  text-decoration: none;
+}
+.btn-outline-white:hover {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.7);
+  transform: translateY(-1px);
+}
+
 .btn-secondary {
   display: inline-flex;
   align-items: center;
@@ -204,7 +298,7 @@ input, textarea, select {
   border: none;
   background: var(--primary-container);
   color: var(--on-primary-container);
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: var(--font-display);
   font-weight: 700;
   font-size: 0.95rem;
   cursor: pointer;
@@ -229,7 +323,7 @@ input, textarea, select {
   background: transparent;
   border: 2px solid var(--primary);
   color: var(--primary);
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: var(--font-display);
   font-weight: 700;
   font-size: 0.95rem;
   cursor: pointer;
@@ -252,7 +346,7 @@ input, textarea, select {
   background: transparent;
   border: none;
   color: var(--on-surface-variant);
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: var(--font-display);
   font-weight: 600;
   font-size: 0.9rem;
   cursor: pointer;
@@ -267,7 +361,7 @@ input, textarea, select {
 
 /* ─── Typography Utilities ─────────────────────── */
 .section-label {
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: var(--font-display);
   font-size: 0.75rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -276,6 +370,29 @@ input, textarea, select {
   display: inline-flex;
   align-items: center;
   gap: 8px;
+}
+
+/* Eyebrow monospace — label kecil di atas heading (signature pitch) */
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--secondary);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Highlight marker lime — untuk menyorot kata di headline */
+.mark-lime {
+  background: var(--lime);
+  color: var(--on-background);
+  padding: 0 0.14em;
+  border-radius: 0.14em;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
 }
 
 .pill-label {
@@ -366,7 +483,7 @@ input, textarea, select {
 .bento-card:hover {
   border-color: var(--secondary);
   transform: translateY(-3px);
-  box-shadow: var(--shadow-card);
+  box-shadow: var(--shadow-pitch);
 }
 .bento-card-dark {
   background: var(--primary);
@@ -374,6 +491,9 @@ input, textarea, select {
   border-radius: var(--radius-lg);
   color: #fff;
 }
+/* Varian kartu solusi — hover glow lime (aksen pitch) */
+.bento-card-sol { border-color: rgba(196, 238, 135, 0.55); }
+.bento-card-sol:hover { border-color: var(--lime-strong); box-shadow: var(--shadow-lime); }
 
 /* ─── Tag Pills (tinted, flat — no glow rings) ─────────────────── */
 .tag-pill {
@@ -382,7 +502,7 @@ input, textarea, select {
   gap: 6px;
   border-radius: var(--radius-full);
   padding: 5px 14px;
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: var(--font-display);
   font-weight: 700;
   font-size: 0.68rem;
   letter-spacing: 0.06em;
@@ -393,6 +513,7 @@ input, textarea, select {
 .tag-pill-pink   { background: rgba(255, 129, 170, 0.18); color: #a31556; }
 .tag-pill-navy   { background: rgba(21, 21, 125, 0.08); color: var(--primary); }
 .tag-pill-white  { background: rgba(255, 255, 255, 0.15); color: #fff; }
+.tag-pill-lime   { background: rgba(196, 238, 135, 0.35); color: #3d6410; }
 
 /* ─── Underline accent (hand-drawn style swash) ────────────────── */
 .underline-accent {

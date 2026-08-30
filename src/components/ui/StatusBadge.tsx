@@ -18,7 +18,7 @@ export default function StatusBadge({ status }: StatusBadgeProps) {
     <span style={{
       display: 'inline-flex', alignItems: 'center', background: config.bg, color: config.color,
       borderRadius: '999px', padding: '4px 12px', fontSize: '0.72rem',
-      fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700, whiteSpace: 'nowrap', letterSpacing: '0.04em',
+      fontFamily: "var(--font-display)", fontWeight: 700, whiteSpace: 'nowrap', letterSpacing: '0.04em',
     }}>
       {config.label}
     </span>

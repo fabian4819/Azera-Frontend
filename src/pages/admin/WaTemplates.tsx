@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Save } from 'lucide-react';
 import api from '../../lib/api';
 
-const f = "'Plus Jakarta Sans', sans-serif";
+const f = "var(--font-display)";
 const cardStyle: React.CSSProperties = {
   background: 'white', borderRadius: '16px', padding: '24px', border: '1px solid #e1e0ff',
   boxShadow: '0 2px 12px rgba(107,46,232,0.05)', marginBottom: '16px',

@@ -52,7 +52,7 @@ export default function Portfolio() {
       <div style={{ padding: '80px 24px 8px', textAlign: 'center' }}>
         <div style={{ maxWidth: '640px', margin: '0 auto' }}>
           <span className="tag-pill tag-pill-navy" style={{ margin: '0 auto 16px' }}>Portfolio</span>
-          <h1 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800, fontSize: 'clamp(2.4rem, 5.5vw, 4rem)', color: 'var(--on-background)', lineHeight: 1.1, marginBottom: '16px', letterSpacing: '-0.03em' }}>
+          <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 'clamp(2.4rem, 5.5vw, 4rem)', color: 'var(--on-background)', lineHeight: 1.1, marginBottom: '16px', letterSpacing: '-0.03em' }}>
             Campaign{' '}
             <span className="underline-accent">
               Sukses
@@ -90,7 +90,7 @@ export default function Portfolio() {
 
         {caseStudies.length > 0 && (
           <div style={{ marginBottom: '52px' }}>
-            <h2 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800, fontSize: '1.4rem', color: 'var(--on-background)', marginBottom: '20px', textAlign: 'center' }}>
+            <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: '1.4rem', color: 'var(--on-background)', marginBottom: '20px', textAlign: 'center' }}>
               Case Study Terbaru
             </h2>
             <div className="portfolio-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '18px' }}>
@@ -99,7 +99,7 @@ export default function Portfolio() {
                   <Link to={`/portfolio/case-study/${cs.id}`} style={{ textDecoration: 'none' }}>
                     <div className="bento-card" style={{ padding: '24px' }}>
                       {cs.brandName && <span className="tag-pill tag-pill-purple">{cs.brandName}</span>}
-                      <h3 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700, fontSize: '1rem', color: 'var(--on-background)', margin: '12px 0' }}>{cs.headline}</h3>
+                      <h3 style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: '1rem', color: 'var(--on-background)', margin: '12px 0' }}>{cs.headline}</h3>
                       <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '14px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: 'var(--outline)', fontSize: '0.78rem' }}><Eye size={13} />{cs.highlightStats.views.toLocaleString('id-ID')}</div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#10B981', fontSize: '0.78rem' }}><TrendingUp size={13} />{cs.highlightStats.engagementRate}% ER</div>
@@ -130,7 +130,7 @@ export default function Portfolio() {
                   {item.logo ? (
                     <img src={item.logo} alt={`Logo ${item.brand}`} style={{ maxHeight: '48px', maxWidth: '70%', objectFit: 'contain' }} />
                   ) : (
-                    <span style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: '3.6rem', fontWeight: 800, color: 'rgba(255,255,255,0.2)', lineHeight: 1 }}>{item.brand[0]}</span>
+                    <span style={{ fontFamily: "var(--font-display)", fontSize: '3.6rem', fontWeight: 800, color: 'rgba(255,255,255,0.2)', lineHeight: 1 }}>{item.brand[0]}</span>
                   )}
                   {item.featured && (
                     <span style={{ background: 'rgba(255,255,255,0.18)', color: 'white', borderRadius: '999px', padding: '4px 12px', fontSize: '0.65rem', fontWeight: 700, position: 'absolute', top: '12px', right: '12px', letterSpacing: '0.08em' }}>
@@ -140,7 +140,7 @@ export default function Portfolio() {
                 </div>
                 <div style={{ padding: '22px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-                    <h3 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700, fontSize: '1rem', color: 'var(--on-background)' }}>{item.brand}</h3>
+                    <h3 style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: '1rem', color: 'var(--on-background)' }}>{item.brand}</h3>
                     <span className="tag-pill tag-pill-purple">{item.category}</span>
                   </div>
                   <p style={{ color: 'var(--outline)', fontSize: '0.82rem', marginBottom: '16px' }}>{item.hashtag}</p>

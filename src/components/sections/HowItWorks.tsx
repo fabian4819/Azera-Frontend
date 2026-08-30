@@ -25,7 +25,7 @@ export default function HowItWorks() {
           transition={{ duration: 0.6, ease: easeOut }}
         >
           <span className="tag-pill tag-pill-navy" style={{ marginBottom: '16px' }}>Proses Kami</span>
-          <h2 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800, fontSize: 'clamp(2rem, 5vw, 3.2rem)', color: 'var(--on-background)', lineHeight: 1.15 }}>
+          <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 'clamp(2rem, 5vw, 3.2rem)', color: 'var(--on-background)', lineHeight: 1.15 }}>
             How It Works
           </h2>
         </motion.div>
@@ -51,10 +51,10 @@ export default function HowItWorks() {
                 >
                   <Icon size={20} color={step.dark ? '#fff' : 'var(--secondary)'} />
                 </div>
-                <p style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700, fontSize: '0.72rem', letterSpacing: '0.08em', color: step.dark ? 'rgba(255,255,255,0.5)' : 'var(--outline)', marginBottom: '8px' }}>
+                <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: '0.72rem', letterSpacing: '0.08em', color: step.dark ? 'rgba(255,255,255,0.5)' : 'var(--outline)', marginBottom: '8px' }}>
                   STEP {step.number}
                 </p>
-                <p style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700, fontSize: '1.15rem', color: step.dark ? '#fff' : 'var(--on-background)', marginBottom: '10px' }}>
+                <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: '1.15rem', color: step.dark ? '#fff' : 'var(--on-background)', marginBottom: '10px' }}>
                   {step.title}
                 </p>
                 <p style={{ color: step.dark ? 'rgba(255,255,255,0.65)' : 'var(--on-surface-variant)', fontSize: '0.85rem', lineHeight: 1.65 }}>

@@ -46,7 +46,7 @@ export default function PortfolioPreview() {
           transition={{ duration: 0.6, ease: easeOut }}
         >
           <span className="tag-pill tag-pill-purple" style={{ marginBottom: '16px' }}>Portfolio</span>
-          <h2 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800, fontSize: 'clamp(2rem, 5vw, 3.2rem)', color: 'var(--on-background)', lineHeight: 1.15 }}>
+          <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 'clamp(2rem, 5vw, 3.2rem)', color: 'var(--on-background)', lineHeight: 1.15 }}>
             Campaign Terbaik Kami.
           </h2>
         </motion.div>
@@ -72,12 +72,12 @@ export default function PortfolioPreview() {
                   {item.logo ? (
                     <img src={item.logo} alt={`Logo ${item.brand}`} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
                   ) : (
-                    <span style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800, fontSize: '1.3rem', color: 'white' }}>{item.brand[0]}</span>
+                    <span style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: '1.3rem', color: 'white' }}>{item.brand[0]}</span>
                   )}
                 </div>
                 {item.featured && <span className="tag-pill tag-pill-purple">Featured</span>}
               </div>
-              <h3 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700, fontSize: '1.1rem', color: 'var(--on-background)', marginBottom: '4px' }}>
+              <h3 style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: '1.1rem', color: 'var(--on-background)', marginBottom: '4px' }}>
                 {item.brand}
               </h3>
               <p style={{ color: 'var(--secondary)', fontSize: '0.82rem', marginBottom: '14px', fontWeight: 500 }}>

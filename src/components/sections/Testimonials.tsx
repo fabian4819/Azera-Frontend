@@ -31,7 +31,7 @@ export default function Testimonials() {
           transition={{ duration: 0.6, ease: easeOut }}
         >
           <span className="tag-pill tag-pill-pink" style={{ marginBottom: '16px' }}>Testimoni</span>
-          <h2 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800, fontSize: 'clamp(2rem, 5vw, 3.2rem)', color: 'var(--on-background)', lineHeight: 1.15 }}>
+          <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 'clamp(2rem, 5vw, 3.2rem)', color: 'var(--on-background)', lineHeight: 1.15 }}>
             Apa Kata Klien Kami?
           </h2>
         </motion.div>
@@ -68,11 +68,11 @@ export default function Testimonials() {
             </div>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <div style={{ width: '44px', height: '44px', borderRadius: '50%', background: t.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800, fontSize: '0.9rem', color: 'white', flexShrink: 0 }}>
+                <div style={{ width: '44px', height: '44px', borderRadius: '50%', background: t.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "var(--font-display)", fontWeight: 800, fontSize: '0.9rem', color: 'white', flexShrink: 0 }}>
                   {t.initials}
                 </div>
                 <div>
-                  <p style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700, fontSize: '0.9rem', color: 'var(--on-background)' }}>{t.name}</p>
+                  <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: '0.9rem', color: 'var(--on-background)' }}>{t.name}</p>
                   <p style={{ color: 'var(--outline)', fontSize: '0.78rem' }}>{t.role}</p>
                 </div>
               </div>
@@ -91,17 +91,17 @@ export default function Testimonials() {
             <div style={{ display: 'flex', gap: '2px', marginBottom: '10px' }}>
               {[0, 1, 2, 3, 4].map((n) => <Star key={n} size={13} fill="#ff81aa" color="#ff81aa" />)}
             </div>
-            <p style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800, fontSize: '1.8rem', color: 'var(--on-background)', lineHeight: 1 }}>4.9</p>
+            <p style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: '1.8rem', color: 'var(--on-background)', lineHeight: 1 }}>4.9</p>
             <p style={{ color: 'var(--on-surface-variant)', fontSize: '0.78rem', marginTop: '4px' }}>Rating Klien</p>
           </div>
 
           <div className="bento-card" style={{ gridArea: 'hours', padding: '24px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-            <p style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800, fontSize: '1.8rem', color: 'var(--on-background)', lineHeight: 1, marginBottom: '4px' }}>500+</p>
+            <p style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: '1.8rem', color: 'var(--on-background)', lineHeight: 1, marginBottom: '4px' }}>500+</p>
             <p style={{ color: 'var(--on-surface-variant)', fontSize: '0.78rem' }}>Campaign Selesai</p>
           </div>
 
           <div className="bento-card-dark" style={{ gridArea: 'niches', padding: '24px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-            <p style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700, fontSize: '0.9rem', color: '#fff', marginBottom: '14px' }}>
+            <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: '0.9rem', color: '#fff', marginBottom: '14px' }}>
               Brand Kategori yang Kami Layani
             </p>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>

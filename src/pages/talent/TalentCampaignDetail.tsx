@@ -11,7 +11,7 @@ interface CampaignInfo {
   _id: string; name: string; briefContent?: string; workflowStage: string;
 }
 
-const f = "'Plus Jakarta Sans', sans-serif";
+const f = "var(--font-display)";
 const cardStyle: React.CSSProperties = { background: 'white', borderRadius: '16px', padding: '20px', border: '1px solid #e1e0ff', marginBottom: '16px' };
 const inputStyle: React.CSSProperties = { width: '100%', padding: '11px 14px', borderRadius: '12px', border: '1.5px solid #c7c8cf', fontSize: '0.875rem', color: '#191c20', background: 'white', outline: 'none', fontFamily: f };
 const labelStyle: React.CSSProperties = { display: 'block', fontWeight: 600, fontSize: '0.8rem', color: '#191c20', marginBottom: '5px', fontFamily: f };

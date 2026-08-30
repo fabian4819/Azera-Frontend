@@ -21,7 +21,7 @@ const statusOptions = ['', 'new', 'reviewed', 'contacted'];
 const thStyle: React.CSSProperties = {
   padding: '14px 16px',
   textAlign: 'left',
-  fontFamily: "'Plus Jakarta Sans', sans-serif",
+  fontFamily: "var(--font-display)",
   fontWeight: 700,
   color: '#191c20',
   fontSize: '0.78rem',
@@ -34,7 +34,7 @@ const tdStyle: React.CSSProperties = {
   fontSize: '0.875rem',
   color: '#464652',
   whiteSpace: 'nowrap',
-  fontFamily: "'Plus Jakarta Sans', sans-serif",
+  fontFamily: "var(--font-display)",
 };
 
 const controlStyle: React.CSSProperties = {
@@ -43,7 +43,7 @@ const controlStyle: React.CSSProperties = {
   border: '1.5px solid #c7c8cf',
   fontSize: '0.875rem',
   outline: 'none',
-  fontFamily: "'Plus Jakarta Sans', sans-serif",
+  fontFamily: "var(--font-display)",
   background: 'white',
   cursor: 'pointer',
   color: '#191c20',
@@ -193,7 +193,7 @@ export default function Brands() {
                           borderRadius: '999px',
                           padding: '3px 10px',
                           fontSize: '0.72rem',
-                          fontFamily: "'Plus Jakarta Sans', sans-serif",
+                          fontFamily: "var(--font-display)",
                           fontWeight: 700,
                           textTransform: 'capitalize',
                         }}
@@ -218,7 +218,7 @@ export default function Brands() {
                           border: 'none',
                           cursor: 'pointer',
                           fontSize: '0.78rem',
-                          fontFamily: "'Plus Jakarta Sans', sans-serif",
+                          fontFamily: "var(--font-display)",
                           fontWeight: 700,
                         }}
                       >
@@ -238,7 +238,7 @@ export default function Brands() {
             borderTop: '1px solid #e1e0ff',
             color: '#777683',
             fontSize: '0.78rem',
-            fontFamily: "'Plus Jakarta Sans', sans-serif",
+            fontFamily: "var(--font-display)",
           }}
         >
           {brands.length} hasil ditemukan

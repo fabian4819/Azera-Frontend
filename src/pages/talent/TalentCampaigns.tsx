@@ -8,7 +8,7 @@ interface CampaignItem {
   campaign: { _id: string; name: string; workflowStage: string; budget: number };
 }
 
-const f = "'Plus Jakarta Sans', sans-serif";
+const f = "var(--font-display)";
 
 export default function TalentCampaigns() {
   const [items, setItems] = useState<CampaignItem[]>([]);

@@ -9,17 +9,17 @@ export default function Footer() {
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
               <img src="/icon.png" alt="AzeraKOL" style={{ height: '28px', objectFit: 'contain' }} />
-              <span style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 900, fontStyle: 'italic', fontSize: '1.05rem', color: '#ffffff', letterSpacing: '-0.02em' }}>
+              <span style={{ fontFamily: "var(--font-display)", fontWeight: 900, fontStyle: 'italic', fontSize: '1.05rem', color: '#ffffff', letterSpacing: '-0.02em' }}>
                 AZERAKOL
               </span>
             </div>
-            <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: '0.85rem', lineHeight: 1.7, maxWidth: '260px', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+            <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: '0.85rem', lineHeight: 1.7, maxWidth: '260px', fontFamily: "var(--font-display)" }}>
               Platform KOL campaign agency terpercaya di Indonesia — menghubungkan brand dengan ribuan KOL terkurasi.
             </p>
           </div>
 
           <div>
-            <h4 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700, fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '16px' }}>
+            <h4 style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '16px' }}>
               Platform
             </h4>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -32,7 +32,7 @@ export default function Footer() {
                 <Link
                   key={item.to + item.label}
                   to={item.to}
-                  style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.85rem', textDecoration: 'none', transition: 'color 0.2s', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+                  style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.85rem', textDecoration: 'none', transition: 'color 0.2s', fontFamily: "var(--font-display)" }}
                   onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = '#ffffff')}
                   onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.7)')}
                 >
@@ -43,7 +43,7 @@ export default function Footer() {
           </div>
 
           <div>
-            <h4 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700, fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '16px' }}>
+            <h4 style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '16px' }}>
               Social
             </h4>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -51,7 +51,7 @@ export default function Footer() {
                 href="https://www.instagram.com/azerakol.id/"
                 target="_blank"
                 rel="noopener noreferrer"
-                style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'rgba(255,255,255,0.7)', fontSize: '0.85rem', textDecoration: 'none', transition: 'color 0.2s', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+                style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'rgba(255,255,255,0.7)', fontSize: '0.85rem', textDecoration: 'none', transition: 'color 0.2s', fontFamily: "var(--font-display)" }}
                 onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = '#ffffff')}
                 onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.7)')}
               >
@@ -61,7 +61,7 @@ export default function Footer() {
                 <a
                   key={platform}
                   href="#"
-                  style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'rgba(255,255,255,0.7)', fontSize: '0.85rem', textDecoration: 'none', transition: 'color 0.2s', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+                  style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'rgba(255,255,255,0.7)', fontSize: '0.85rem', textDecoration: 'none', transition: 'color 0.2s', fontFamily: "var(--font-display)" }}
                   onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = '#ffffff')}
                   onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.7)')}
                 >
@@ -72,7 +72,7 @@ export default function Footer() {
           </div>
 
           <div>
-            <h4 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700, fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '16px' }}>
+            <h4 style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '16px' }}>
               Kontak
             </h4>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -80,7 +80,7 @@ export default function Footer() {
                 href="https://wa.me/6288201586126"
                 target="_blank"
                 rel="noopener noreferrer"
-                style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'rgba(255,255,255,0.7)', fontSize: '0.85rem', textDecoration: 'none', transition: 'color 0.2s', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+                style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'rgba(255,255,255,0.7)', fontSize: '0.85rem', textDecoration: 'none', transition: 'color 0.2s', fontFamily: "var(--font-display)" }}
                 onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = '#ffffff')}
                 onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.7)')}
               >
@@ -88,7 +88,7 @@ export default function Footer() {
               </a>
               <a
                 href="mailto:hello@azerakol.id"
-                style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'rgba(255,255,255,0.7)', fontSize: '0.85rem', textDecoration: 'none', transition: 'color 0.2s', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+                style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'rgba(255,255,255,0.7)', fontSize: '0.85rem', textDecoration: 'none', transition: 'color 0.2s', fontFamily: "var(--font-display)" }}
                 onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = '#ffffff')}
                 onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.7)')}
               >
@@ -99,10 +99,10 @@ export default function Footer() {
         </div>
 
         <div style={{ borderTop: '1px solid rgba(255,255,255,0.12)', paddingTop: '24px', display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
-          <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.78rem', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+          <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.78rem', fontFamily: "var(--font-display)" }}>
             &copy; {new Date().getFullYear()} AzeraKOL Agency. All rights reserved.
           </p>
-          <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.78rem', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+          <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.78rem', fontFamily: "var(--font-display)" }}>
             Jasa KOL Management & Influencer Marketing Indonesia
           </p>
         </div>

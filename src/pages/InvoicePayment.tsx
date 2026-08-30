@@ -3,7 +3,7 @@ import { useParams, useSearchParams } from 'react-router-dom';
 import { CheckCircle2, Upload, ExternalLink } from 'lucide-react';
 import api from '../lib/api';
 
-const f = "'Plus Jakarta Sans', sans-serif";
+const f = "var(--font-display)";
 
 interface InvoiceItem { name: string; description?: string; qty: number | null; rate: number }
 interface InvoiceInfo {

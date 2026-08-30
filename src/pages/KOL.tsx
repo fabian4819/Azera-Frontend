@@ -34,7 +34,7 @@ export default function KOL() {
             initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: easeOut }}>
             Untuk KOL &amp; Creator
           </motion.span>
-          <motion.h1 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800, fontSize: 'clamp(2.4rem, 6vw, 4.4rem)', color: 'var(--on-background)', lineHeight: 1.1, marginBottom: '20px', letterSpacing: '-0.03em' }}
+          <motion.h1 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 'clamp(2.4rem, 6vw, 4.4rem)', color: 'var(--on-background)', lineHeight: 1.1, marginBottom: '20px', letterSpacing: '-0.03em' }}
             initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, ease: easeOut, delay: 0.1 }}>
             Bergabung dengan{' '}
             <span className="underline-accent">
@@ -71,7 +71,7 @@ export default function KOL() {
           <motion.div style={{ textAlign: 'center', marginBottom: '56px' }}
             initial={{ opacity: 0, y: 24 }} animate={benefitsInView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6, ease: easeOut }}>
             <span className="tag-pill tag-pill-purple" style={{ marginBottom: '14px' }}>Manfaat</span>
-            <h2 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800, fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', color: 'var(--on-background)' }}>
+            <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', color: 'var(--on-background)' }}>
               Kenapa Bergabung AzeraKOL?
             </h2>
           </motion.div>
@@ -84,7 +84,7 @@ export default function KOL() {
                   <div style={{ width: '44px', height: '44px', borderRadius: '13px', background: b.dark ? 'rgba(255,255,255,0.12)' : 'rgba(103,40,228,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '18px' }}>
                     <Icon size={20} color={b.dark ? '#fff' : 'var(--secondary)'} />
                   </div>
-                  <h3 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700, fontSize: '1rem', color: b.dark ? '#fff' : 'var(--on-background)', marginBottom: '10px' }}>{b.title}</h3>
+                  <h3 style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: '1rem', color: b.dark ? '#fff' : 'var(--on-background)', marginBottom: '10px' }}>{b.title}</h3>
                   <p style={{ color: b.dark ? 'rgba(255,255,255,0.65)' : 'var(--on-surface-variant)', fontSize: '0.85rem', lineHeight: 1.65 }}>{b.desc}</p>
                 </motion.div>
               );
@@ -94,7 +94,7 @@ export default function KOL() {
       </section>
 
       <div style={{ background: 'var(--primary)', padding: '64px 24px', textAlign: 'center' }}>
-        <p style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800, fontSize: 'clamp(3rem, 8vw, 5rem)', color: '#fff', lineHeight: 1, marginBottom: '8px' }}>
+        <p style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 'clamp(3rem, 8vw, 5rem)', color: '#fff', lineHeight: 1, marginBottom: '8px' }}>
           20.000+
         </p>
         <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '1rem', fontWeight: 500 }}>
@@ -107,7 +107,7 @@ export default function KOL() {
           <motion.div style={{ textAlign: 'center', marginBottom: '56px' }}
             initial={{ opacity: 0, y: 24 }} animate={stepsInView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6, ease: easeOut }}>
             <span className="tag-pill tag-pill-navy" style={{ marginBottom: '14px' }}>Cara Bergabung</span>
-            <h2 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800, fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', color: 'var(--on-background)' }}>
+            <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', color: 'var(--on-background)' }}>
               Mudah &amp; Gratis.
             </h2>
           </motion.div>
@@ -115,10 +115,10 @@ export default function KOL() {
             {steps.map((step, i) => (
               <motion.div key={step.title} initial={{ opacity: 0, y: 24 }} animate={stepsInView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6, ease: easeOut, delay: i * 0.12 }}
                 className="bento-card" style={{ padding: '28px' }}>
-                <p style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700, fontSize: '0.72rem', letterSpacing: '0.08em', color: 'var(--outline)', marginBottom: '10px' }}>
+                <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: '0.72rem', letterSpacing: '0.08em', color: 'var(--outline)', marginBottom: '10px' }}>
                   STEP {step.num}
                 </p>
-                <h3 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700, fontSize: '1.1rem', color: 'var(--on-background)', marginBottom: '10px' }}>{step.title}</h3>
+                <h3 style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: '1.1rem', color: 'var(--on-background)', marginBottom: '10px' }}>{step.title}</h3>
                 <p style={{ color: 'var(--on-surface-variant)', fontSize: '0.875rem', lineHeight: 1.65 }}>{step.desc}</p>
               </motion.div>
             ))}
@@ -131,7 +131,7 @@ export default function KOL() {
           <motion.div initial={{ opacity: 0, y: 24 }} animate={ctaInView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.7, ease: easeOut }}
             className="bento-card-dark" style={{ padding: '60px 40px', textAlign: 'center' }}>
             <span className="tag-pill tag-pill-white" style={{ margin: '0 auto 16px' }}>Siap Bergabung?</span>
-            <h2 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800, fontSize: 'clamp(1.9rem, 4.5vw, 3rem)', color: '#fff', lineHeight: 1.15, marginBottom: '16px' }}>
+            <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 'clamp(1.9rem, 4.5vw, 3rem)', color: '#fff', lineHeight: 1.15, marginBottom: '16px' }}>
               Daftar Sekarang — Gratis!
             </h2>
             <p style={{ color: 'rgba(255,255,255,0.65)', fontSize: '1rem', lineHeight: 1.7, marginBottom: '32px', maxWidth: '480px', margin: '0 auto 32px' }}>

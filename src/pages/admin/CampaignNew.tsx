@@ -16,12 +16,12 @@ interface Brand { _id: string; namaBrand: string }
 const inputStyle: React.CSSProperties = {
   width: '100%', padding: '11px 14px', borderRadius: '12px', border: '1.5px solid #c7c8cf',
   fontSize: '0.875rem', color: '#191c20', background: 'white', outline: 'none',
-  fontFamily: "'Plus Jakarta Sans', sans-serif",
+  fontFamily: "var(--font-display)",
 };
 
 const labelStyle: React.CSSProperties = {
   display: 'block', fontWeight: 600, fontSize: '0.8rem', color: '#191c20',
-  marginBottom: '5px', fontFamily: "'Plus Jakarta Sans', sans-serif",
+  marginBottom: '5px', fontFamily: "var(--font-display)",
 };
 
 const cardStyle: React.CSSProperties = {
@@ -30,7 +30,7 @@ const cardStyle: React.CSSProperties = {
 };
 
 const SectionTitle = ({ title }: { title: string }) => (
-  <p style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700, fontSize: '1rem', color: '#6728e4', marginBottom: '18px' }}>
+  <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: '1rem', color: '#6728e4', marginBottom: '18px' }}>
     {title}
   </p>
 );
@@ -40,7 +40,7 @@ const Pill = ({ label, selected, onClick }: { label: string; selected: boolean; 
     padding: '7px 14px', borderRadius: '999px', border: 'none',
     background: selected ? 'linear-gradient(135deg, #6728e4, #814bfe)' : '#e1e0ff',
     color: selected ? 'white' : '#6728e4', fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer',
-    fontFamily: "'Plus Jakarta Sans', sans-serif",
+    fontFamily: "var(--font-display)",
   }}>
     {label}
   </button>
@@ -110,7 +110,7 @@ export default function CampaignNew() {
     <div>
       <button
         onClick={() => navigate('/admin/campaigns')}
-        style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'none', border: 'none', cursor: 'pointer', color: '#777683', fontSize: '0.875rem', marginBottom: '24px', padding: 0, fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+        style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'none', border: 'none', cursor: 'pointer', color: '#777683', fontSize: '0.875rem', marginBottom: '24px', padding: 0, fontFamily: "var(--font-display)" }}
       >
         <ArrowLeft size={16} />
         Kembali ke Campaigns
@@ -205,7 +205,7 @@ export default function CampaignNew() {
           </div>
         </div>
 
-        {error && <p style={{ color: '#ba1a1a', fontSize: '0.85rem', marginBottom: '16px', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>{error}</p>}
+        {error && <p style={{ color: '#ba1a1a', fontSize: '0.85rem', marginBottom: '16px', fontFamily: "var(--font-display)" }}>{error}</p>}
 
         <button type="submit" disabled={saving} className="btn-primary" style={{ width: '100%', justifyContent: 'center', padding: '14px', opacity: saving ? 0.7 : 1 }}>
           <Zap size={18} />

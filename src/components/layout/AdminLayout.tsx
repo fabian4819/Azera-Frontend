@@ -37,8 +37,8 @@ function SidebarContent({
           <img src="/icon.png" alt="AzeraKOL" style={{ height: '30px', objectFit: 'contain', flexShrink: 0 }} />
           {!collapsed && (
             <>
-              <span style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 900, fontStyle: 'italic', fontSize: '1.05rem', color: '#15157d', letterSpacing: '-0.02em', whiteSpace: 'nowrap' }}>AZERAKOL</span>
-              <span style={{ fontSize: '0.65rem', background: 'linear-gradient(135deg, #6728e4, #814bfe)', color: 'white', borderRadius: '4px', padding: '2px 7px', fontWeight: 700, letterSpacing: '0.06em', fontFamily: "'Plus Jakarta Sans', sans-serif", whiteSpace: 'nowrap' }}>ADMIN</span>
+              <span style={{ fontFamily: "var(--font-display)", fontWeight: 900, fontStyle: 'italic', fontSize: '1.05rem', color: '#15157d', letterSpacing: '-0.02em', whiteSpace: 'nowrap' }}>AZERAKOL</span>
+              <span style={{ fontSize: '0.65rem', background: 'linear-gradient(135deg, #6728e4, #814bfe)', color: 'white', borderRadius: '4px', padding: '2px 7px', fontWeight: 700, letterSpacing: '0.06em', fontFamily: "var(--font-display)", whiteSpace: 'nowrap' }}>ADMIN</span>
             </>
           )}
         </Link>
@@ -54,7 +54,7 @@ function SidebarContent({
                 display: 'flex', alignItems: 'center', gap: '12px',
                 padding: collapsed ? '12px' : '12px 14px', justifyContent: collapsed ? 'center' : 'flex-start',
                 borderRadius: '10px', marginBottom: '4px', textDecoration: 'none',
-                fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: active ? 700 : 500,
+                fontFamily: "var(--font-display)", fontWeight: active ? 700 : 500,
                 fontSize: '0.9rem', color: active ? '#6728e4' : '#464652',
                 background: active ? '#e1e0ff' : 'transparent',
                 transition: 'background 0.2s',
@@ -74,7 +74,7 @@ function SidebarContent({
             display: 'flex', alignItems: 'center', gap: '12px', width: '100%',
             padding: collapsed ? '12px' : '12px 14px', justifyContent: collapsed ? 'center' : 'flex-start',
             borderRadius: '10px', border: 'none', background: 'transparent',
-            cursor: 'pointer', fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 500,
+            cursor: 'pointer', fontFamily: "var(--font-display)", fontWeight: 500,
             fontSize: '0.9rem', color: '#ba1a1a', transition: 'background 0.2s',
           }}
         >
@@ -151,16 +151,16 @@ export default function AdminLayout() {
             <button onClick={() => setSidebarOpen(true)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#464652', padding: '4px' }} className="admin-hamburger">
               <Menu size={22} />
             </button>
-            <h1 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700, fontSize: '1.05rem', color: '#191c20' }}>{pageTitle}</h1>
+            <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: '1.05rem', color: '#191c20' }}>{pageTitle}</h1>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <div style={{ textAlign: 'right' }}>
-              <p style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 600, fontSize: '0.875rem', color: '#191c20' }}>
+              <p style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: '0.875rem', color: '#191c20' }}>
                 {admin?.name || 'Admin'}
               </p>
               <p style={{ fontSize: '0.72rem', color: '#777683' }}>{admin?.email || ''}</p>
             </div>
-            <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'linear-gradient(135deg, #6728e4, #814bfe)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700, fontSize: '0.9rem', flexShrink: 0 }}>
+            <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'linear-gradient(135deg, #6728e4, #814bfe)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontFamily: "var(--font-display)", fontWeight: 700, fontSize: '0.9rem', flexShrink: 0 }}>
               {(admin?.name?.[0] || 'A').toUpperCase()}
             </div>
           </div>
