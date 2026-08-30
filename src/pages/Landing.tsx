@@ -3,7 +3,6 @@ import ProblemSolution from '../components/sections/ProblemSolution';
 import Stats from '../components/sections/Stats';
 import HowItWorks from '../components/sections/HowItWorks';
 import WhyAzera from '../components/sections/WhyAzera';
-import OurOffer from '../components/sections/OurOffer';
 import PortfolioPreview from '../components/sections/PortfolioPreview';
 import Testimonials from '../components/sections/Testimonials';
 import DualCTA from '../components/sections/DualCTA';
@@ -17,7 +16,6 @@ export default function Landing() {
       <Stats />
       <HowItWorks />
       <ProblemSolution />
-      <OurOffer />
       <PortfolioPreview />
       <Testimonials />
       <DualCTA />
