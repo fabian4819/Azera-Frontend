@@ -1,77 +1,92 @@
-import { useEffect, useRef, useState } from 'react';
-import { useInView } from 'framer-motion';
+import { useRef } from 'react';
+import { motion, useScroll, useTransform, useInView, type MotionValue } from 'framer-motion';
+
+const heading =
+  'Campaign KOL bukan sekadar konten. Bersama AzeraKOL, itu jadi pertumbuhan nyata. Bangun kepercayaan, raih target, dan menangkan lebih banyak pasar.';
 
 const stats = [
-  { value: 20000, suffix: '', label: 'KOL Aktif', display: '20K+' },
-  { value: 100, suffix: '+', label: 'Brand Partner', display: '100+' },
-  { value: 500, suffix: '+', label: 'Campaign Sukses', display: '500+' },
-  { value: 100, suffix: '%', label: 'Tingkat Kepuasan', display: '100%' },
+  { value: '20K+', desc: 'Creator aktif siap menjalankan campaign brand kamu.' },
+  { value: '500+', desc: 'Campaign berhasil dijalankan dari berbagai niche & industri.' },
+  { value: '100%', desc: 'Tingkat kepuasan klien dari setiap campaign yang kami tangani.' },
 ];
 
-function CountUp({ target, suffix, started }: { target: number; suffix: string; started: boolean }) {
-  const [count, setCount] = useState(0);
-  const rafRef = useRef<number>(0);
-
-  useEffect(() => {
-    if (!started) return;
-    const duration = 1800;
-    const start = performance.now();
-
-    const tick = (now: number) => {
-      const elapsed = now - start;
-      const progress = Math.min(elapsed / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3);
-      setCount(Math.round(eased * target));
-      if (progress < 1) {
-        rafRef.current = requestAnimationFrame(tick);
-      }
-    };
-    rafRef.current = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(rafRef.current);
-  }, [started, target]);
-
-  const display =
-    target === 20000
-      ? count >= 1000
-        ? `${Math.round(count / 1000)}K`
-        : count.toString()
-      : count.toString();
-
-  return <span>{display}{suffix}</span>;
+function Word({ children, progress, range }: { children: string; progress: MotionValue<number>; range: [number, number] }) {
+  const opacity = useTransform(progress, range, [0.15, 1]);
+  return (
+    <motion.span style={{ opacity, marginRight: '0.28em', display: 'inline-block' }}>
+      {children}
+    </motion.span>
+  );
 }
 
 export default function Stats() {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: '-80px' });
+  const headingRef = useRef<HTMLParagraphElement>(null);
+  const { scrollYProgress } = useScroll({ target: headingRef, offset: ['start 0.85', 'start 0.35'] });
+  const words = heading.split(' ');
+
+  const statsRef = useRef(null);
+  const statsInView = useInView(statsRef, { once: true, margin: '-60px' });
 
   return (
-    <section ref={ref} style={{ background: 'var(--primary)', padding: '80px 24px' }}>
-      <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
-        <div className="stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)' }}>
-          {stats.map((stat, i) => (
-            <div
-              key={stat.label}
+    <section style={{ background: '#ffffff', padding: '120px 24px' }}>
+      <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '200px 1fr', gap: '24px' }} className="payoff-grid">
+          <div>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--secondary)' }}>
+              Hasil Nyata
+            </span>
+          </div>
+
+          <div>
+            <p
+              ref={headingRef}
               style={{
-                textAlign: 'center',
-                padding: '32px',
-                borderRight: i < stats.length - 1 ? '1px solid rgba(157,161,255,0.2)' : 'none',
+                fontFamily: 'var(--font-display)',
+                fontWeight: 700,
+                fontSize: 'clamp(1.7rem, 3.6vw, 2.8rem)',
+                lineHeight: 1.25,
+                letterSpacing: '-0.02em',
+                color: 'var(--secondary)',
+                maxWidth: '900px',
+                marginBottom: '76px',
               }}
             >
-              <p style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 'clamp(2.5rem, 6vw, 4rem)', lineHeight: 1, marginBottom: '8px', color: '#9da1ff' }}>
-                <CountUp target={stat.value} suffix={stat.suffix} started={isInView} />
-              </p>
-              <p style={{ color: 'rgba(157,161,255,0.7)', fontSize: '0.875rem', fontFamily: "var(--font-display)", fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-                {stat.label}
-              </p>
+              {words.map((w, i) => {
+                const start = i / words.length;
+                const end = start + 1 / words.length;
+                return (
+                  <Word key={i} progress={scrollYProgress} range={[start, end]}>
+                    {w}
+                  </Word>
+                );
+              })}
+            </p>
+
+            <div ref={statsRef} style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '32px' }} className="payoff-stats">
+              {stats.map((s, i) => (
+                <motion.div
+                  key={s.value}
+                  initial={{ opacity: 0, y: 18 }}
+                  animate={statsInView ? { opacity: 1, y: 0 } : {}}
+                  transition={{ duration: 0.5, delay: i * 0.1 }}
+                >
+                  <p style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 'clamp(2.4rem, 5vw, 3.4rem)', color: 'var(--secondary)', lineHeight: 1, marginBottom: '14px' }}>
+                    {s.value}
+                  </p>
+                  <p style={{ color: 'var(--on-surface-variant)', fontSize: '0.95rem', lineHeight: 1.6, maxWidth: '260px' }}>
+                    {s.desc}
+                  </p>
+                </motion.div>
+              ))}
             </div>
-          ))}
+          </div>
         </div>
       </div>
 
       <style>{`
-        @media (max-width: 640px) {
-          .stats-grid { grid-template-columns: repeat(2, 1fr) !important; }
-          .stats-grid > div { border-right: none !important; border-bottom: 1px solid rgba(157,161,255,0.2); }
+        @media (max-width: 768px) {
+          .payoff-grid { grid-template-columns: 1fr !important; gap: 16px !important; }
+          .payoff-stats { grid-template-columns: 1fr !important; gap: 36px !important; }
         }
       `}</style>
     </section>
