@@ -2,6 +2,25 @@ import { useEffect, useState } from 'react';
 import { Plus, Edit2, Trash2, X } from 'lucide-react';
 import api from '../../lib/api';
 
+type CreatorPlatform = 'instagram' | 'tiktok';
+interface TopCreator {
+  name: string;
+  platform: CreatorPlatform;
+  postLink: string;
+  views: string;
+  likes: string;
+  comments: string;
+  shares: string;
+}
+interface PortfolioMetrics {
+  totalImpression: string;
+  accountsReached: string;
+  totalEngagement: string;
+  totalFollowers: string;
+  avgEngagementRate: string;
+  costPerView: string;
+}
+
 interface PortfolioItem {
   _id: string;
   brand: string;
@@ -12,6 +31,10 @@ interface PortfolioItem {
   engagement: number;
   featured: boolean;
   logo?: string;
+  title?: string;
+  objective?: string;
+  metrics?: Partial<PortfolioMetrics>;
+  topCreators?: TopCreator[];
   createdAt: string;
 }
 
@@ -23,7 +46,18 @@ interface FormState {
   reach: string;
   engagement: string;
   featured: boolean;
+  title: string;
+  objective: string;
+  metrics: PortfolioMetrics;
+  topCreators: TopCreator[];
 }
+
+const emptyMetrics: PortfolioMetrics = {
+  totalImpression: '', accountsReached: '', totalEngagement: '',
+  totalFollowers: '', avgEngagementRate: '', costPerView: '',
+};
+
+const emptyCreator = (): TopCreator => ({ name: '', platform: 'instagram', postLink: '', views: '', likes: '', comments: '', shares: '' });
 
 const emptyForm: FormState = {
   brand: '',
@@ -33,9 +67,23 @@ const emptyForm: FormState = {
   reach: '',
   engagement: '',
   featured: false,
+  title: '',
+  objective: '',
+  metrics: emptyMetrics,
+  topCreators: [],
 };
 
-const categories = ['Beauty', 'F&B', 'Fashion', 'Tech', 'Fitness', 'Home & Living', 'Travel', 'Finance', 'Education', 'Other'];
+// Kategori resmi AzeraKOL — sama seperti yang dipakai di Footer & filter Portfolio publik
+const categories = ['Engagement Boost', 'KOL Marketing', 'Affiliate Marketing'];
+
+const metricLabels: Record<keyof PortfolioMetrics, string> = {
+  totalImpression: 'Total Impression',
+  accountsReached: 'Accounts Reached',
+  totalEngagement: 'Total Engagement',
+  totalFollowers: 'Total Followers',
+  avgEngagementRate: 'Average ER Post',
+  costPerView: 'Cost Per View',
+};
 
 const thStyle: React.CSSProperties = {
   padding: '14px 16px',
@@ -126,17 +174,39 @@ export default function PortfolioManager() {
       reach: item.reach,
       engagement: item.engagement.toString(),
       featured: item.featured,
+      title: item.title || '',
+      objective: item.objective || '',
+      metrics: { ...emptyMetrics, ...item.metrics },
+      topCreators: item.topCreators?.length ? item.topCreators : [],
     });
     setLogoFile(null);
     setContentFiles([]);
     setShowModal(true);
   };
 
+  const updateMetric = (key: keyof PortfolioMetrics, value: string) => {
+    setForm((f) => ({ ...f, metrics: { ...f.metrics, [key]: value } }));
+  };
+
+  const addCreator = () => {
+    if (form.topCreators.length >= 3) return;
+    setForm((f) => ({ ...f, topCreators: [...f.topCreators, emptyCreator()] }));
+  };
+  const updateCreator = (i: number, patch: Partial<TopCreator>) => {
+    setForm((f) => ({ ...f, topCreators: f.topCreators.map((c, idx) => (idx === i ? { ...c, ...patch } : c)) }));
+  };
+  const removeCreator = (i: number) => {
+    setForm((f) => ({ ...f, topCreators: f.topCreators.filter((_, idx) => idx !== i) }));
+  };
+
   const save = async () => {
     setSaving(true);
     try {
       const fd = new FormData();
-      Object.entries(form).forEach(([k, v]) => fd.append(k, String(v)));
+      const { metrics, topCreators, ...flat } = form;
+      Object.entries(flat).forEach(([k, v]) => fd.append(k, String(v)));
+      fd.append('metrics', JSON.stringify(metrics));
+      fd.append('topCreators', JSON.stringify(topCreators.filter((c) => c.name.trim() && c.postLink.trim())));
       if (logoFile) fd.append('logo', logoFile);
       contentFiles.forEach((f) => fd.append('contents', f));
 
@@ -242,7 +312,7 @@ export default function PortfolioManager() {
       {/* Add/Edit Modal */}
       {showModal && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
-          <div style={{ background: 'white', borderRadius: '20px', padding: '32px', width: '100%', maxWidth: '560px', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' }}>
+          <div style={{ background: 'white', borderRadius: '20px', padding: '32px', width: '100%', maxWidth: '680px', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
               <h3 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: '1.1rem', color: '#191c20' }}>
                 {editId ? 'Edit Portfolio' : 'Tambah Portfolio'}
@@ -290,6 +360,82 @@ export default function PortfolioManager() {
                 <input type="checkbox" checked={form.featured} onChange={(e) => setForm({ ...form, featured: e.target.checked })} style={{ width: '16px', height: '16px', accentColor: '#6728e4' }} />
                 <span style={{ fontWeight: 600, fontSize: '0.875rem', color: '#191c20' }}>Tampilkan di featured homepage</span>
               </label>
+            </div>
+
+            <div style={{ marginBottom: '14px' }}>
+              <label style={labelStyle}>Judul Campaign (opsional, beda dari nama brand)</label>
+              <input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Serambi MyPertamina KOL Campaign" style={modalInputStyle} />
+            </div>
+
+            <div style={{ marginBottom: '14px' }}>
+              <label style={labelStyle}>Objective Campaign (opsional)</label>
+              <textarea
+                value={form.objective}
+                onChange={(e) => setForm({ ...form, objective: e.target.value })}
+                rows={3}
+                placeholder="Membangun konten organik & menghibur untuk kampanye..., mengaktivasi total X KOL, menghasilkan Y impresi..."
+                style={{ ...modalInputStyle, resize: 'vertical', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+              />
+            </div>
+
+            <div style={{ marginBottom: '14px' }}>
+              <p style={{ ...labelStyle, marginBottom: '10px' }}>Performance Metrics Result (opsional, tampil di detail publik)</p>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
+                {(Object.keys(metricLabels) as (keyof PortfolioMetrics)[]).map((key) => (
+                  <div key={key}>
+                    <label style={{ ...labelStyle, fontSize: '0.72rem', fontWeight: 500 }}>{metricLabels[key]}</label>
+                    <input
+                      value={form.metrics[key]}
+                      onChange={(e) => updateMetric(key, e.target.value)}
+                      placeholder={key === 'costPerView' ? 'Rp468' : key === 'avgEngagementRate' ? '20%' : '1.4M+'}
+                      style={{ ...modalInputStyle, padding: '9px 10px', fontSize: '0.8rem' }}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div style={{ marginBottom: '14px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                <p style={labelStyle}>Top 3 Creator (opsional, tampil sebagai showcase video)</p>
+                <button
+                  onClick={addCreator}
+                  disabled={form.topCreators.length >= 3}
+                  style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '6px 12px', background: '#e1e0ff', color: '#6728e4', borderRadius: '8px', border: 'none', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 700, fontFamily: 'var(--font-display)', opacity: form.topCreators.length >= 3 ? 0.5 : 1 }}
+                >
+                  <Plus size={13} /> Tambah Creator
+                </button>
+              </div>
+              {form.topCreators.length === 0 ? (
+                <p style={{ color: '#777683', fontSize: '0.8rem', textAlign: 'center', padding: '14px', background: '#f8f9ff', borderRadius: '10px' }}>Belum ada creator ditambahkan.</p>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  {form.topCreators.map((c, i) => (
+                    <div key={i} style={{ border: '1.5px solid #e1e0ff', borderRadius: '12px', padding: '12px' }}>
+                      <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
+                        <input value={c.name} onChange={(e) => updateCreator(i, { name: e.target.value })} placeholder={`Nama Creator ${i + 1}`} style={{ ...modalInputStyle, flex: 1, padding: '8px 10px', fontSize: '0.8rem' }} />
+                        <select value={c.platform} onChange={(e) => updateCreator(i, { platform: e.target.value as CreatorPlatform })} style={{ ...modalInputStyle, width: '110px', padding: '8px 10px', fontSize: '0.8rem' }}>
+                          <option value="instagram">Instagram</option>
+                          <option value="tiktok">TikTok</option>
+                        </select>
+                        <button onClick={() => removeCreator(i)} style={{ padding: '8px', background: '#ffdad6', border: 'none', borderRadius: '8px', color: '#ba1a1a', cursor: 'pointer', display: 'flex', flexShrink: 0 }}>
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                      <input value={c.postLink} onChange={(e) => updateCreator(i, { postLink: e.target.value })} placeholder="Link postingan (https://instagram.com/p/... atau tiktok.com/@.../video/...)" style={{ ...modalInputStyle, padding: '8px 10px', fontSize: '0.8rem', marginBottom: '8px' }} />
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px' }}>
+                        <input value={c.views} onChange={(e) => updateCreator(i, { views: e.target.value })} placeholder="Views" style={{ ...modalInputStyle, padding: '8px 10px', fontSize: '0.78rem' }} />
+                        <input value={c.likes} onChange={(e) => updateCreator(i, { likes: e.target.value })} placeholder="Likes" style={{ ...modalInputStyle, padding: '8px 10px', fontSize: '0.78rem' }} />
+                        <input value={c.comments} onChange={(e) => updateCreator(i, { comments: e.target.value })} placeholder="Comments" style={{ ...modalInputStyle, padding: '8px 10px', fontSize: '0.78rem' }} />
+                        <input value={c.shares} onChange={(e) => updateCreator(i, { shares: e.target.value })} placeholder="Shares" style={{ ...modalInputStyle, padding: '8px 10px', fontSize: '0.78rem' }} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <p style={{ fontSize: '0.72rem', color: '#8a8a99', marginTop: '8px' }}>
+                Urutan menentukan ranking (creator pertama = Top 1). Data diisi manual — belum dihitung otomatis dari data campaign.
+              </p>
             </div>
 
             <div style={{ marginBottom: '14px' }}>

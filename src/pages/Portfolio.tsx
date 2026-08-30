@@ -1,9 +1,27 @@
-import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Users, Eye, TrendingUp, ArrowRight } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Users, Eye, TrendingUp, ChevronLeft, ChevronRight } from 'lucide-react';
 import api from '../lib/api';
+import SocialEmbed from '../components/SocialEmbed';
+import { ease } from '../lib/motion';
 
+interface TopCreator {
+  name: string;
+  platform: 'instagram' | 'tiktok';
+  postLink: string;
+  views?: string;
+  likes?: string;
+  comments?: string;
+  shares?: string;
+}
+interface PortfolioMetrics {
+  totalImpression?: string;
+  accountsReached?: string;
+  totalEngagement?: string;
+  totalFollowers?: string;
+  avgEngagementRate?: string;
+  costPerView?: string;
+}
 interface PortfolioItem {
   _id: string;
   brand: string;
@@ -15,44 +33,76 @@ interface PortfolioItem {
   featured?: boolean;
   logo?: string;
   logoBg?: string;
+  title?: string;
+  objective?: string;
+  metrics?: PortfolioMetrics;
+  topCreators?: TopCreator[];
 }
 
-interface CaseStudy {
-  id: string;
-  headline: string;
-  brandName?: string;
-  campaignName?: string;
-  highlightStats: { views: number; engagementRate: number; totalPosts: number };
-}
+const categories = ['All', 'Engagement Boost', 'KOL Marketing', 'Affiliate Marketing'];
 
-const placeholders: PortfolioItem[] = [];
-
-const swatches = ['#6728e4', '#814bfe', '#7f003f', '#15157d', '#a31556', '#6728e4'];
-
-const allCategories = ['Semua', 'Beauty', 'F&B', 'Fashion', 'Tech', 'Fitness', 'Home & Living'];
+const metricEntries: { key: keyof PortfolioMetrics; label: string }[] = [
+  { key: 'totalImpression', label: 'Total Impression' },
+  { key: 'accountsReached', label: 'Accounts Reached' },
+  { key: 'totalEngagement', label: 'Total Engagement' },
+  { key: 'totalFollowers', label: 'Total Followers' },
+  { key: 'avgEngagementRate', label: 'Average ER Post' },
+  { key: 'costPerView', label: 'Cost Per View' },
+];
 
 export default function Portfolio() {
-  const [items, setItems] = useState<PortfolioItem[]>(placeholders);
-  const [caseStudies, setCaseStudies] = useState<CaseStudy[]>([]);
-  const [activeCategory, setActiveCategory] = useState('Semua');
+  const [items, setItems] = useState<PortfolioItem[]>([]);
+  const [category, setCategory] = useState('All');
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [creatorIndex, setCreatorIndex] = useState(0);
+  const [creatorScrollKey, setCreatorScrollKey] = useState<string | undefined>(undefined);
+  const creatorScrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     api.get('/portfolio')
-      .then((res) => { if (res.data?.length) setItems(res.data); })
-      .catch(() => {});
-    api.get('/portfolio/case-studies')
-      .then((res) => setCaseStudies(res.data))
+      .then((res) => {
+        if (res.data?.length) {
+          setItems(res.data);
+          setSelectedId(res.data[0]._id);
+        }
+      })
       .catch(() => {});
   }, []);
 
-  const filtered = activeCategory === 'Semua' ? items : items.filter((i) => i.category === activeCategory);
+  const filtered = category === 'All' ? items : items.filter((i) => i.category === category);
+  // fallback ke brand pertama yang terlihat kalau selectedId hilang dari filter kategori aktif
+  const selected = filtered.find((i) => i._id === selectedId) || filtered[0];
+
+  const hasMetrics = selected?.metrics && Object.values(selected.metrics).some((v) => v);
+  const hasCreators = selected?.topCreators && selected.topCreators.length > 0;
+  const creatorCount = selected?.topCreators?.length ?? 0;
+
+  // ganti brand -> reset carousel creator ke slide pertama (remount via key, bukan effect)
+  if (selected?._id !== creatorScrollKey) {
+    setCreatorScrollKey(selected?._id);
+    if (creatorIndex !== 0) setCreatorIndex(0);
+  }
+
+  function handleCreatorScroll() {
+    const el = creatorScrollRef.current;
+    if (!el || el.clientWidth === 0) return;
+    setCreatorIndex(Math.round(el.scrollLeft / el.clientWidth));
+  }
+
+  function goToCreator(i: number) {
+    const el = creatorScrollRef.current;
+    if (!el) return;
+    const clamped = Math.max(0, Math.min(i, creatorCount - 1));
+    el.scrollTo({ left: clamped * el.clientWidth, behavior: 'smooth' });
+    setCreatorIndex(clamped);
+  }
 
   return (
     <div style={{ background: 'var(--surface)', minHeight: '100vh' }}>
       <div style={{ padding: '80px 24px 8px', textAlign: 'center' }}>
         <div style={{ maxWidth: '640px', margin: '0 auto' }}>
           <span className="tag-pill tag-pill-navy" style={{ margin: '0 auto 16px' }}>Portfolio</span>
-          <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 'clamp(2.4rem, 5.5vw, 4rem)', color: 'var(--on-background)', lineHeight: 1.1, marginBottom: '16px', letterSpacing: '-0.03em' }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 'clamp(2.4rem, 5.5vw, 4rem)', color: 'var(--on-background)', lineHeight: 1.1, marginBottom: '16px', letterSpacing: '-0.03em' }}>
             Campaign{' '}
             <span className="underline-accent">
               Sukses
@@ -63,108 +113,228 @@ export default function Portfolio() {
             Kami
           </h1>
           <p style={{ color: 'var(--on-surface-variant)', fontSize: '1rem', lineHeight: 1.7, maxWidth: '480px', margin: '0 auto' }}>
-            Hasil nyata dari ratusan campaign KOL yang telah kami jalankan bersama brand terpercaya.
+            Hasil nyata dari campaign KOL yang telah kami jalankan bersama brand terpercaya.
           </p>
         </div>
       </div>
 
-      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '56px 24px 80px' }}>
-        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '48px', justifyContent: 'center' }}>
-          {allCategories.map((cat) => {
-            const active = activeCategory === cat;
+      <div style={{ maxWidth: '1160px', margin: '0 auto', padding: '56px 24px 90px' }}>
+        {/* Filter kategori */}
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '28px' }}>
+          <div style={{ display: 'inline-flex', gap: '4px', padding: '6px', borderRadius: '999px', background: 'var(--primary)', flexWrap: 'wrap', justifyContent: 'center' }}>
+            {categories.map((cat) => {
+              const active = category === cat;
+              return (
+                <button
+                  key={cat}
+                  onClick={() => setCategory(cat)}
+                  style={{
+                    padding: '10px 20px', borderRadius: '999px', border: 'none',
+                    background: active ? '#fff' : 'transparent',
+                    color: active ? 'var(--secondary)' : 'rgba(255,255,255,0.75)',
+                    fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer',
+                    transition: 'all 0.2s', whiteSpace: 'nowrap',
+                  }}
+                >
+                  {cat}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Grid chip brand (dari data Portfolio asli) */}
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', justifyContent: 'center', marginBottom: '40px' }}>
+          {filtered.map((item) => {
+            const active = selected?._id === item._id;
             return (
-              <button key={cat} onClick={() => setActiveCategory(cat)}
+              <button
+                key={item._id}
+                onClick={() => setSelectedId(item._id)}
                 style={{
-                  padding: '9px 22px', borderRadius: '999px',
+                  padding: '11px 22px', borderRadius: '999px',
                   border: active ? '1.5px solid var(--secondary)' : '1.5px solid var(--outline-variant)',
-                  background: active ? 'var(--secondary)' : 'white',
-                  color: active ? 'white' : 'var(--on-surface-variant)',
-                  fontWeight: 600, fontSize: '0.875rem', cursor: 'pointer',
+                  background: active ? 'var(--secondary)' : '#fff',
+                  color: active ? '#fff' : 'var(--on-background)',
+                  fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '0.88rem', cursor: 'pointer',
                   transition: 'all 0.2s',
-                }}>
-                {cat}
+                }}
+              >
+                {item.brand}
               </button>
             );
           })}
         </div>
 
-        {caseStudies.length > 0 && (
-          <div style={{ marginBottom: '52px' }}>
-            <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: '1.4rem', color: 'var(--on-background)', marginBottom: '20px', textAlign: 'center' }}>
-              Case Study Terbaru
-            </h2>
-            <div className="portfolio-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '18px' }}>
-              {caseStudies.map((cs, index) => (
-                <motion.div key={cs.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: index * 0.06 }}>
-                  <Link to={`/portfolio/case-study/${cs.id}`} style={{ textDecoration: 'none' }}>
-                    <div className="bento-card" style={{ padding: '24px' }}>
-                      {cs.brandName && <span className="tag-pill tag-pill-purple">{cs.brandName}</span>}
-                      <h3 style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: '1rem', color: 'var(--on-background)', margin: '12px 0' }}>{cs.headline}</h3>
-                      <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '14px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: 'var(--outline)', fontSize: '0.78rem' }}><Eye size={13} />{cs.highlightStats.views.toLocaleString('id-ID')}</div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#10B981', fontSize: '0.78rem' }}><TrendingUp size={13} />{cs.highlightStats.engagementRate}% ER</div>
-                      </div>
-                      <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--secondary)', fontSize: '0.82rem', fontWeight: 700 }}>
-                        Lihat Detail <ArrowRight size={13} />
-                      </span>
-                    </div>
-                  </Link>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        <div className="portfolio-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px' }}>
-          {filtered.map((item, index) => (
-            <motion.div key={item._id} layout initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: index * 0.06 }}>
-              <div className="bento-card" style={{ overflow: 'hidden' }}>
-                <div
-                  style={{
-                    height: '110px',
-                    background: item.logo ? (item.logoBg || 'var(--surface-container)') : swatches[index % swatches.length],
-                    display: 'flex', alignItems: 'center', justifyContent: item.logo ? 'center' : 'space-between',
-                    padding: '20px', position: 'relative',
-                  }}
-                >
-                  {item.logo ? (
-                    <img src={item.logo} alt={`Logo ${item.brand}`} style={{ maxHeight: '48px', maxWidth: '70%', objectFit: 'contain' }} />
-                  ) : (
-                    <span style={{ fontFamily: "var(--font-display)", fontSize: '3.6rem', fontWeight: 800, color: 'rgba(255,255,255,0.2)', lineHeight: 1 }}>{item.brand[0]}</span>
-                  )}
-                  {item.featured && (
-                    <span style={{ background: 'rgba(255,255,255,0.18)', color: 'white', borderRadius: '999px', padding: '4px 12px', fontSize: '0.65rem', fontWeight: 700, position: 'absolute', top: '12px', right: '12px', letterSpacing: '0.08em' }}>
-                      FEATURED
-                    </span>
-                  )}
-                </div>
-                <div style={{ padding: '22px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-                    <h3 style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: '1rem', color: 'var(--on-background)' }}>{item.brand}</h3>
-                    <span className="tag-pill tag-pill-purple">{item.category}</span>
-                  </div>
-                  <p style={{ color: 'var(--outline)', fontSize: '0.82rem', marginBottom: '16px' }}>{item.hashtag}</p>
-                  <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: 'var(--outline)', fontSize: '0.78rem' }}><Users size={13} />{item.kolCount} KOL</div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: 'var(--outline)', fontSize: '0.78rem' }}><Eye size={13} />{item.reach}</div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#10B981', fontSize: '0.78rem' }}><TrendingUp size={13} />{item.engagement}% ER</div>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-
         {filtered.length === 0 && (
-          <div style={{ textAlign: 'center', padding: '80px 24px', color: 'var(--outline)' }}>
+          <div style={{ textAlign: 'center', padding: '60px 24px', color: 'var(--outline)' }}>
             <p style={{ fontSize: '1rem' }}>Belum ada portfolio untuk kategori ini.</p>
           </div>
         )}
+
+        {/* Detail campaign brand terpilih */}
+        <AnimatePresence mode="wait">
+          {selected && (
+            <motion.div
+              key={selected._id}
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -16 }}
+              transition={{ duration: 0.3, ease }}
+              style={{ background: 'var(--primary)', borderRadius: '28px', padding: '36px', display: 'grid', gridTemplateColumns: '1fr 1.1fr', gap: '36px' }}
+              className="portfolio-detail-grid"
+            >
+              {/* Kiri: showcase top 3 creator (video ter-embed) atau fallback logo */}
+              <div>
+                {hasCreators ? (
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }}>
+                      <button
+                        onClick={() => goToCreator(creatorIndex - 1)}
+                        disabled={creatorIndex === 0}
+                        style={{
+                          flexShrink: 0, width: '32px', height: '32px', borderRadius: '50%', border: 'none',
+                          background: 'rgba(255,255,255,0.12)', color: '#fff', display: creatorCount > 1 ? 'flex' : 'none',
+                          alignItems: 'center', justifyContent: 'center', cursor: creatorIndex === 0 ? 'default' : 'pointer',
+                          opacity: creatorIndex === 0 ? 0.35 : 1, transition: 'opacity 0.2s',
+                        }}
+                      >
+                        <ChevronLeft size={16} />
+                      </button>
+
+                      <div
+                        key={selected._id}
+                        ref={creatorScrollRef}
+                        onScroll={handleCreatorScroll}
+                        style={{ width: '340px', minWidth: 0, display: 'flex', overflowX: 'auto', scrollSnapType: 'x mandatory' }}
+                        className="portfolio-creator-scroll"
+                      >
+                        {selected.topCreators!.slice(0, 3).map((c, i) => (
+                          <div key={i} style={{ flex: '0 0 100%', minWidth: 0, scrollSnapAlign: 'center' }}>
+                            <SocialEmbed platform={c.platform} url={c.postLink} />
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginTop: '8px', fontSize: '0.76rem', color: 'rgba(255,255,255,0.7)' }}>
+                              <span
+                                style={{
+                                  flexShrink: 0, width: '20px', height: '20px', borderRadius: '50%',
+                                  background: 'var(--lime)', color: 'var(--on-lime)', display: 'flex',
+                                  alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-display)',
+                                  fontWeight: 800, fontSize: '0.66rem',
+                                }}
+                              >
+                                {i + 1}
+                              </span>
+                              <span style={{ fontWeight: 700, color: '#fff' }}>{c.name}</span>
+                              {c.views && <span>{c.views} views</span>}
+                              {c.likes && <span>{c.likes} likes</span>}
+                              {c.comments && <span>{c.comments} komentar</span>}
+                              {c.shares && <span>{c.shares} share</span>}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+
+                      <button
+                        onClick={() => goToCreator(creatorIndex + 1)}
+                        disabled={creatorIndex === creatorCount - 1}
+                        style={{
+                          flexShrink: 0, width: '32px', height: '32px', borderRadius: '50%', border: 'none',
+                          background: 'rgba(255,255,255,0.12)', color: '#fff', display: creatorCount > 1 ? 'flex' : 'none',
+                          alignItems: 'center', justifyContent: 'center', cursor: creatorIndex === creatorCount - 1 ? 'default' : 'pointer',
+                          opacity: creatorIndex === creatorCount - 1 ? 0.35 : 1, transition: 'opacity 0.2s',
+                        }}
+                      >
+                        <ChevronRight size={16} />
+                      </button>
+                    </div>
+
+                    {creatorCount > 1 && (
+                      <div style={{ display: 'flex', gap: '6px', justifyContent: 'center', marginTop: '14px' }}>
+                        {selected.topCreators!.slice(0, 3).map((_, i) => (
+                          <button
+                            key={i}
+                            onClick={() => goToCreator(i)}
+                            style={{
+                              width: i === creatorIndex ? '20px' : '6px', height: '6px', borderRadius: '999px', border: 'none',
+                              background: i === creatorIndex ? 'var(--lime)' : 'rgba(255,255,255,0.25)', cursor: 'pointer', transition: 'all 0.2s',
+                            }}
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div
+                    style={{
+                      borderRadius: '20px', overflow: 'hidden', height: '100%', minHeight: '340px',
+                      background: selected.logo ? (selected.logoBg || 'rgba(255,255,255,0.08)') : 'rgba(255,255,255,0.08)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '32px',
+                    }}
+                  >
+                    {selected.logo ? (
+                      <img src={selected.logo} alt={selected.brand} style={{ maxWidth: '70%', maxHeight: '140px', objectFit: 'contain' }} />
+                    ) : (
+                      <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '4rem', color: 'rgba(255,255,255,0.25)' }}>{selected.brand[0]}</span>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Kanan: info campaign */}
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
+                  <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '1.05rem', color: 'var(--lime)' }}>{selected.brand}</span>
+                  <span className="tag-pill tag-pill-white">{selected.category}</span>
+                </div>
+                <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 'clamp(1.5rem, 3vw, 2rem)', color: '#fff', lineHeight: 1.2, marginBottom: '20px' }}>
+                  {selected.title || `${selected.brand} KOL Campaign`}
+                </h2>
+
+                {selected.objective && (
+                  <div style={{ marginBottom: '22px' }}>
+                    <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--lime)', marginBottom: '8px' }}>Objective</p>
+                    <p style={{ color: 'rgba(255,255,255,0.78)', fontSize: '0.92rem', lineHeight: 1.7 }}>{selected.objective}</p>
+                  </div>
+                )}
+
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--lime)', marginBottom: '12px' }}>
+                  {hasMetrics ? 'Performance Metrics Result' : 'Ringkasan Campaign'}
+                </p>
+
+                {hasMetrics ? (
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }} className="portfolio-metrics-grid">
+                    {metricEntries.map(({ key, label }) => {
+                      const value = selected.metrics?.[key];
+                      if (!value) return null;
+                      return (
+                        <div key={key} style={{ background: 'rgba(255,255,255,0.08)', borderRadius: '12px', padding: '12px 14px' }}>
+                          <p style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.6)', marginBottom: '4px' }}>{label}</p>
+                          <p style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '1.15rem', color: 'var(--lime)' }}>{value}</p>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'rgba(255,255,255,0.75)', fontSize: '0.85rem' }}><Users size={14} /> {selected.kolCount} KOL</div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'rgba(255,255,255,0.75)', fontSize: '0.85rem' }}><Eye size={14} /> {selected.reach} Reach</div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--lime)', fontSize: '0.85rem', fontWeight: 700 }}><TrendingUp size={14} /> {selected.engagement}% ER</div>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       <style>{`
-        @media (max-width: 768px) { .portfolio-grid { grid-template-columns: 1fr !important; } }
-        @media (min-width: 769px) and (max-width: 1024px) { .portfolio-grid { grid-template-columns: repeat(2, 1fr) !important; } }
+        @media (max-width: 900px) {
+          .portfolio-detail-grid { grid-template-columns: 1fr !important; }
+        }
+        @media (max-width: 480px) {
+          .portfolio-metrics-grid { grid-template-columns: 1fr 1fr !important; }
+        }
+        .portfolio-creator-scroll { scrollbar-width: none; -ms-overflow-style: none; }
+        .portfolio-creator-scroll::-webkit-scrollbar { display: none; }
       `}</style>
     </div>
   );
