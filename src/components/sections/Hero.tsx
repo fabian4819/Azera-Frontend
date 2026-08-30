@@ -1,4 +1,5 @@
-import { motion } from 'framer-motion';
+import { motion, useMotionValue, useSpring, useTransform, type MotionValue } from 'framer-motion';
+import type { MouseEvent as ReactMouseEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { SiInstagram, SiTiktok, SiThreads, SiX } from 'react-icons/si';
 import { ease } from '../../lib/motion';
@@ -40,9 +41,47 @@ const glassCard: React.CSSProperties = {
   WebkitBackdropFilter: 'blur(6px)',
 };
 
+// Kartu foto (boks + gambar sekaligus) yang bergeser mengikuti mouse (parallax)
+// sebagai satu kesatuan — depth beda-beda per foto biar terasa berlapis.
+function ParallaxCard({ src, w, h, springX, springY, depth }: { src: string; w: number; h: number; springX: MotionValue<number>; springY: MotionValue<number>; depth: number }) {
+  const x = useTransform(springX, (v) => v * depth);
+  const y = useTransform(springY, (v) => v * depth);
+  return (
+    <motion.div
+      style={{
+        x, y,
+        width: `${w}px`, height: `${h}px`,
+        borderRadius: '18px',
+        overflow: 'hidden',
+        border: '1px solid rgba(255,255,255,0.18)',
+        boxShadow: '0 20px 50px -18px rgba(0,0,0,0.45)',
+      }}
+    >
+      <img src={src} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+    </motion.div>
+  );
+}
+
 export default function Hero() {
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+  const springX = useSpring(mouseX, { stiffness: 60, damping: 20, mass: 0.5 });
+  const springY = useSpring(mouseY, { stiffness: 60, damping: 20, mass: 0.5 });
+
+  const handleMouseMove = (e: ReactMouseEvent<HTMLElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    mouseX.set((e.clientX - rect.left) / rect.width - 0.5);
+    mouseY.set((e.clientY - rect.top) / rect.height - 0.5);
+  };
+  const handleMouseLeave = () => {
+    mouseX.set(0);
+    mouseY.set(0);
+  };
+
   return (
     <section
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
       style={{
         position: 'relative',
         overflow: 'hidden',
@@ -76,18 +115,9 @@ export default function Hero() {
                 rotate: { duration: dur, ease: 'easeInOut', repeat: Infinity, delay },
                 y: { duration: dur, ease: 'easeInOut', repeat: Infinity, delay },
               }}
-              style={{
-                position: 'absolute',
-                ...p.pos,
-                width: `${p.w}px`,
-                height: `${p.h}px`,
-                borderRadius: '18px',
-                overflow: 'hidden',
-                border: '1px solid rgba(255,255,255,0.18)',
-                boxShadow: '0 20px 50px -18px rgba(0,0,0,0.45)',
-              }}
+              style={{ position: 'absolute', ...p.pos }}
             >
-              <img src={p.src} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <ParallaxCard src={p.src} w={p.w} h={p.h} springX={springX} springY={springY} depth={10 + (i % 5) * 6} />
             </motion.div>
           );
         })}
