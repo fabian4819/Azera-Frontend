@@ -15,6 +15,7 @@ import Portfolio from './pages/Portfolio';
 import CaseStudyDetail from './pages/CaseStudyDetail';
 import CampaignApply from './pages/CampaignApply';
 import InvoicePayment from './pages/InvoicePayment';
+import CampaignDashboard from './pages/CampaignDashboard';
 
 // Admin pages are not SEO targets, so keep them out of the initial public bundle.
 const AdminLayout = lazy(() => import('./components/layout/AdminLayout'));
@@ -86,6 +87,9 @@ export default function App() {
 
           {/* Invoice payment — halaman publik transaksional, tanpa Navbar/Footer marketing */}
           <Route path="/invoice/:id" element={<InvoicePayment />} />
+
+          {/* AD-48: dashboard PIC/Handle-by, akses via accessCode (query ?code=), tanpa login/Navbar/Footer */}
+          <Route path="/campaign-dashboard/:id" element={<CampaignDashboard />} />
 
           {/* Admin login — no layout */}
           <Route path="/admin/login" element={<AdminLogin />} />
