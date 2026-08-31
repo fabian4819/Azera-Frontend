@@ -140,7 +140,7 @@ export default function BrandForm() {
           <div style={{ position: 'sticky', top: '96px' }} className="brandform-panel">
             <div className="bento-card" style={{ padding: '28px', marginBottom: '20px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
-                <img src="/icon.png" alt="AzeraKOL" style={{ height: '28px' }} />
+                <img src="/logo-transparent.png" alt="AzeraKOL" style={{ height: '28px' }} />
                 <span style={{ fontFamily: "var(--font-display)", fontWeight: 900, fontStyle: 'italic', fontSize: '1rem', color: '#15157d', letterSpacing: '-0.02em' }}>AZERAKOL</span>
               </div>
               <p style={{ color: '#464652', fontSize: '0.85rem', lineHeight: 1.7, marginBottom: '20px', fontFamily: "var(--font-display)" }}>

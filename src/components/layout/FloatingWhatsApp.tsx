@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { FaWhatsapp } from 'react-icons/fa';
 
-const WA_PHONE = '6281994035538';
+const WA_PHONE = '6281919525186';
 const WA_MESSAGE = 'Halo AzeraKOL!\nSaya ingin tanya-tanya, boleh dibantu?';
 
 export default function FloatingWhatsApp() {

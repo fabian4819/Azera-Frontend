@@ -47,7 +47,7 @@ export default function CaseStudyDetail() {
       {/* Hero — screenshot-friendly: brand + headline + azerakol branding all in one crop */}
       <div style={{ background: 'linear-gradient(135deg, #1E0A5E, #2D1060)', padding: '100px 24px 80px', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', top: '24px', left: '50%', transform: 'translateX(-50%)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <img src="/icon.png" alt="AzeraKOL" style={{ height: '28px' }} />
+          <img src="/logo-transparent.png" alt="AzeraKOL" style={{ height: '28px' }} />
           <span style={{ fontFamily: f, fontWeight: 900, fontStyle: 'italic', fontSize: '1rem', color: 'white', letterSpacing: '-0.02em' }}>AZERAKOL</span>
         </div>
         <div style={{ maxWidth: '720px', margin: '40px auto 0' }}>

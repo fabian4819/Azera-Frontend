@@ -34,7 +34,7 @@ function SidebarContent({
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       <div style={{ padding: collapsed ? '24px 14px' : '24px 20px', borderBottom: '1px solid #e1e0ff', display: 'flex', justifyContent: collapsed ? 'center' : 'flex-start' }}>
         <Link to="/admin/campaigns" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}>
-          <img src="/icon.png" alt="AzeraKOL" style={{ height: '30px', objectFit: 'contain', flexShrink: 0 }} />
+          <img src="/logo-transparent.png" alt="AzeraKOL" style={{ height: '30px', objectFit: 'contain', flexShrink: 0 }} />
           {!collapsed && (
             <>
               <span style={{ fontFamily: "var(--font-display)", fontWeight: 900, fontStyle: 'italic', fontSize: '1.05rem', color: '#15157d', letterSpacing: '-0.02em', whiteSpace: 'nowrap' }}>AZERAKOL</span>

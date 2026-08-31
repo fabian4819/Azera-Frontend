@@ -53,7 +53,7 @@ export default function AdminLogin() {
 
       <div className="login-right" style={{ width: '480px', background: 'white', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '60px 48px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '48px' }}>
-          <img src="/icon.png" alt="AzeraKOL" style={{ height: '36px', objectFit: 'contain' }} />
+          <img src="/logo-transparent.png" alt="AzeraKOL" style={{ height: '36px', objectFit: 'contain' }} />
           <span style={{ fontFamily: f, fontWeight: 900, fontStyle: 'italic', fontSize: '1.2rem', color: '#15157d', letterSpacing: '-0.02em' }}>AZERAKOL</span>
         </div>
         <div style={{ width: '100%', maxWidth: '360px' }}>

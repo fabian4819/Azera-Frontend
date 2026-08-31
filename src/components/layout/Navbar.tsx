@@ -12,7 +12,7 @@ const registerOptions = [
   { label: 'Brand', to: '/brand/form' },
 ];
 
-const WA_PHONE = '6281994035538';
+const WA_PHONE = '6281919525186';
 const WA_MESSAGE = 'Halo AzeraKOL!\nSaya ingin tanya-tanya, boleh dibantu?';
 const WA_LINK = `https://wa.me/${WA_PHONE}?text=${encodeURIComponent(WA_MESSAGE)}`;
 
@@ -82,18 +82,17 @@ export default function Navbar() {
           }}
         >
           <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none', flexShrink: 0 }}>
-            <img src="/icon.png" alt="AzeraKOL" style={{ height: '26px', objectFit: 'contain' }} />
+            <img src="/logo-transparent.png" alt="AzeraKOL" style={{ height: '26px', objectFit: 'contain' }} />
             <span
               style={{
                 fontFamily: "var(--font-display)",
-                fontWeight: 900,
-                fontStyle: 'italic',
+                fontWeight: 700,
                 fontSize: '1.05rem',
                 color: 'var(--primary)',
-                letterSpacing: '-0.02em',
+                letterSpacing: '-0.045em',
               }}
             >
-              AZERAKOL
+              AZERAKOL.ID
             </span>
           </Link>
 
