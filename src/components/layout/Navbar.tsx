@@ -5,7 +5,7 @@ import { Menu, X, ChevronDown } from 'lucide-react';
 const navLinks = [{ label: 'Home', to: '/' }];
 
 // belum ada landing page khusus per service, redirect sengaja dikosongkan dulu
-const services = ['Engagement Boost', 'KOL Marketing', 'Affiliate Marketing'];
+const services = ['KOL Marketing', 'Engagement Boost', 'Affiliate Marketing'];
 
 const registerOptions = [
   { label: 'KOL', to: '/kol/register' },

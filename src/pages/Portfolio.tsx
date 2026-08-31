@@ -39,7 +39,7 @@ interface PortfolioItem {
   topCreators?: TopCreator[];
 }
 
-const categories = ['All', 'Engagement Boost', 'KOL Marketing', 'Affiliate Marketing'];
+const categories = ['All', 'KOL Marketing', 'Engagement Boost', 'Affiliate Marketing'];
 
 const metricEntries: { key: keyof PortfolioMetrics; label: string }[] = [
   { key: 'totalImpression', label: 'Total Impression' },

@@ -73,8 +73,8 @@ export default function Footer() {
           <div>
             <h4 style={headingStyle}>Layanan</h4>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-              <FooterLink to="/brand">Engagement Boost</FooterLink>
               <FooterLink to="/brand">KOL Marketing</FooterLink>
+              <FooterLink to="/brand">Engagement Boost</FooterLink>
               <FooterLink to="/brand">Affiliate Marketing</FooterLink>
             </div>
           </div>
