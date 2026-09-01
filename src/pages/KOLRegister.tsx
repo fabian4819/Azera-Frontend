@@ -75,7 +75,7 @@ export default function KOLRegister() {
   const [accountNumber, setAccountNumber] = useState('');
   const [accountName, setAccountName] = useState('');
   const [npwp, setNpwp] = useState('');
-  const [mediaKitUrl, setMediaKitUrl] = useState('');
+  const [portfolioLink, setPortfolioLink] = useState('');
 
   useEffect(() => {
     fetch(`${WILAYAH_API}/provinces.json`)
@@ -131,7 +131,7 @@ export default function KOLRegister() {
         contentStyleOther: selectedStyles.includes('Yang lain') ? styleOther : undefined,
         bankAccount: bankName ? { bankName, accountNumber, accountName } : undefined,
         npwp: npwp || undefined,
-        mediaKitUrl: mediaKitUrl || undefined,
+        portfolioLink: portfolioLink || undefined,
       });
       if (res.data.alreadyExists) setAlreadyExists(true);
       setSubmitted(true);
@@ -274,7 +274,7 @@ export default function KOLRegister() {
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '36px' }} className="form-2col">
             <div><label style={labelStyle}>NPWP (opsional)</label><input value={npwp} onChange={(e) => setNpwp(e.target.value)} placeholder="Opsional" style={inputStyle} /></div>
-            <div><label style={labelStyle}>Link Media Kit</label><input value={mediaKitUrl} onChange={(e) => setMediaKitUrl(e.target.value)} placeholder="https://..." style={inputStyle} /></div>
+            <div><label style={labelStyle}>Portfolio (opsional)</label><input value={portfolioLink} onChange={(e) => setPortfolioLink(e.target.value)} placeholder="https://..." style={inputStyle} /></div>
           </div>
 
           {submitError && <p style={{ color: '#ba1a1a', fontSize: '0.85rem', marginBottom: '16px', fontFamily: "var(--font-display)" }}>{submitError}</p>}
