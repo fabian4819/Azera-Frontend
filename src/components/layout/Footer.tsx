@@ -115,6 +115,7 @@ export default function Footer() {
               <FooterLink to="/portfolio">Portfolio</FooterLink>
               <FooterLink to="/brand">Untuk Brand</FooterLink>
               <FooterLink to="/kol">Untuk KOL</FooterLink>
+              <FooterLink to="/privacy-policy">Kebijakan Privasi</FooterLink>
             </div>
           </div>
 

@@ -14,6 +14,7 @@ import KOL from './pages/KOL';
 import KOLRegister from './pages/KOLRegister';
 import Portfolio from './pages/Portfolio';
 import CaseStudyDetail from './pages/CaseStudyDetail';
+import PrivacyPolicy from './pages/PrivacyPolicy';
 import CampaignApply from './pages/CampaignApply';
 import InvoicePayment from './pages/InvoicePayment';
 import CampaignDashboard from './pages/CampaignDashboard';
@@ -84,6 +85,7 @@ export default function App() {
             <Route path="/kol/register" element={<KOLRegister />} />
             <Route path="/portfolio" element={<Portfolio />} />
             <Route path="/portfolio/case-study/:id" element={<CaseStudyDetail />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             <Route path="/apply/:slug" element={<CampaignApply />} />
           </Route>
 
