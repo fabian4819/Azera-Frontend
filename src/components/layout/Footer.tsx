@@ -103,9 +103,9 @@ export default function Footer() {
           <div>
             <h4 style={headingStyle}>Services</h4>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-              <FooterLink to="/brand">KOL Marketing</FooterLink>
-              <FooterLink to="/brand">Engagement Boost</FooterLink>
-              <FooterLink to="/brand">Affiliate Marketing</FooterLink>
+              <FooterLink to="/service/kol-marketing">KOL Marketing</FooterLink>
+              <FooterLink to="/service/engagement-boost">Engagement Boost</FooterLink>
+              <FooterLink to="/service/affiliate-marketing">Affiliate Marketing</FooterLink>
             </div>
           </div>
 

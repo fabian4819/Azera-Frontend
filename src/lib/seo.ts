@@ -135,6 +135,30 @@ export const seoByPath: Record<string, SEOConfig> = {
     keywords: 'portfolio KOL campaign, case study influencer marketing, hasil campaign KOL, campaign brand Indonesia',
     jsonLd: [portfolioJsonLd, breadcrumb([{ name: 'Home', path: '/' }, { name: 'Portfolio', path: '/portfolio' }])],
   },
+  '/service/kol-marketing': {
+    title: 'Jasa KOL Marketing & Amplifikasi Brand | AzeraKOL',
+    description:
+      'Kolaborasi dengan nano hingga macro creator di Instagram, TikTok, YouTube, dan live streaming melalui jaringan 20.000+ KOL terkurasi AzeraKOL.',
+    path: '/service/kol-marketing',
+    keywords: 'jasa KOL marketing, KOL management Indonesia, campaign influencer, nano micro macro creator',
+    jsonLd: [kolServiceJsonLd, breadcrumb([{ name: 'Home', path: '/' }, { name: 'KOL Marketing', path: '/service/kol-marketing' }])],
+  },
+  '/service/engagement-boost': {
+    title: 'Jasa Engagement Boost KOL & Social Media | AzeraKOL',
+    description:
+      'Tingkatkan interaksi organik di semua platform sosial brand kamu lewat aktivasi KOL yang dirancang untuk mendorong comment, share, dan community building.',
+    path: '/service/engagement-boost',
+    keywords: 'engagement boost, social media engagement, community building KOL, interaksi organik campaign',
+    jsonLd: [kolServiceJsonLd, breadcrumb([{ name: 'Home', path: '/' }, { name: 'Engagement Boost', path: '/service/engagement-boost' }])],
+  },
+  '/service/affiliate-marketing': {
+    title: 'Jasa Affiliate Marketing KOL Indonesia | AzeraKOL',
+    description:
+      'Program afiliasi KOL end-to-end untuk TikTok Shop dan Shopee, mulai dari rekrutmen creator, struktur komisi, hingga live shopping untuk dorong penjualan brand.',
+    path: '/service/affiliate-marketing',
+    keywords: 'affiliate marketing KOL, program afiliasi TikTok Shop, live shopping KOL, affiliate program Shopee',
+    jsonLd: [kolServiceJsonLd, breadcrumb([{ name: 'Home', path: '/' }, { name: 'Affiliate Marketing', path: '/service/affiliate-marketing' }])],
+  },
 };
 
 export const defaultSeo: SEOConfig = seoByPath['/'];

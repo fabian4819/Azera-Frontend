@@ -1,11 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, ChevronDown } from 'lucide-react';
+import { services as serviceList } from '../../data/services';
 
 const navLinks = [{ label: 'Home', to: '/' }];
 
-// belum ada landing page khusus per service, redirect sengaja dikosongkan dulu
-const services = ['KOL Marketing', 'Engagement Boost', 'Affiliate Marketing'];
+const services = serviceList.map((s) => ({ label: s.navLabel, to: `/service/${s.slug}` }));
 
 const registerOptions = [
   { label: 'KOL', to: '/kol/register' },
@@ -141,17 +141,19 @@ export default function Navbar() {
                     boxShadow: '0 12px 32px rgba(25,28,32,0.12)', padding: '8px', minWidth: '220px',
                   }}
                 >
-                  {services.map((label) => (
-                    <span
-                      key={label}
+                  {services.map((s) => (
+                    <Link
+                      key={s.to}
+                      to={s.to}
+                      onClick={() => { setServiceOpen(false); setMenuOpen(false); }}
                       style={{
                         display: 'block', padding: '10px 14px', borderRadius: '10px',
                         fontFamily: "var(--font-display)", fontWeight: 600, fontSize: '0.88rem',
-                        color: 'var(--on-background)', whiteSpace: 'nowrap', cursor: 'default',
+                        textDecoration: 'none', color: 'var(--on-background)', whiteSpace: 'nowrap',
                       }}
                     >
-                      {label}
-                    </span>
+                      {s.label}
+                    </Link>
                   ))}
                 </div>
               )}
@@ -285,16 +287,18 @@ export default function Navbar() {
             </button>
             {mobileServiceOpen && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', paddingLeft: '14px' }}>
-                {services.map((label) => (
-                  <span
-                    key={label}
+                {services.map((s) => (
+                  <Link
+                    key={s.to}
+                    to={s.to}
+                    onClick={() => { setMenuOpen(false); setMobileServiceOpen(false); }}
                     style={{
                       padding: '10px 14px', borderRadius: '10px', fontFamily: "var(--font-display)",
-                      fontWeight: 600, fontSize: '0.9rem', color: 'var(--on-surface-variant)',
+                      fontWeight: 600, fontSize: '0.9rem', textDecoration: 'none', color: 'var(--on-surface-variant)',
                     }}
                   >
-                    {label}
-                  </span>
+                    {s.label}
+                  </Link>
                 ))}
               </div>
             )}

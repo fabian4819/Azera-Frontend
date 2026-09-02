@@ -92,6 +92,33 @@ const routes = [
     fallbackBody: 'Portfolio AzeraKOL menampilkan hasil kampanye KOL dan influencer marketing bersama brand di kategori beauty, F&B, fashion, tech, fitness, dan home living.',
     jsonLd: [{ '@context': 'https://schema.org', '@type': 'CollectionPage', name: 'Portfolio Kampanye KOL AzeraKOL', url: `${siteUrl}/portfolio` }],
   },
+  {
+    path: '/service/kol-marketing',
+    title: 'Jasa KOL Marketing & Amplifikasi Brand | AzeraKOL',
+    description: 'Kolaborasi dengan nano hingga macro creator di Instagram, TikTok, YouTube, dan live streaming melalui jaringan 20.000+ KOL terkurasi AzeraKOL.',
+    keywords: 'jasa KOL marketing, KOL management Indonesia, campaign influencer, nano micro macro creator',
+    fallbackHeading: 'Jasa KOL Marketing & Amplifikasi Brand AzeraKOL',
+    fallbackBody: 'AzeraKOL menghubungkan brand dengan nano hingga macro creator terkurasi di Instagram, TikTok, YouTube, dan live streaming.',
+    jsonLd: [kolServiceJsonLd],
+  },
+  {
+    path: '/service/engagement-boost',
+    title: 'Jasa Engagement Boost KOL & Social Media | AzeraKOL',
+    description: 'Tingkatkan interaksi organik di semua platform sosial brand kamu lewat aktivasi KOL yang dirancang untuk mendorong comment, share, dan community building.',
+    keywords: 'engagement boost, social media engagement, community building KOL, interaksi organik campaign',
+    fallbackHeading: 'Jasa Engagement Boost AzeraKOL',
+    fallbackBody: 'AzeraKOL merancang aktivasi KOL yang mendorong interaksi organik dan community building di semua platform sosial brand.',
+    jsonLd: [kolServiceJsonLd],
+  },
+  {
+    path: '/service/affiliate-marketing',
+    title: 'Jasa Affiliate Marketing KOL Indonesia | AzeraKOL',
+    description: 'Program afiliasi KOL end-to-end untuk TikTok Shop dan Shopee, mulai dari rekrutmen creator, struktur komisi, hingga live shopping untuk dorong penjualan brand.',
+    keywords: 'affiliate marketing KOL, program afiliasi TikTok Shop, live shopping KOL, affiliate program Shopee',
+    fallbackHeading: 'Jasa Affiliate Marketing AzeraKOL',
+    fallbackBody: 'AzeraKOL menyusun program afiliasi KOL end-to-end untuk TikTok Shop dan Shopee, dari rekrutmen creator hingga live shopping.',
+    jsonLd: [kolServiceJsonLd],
+  },
 ];
 
 function absoluteUrl(path) {
