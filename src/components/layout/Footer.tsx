@@ -142,8 +142,8 @@ export default function Footer() {
               borderRadius: '20px',
               padding: '28px',
               background:
-                'radial-gradient(85% 65% at 50% -8%, #8c68d4, rgba(140,104,212,0) 58%),' +
-                'linear-gradient(180deg, #7d54d2 0%, #7650cd 52%, #6f4ac6 100%)',
+                'radial-gradient(85% 65% at 50% -8%, #6f4ab8, rgba(111,74,184,0) 58%),' +
+                'linear-gradient(180deg, #5c3aa8 0%, #562fa0 52%, #4a2f8c 100%)',
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'space-between',
