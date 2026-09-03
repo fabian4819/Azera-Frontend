@@ -326,7 +326,7 @@ export default function ServiceDetail() {
           <p style={{ color: 'rgba(255,255,255,0.85)', fontSize: '1.05rem', marginBottom: '24px' }}>{service.subheading}</p>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', justifyContent: 'center', marginBottom: '28px' }}>
             {service.tags.map((tag) => (
-              <span key={tag} className="tag-pill tag-pill-white" style={{ fontSize: '0.78rem' }}>{tag}</span>
+              <span key={tag} className="tag-pill tag-pill-white" style={{ fontSize: '0.78rem', color: 'var(--lime)' }}>{tag}</span>
             ))}
           </div>
           {service.description.map((p, i) => (
