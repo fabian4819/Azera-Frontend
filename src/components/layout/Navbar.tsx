@@ -138,7 +138,7 @@ export default function Navbar() {
                   style={{
                     position: 'absolute', top: 'calc(100% + 10px)', left: '50%', transform: 'translateX(-50%)',
                     background: '#ffffff', border: '1.5px solid var(--outline-variant)', borderRadius: '16px',
-                    boxShadow: '0 12px 32px rgba(25,28,32,0.12)', padding: '8px', minWidth: '220px',
+                    boxShadow: '0 12px 32px rgba(25,28,32,0.12)', padding: '8px', minWidth: '260px',
                   }}
                 >
                   {services.map((s) => (

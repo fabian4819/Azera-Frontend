@@ -135,29 +135,37 @@ export const seoByPath: Record<string, SEOConfig> = {
     keywords: 'portfolio KOL campaign, case study influencer marketing, hasil campaign KOL, campaign brand Indonesia',
     jsonLd: [portfolioJsonLd, breadcrumb([{ name: 'Home', path: '/' }, { name: 'Portfolio', path: '/portfolio' }])],
   },
-  '/service/kol-marketing': {
-    title: 'Jasa KOL Marketing & Amplifikasi Brand | AzeraKOL',
+  '/service/nano-micro-kol-campaign': {
+    title: 'Nano-Micro KOL Campaign | AzeraKOL',
     description:
-      'Kolaborasi dengan nano hingga macro creator di Instagram, TikTok, YouTube, dan live streaming melalui jaringan 20.000+ KOL terkurasi AzeraKOL.',
-    path: '/service/kol-marketing',
-    keywords: 'jasa KOL marketing, KOL management Indonesia, campaign influencer, nano micro macro creator',
-    jsonLd: [kolServiceJsonLd, breadcrumb([{ name: 'Home', path: '/' }, { name: 'KOL Marketing', path: '/service/kol-marketing' }])],
+      'Campaign bersama puluhan hingga ribuan nano-micro KOL untuk meningkatkan awareness, engagement, review, dan peluncuran produk brand kamu.',
+    path: '/service/nano-micro-kol-campaign',
+    keywords: 'nano micro KOL campaign, jasa KOL management Indonesia, campaign influencer skala besar',
+    jsonLd: [kolServiceJsonLd, breadcrumb([{ name: 'Home', path: '/' }, { name: 'Nano-Micro KOL Campaign', path: '/service/nano-micro-kol-campaign' }])],
   },
-  '/service/engagement-boost': {
-    title: 'Jasa Engagement Boost KOL & Social Media | AzeraKOL',
+  '/service/koc-campaign': {
+    title: 'KOC Campaign | AzeraKOL',
     description:
-      'Tingkatkan interaksi organik di semua platform sosial brand kamu lewat aktivasi KOL yang dirancang untuk mendorong comment, share, dan community building.',
-    path: '/service/engagement-boost',
-    keywords: 'engagement boost, social media engagement, community building KOL, interaksi organik campaign',
-    jsonLd: [kolServiceJsonLd, breadcrumb([{ name: 'Home', path: '/' }, { name: 'Engagement Boost', path: '/service/engagement-boost' }])],
+      'Aktivasi everyday consumers dan small creators untuk authentic reviews, product seeding, mass content distribution, dan UGC sesuai kebutuhan campaign.',
+    path: '/service/koc-campaign',
+    keywords: 'KOC campaign, key opinion consumer, UGC campaign Indonesia, product seeding',
+    jsonLd: [kolServiceJsonLd, breadcrumb([{ name: 'Home', path: '/' }, { name: 'KOC Campaign', path: '/service/koc-campaign' }])],
   },
-  '/service/affiliate-marketing': {
-    title: 'Jasa Affiliate Marketing KOL Indonesia | AzeraKOL',
+  '/service/affiliate-creator-campaign': {
+    title: 'Affiliate Creator Campaign | AzeraKOL',
     description:
-      'Program afiliasi KOL end-to-end untuk TikTok Shop dan Shopee, mulai dari rekrutmen creator, struktur komisi, hingga live shopping untuk dorong penjualan brand.',
-    path: '/service/affiliate-marketing',
-    keywords: 'affiliate marketing KOL, program afiliasi TikTok Shop, live shopping KOL, affiliate program Shopee',
-    jsonLd: [kolServiceJsonLd, breadcrumb([{ name: 'Home', path: '/' }, { name: 'Affiliate Marketing', path: '/service/affiliate-marketing' }])],
+      'Campaign berbasis performa bersama affiliate creators untuk mendorong traffic, conversion, sales, commission, dan GMV brand kamu.',
+    path: '/service/affiliate-creator-campaign',
+    keywords: 'affiliate creator campaign, affiliate marketing KOL, program afiliasi TikTok Shop, GMV creator',
+    jsonLd: [kolServiceJsonLd, breadcrumb([{ name: 'Home', path: '/' }, { name: 'Affiliate Creator Campaign', path: '/service/affiliate-creator-campaign' }])],
+  },
+  '/service/event-creator-activation': {
+    title: 'Event Creator Activation | AzeraKOL',
+    description:
+      'Aktivasi KOC dan nano creators untuk menghadiri serta meramaikan event, menghasilkan live content, dan memperluas exposure event di media sosial.',
+    path: '/service/event-creator-activation',
+    keywords: 'event creator activation, aktivasi event KOC, live content event, exposure event media sosial',
+    jsonLd: [kolServiceJsonLd, breadcrumb([{ name: 'Home', path: '/' }, { name: 'Event Creator Activation', path: '/service/event-creator-activation' }])],
   },
 };
 

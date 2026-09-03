@@ -39,7 +39,7 @@ interface PortfolioItem {
   topCreators?: TopCreator[];
 }
 
-const categories = ['All', 'KOL Marketing', 'Engagement Boost', 'Affiliate Marketing'];
+const categories = ['All Campaigns', 'KOL Campaign', 'KOC Campaign', 'Affiliate Campaign', 'Event Activation'];
 
 const metricEntries: { key: keyof PortfolioMetrics; label: string }[] = [
   { key: 'totalImpression', label: 'Total Impression' },
@@ -52,7 +52,7 @@ const metricEntries: { key: keyof PortfolioMetrics; label: string }[] = [
 
 export default function Portfolio() {
   const [items, setItems] = useState<PortfolioItem[]>([]);
-  const [category, setCategory] = useState('All');
+  const [category, setCategory] = useState('All Campaigns');
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [creatorIndex, setCreatorIndex] = useState(0);
   const [creatorScrollKey, setCreatorScrollKey] = useState<string | undefined>(undefined);
@@ -69,7 +69,7 @@ export default function Portfolio() {
       .catch(() => {});
   }, []);
 
-  const filtered = category === 'All' ? items : items.filter((i) => i.category === category);
+  const filtered = category === 'All Campaigns' ? items : items.filter((i) => i.category === category);
   // fallback ke brand pertama yang terlihat kalau selectedId hilang dari filter kategori aktif
   const selected = filtered.find((i) => i._id === selectedId) || filtered[0];
 

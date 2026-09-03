@@ -74,7 +74,7 @@ const emptyForm: FormState = {
 };
 
 // Kategori resmi AzeraKOL — sama seperti yang dipakai di Footer & filter Portfolio publik
-const categories = ['KOL Marketing', 'Engagement Boost', 'Affiliate Marketing'];
+const categories = ['KOL Campaign', 'KOC Campaign', 'Affiliate Campaign', 'Event Activation'];
 
 const metricLabels: Record<keyof PortfolioMetrics, string> = {
   totalImpression: 'Total Impression',

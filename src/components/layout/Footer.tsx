@@ -96,6 +96,9 @@ export default function Footer() {
             <SocialIcon href="mailto:hello@azerakol.id" label="Email"><Mail size={16} /></SocialIcon>
           </div>
         </div>
+        <p style={{ color: 'var(--on-surface-variant)', fontSize: '0.88rem', lineHeight: 1.7, maxWidth: '640px', margin: '20px 0 0' }}>
+          AZERAKOL.ID is a nano&ndash;micro creator campaign specialist operated by PT Azera Creator Network. We help brands execute scalable KOL, KOC, affiliate, and event creator campaigns&mdash;from dozens to thousands of creators.
+        </p>
       </div>
 
       <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '40px 24px 40px' }}>
@@ -103,9 +106,10 @@ export default function Footer() {
           <div>
             <h4 style={headingStyle}>Services</h4>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-              <FooterLink to="/service/kol-marketing">KOL Marketing</FooterLink>
-              <FooterLink to="/service/engagement-boost">Engagement Boost</FooterLink>
-              <FooterLink to="/service/affiliate-marketing">Affiliate Marketing</FooterLink>
+              <FooterLink to="/service/nano-micro-kol-campaign">Nano-Micro KOL Campaign</FooterLink>
+              <FooterLink to="/service/koc-campaign">KOC Campaign</FooterLink>
+              <FooterLink to="/service/affiliate-creator-campaign">Affiliate Creator Campaign</FooterLink>
+              <FooterLink to="/service/event-creator-activation">Event Creator Activation</FooterLink>
             </div>
           </div>
 
@@ -167,6 +171,9 @@ export default function Footer() {
       <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 24px 32px' }}>
         <div style={{ borderTop: '1px solid var(--outline-variant)', paddingTop: '24px', textAlign: 'center' }}>
           <p style={{ color: 'var(--on-surface-variant)', fontSize: '0.82rem', fontFamily: "var(--font-display)" }}>
+            AZERAKOL.ID is a brand of PT Azera Creator Network.
+          </p>
+          <p style={{ color: 'var(--on-surface-variant)', fontSize: '0.82rem', fontFamily: "var(--font-display)", marginTop: '4px' }}>
             &copy; {new Date().getFullYear()} AzeraKOL Agency. All rights reserved.
           </p>
         </div>

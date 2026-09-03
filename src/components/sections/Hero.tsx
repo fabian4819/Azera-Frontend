@@ -139,9 +139,9 @@ export default function Hero() {
             marginBottom: '26px',
           }}
         >
-          Jasa KOL Management untuk{' '}
+          Scale Your Brand with{' '}
           <span className="underline-accent">
-            Brand Growth.
+            Nano&ndash;Micro Creators
             <svg viewBox="0 0 300 20" preserveAspectRatio="none" fill="none">
               <path d="M2 14C60 4 160 2 298 12" stroke="var(--lime)" strokeWidth="5" strokeLinecap="round" />
             </svg>
@@ -154,7 +154,7 @@ export default function Hero() {
           transition={{ duration: 0.6, ease, delay: 0.13 }}
           style={{ color: 'rgba(255,255,255,0.82)', fontSize: '1.08rem', lineHeight: 1.7, maxWidth: '600px', margin: '0 auto 36px' }}
         >
-          AzeraKOL membantu brand menjalankan campaign KOL dan influencer marketing di Indonesia melalui jaringan nano, micro, dan macro creator terkurasi untuk Instagram, TikTok, YouTube, dan live streaming.
+          Specialized in high-volume KOL, KOC, affiliate, and event creator campaigns&mdash;from dozens to thousands of creators.
         </motion.p>
 
         <motion.div
