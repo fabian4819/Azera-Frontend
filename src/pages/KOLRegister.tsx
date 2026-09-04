@@ -74,7 +74,9 @@ export default function KOLRegister() {
   const [bankName, setBankName] = useState('');
   const [accountNumber, setAccountNumber] = useState('');
   const [accountName, setAccountName] = useState('');
-  const [npwp, setNpwp] = useState('');
+  const [rateType, setRateType] = useState<'nominal' | 'unknown' | ''>('');
+  const [rateAmount, setRateAmount] = useState('');
+  const [rateNegotiable, setRateNegotiable] = useState<'yes' | 'no' | 'depends' | ''>('');
   const [portfolioLink, setPortfolioLink] = useState('');
 
   useEffect(() => {
@@ -130,7 +132,9 @@ export default function KOLRegister() {
         contentStyles: selectedStyles.filter((s) => s !== 'Yang lain'),
         contentStyleOther: selectedStyles.includes('Yang lain') ? styleOther : undefined,
         bankAccount: bankName ? { bankName, accountNumber, accountName } : undefined,
-        npwp: npwp || undefined,
+        rateEstimateType: rateType || undefined,
+        rateEstimateAmount: rateType === 'nominal' && rateAmount ? Number(rateAmount) : undefined,
+        rateNegotiable: rateNegotiable || undefined,
         portfolioLink: portfolioLink || undefined,
       });
       if (res.data.alreadyExists) setAlreadyExists(true);
@@ -272,9 +276,28 @@ export default function KOLRegister() {
             <label style={labelStyle}>Nama Pemilik Rekening</label>
             <input value={accountName} onChange={(e) => setAccountName(e.target.value)} placeholder="Sesuai buku tabungan" style={inputStyle} />
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '36px' }} className="form-2col">
-            <div><label style={labelStyle}>NPWP (opsional)</label><input value={npwp} onChange={(e) => setNpwp(e.target.value)} placeholder="Opsional" style={inputStyle} /></div>
-            <div><label style={labelStyle}>Portfolio (opsional)</label><input value={portfolioLink} onChange={(e) => setPortfolioLink(e.target.value)} placeholder="https://..." style={inputStyle} /></div>
+          <div style={{ marginBottom: '20px' }}>
+            <label style={labelStyle}>1. Estimasi rate untuk 1&times; video posting</label>
+            <p style={{ fontSize: '0.78rem', color: '#777683', marginBottom: '8px' }}>Hanya untuk referensi awal dan bukan merupakan kesepakatan final.</p>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: rateType === 'nominal' ? '10px' : 0 }}>
+              <Pill label="Isi nominal" selected={rateType === 'nominal'} onClick={() => setRateType('nominal')} />
+              <Pill label="Saya belum memiliki patokan rate" selected={rateType === 'unknown'} onClick={() => { setRateType('unknown'); setRateAmount(''); }} />
+            </div>
+            {rateType === 'nominal' && (
+              <input value={rateAmount} onChange={(e) => setRateAmount(e.target.value)} placeholder="Rp ________" type="number" style={inputStyle} />
+            )}
+          </div>
+          <div style={{ marginBottom: '28px' }}>
+            <label style={labelStyle}>2. Apakah rate tersebut masih dapat dinegosiasikan?</label>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+              <Pill label="Ya" selected={rateNegotiable === 'yes'} onClick={() => setRateNegotiable('yes')} />
+              <Pill label="Tidak" selected={rateNegotiable === 'no'} onClick={() => setRateNegotiable('no')} />
+              <Pill label="Tergantung Campaign" selected={rateNegotiable === 'depends'} onClick={() => setRateNegotiable('depends')} />
+            </div>
+          </div>
+          <div style={{ marginBottom: '36px' }}>
+            <label style={labelStyle}>Portfolio (opsional)</label>
+            <input value={portfolioLink} onChange={(e) => setPortfolioLink(e.target.value)} placeholder="https://..." style={inputStyle} />
           </div>
 
           {submitError && <p style={{ color: '#ba1a1a', fontSize: '0.85rem', marginBottom: '16px', fontFamily: "var(--font-display)" }}>{submitError}</p>}

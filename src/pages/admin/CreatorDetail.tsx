@@ -285,8 +285,24 @@ export default function CreatorDetail() {
           {(creator.mediaKitUrl || creator.portfolioLink) && (
             <div style={cardStyle}>
               <p style={{ fontFamily: f, fontWeight: 700, fontSize: '1rem', color: '#191c20', marginBottom: '14px' }}>Link</p>
-              {creator.mediaKitUrl && <p style={{ fontSize: '0.85rem', marginBottom: '6px' }}><a href={creator.mediaKitUrl} target="_blank" rel="noreferrer" style={{ color: '#6728e4' }}>Media Kit</a></p>}
-              {creator.portfolioLink && <p style={{ fontSize: '0.85rem' }}><a href={creator.portfolioLink} target="_blank" rel="noreferrer" style={{ color: '#6728e4' }}>Portfolio</a></p>}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                {creator.mediaKitUrl && (
+                  <div>
+                    <a href={normalizeUrl(creator.mediaKitUrl)} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', color: '#6728e4', textDecoration: 'none' }}>
+                      <ExternalLink size={14} /> Media Kit
+                    </a>
+                    <p style={{ fontSize: '0.75rem', color: '#777683', marginTop: '2px', wordBreak: 'break-all' }}>{creator.mediaKitUrl}</p>
+                  </div>
+                )}
+                {creator.portfolioLink && (
+                  <div>
+                    <a href={normalizeUrl(creator.portfolioLink)} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', color: '#6728e4', textDecoration: 'none' }}>
+                      <ExternalLink size={14} /> Portfolio
+                    </a>
+                    <p style={{ fontSize: '0.75rem', color: '#777683', marginTop: '2px', wordBreak: 'break-all' }}>{creator.portfolioLink}</p>
+                  </div>
+                )}
+              </div>
             </div>
           )}
         </div>
