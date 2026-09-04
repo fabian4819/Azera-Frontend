@@ -14,6 +14,19 @@ const labelSmall: React.CSSProperties = {
   marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.06em',
 };
 
+// profileUrl kosong (data lama sebelum field ini wajib) -> tebak link dari username per platform
+function socialFallbackUrl(platform: string, username: string) {
+  const handle = username.replace(/^@/, '').trim();
+  if (!handle) return '';
+  switch (platform) {
+    case 'instagram': return `https://instagram.com/${handle}`;
+    case 'tiktok': return `https://tiktok.com/@${handle}`;
+    case 'threads': return `https://threads.net/@${handle}`;
+    case 'x': return `https://x.com/${handle}`;
+    default: return '';
+  }
+}
+
 interface ScoreBreakdown {
   reliability: { score: number; totalCampaigns: number; onTimeCount: number; violationCount: number };
   quality: { score: number; totalCampaigns: number; avgRevisions: number; noRevisionCount: number };
@@ -138,12 +151,21 @@ export default function CreatorDetail() {
             <p style={{ fontFamily: f, fontWeight: 700, fontSize: '1rem', color: '#191c20', marginBottom: '16px' }}>Media Sosial</p>
             {creator.socials.length === 0 ? <p style={{ color: '#777683', fontSize: '0.85rem' }}>Belum ada.</p> : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                {creator.socials.map((s, i) => (
-                  <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 14px', background: '#f8f9ff', borderRadius: '10px', fontSize: '0.85rem' }}>
-                    <span style={{ textTransform: 'capitalize', fontWeight: 700, color: '#6728e4' }}>{s.platform}</span>
-                    <span>{s.username} · {s.followers.toLocaleString('id-ID')} followers</span>
-                  </div>
-                ))}
+                {creator.socials.map((s, i) => {
+                  const href = s.profileUrl || socialFallbackUrl(s.platform, s.username);
+                  return (
+                    <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 14px', background: '#f8f9ff', borderRadius: '10px', fontSize: '0.85rem' }}>
+                      {href ? (
+                        <a href={href} target="_blank" rel="noopener noreferrer" style={{ textTransform: 'capitalize', fontWeight: 700, color: '#6728e4', textDecoration: 'none' }}>
+                          {s.platform}
+                        </a>
+                      ) : (
+                        <span style={{ textTransform: 'capitalize', fontWeight: 700, color: '#6728e4' }}>{s.platform}</span>
+                      )}
+                      <span>{s.username} · {s.followers.toLocaleString('id-ID')} followers</span>
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>
