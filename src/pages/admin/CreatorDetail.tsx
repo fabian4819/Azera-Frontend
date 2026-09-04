@@ -1,8 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, ThumbsUp, ThumbsDown, Unlock } from 'lucide-react';
+import { ArrowLeft, ThumbsUp, ThumbsDown, Unlock, ExternalLink } from 'lucide-react';
+import { SiInstagram, SiTiktok, SiThreads, SiX } from 'react-icons/si';
 import StatusBadge from '../../components/ui/StatusBadge';
 import api from '../../lib/api';
+
+const socialIcons: Record<string, React.ComponentType<{ size?: number }>> = {
+  instagram: SiInstagram, tiktok: SiTiktok, threads: SiThreads, x: SiX,
+};
 
 const f = "var(--font-display)";
 const cardStyle: React.CSSProperties = {
@@ -25,6 +30,14 @@ function socialFallbackUrl(platform: string, username: string) {
     case 'x': return `https://x.com/${handle}`;
     default: return '';
   }
+}
+
+// KOL sering isi profileUrl tanpa "https://" (mis. "instagram.com/user"), yang bikin browser
+// menganggapnya link relatif ke halaman admin saat ini alih-alih ke platform medsos-nya.
+function normalizeUrl(url: string) {
+  const trimmed = url.trim();
+  if (!trimmed) return '';
+  return /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
 }
 
 interface ScoreBreakdown {
@@ -152,16 +165,25 @@ export default function CreatorDetail() {
             {creator.socials.length === 0 ? <p style={{ color: '#777683', fontSize: '0.85rem' }}>Belum ada.</p> : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 {creator.socials.map((s, i) => {
-                  const href = s.profileUrl || socialFallbackUrl(s.platform, s.username);
+                  const raw = s.profileUrl || socialFallbackUrl(s.platform, s.username);
+                  const href = raw ? normalizeUrl(raw) : '';
+                  const Icon = socialIcons[s.platform];
                   return (
-                    <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 14px', background: '#f8f9ff', borderRadius: '10px', fontSize: '0.85rem' }}>
-                      {href ? (
-                        <a href={href} target="_blank" rel="noopener noreferrer" style={{ textTransform: 'capitalize', fontWeight: 700, color: '#6728e4', textDecoration: 'none' }}>
-                          {s.platform}
-                        </a>
-                      ) : (
-                        <span style={{ textTransform: 'capitalize', fontWeight: 700, color: '#6728e4' }}>{s.platform}</span>
-                      )}
+                    <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', background: '#f8f9ff', borderRadius: '10px', fontSize: '0.85rem' }}>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        {href && Icon && (
+                          <a href={href} target="_blank" rel="noopener noreferrer" aria-label={`Buka ${s.platform}`} style={{ display: 'flex', color: '#6728e4' }}>
+                            <Icon size={16} />
+                          </a>
+                        )}
+                        {href ? (
+                          <a href={href} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '4px', textTransform: 'capitalize', fontWeight: 700, color: '#6728e4', textDecoration: 'none' }}>
+                            {s.platform} <ExternalLink size={11} />
+                          </a>
+                        ) : (
+                          <span style={{ textTransform: 'capitalize', fontWeight: 700, color: '#6728e4' }}>{s.platform}</span>
+                        )}
+                      </span>
                       <span>{s.username} · {s.followers.toLocaleString('id-ID')} followers</span>
                     </div>
                   );
