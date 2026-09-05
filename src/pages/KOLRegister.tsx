@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { CheckCircle2, Camera, Music2, AtSign, Hash, Zap } from 'lucide-react';
 import api from '../lib/api';
 
@@ -52,11 +52,28 @@ const Pill = ({ label, selected, onClick }: { label: string; selected: boolean; 
 
 interface SocialState { username: string; profileUrl: string; followers: string }
 
+type Section = 'gender' | 'socials' | 'activities' | 'niches' | 'styles' | 'rate';
+
+const fieldErrorTextStyle: React.CSSProperties = {
+  color: '#ba1a1a', fontSize: '0.8rem', fontFamily: "var(--font-display)", fontWeight: 600, marginTop: '-4px', marginBottom: '12px',
+};
+
 export default function KOLRegister() {
   const [submitted, setSubmitted] = useState(false);
   const [alreadyExists, setAlreadyExists] = useState(false);
   const [submitError, setSubmitError] = useState('');
+  const [fieldError, setFieldError] = useState<{ section: Section; message: string } | null>(null);
   const [loading, setLoading] = useState(false);
+
+  const genderRef = useRef<HTMLDivElement>(null);
+  const socialsRef = useRef<HTMLDivElement>(null);
+  const activitiesRef = useRef<HTMLDivElement>(null);
+  const nichesRef = useRef<HTMLDivElement>(null);
+  const stylesRef = useRef<HTMLDivElement>(null);
+  const rateRef = useRef<HTMLDivElement>(null);
+  const sectionRefs: Record<Section, React.RefObject<HTMLDivElement | null>> = {
+    gender: genderRef, socials: socialsRef, activities: activitiesRef, niches: nichesRef, styles: stylesRef, rate: rateRef,
+  };
 
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
@@ -106,31 +123,37 @@ export default function KOLRegister() {
     setSocials((prev) => ({ ...prev, [platform]: { ...prev[platform], [field]: value } }));
   };
 
+  const failSection = (section: Section, message: string) => {
+    setFieldError({ section, message });
+    sectionRefs[section].current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  };
+
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitError('');
-    if (!name || !phone || !gender || !province || !city) {
-      setSubmitError('Nama, nomor WA, jenis kelamin, provinsi, dan kota/kabupaten wajib diisi.');
+    setFieldError(null);
+    if (!gender) {
+      failSection('gender', 'Jenis kelamin wajib dipilih.');
       return;
     }
     if (!Object.values(socials).some((v) => v?.username)) {
-      setSubmitError('Isi minimal 1 platform media sosial.');
+      failSection('socials', 'Isi minimal 1 platform media sosial.');
       return;
     }
     if (selectedActivities.length === 0) {
-      setSubmitError('Pilih minimal 1 aktivitas sebagai creator.');
+      failSection('activities', 'Pilih minimal 1 aktivitas sebagai creator.');
       return;
     }
-    if (selectedNiches.length === 0 || (selectedNiches.includes('Yang lain') && !nicheOther)) {
-      setSubmitError('Pilih minimal 1 niche konten.');
+    if (selectedNiches.length === 0) {
+      failSection('niches', 'Pilih minimal 1 niche konten.');
       return;
     }
-    if (selectedStyles.length === 0 || (selectedStyles.includes('Yang lain') && !styleOther)) {
-      setSubmitError('Pilih minimal 1 gaya konten.');
+    if (selectedStyles.length === 0) {
+      failSection('styles', 'Pilih minimal 1 gaya konten.');
       return;
     }
-    if (!rateType || (rateType === 'nominal' && !rateAmount) || !rateNegotiable) {
-      setSubmitError('Estimasi rate dan status negosiasi rate wajib diisi.');
+    if (!rateType || !rateNegotiable) {
+      failSection('rate', 'Estimasi rate dan status negosiasi rate wajib diisi.');
       return;
     }
     setLoading(true);
@@ -208,32 +231,33 @@ export default function KOLRegister() {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }} className="form-2col">
             <div>
               <label style={labelStyle}>Nama Lengkap *</label>
-              <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Nama lengkap" style={inputStyle} />
+              <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Nama lengkap" required style={inputStyle} />
             </div>
             <div>
               <label style={labelStyle}>Nomor WhatsApp *</label>
-              <input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="08xxxxxxxxxx" style={inputStyle} />
+              <input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="08xxxxxxxxxx" required style={inputStyle} />
             </div>
           </div>
-          <div style={{ marginBottom: '14px' }}>
+          <div ref={genderRef} style={{ marginBottom: '14px' }}>
             <label style={labelStyle}>Jenis Kelamin *</label>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-              <Pill label="Laki-laki" selected={gender === 'male'} onClick={() => setGender('male')} />
-              <Pill label="Perempuan (Hijab)" selected={gender === 'female_hijab'} onClick={() => setGender('female_hijab')} />
-              <Pill label="Perempuan (Non-Hijab)" selected={gender === 'female_non_hijab'} onClick={() => setGender('female_non_hijab')} />
+              <Pill label="Laki-laki" selected={gender === 'male'} onClick={() => { setGender('male'); setFieldError(null); }} />
+              <Pill label="Perempuan (Hijab)" selected={gender === 'female_hijab'} onClick={() => { setGender('female_hijab'); setFieldError(null); }} />
+              <Pill label="Perempuan (Non-Hijab)" selected={gender === 'female_non_hijab'} onClick={() => { setGender('female_non_hijab'); setFieldError(null); }} />
             </div>
+            {fieldError?.section === 'gender' && <p style={fieldErrorTextStyle}>{fieldError.message}</p>}
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '28px' }} className="form-2col">
             <div>
               <label style={labelStyle}>Provinsi *</label>
-              <select value={province} onChange={(e) => onProvinceChange(e.target.value)} style={inputStyle}>
+              <select value={province} onChange={(e) => onProvinceChange(e.target.value)} required style={inputStyle}>
                 <option value="">Pilih provinsi</option>
                 {provinces.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
               </select>
             </div>
             <div>
               <label style={labelStyle}>Kota/Kabupaten *</label>
-              <select value={city} onChange={(e) => setCity(e.target.value)} disabled={!province} style={inputStyle}>
+              <select value={city} onChange={(e) => setCity(e.target.value)} disabled={!province} required style={inputStyle}>
                 <option value="">{province ? 'Pilih kota/kabupaten' : 'Pilih provinsi dulu'}</option>
                 {cities.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
               </select>
@@ -241,71 +265,95 @@ export default function KOLRegister() {
           </div>
 
           <SectionTitle title="2. Media Sosial" />
-          <p style={{ color: '#777683', fontSize: '0.85rem', marginBottom: '20px', fontFamily: "var(--font-display)" }}>Isi minimal 1 platform. *</p>
-          {socialPlatforms.map(({ value, label, icon: Icon, color }) => (
-            <div key={value} style={{ background: '#f8f9ff', border: `1px solid ${color}22`, borderRadius: '16px', padding: '20px', marginBottom: '16px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
-                <Icon size={18} color={color} />
-                <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, color, fontSize: '0.9rem' }}>{label}</p>
+          <div ref={socialsRef}>
+            <p style={{ color: '#777683', fontSize: '0.85rem', marginBottom: '8px', fontFamily: "var(--font-display)" }}>Isi minimal 1 platform. *</p>
+            {fieldError?.section === 'socials' && <p style={fieldErrorTextStyle}>{fieldError.message}</p>}
+            {socialPlatforms.map(({ value, label, icon: Icon, color }) => (
+              <div key={value} style={{ background: '#f8f9ff', border: `1px solid ${color}22`, borderRadius: '16px', padding: '20px', marginBottom: '16px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
+                  <Icon size={18} color={color} />
+                  <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, color, fontSize: '0.9rem' }}>{label}</p>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }} className="form-2col">
+                  <div>
+                    <label style={labelStyle}>Username</label>
+                    <div style={{ display: 'flex', alignItems: 'stretch', border: '1.5px solid #c7c8cf', borderRadius: '12px', background: 'white', overflow: 'hidden' }}>
+                      <span style={{ display: 'flex', alignItems: 'center', padding: '0 12px', color: '#8a8a99', fontFamily: "var(--font-display)", fontSize: '0.875rem', borderRight: '1.5px solid #e1e0ff' }}>@</span>
+                      <input
+                        value={socials[value]?.username || ''}
+                        onChange={(e) => { setSocialField(value, 'username', e.target.value.replace(/^@+/, '')); setFieldError(null); }}
+                        placeholder="username"
+                        style={{ flex: 1, minWidth: 0, border: 'none', outline: 'none', padding: '11px 14px', fontSize: '0.875rem', fontFamily: "var(--font-display)", color: '#191c20', background: 'transparent' }}
+                      />
+                    </div>
+                  </div>
+                  <div><label style={labelStyle}>Followers</label><input value={socials[value]?.followers || ''} onChange={(e) => setSocialField(value, 'followers', e.target.value)} type="number" placeholder="10000" style={inputStyle} /></div>
+                </div>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }} className="form-2col">
-                <div><label style={labelStyle}>Username</label><input value={socials[value]?.username || ''} onChange={(e) => setSocialField(value, 'username', e.target.value)} placeholder="@username" style={inputStyle} /></div>
-                <div><label style={labelStyle}>Followers</label><input value={socials[value]?.followers || ''} onChange={(e) => setSocialField(value, 'followers', e.target.value)} type="number" placeholder="10000" style={inputStyle} /></div>
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
 
           <SectionTitle title="3. Aktivitas Sebagai Creator" />
-          <p style={{ color: '#777683', fontSize: '0.85rem', marginBottom: '16px', fontFamily: "var(--font-display)" }}>Bisa pilih lebih dari 1. *</p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '28px' }}>
-            {activities.map((a) => {
-              const selected = selectedActivities.includes(a.value);
-              return (
-                <button key={a.value} type="button" onClick={() => toggle(selectedActivities, setSelectedActivities, a.value)}
-                  style={{ textAlign: 'left', padding: '14px 16px', borderRadius: '12px', border: selected ? '1.5px solid #6728e4' : '1.5px solid #e1e0ff', background: selected ? '#f0eeff' : 'white', cursor: 'pointer' }}>
-                  <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: '0.85rem', color: selected ? '#6728e4' : '#191c20', marginBottom: '2px' }}>{a.label}</p>
-                  <p style={{ fontSize: '0.78rem', color: '#777683', fontFamily: "var(--font-display)" }}>{a.desc}</p>
-                </button>
-              );
-            })}
+          <div ref={activitiesRef}>
+            <p style={{ color: '#777683', fontSize: '0.85rem', marginBottom: '16px', fontFamily: "var(--font-display)" }}>Bisa pilih lebih dari 1. *</p>
+            {fieldError?.section === 'activities' && <p style={fieldErrorTextStyle}>{fieldError.message}</p>}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '28px' }}>
+              {activities.map((a) => {
+                const selected = selectedActivities.includes(a.value);
+                return (
+                  <button key={a.value} type="button" onClick={() => { toggle(selectedActivities, setSelectedActivities, a.value); setFieldError(null); }}
+                    style={{ textAlign: 'left', padding: '14px 16px', borderRadius: '12px', border: selected ? '1.5px solid #6728e4' : '1.5px solid #e1e0ff', background: selected ? '#f0eeff' : 'white', cursor: 'pointer' }}>
+                    <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: '0.85rem', color: selected ? '#6728e4' : '#191c20', marginBottom: '2px' }}>{a.label}</p>
+                    <p style={{ fontSize: '0.78rem', color: '#777683', fontFamily: "var(--font-display)" }}>{a.desc}</p>
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
           <SectionTitle title="4. Niche Konten" />
-          <p style={{ color: '#777683', fontSize: '0.85rem', marginBottom: '16px', fontFamily: "var(--font-display)" }}>Pilih minimal 1 niche. *</p>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: selectedNiches.includes('Yang lain') ? '12px' : '28px' }}>
-            {niches.map((n) => <Pill key={n} label={n} selected={selectedNiches.includes(n)} onClick={() => toggle(selectedNiches, setSelectedNiches, n)} />)}
-          </div>
-          {selectedNiches.includes('Yang lain') && (
-            <input value={nicheOther} onChange={(e) => setNicheOther(e.target.value)} placeholder="Sebutkan niche lain..." style={{ ...inputStyle, marginBottom: '28px' }} />
-          )}
-
-          <SectionTitle title="5. Gaya Konten" />
-          <p style={{ color: '#777683', fontSize: '0.85rem', marginBottom: '16px', fontFamily: "var(--font-display)" }}>Pilih minimal 1 gaya konten. *</p>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: selectedStyles.includes('Yang lain') ? '12px' : '28px' }}>
-            {contentStyles.map((s) => <Pill key={s} label={s} selected={selectedStyles.includes(s)} onClick={() => toggle(selectedStyles, setSelectedStyles, s)} />)}
-          </div>
-          {selectedStyles.includes('Yang lain') && (
-            <input value={styleOther} onChange={(e) => setStyleOther(e.target.value)} placeholder="Sebutkan gaya konten lain..." style={{ ...inputStyle, marginBottom: '28px' }} />
-          )}
-
-          <SectionTitle title="6. Rate & Negosiasi" />
-          <div style={{ marginBottom: '20px' }}>
-            <label style={labelStyle}>Estimasi rate untuk 1&times; video posting *</label>
-            <p style={{ fontSize: '0.78rem', color: '#777683', marginBottom: '8px' }}>Hanya untuk referensi awal dan bukan merupakan kesepakatan final.</p>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: rateType === 'nominal' ? '10px' : 0 }}>
-              <Pill label="Isi nominal" selected={rateType === 'nominal'} onClick={() => setRateType('nominal')} />
-              <Pill label="Saya belum memiliki patokan rate" selected={rateType === 'unknown'} onClick={() => { setRateType('unknown'); setRateAmount(''); }} />
+          <div ref={nichesRef}>
+            <p style={{ color: '#777683', fontSize: '0.85rem', marginBottom: '16px', fontFamily: "var(--font-display)" }}>Pilih minimal 1 niche. *</p>
+            {fieldError?.section === 'niches' && <p style={fieldErrorTextStyle}>{fieldError.message}</p>}
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: selectedNiches.includes('Yang lain') ? '12px' : '28px' }}>
+              {niches.map((n) => <Pill key={n} label={n} selected={selectedNiches.includes(n)} onClick={() => { toggle(selectedNiches, setSelectedNiches, n); setFieldError(null); }} />)}
             </div>
-            {rateType === 'nominal' && (
-              <input value={rateAmount} onChange={(e) => setRateAmount(e.target.value)} placeholder="Rp ________" type="number" style={inputStyle} />
+            {selectedNiches.includes('Yang lain') && (
+              <input value={nicheOther} onChange={(e) => setNicheOther(e.target.value)} placeholder="Sebutkan niche lain..." required style={{ ...inputStyle, marginBottom: '28px' }} />
             )}
           </div>
-          <div style={{ marginBottom: '28px' }}>
-            <label style={labelStyle}>Apakah rate tersebut masih dapat dinegosiasikan? *</label>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-              <Pill label="Ya" selected={rateNegotiable === 'yes'} onClick={() => setRateNegotiable('yes')} />
-              <Pill label="Tidak" selected={rateNegotiable === 'no'} onClick={() => setRateNegotiable('no')} />
-              <Pill label="Tergantung Campaign" selected={rateNegotiable === 'depends'} onClick={() => setRateNegotiable('depends')} />
+
+          <SectionTitle title="5. Gaya Konten" />
+          <div ref={stylesRef}>
+            <p style={{ color: '#777683', fontSize: '0.85rem', marginBottom: '16px', fontFamily: "var(--font-display)" }}>Pilih minimal 1 gaya konten. *</p>
+            {fieldError?.section === 'styles' && <p style={fieldErrorTextStyle}>{fieldError.message}</p>}
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: selectedStyles.includes('Yang lain') ? '12px' : '28px' }}>
+              {contentStyles.map((s) => <Pill key={s} label={s} selected={selectedStyles.includes(s)} onClick={() => { toggle(selectedStyles, setSelectedStyles, s); setFieldError(null); }} />)}
+            </div>
+            {selectedStyles.includes('Yang lain') && (
+              <input value={styleOther} onChange={(e) => setStyleOther(e.target.value)} placeholder="Sebutkan gaya konten lain..." required style={{ ...inputStyle, marginBottom: '28px' }} />
+            )}
+          </div>
+
+          <SectionTitle title="6. Rate & Negosiasi" />
+          <div ref={rateRef} style={{ marginBottom: '20px' }}>
+            <label style={labelStyle}>Estimasi rate untuk 1&times; video posting *</label>
+            <p style={{ fontSize: '0.78rem', color: '#777683', marginBottom: '8px' }}>Hanya untuk referensi awal dan bukan merupakan kesepakatan final.</p>
+            {fieldError?.section === 'rate' && <p style={fieldErrorTextStyle}>{fieldError.message}</p>}
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: rateType === 'nominal' ? '10px' : 0 }}>
+              <Pill label="Isi nominal" selected={rateType === 'nominal'} onClick={() => { setRateType('nominal'); setFieldError(null); }} />
+              <Pill label="Saya belum memiliki patokan rate" selected={rateType === 'unknown'} onClick={() => { setRateType('unknown'); setRateAmount(''); setFieldError(null); }} />
+            </div>
+            {rateType === 'nominal' && (
+              <input value={rateAmount} onChange={(e) => setRateAmount(e.target.value)} placeholder="Rp ________" type="number" required style={inputStyle} />
+            )}
+            <div style={{ marginTop: '20px' }}>
+              <label style={labelStyle}>Apakah rate tersebut masih dapat dinegosiasikan? *</label>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                <Pill label="Ya" selected={rateNegotiable === 'yes'} onClick={() => { setRateNegotiable('yes'); setFieldError(null); }} />
+                <Pill label="Tidak" selected={rateNegotiable === 'no'} onClick={() => { setRateNegotiable('no'); setFieldError(null); }} />
+                <Pill label="Tergantung Campaign" selected={rateNegotiable === 'depends'} onClick={() => { setRateNegotiable('depends'); setFieldError(null); }} />
+              </div>
             </div>
           </div>
 
