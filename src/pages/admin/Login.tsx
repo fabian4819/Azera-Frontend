@@ -9,33 +9,6 @@ const heroGradient =
   'radial-gradient(85% 65% at 50% -8%, #5a3a94, rgba(90,58,148,0) 58%),' +
   'linear-gradient(180deg, #452a80 0%, #3f2378 52%, #331d64 100%)';
 
-const wavePath =
-  'M50 0 C 20 40, 80 80, 50 120 C 20 160, 80 200, 50 240 C 20 280, 80 320, 50 360 ' +
-  'C 20 400, 80 440, 50 480 C 20 520, 80 560, 50 600 C 20 640, 80 680, 50 720 ' +
-  'C 20 760, 80 800, 50 800 L100 800 L100 0 Z';
-
-function WaveEdge() {
-  const layers = [
-    { color: '#3f2378', offset: 0 },
-    { color: '#814bfe', offset: 14 },
-    { color: '#e1e0ff', offset: 28 },
-  ];
-  return (
-    <div style={{ position: 'absolute', top: 0, right: 0, height: '100%', width: '90px', transform: 'translateX(60%)', pointerEvents: 'none' }}>
-      {layers.map((layer, i) => (
-        <svg
-          key={i}
-          viewBox="0 0 100 800"
-          preserveAspectRatio="none"
-          style={{ position: 'absolute', top: 0, left: `${layer.offset}px`, height: '100%', width: '70px', zIndex: i }}
-        >
-          <path d={wavePath} fill={layer.color} />
-        </svg>
-      ))}
-    </div>
-  );
-}
-
 export default function AdminLogin() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -55,7 +28,7 @@ export default function AdminLogin() {
       login(token, admin);
       navigate('/admin/dashboard');
     } catch {
-      setError('Email atau password salah. Silakan coba lagi.');
+      setError('Invalid email or password. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -83,6 +56,7 @@ export default function AdminLogin() {
             flex: '0 0 44%', position: 'relative', overflow: 'hidden', background: heroGradient,
             display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
             padding: '56px 44px', textAlign: 'center',
+            borderTopRightRadius: '64px', borderBottomRightRadius: '64px',
           }}
         >
           <div className="blob-lg" style={{ width: '340px', height: '340px', background: '#814bfe', opacity: 0.25, top: '-120px', left: '-100px' }} />
@@ -90,7 +64,7 @@ export default function AdminLogin() {
 
           <div style={{ position: 'relative', zIndex: 1 }}>
             <p style={{ color: 'rgba(255,255,255,0.65)', fontFamily: f, fontWeight: 600, fontSize: '0.85rem', letterSpacing: '0.04em', textTransform: 'uppercase', marginBottom: '28px' }}>
-              Selamat Datang di
+              Welcome to
             </p>
             <div
               style={{
@@ -101,15 +75,13 @@ export default function AdminLogin() {
             >
               <img src="/logo-transparent.png" alt="AzeraKOL" style={{ width: '56px', height: '56px', objectFit: 'contain' }} />
             </div>
-            <p style={{ fontFamily: f, fontWeight: 900, fontStyle: 'italic', fontSize: '1.4rem', color: '#fff', letterSpacing: '-0.02em', marginBottom: '18px' }}>
+            <p style={{ fontFamily: f, fontWeight: 900, fontSize: '1.4rem', color: '#fff', letterSpacing: '-0.02em', marginBottom: '18px' }}>
               AZERAKOL
             </p>
             <p style={{ color: 'rgba(255,255,255,0.75)', fontSize: '0.9rem', fontFamily: f, lineHeight: 1.7, maxWidth: '280px' }}>
-              Platform manajemen campaign KOL untuk tim AzeraKOL. Kelola brand, creator, dan campaign dalam satu tempat.
+              The KOL campaign management platform for the AzeraKOL team. Manage brands, creators, and campaigns in one place.
             </p>
           </div>
-
-          <WaveEdge />
         </div>
 
         <div
@@ -118,12 +90,12 @@ export default function AdminLogin() {
         >
           <div className="mobile-logo" style={{ display: 'none', alignItems: 'center', gap: '10px', marginBottom: '36px' }}>
             <img src="/logo-transparent.png" alt="AzeraKOL" style={{ height: '32px', objectFit: 'contain' }} />
-            <span style={{ fontFamily: f, fontWeight: 900, fontStyle: 'italic', fontSize: '1.1rem', color: 'var(--primary)', letterSpacing: '-0.02em' }}>AZERAKOL</span>
+            <span style={{ fontFamily: f, fontWeight: 900, fontSize: '1.1rem', color: 'var(--primary)', letterSpacing: '-0.02em' }}>AZERAKOL</span>
           </div>
 
           <div style={{ width: '100%', maxWidth: '360px' }}>
-            <h1 style={{ fontFamily: f, fontWeight: 800, fontSize: '1.8rem', color: '#191c20', marginBottom: '8px' }}>Masuk</h1>
-            <p style={{ color: '#777683', fontSize: '0.875rem', marginBottom: '32px', fontFamily: f }}>Masukkan kredensial admin kamu.</p>
+            <h1 style={{ fontFamily: f, fontWeight: 800, fontSize: '1.8rem', color: '#191c20', marginBottom: '8px' }}>Sign In</h1>
+            <p style={{ color: '#777683', fontSize: '0.875rem', marginBottom: '32px', fontFamily: f }}>Enter your admin credentials.</p>
             {error && (
               <div style={{ background: '#ffdad6', color: '#ba1a1a', borderRadius: '12px', padding: '12px 16px', fontSize: '0.875rem', marginBottom: '20px', fontFamily: f }}>{error}</div>
             )}
@@ -142,7 +114,7 @@ export default function AdminLogin() {
                 </div>
               </div>
               <button type="submit" disabled={loading} className="btn-primary" style={{ width: '100%', justifyContent: 'center', fontSize: '1rem', padding: '14px', opacity: loading ? 0.7 : 1 }}>
-                {loading ? 'Masuk...' : 'Masuk'}
+                {loading ? 'Signing in...' : 'Sign In'}
               </button>
             </form>
           </div>
