@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation, Outlet } from 'react-router-dom';
-import { LayoutDashboard, Building2, Users, ImageIcon, Megaphone, Upload, MessageCircle, Inbox, MessageSquareText, Bot, LogOut, ChevronsLeft, ChevronsRight } from 'lucide-react';
+import { LayoutDashboard, Building2, Users, UserCheck, ImageIcon, Megaphone, Upload, MessageCircle, Inbox, MessageSquareText, Bot, LogOut, ChevronsLeft, ChevronsRight } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 
 const navItems = [
@@ -13,6 +13,7 @@ const navItems = [
   { label: 'Template Bot Lead', to: '/admin/lead-bot-templates', icon: Bot },
   { label: 'Brands', to: '/admin/brands', icon: Building2 },
   { label: 'Creators', to: '/admin/creators', icon: Users },
+  { label: 'PIC', to: '/admin/pic', icon: UserCheck },
   { label: 'Portfolio', to: '/admin/portfolio', icon: ImageIcon },
 ];
 
@@ -26,6 +27,7 @@ const pageTitles: Record<string, string> = {
   '/admin/lead-bot-templates': 'Template Bot WhatsApp (Lead Masuk)',
   '/admin/brands': 'Brand Submissions',
   '/admin/creators': 'Creator Registrations',
+  '/admin/pic': 'PIC / Handle-by',
   '/admin/portfolio': 'Portfolio Manager',
 };
 
@@ -145,11 +147,12 @@ export default function AdminLayout() {
         </div>
       </aside>
 
-      <div style={{ flex: 1, minWidth: 0, background: '#f8f9ff', borderRadius: '24px', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '16px', overflow: 'hidden' }}>
         <header
           style={{
-            padding: '20px 28px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            borderBottom: '1px solid var(--outline-variant)', flexShrink: 0,
+            background: '#f8f9ff', borderRadius: '999px', padding: '14px 28px',
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            flexShrink: 0, boxShadow: '0 4px 16px rgba(21,21,125,0.06)',
           }}
         >
           <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.15rem', color: 'var(--on-background)' }}>{pageTitle}</h1>
@@ -165,7 +168,7 @@ export default function AdminLayout() {
             </div>
           </div>
         </header>
-        <main style={{ flex: 1, padding: '28px', overflow: 'auto' }}>
+        <main style={{ flex: 1, background: '#f8f9ff', borderRadius: '24px', padding: '28px', overflow: 'auto' }}>
           <Outlet />
         </main>
       </div>

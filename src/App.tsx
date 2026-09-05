@@ -39,6 +39,7 @@ const LeadBotTemplates = lazy(() => import('./pages/admin/LeadBotTemplates'));
 const Broadcast = lazy(() => import('./pages/admin/Broadcast'));
 const Creators = lazy(() => import('./pages/admin/Creators'));
 const CreatorDetail = lazy(() => import('./pages/admin/CreatorDetail'));
+const PicUsers = lazy(() => import('./pages/admin/PicUsers'));
 
 // Talent Portal — creator-facing, juga bukan target SEO
 const TalentLayout = lazy(() => import('./components/layout/TalentLayout'));
@@ -131,6 +132,7 @@ export default function App() {
             <Route path="brands/:id" element={<BrandDetail />} />
             <Route path="creators" element={<Creators />} />
             <Route path="creators/:id" element={<CreatorDetail />} />
+            <Route path="pic" element={<PicUsers />} />
             <Route path="portfolio" element={<PortfolioManager />} />
           </Route>
 
