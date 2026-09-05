@@ -31,6 +31,7 @@ const CampaignNew = lazy(() => import('./pages/admin/CampaignNew'));
 const CampaignDetail = lazy(() => import('./pages/admin/CampaignDetail'));
 const Import = lazy(() => import('./pages/admin/Import'));
 const WhatsApp = lazy(() => import('./pages/admin/WhatsApp'));
+const WhatsAppInbox = lazy(() => import('./pages/admin/WhatsAppInbox'));
 const WaTemplates = lazy(() => import('./pages/admin/WaTemplates'));
 const LeadBotTemplates = lazy(() => import('./pages/admin/LeadBotTemplates'));
 const Broadcast = lazy(() => import('./pages/admin/Broadcast'));
@@ -109,6 +110,7 @@ export default function App() {
             <Route path="campaigns/:id" element={<CampaignDetail />} />
             <Route path="import" element={<Import />} />
             <Route path="whatsapp" element={<WhatsApp />} />
+            <Route path="whatsapp/inbox" element={<WhatsAppInbox />} />
             <Route path="wa-templates" element={<WaTemplates />} />
             <Route path="lead-bot-templates" element={<LeadBotTemplates />} />
             <Route path="campaigns/:id/broadcast" element={<Broadcast />} />
