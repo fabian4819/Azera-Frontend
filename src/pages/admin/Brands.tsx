@@ -21,9 +21,10 @@ interface Brand {
 const statusOptions = ['', 'new', 'reviewed', 'contacted'];
 
 const JASA_LABELS: Record<string, string> = {
-  engagement_boost: 'Engagement Boost',
-  kol_marketing: 'KOL Marketing',
-  affiliate_marketing: 'Affiliate Marketing',
+  nano_micro_kol_campaign: 'Nano-Micro KOL Campaign',
+  koc_campaign: 'KOC Campaign',
+  affiliate_creator_campaign: 'Affiliate Creator Campaign',
+  event_creator_activation: 'Event Creator Activation',
 };
 
 const thStyle: React.CSSProperties = {

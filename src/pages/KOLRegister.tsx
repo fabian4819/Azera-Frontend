@@ -109,8 +109,28 @@ export default function KOLRegister() {
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitError('');
-    if (!name || !phone || !gender) {
-      setSubmitError('Nama, nomor WA, dan jenis kelamin wajib diisi.');
+    if (!name || !phone || !gender || !province || !city) {
+      setSubmitError('Nama, nomor WA, jenis kelamin, provinsi, dan kota/kabupaten wajib diisi.');
+      return;
+    }
+    if (!Object.values(socials).some((v) => v?.username)) {
+      setSubmitError('Isi minimal 1 platform media sosial.');
+      return;
+    }
+    if (selectedActivities.length === 0) {
+      setSubmitError('Pilih minimal 1 aktivitas sebagai creator.');
+      return;
+    }
+    if (selectedNiches.length === 0 || (selectedNiches.includes('Yang lain') && !nicheOther)) {
+      setSubmitError('Pilih minimal 1 niche konten.');
+      return;
+    }
+    if (selectedStyles.length === 0 || (selectedStyles.includes('Yang lain') && !styleOther)) {
+      setSubmitError('Pilih minimal 1 gaya konten.');
+      return;
+    }
+    if (!rateType || (rateType === 'nominal' && !rateAmount) || !rateNegotiable) {
+      setSubmitError('Estimasi rate dan status negosiasi rate wajib diisi.');
       return;
     }
     setLoading(true);
@@ -205,14 +225,14 @@ export default function KOLRegister() {
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '28px' }} className="form-2col">
             <div>
-              <label style={labelStyle}>Provinsi</label>
+              <label style={labelStyle}>Provinsi *</label>
               <select value={province} onChange={(e) => onProvinceChange(e.target.value)} style={inputStyle}>
                 <option value="">Pilih provinsi</option>
                 {provinces.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
               </select>
             </div>
             <div>
-              <label style={labelStyle}>Kota/Kabupaten</label>
+              <label style={labelStyle}>Kota/Kabupaten *</label>
               <select value={city} onChange={(e) => setCity(e.target.value)} disabled={!province} style={inputStyle}>
                 <option value="">{province ? 'Pilih kota/kabupaten' : 'Pilih provinsi dulu'}</option>
                 {cities.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
@@ -221,7 +241,7 @@ export default function KOLRegister() {
           </div>
 
           <SectionTitle title="2. Media Sosial" />
-          <p style={{ color: '#777683', fontSize: '0.85rem', marginBottom: '20px', fontFamily: "var(--font-display)" }}>Isi minimal 1 platform.</p>
+          <p style={{ color: '#777683', fontSize: '0.85rem', marginBottom: '20px', fontFamily: "var(--font-display)" }}>Isi minimal 1 platform. *</p>
           {socialPlatforms.map(({ value, label, icon: Icon, color }) => (
             <div key={value} style={{ background: '#f8f9ff', border: `1px solid ${color}22`, borderRadius: '16px', padding: '20px', marginBottom: '16px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
@@ -237,7 +257,7 @@ export default function KOLRegister() {
           ))}
 
           <SectionTitle title="3. Aktivitas Sebagai Creator" />
-          <p style={{ color: '#777683', fontSize: '0.85rem', marginBottom: '16px', fontFamily: "var(--font-display)" }}>Bisa pilih lebih dari 1.</p>
+          <p style={{ color: '#777683', fontSize: '0.85rem', marginBottom: '16px', fontFamily: "var(--font-display)" }}>Bisa pilih lebih dari 1. *</p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '28px' }}>
             {activities.map((a) => {
               const selected = selectedActivities.includes(a.value);
@@ -252,6 +272,7 @@ export default function KOLRegister() {
           </div>
 
           <SectionTitle title="4. Niche Konten" />
+          <p style={{ color: '#777683', fontSize: '0.85rem', marginBottom: '16px', fontFamily: "var(--font-display)" }}>Pilih minimal 1 niche. *</p>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: selectedNiches.includes('Yang lain') ? '12px' : '28px' }}>
             {niches.map((n) => <Pill key={n} label={n} selected={selectedNiches.includes(n)} onClick={() => toggle(selectedNiches, setSelectedNiches, n)} />)}
           </div>
@@ -260,6 +281,7 @@ export default function KOLRegister() {
           )}
 
           <SectionTitle title="5. Gaya Konten" />
+          <p style={{ color: '#777683', fontSize: '0.85rem', marginBottom: '16px', fontFamily: "var(--font-display)" }}>Pilih minimal 1 gaya konten. *</p>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: selectedStyles.includes('Yang lain') ? '12px' : '28px' }}>
             {contentStyles.map((s) => <Pill key={s} label={s} selected={selectedStyles.includes(s)} onClick={() => toggle(selectedStyles, setSelectedStyles, s)} />)}
           </div>
@@ -267,17 +289,9 @@ export default function KOLRegister() {
             <input value={styleOther} onChange={(e) => setStyleOther(e.target.value)} placeholder="Sebutkan gaya konten lain..." style={{ ...inputStyle, marginBottom: '28px' }} />
           )}
 
-          <SectionTitle title="6. Info Tambahan (opsional)" />
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }} className="form-2col">
-            <div><label style={labelStyle}>Nama Bank</label><input value={bankName} onChange={(e) => setBankName(e.target.value)} placeholder="BCA" style={inputStyle} /></div>
-            <div><label style={labelStyle}>Nomor Rekening</label><input value={accountNumber} onChange={(e) => setAccountNumber(e.target.value)} placeholder="1234567890" style={inputStyle} /></div>
-          </div>
-          <div style={{ marginBottom: '14px' }}>
-            <label style={labelStyle}>Nama Pemilik Rekening</label>
-            <input value={accountName} onChange={(e) => setAccountName(e.target.value)} placeholder="Sesuai buku tabungan" style={inputStyle} />
-          </div>
+          <SectionTitle title="6. Rate & Negosiasi" />
           <div style={{ marginBottom: '20px' }}>
-            <label style={labelStyle}>1. Estimasi rate untuk 1&times; video posting</label>
+            <label style={labelStyle}>Estimasi rate untuk 1&times; video posting *</label>
             <p style={{ fontSize: '0.78rem', color: '#777683', marginBottom: '8px' }}>Hanya untuk referensi awal dan bukan merupakan kesepakatan final.</p>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: rateType === 'nominal' ? '10px' : 0 }}>
               <Pill label="Isi nominal" selected={rateType === 'nominal'} onClick={() => setRateType('nominal')} />
@@ -288,15 +302,25 @@ export default function KOLRegister() {
             )}
           </div>
           <div style={{ marginBottom: '28px' }}>
-            <label style={labelStyle}>2. Apakah rate tersebut masih dapat dinegosiasikan?</label>
+            <label style={labelStyle}>Apakah rate tersebut masih dapat dinegosiasikan? *</label>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
               <Pill label="Ya" selected={rateNegotiable === 'yes'} onClick={() => setRateNegotiable('yes')} />
               <Pill label="Tidak" selected={rateNegotiable === 'no'} onClick={() => setRateNegotiable('no')} />
               <Pill label="Tergantung Campaign" selected={rateNegotiable === 'depends'} onClick={() => setRateNegotiable('depends')} />
             </div>
           </div>
+
+          <SectionTitle title="7. Info Tambahan (opsional)" />
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }} className="form-2col">
+            <div><label style={labelStyle}>Nama Bank</label><input value={bankName} onChange={(e) => setBankName(e.target.value)} placeholder="BCA" style={inputStyle} /></div>
+            <div><label style={labelStyle}>Nomor Rekening</label><input value={accountNumber} onChange={(e) => setAccountNumber(e.target.value)} placeholder="1234567890" style={inputStyle} /></div>
+          </div>
+          <div style={{ marginBottom: '14px' }}>
+            <label style={labelStyle}>Nama Pemilik Rekening</label>
+            <input value={accountName} onChange={(e) => setAccountName(e.target.value)} placeholder="Sesuai buku tabungan" style={inputStyle} />
+          </div>
           <div style={{ marginBottom: '36px' }}>
-            <label style={labelStyle}>Portfolio (opsional)</label>
+            <label style={labelStyle}>Portfolio</label>
             <input value={portfolioLink} onChange={(e) => setPortfolioLink(e.target.value)} placeholder="https://..." style={inputStyle} />
           </div>
 
