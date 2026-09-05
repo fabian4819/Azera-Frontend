@@ -13,10 +13,9 @@ const pageTitles: Record<string, string> = {
 };
 
 const COLLAPSE_KEY = 'azera_talent_sidebar_collapsed';
-const EMAIL_PROMPT_DISMISSED_KEY = 'azera_creator_email_prompt_dismissed';
 const f = "var(--font-display)";
 
-function CompleteEmailModal({ onClose, onSaved }: { onClose: () => void; onSaved: () => void }) {
+function CompleteEmailModal({ onSaved }: { onSaved: () => void }) {
   const [email, setEmail] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -56,11 +55,8 @@ function CompleteEmailModal({ onClose, onSaved }: { onClose: () => void; onSaved
             style={{ width: '100%', padding: '12px 14px', borderRadius: '12px', border: '1.5px solid #e1e0ff', fontSize: '0.9rem', outline: 'none', fontFamily: f, color: '#191c20', background: '#f8f9ff', marginBottom: '14px', boxSizing: 'border-box' }}
           />
           {error && <p style={{ color: '#ba1a1a', fontSize: '0.8rem', marginBottom: '14px', fontFamily: f }}>{error}</p>}
-          <button type="submit" disabled={saving} className="btn-primary" style={{ width: '100%', justifyContent: 'center', padding: '12px', opacity: saving ? 0.7 : 1, marginBottom: '12px' }}>
+          <button type="submit" disabled={saving} className="btn-primary" style={{ width: '100%', justifyContent: 'center', padding: '12px', opacity: saving ? 0.7 : 1 }}>
             {saving ? 'Menyimpan...' : 'Simpan'}
-          </button>
-          <button type="button" onClick={onClose} style={{ width: '100%', background: 'none', border: 'none', cursor: 'pointer', color: '#777683', fontSize: '0.82rem', fontFamily: f, fontWeight: 600, padding: '4px' }}>
-            Nanti saja
           </button>
         </form>
       </div>
@@ -76,18 +72,12 @@ export default function TalentLayout() {
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
-      if (sessionStorage.getItem(EMAIL_PROMPT_DISMISSED_KEY)) return;
       talentApi.get('/creator/me')
         .then((res) => { if (!res.data.email) setShowEmailModal(true); })
         .catch(() => {});
     }, 0);
     return () => window.clearTimeout(timeoutId);
   }, []);
-
-  const dismissEmailModal = () => {
-    sessionStorage.setItem(EMAIL_PROMPT_DISMISSED_KEY, '1');
-    setShowEmailModal(false);
-  };
 
   const toggleCollapsed = () => {
     setCollapsed((prev) => {
@@ -226,7 +216,7 @@ export default function TalentLayout() {
       </div>
 
       {showEmailModal && (
-        <CompleteEmailModal onClose={dismissEmailModal} onSaved={() => setShowEmailModal(false)} />
+        <CompleteEmailModal onSaved={() => setShowEmailModal(false)} />
       )}
 
       <style>{`

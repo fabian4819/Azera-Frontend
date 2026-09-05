@@ -64,7 +64,7 @@ export default function PortalLogin() {
         loginCreator(res.data.token, res.data.creator);
         navigate('/talent/campaigns');
       } else if (role === 'creator' && mode === 'signup') {
-        const res = await talentApi.post('/creator/register-password', { phone, password: creatorPassword, email: creatorEmail || undefined });
+        const res = await talentApi.post('/creator/register-password', { phone, password: creatorPassword, email: creatorEmail });
         loginCreator(res.data.token, res.data.creator);
         navigate('/talent/campaigns');
       } else if (role === 'pic' && mode === 'signin') {
@@ -173,7 +173,7 @@ export default function PortalLogin() {
               {role === 'creator' ? (
                 <>
                   <div style={{ marginBottom: '16px' }}>
-                    <label style={labelStyle}>WhatsApp Number</label>
+                    <label style={labelStyle}>WhatsApp Number *</label>
                     <input
                       type="tel"
                       value={phone}
@@ -189,12 +189,12 @@ export default function PortalLogin() {
                   </div>
                   {mode === 'signup' && (
                     <div style={{ marginBottom: '16px' }}>
-                      <label style={labelStyle}>Email (optional)</label>
-                      <input type="email" value={creatorEmail} onChange={(e) => setCreatorEmail(e.target.value)} placeholder="you@email.com" style={inputStyle} />
+                      <label style={labelStyle}>Email *</label>
+                      <input type="email" value={creatorEmail} onChange={(e) => setCreatorEmail(e.target.value)} placeholder="you@email.com" required style={inputStyle} />
                     </div>
                   )}
                   <div style={{ marginBottom: mode === 'signin' ? '12px' : '8px' }}>
-                    <label style={labelStyle}>Password</label>
+                    <label style={labelStyle}>Password *</label>
                     <div style={{ position: 'relative' }}>
                       <input type={showPass ? 'text' : 'password'} value={creatorPassword} onChange={(e) => setCreatorPassword(e.target.value)} placeholder="••••••••" required minLength={mode === 'signup' ? 6 : undefined} style={{ ...inputStyle, paddingRight: '44px' }} />
                       <button type="button" onClick={() => setShowPass(!showPass)} style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#777683', padding: 0, display: 'flex' }}>
@@ -213,11 +213,11 @@ export default function PortalLogin() {
                   {mode === 'signup' && (
                     <>
                       <div style={{ marginBottom: '16px' }}>
-                        <label style={labelStyle}>Nama MG</label>
+                        <label style={labelStyle}>Nama MG *</label>
                         <input type="text" value={picName} onChange={(e) => setPicName(e.target.value)} placeholder="Enter name" required style={inputStyle} />
                       </div>
                       <div style={{ marginBottom: '16px' }}>
-                        <label style={labelStyle}>WhatsApp Number</label>
+                        <label style={labelStyle}>WhatsApp Number *</label>
                         <input
                           type="tel"
                           value={picPhone}
@@ -234,11 +234,11 @@ export default function PortalLogin() {
                     </>
                   )}
                   <div style={{ marginBottom: '16px' }}>
-                    <label style={labelStyle}>Email</label>
+                    <label style={labelStyle}>Email *</label>
                     <input type="email" value={picEmail} onChange={(e) => setPicEmail(e.target.value)} placeholder="you@brand.com" required style={inputStyle} />
                   </div>
                   <div style={{ marginBottom: '12px' }}>
-                    <label style={labelStyle}>Password</label>
+                    <label style={labelStyle}>Password *</label>
                     <div style={{ position: 'relative' }}>
                       <input type={showPass ? 'text' : 'password'} value={picPassword} onChange={(e) => setPicPassword(e.target.value)} placeholder="••••••••" required minLength={mode === 'signup' ? 6 : undefined} style={{ ...inputStyle, paddingRight: '44px' }} />
                       <button type="button" onClick={() => setShowPass(!showPass)} style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#777683', padding: 0, display: 'flex' }}>
