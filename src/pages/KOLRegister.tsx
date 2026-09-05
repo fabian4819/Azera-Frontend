@@ -235,7 +235,17 @@ export default function KOLRegister() {
             </div>
             <div>
               <label style={labelStyle}>Nomor WhatsApp *</label>
-              <input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="08xxxxxxxxxx" required style={inputStyle} />
+              <input
+                value={phone}
+                onChange={(e) => setPhone(e.target.value.replace(/[^0-9]/g, ''))}
+                placeholder="08xxxxxxxxxx"
+                required
+                pattern="08[0-9]{8,11}"
+                title="Nomor harus diawali 08, hanya angka, tanpa spasi atau tanda hubung (contoh: 08123456789)"
+                inputMode="numeric"
+                maxLength={13}
+                style={inputStyle}
+              />
             </div>
           </div>
           <div ref={genderRef} style={{ marginBottom: '14px' }}>

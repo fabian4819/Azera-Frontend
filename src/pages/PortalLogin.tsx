@@ -174,7 +174,18 @@ export default function PortalLogin() {
                 <>
                   <div style={{ marginBottom: '16px' }}>
                     <label style={labelStyle}>WhatsApp Number</label>
-                    <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="628xxxxxxxxxx" required style={inputStyle} />
+                    <input
+                      type="tel"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value.replace(/[^0-9]/g, ''))}
+                      placeholder="08xxxxxxxxxx"
+                      required
+                      pattern="08[0-9]{8,11}"
+                      title="Nomor harus diawali 08, hanya angka, tanpa spasi atau tanda hubung (contoh: 08123456789)"
+                      inputMode="numeric"
+                      maxLength={13}
+                      style={inputStyle}
+                    />
                   </div>
                   {mode === 'signup' && (
                     <div style={{ marginBottom: '16px' }}>
@@ -207,7 +218,18 @@ export default function PortalLogin() {
                       </div>
                       <div style={{ marginBottom: '16px' }}>
                         <label style={labelStyle}>WhatsApp Number</label>
-                        <input type="tel" value={picPhone} onChange={(e) => setPicPhone(e.target.value)} placeholder="628xxxxxxxxxx" required style={inputStyle} />
+                        <input
+                          type="tel"
+                          value={picPhone}
+                          onChange={(e) => setPicPhone(e.target.value.replace(/[^0-9]/g, ''))}
+                          placeholder="08xxxxxxxxxx"
+                          required
+                          pattern="08[0-9]{8,11}"
+                          title="Nomor harus diawali 08, hanya angka, tanpa spasi atau tanda hubung (contoh: 08123456789)"
+                          inputMode="numeric"
+                          maxLength={13}
+                          style={inputStyle}
+                        />
                       </div>
                     </>
                   )}
