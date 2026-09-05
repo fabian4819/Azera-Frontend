@@ -19,7 +19,7 @@ talentApi.interceptors.response.use(
     if (error.response?.status === 401 && !error.config?.url?.includes('/creator/login')) {
       localStorage.removeItem('azera_creator_token');
       localStorage.removeItem('azera_creator');
-      window.location.href = '/talent/login';
+      window.location.href = '/login';
     }
     return Promise.reject(error);
   }

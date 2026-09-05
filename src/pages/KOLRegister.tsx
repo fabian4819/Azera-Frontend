@@ -251,7 +251,6 @@ export default function KOLRegister() {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }} className="form-2col">
                 <div><label style={labelStyle}>Username</label><input value={socials[value]?.username || ''} onChange={(e) => setSocialField(value, 'username', e.target.value)} placeholder="@username" style={inputStyle} /></div>
                 <div><label style={labelStyle}>Followers</label><input value={socials[value]?.followers || ''} onChange={(e) => setSocialField(value, 'followers', e.target.value)} type="number" placeholder="10000" style={inputStyle} /></div>
-                <div style={{ gridColumn: '1 / -1' }}><label style={labelStyle}>Link Profil</label><input value={socials[value]?.profileUrl || ''} onChange={(e) => setSocialField(value, 'profileUrl', e.target.value)} placeholder="https://..." style={inputStyle} /></div>
               </div>
             </div>
           ))}

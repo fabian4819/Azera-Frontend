@@ -23,7 +23,6 @@ export default function TalentCampaigns() {
 
   return (
     <div>
-      <h1 style={{ fontFamily: f, fontWeight: 800, fontSize: '1.3rem', color: '#191c20', marginBottom: '20px' }}>Campaign Aktif</h1>
       {loading ? (
         <p style={{ color: '#777683', fontFamily: f, textAlign: 'center', padding: '40px' }}>Memuat...</p>
       ) : items.length === 0 ? (

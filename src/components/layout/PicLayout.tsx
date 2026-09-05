@@ -1,21 +1,17 @@
 import { useState } from 'react';
 import { Link, useLocation, Outlet } from 'react-router-dom';
 import { Megaphone, LogOut, ChevronsLeft, ChevronsRight } from 'lucide-react';
-import { useTalentAuth } from '../../hooks/useTalentAuth';
+import { usePicAuth } from '../../hooks/usePicAuth';
 
 const navItems = [
-  { label: 'My Campaigns', to: '/talent/campaigns', icon: Megaphone },
+  { label: 'My Campaigns', to: '/pic/campaigns', icon: Megaphone },
 ];
 
-const pageTitles: Record<string, string> = {
-  '/talent/campaigns': 'My Campaigns',
-};
+const COLLAPSE_KEY = 'azera_pic_sidebar_collapsed';
 
-const COLLAPSE_KEY = 'azera_talent_sidebar_collapsed';
-
-export default function TalentLayout() {
+export default function PicLayout() {
   const location = useLocation();
-  const { creator, logout } = useTalentAuth();
+  const { pic, logout } = usePicAuth();
   const [collapsed, setCollapsed] = useState(() => localStorage.getItem(COLLAPSE_KEY) === '1');
 
   const toggleCollapsed = () => {
@@ -30,14 +26,8 @@ export default function TalentLayout() {
     .filter((item) => location.pathname === item.to || location.pathname.startsWith(item.to + '/'))
     .sort((a, b) => b.to.length - a.to.length)[0]?.to;
 
-  const pageTitle =
-    pageTitles[location.pathname] ||
-    Object.entries(pageTitles).find(([key]) => location.pathname.startsWith(key))?.[1] ||
-    'Talent Portal';
-
   return (
     <div
-      className="talent-shell"
       style={{
         minHeight: '100vh',
         display: 'flex',
@@ -49,7 +39,6 @@ export default function TalentLayout() {
       }}
     >
       <aside
-        className="talent-sidebar"
         style={{
           width: collapsed ? '76px' : '236px', flexShrink: 0, borderRadius: '22px',
           background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
@@ -72,7 +61,7 @@ export default function TalentLayout() {
         </button>
 
         <Link
-          to="/talent/campaigns"
+          to="/pic/campaigns"
           style={{
             display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '28px',
             padding: collapsed ? '0 15px' : '0 20px',
@@ -136,30 +125,23 @@ export default function TalentLayout() {
             borderBottom: '1px solid var(--outline-variant)', flexShrink: 0,
           }}
         >
-          <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.15rem', color: 'var(--on-background)' }}>{pageTitle}</h1>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.15rem', color: 'var(--on-background)' }}>My Campaigns</h1>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <div style={{ textAlign: 'right' }}>
               <p style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '0.875rem', color: 'var(--on-background)' }}>
-                {creator?.name || 'Creator'}
+                {pic?.name || 'PIC'}
               </p>
-              <p style={{ fontSize: '0.72rem', color: 'var(--on-surface-variant)' }}>{creator?.phone || ''}</p>
+              <p style={{ fontSize: '0.72rem', color: 'var(--on-surface-variant)' }}>{pic?.email || ''}</p>
             </div>
             <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'var(--secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '0.9rem', flexShrink: 0 }}>
-              {(creator?.name?.[0] || 'C').toUpperCase()}
+              {(pic?.name?.[0] || 'P').toUpperCase()}
             </div>
           </div>
         </header>
-        <main style={{ flex: 1, padding: '24px', overflow: 'auto' }}>
+        <main style={{ flex: 1, padding: '28px', overflow: 'auto' }}>
           <Outlet />
         </main>
       </div>
-
-      <style>{`
-        @media (max-width: 640px) {
-          .talent-sidebar { width: 64px !important; }
-          .talent-sidebar span { display: none !important; }
-        }
-      `}</style>
     </div>
   );
 }

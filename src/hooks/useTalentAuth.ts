@@ -35,7 +35,7 @@ export function useTalentAuth() {
     localStorage.removeItem('azera_creator');
     setToken(null);
     setCreator(null);
-    navigate('/talent/login');
+    navigate('/login');
   }, [navigate]);
 
   return { token, creator, login, logout };

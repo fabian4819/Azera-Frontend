@@ -19,6 +19,7 @@ import PrivacyPolicy from './pages/PrivacyPolicy';
 import CampaignApply from './pages/CampaignApply';
 import InvoicePayment from './pages/InvoicePayment';
 import CampaignDashboard from './pages/CampaignDashboard';
+import PortalLogin from './pages/PortalLogin';
 
 // Admin pages are not SEO targets, so keep them out of the initial public bundle.
 const AdminLayout = lazy(() => import('./components/layout/AdminLayout'));
@@ -41,9 +42,13 @@ const CreatorDetail = lazy(() => import('./pages/admin/CreatorDetail'));
 
 // Talent Portal — creator-facing, juga bukan target SEO
 const TalentLayout = lazy(() => import('./components/layout/TalentLayout'));
-const TalentLogin = lazy(() => import('./pages/talent/TalentLogin'));
 const TalentCampaigns = lazy(() => import('./pages/talent/TalentCampaigns'));
 const TalentCampaignDetail = lazy(() => import('./pages/talent/TalentCampaignDetail'));
+
+// PIC/Handle-by Portal — campaign contact-facing, akun bisa link banyak campaign
+const PicLayout = lazy(() => import('./components/layout/PicLayout'));
+const PicCampaigns = lazy(() => import('./pages/pic/PicCampaigns'));
+const PicCampaignDetail = lazy(() => import('./pages/pic/PicCampaignDetail'));
 
 function RouteFallback() {
   return <div style={{ minHeight: '100vh', background: '#f8f9ff' }} />;
@@ -70,8 +75,14 @@ function ProtectedRoute() {
 
 function ProtectedTalentRoute() {
   const token = localStorage.getItem('azera_creator_token');
-  if (!token) return <Navigate to="/talent/login" replace />;
+  if (!token) return <Navigate to="/login" replace />;
   return <TalentLayout />;
+}
+
+function ProtectedPicRoute() {
+  const token = localStorage.getItem('azera_pic_token');
+  if (!token) return <Navigate to="/login" replace />;
+  return <PicLayout />;
 }
 
 export default function App() {
@@ -123,14 +134,22 @@ export default function App() {
             <Route path="portfolio" element={<PortfolioManager />} />
           </Route>
 
-          {/* Talent Portal login — no layout */}
-          <Route path="/talent/login" element={<TalentLogin />} />
+          {/* Unified sign in/up for Creator & PIC campaign portals — no layout */}
+          <Route path="/login" element={<PortalLogin />} />
+          <Route path="/talent/login" element={<Navigate to="/login" replace />} />
 
           {/* Talent Portal protected routes */}
           <Route path="/talent" element={<ProtectedTalentRoute />}>
             <Route index element={<Navigate to="/talent/campaigns" replace />} />
             <Route path="campaigns" element={<TalentCampaigns />} />
             <Route path="campaigns/:id" element={<TalentCampaignDetail />} />
+          </Route>
+
+          {/* PIC/Handle-by Portal protected routes */}
+          <Route path="/pic" element={<ProtectedPicRoute />}>
+            <Route index element={<Navigate to="/pic/campaigns" replace />} />
+            <Route path="campaigns" element={<PicCampaigns />} />
+            <Route path="campaigns/:id" element={<PicCampaignDetail />} />
           </Route>
 
           {/* Catch-all */}
