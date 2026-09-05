@@ -31,13 +31,14 @@ export default function PortalLogin() {
 
   // Creator fields
   const [phone, setPhone] = useState('');
+  const [creatorEmail, setCreatorEmail] = useState('');
   const [creatorPassword, setCreatorPassword] = useState('');
 
   // PIC fields
   const [picName, setPicName] = useState('');
+  const [picPhone, setPicPhone] = useState('');
   const [picEmail, setPicEmail] = useState('');
   const [picPassword, setPicPassword] = useState('');
-  const [accessCode, setAccessCode] = useState('');
 
   const [showPass, setShowPass] = useState(false);
   const [error, setError] = useState('');
@@ -63,7 +64,7 @@ export default function PortalLogin() {
         loginCreator(res.data.token, res.data.creator);
         navigate('/talent/campaigns');
       } else if (role === 'creator' && mode === 'signup') {
-        const res = await talentApi.post('/creator/register-password', { phone, password: creatorPassword });
+        const res = await talentApi.post('/creator/register-password', { phone, password: creatorPassword, email: creatorEmail || undefined });
         loginCreator(res.data.token, res.data.creator);
         navigate('/talent/campaigns');
       } else if (role === 'pic' && mode === 'signin') {
@@ -71,7 +72,7 @@ export default function PortalLogin() {
         loginPic(res.data.token, res.data.pic);
         navigate('/pic/campaigns');
       } else {
-        const res = await picApi.post('/pic/register', { name: picName, email: picEmail, password: picPassword, accessCode });
+        const res = await picApi.post('/pic/register', { name: picName, phone: picPhone, email: picEmail, password: picPassword });
         loginPic(res.data.token, res.data.pic);
         navigate('/pic/campaigns');
       }
@@ -175,6 +176,12 @@ export default function PortalLogin() {
                     <label style={labelStyle}>WhatsApp Number</label>
                     <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="628xxxxxxxxxx" required style={inputStyle} />
                   </div>
+                  {mode === 'signup' && (
+                    <div style={{ marginBottom: '16px' }}>
+                      <label style={labelStyle}>Email (optional)</label>
+                      <input type="email" value={creatorEmail} onChange={(e) => setCreatorEmail(e.target.value)} placeholder="you@email.com" style={inputStyle} />
+                    </div>
+                  )}
                   <div style={{ marginBottom: mode === 'signin' ? '12px' : '8px' }}>
                     <label style={labelStyle}>Password</label>
                     <div style={{ position: 'relative' }}>
@@ -193,16 +200,22 @@ export default function PortalLogin() {
               ) : (
                 <>
                   {mode === 'signup' && (
-                    <div style={{ marginBottom: '16px' }}>
-                      <label style={labelStyle}>Full Name</label>
-                      <input type="text" value={picName} onChange={(e) => setPicName(e.target.value)} placeholder="Enter full name" required style={inputStyle} />
-                    </div>
+                    <>
+                      <div style={{ marginBottom: '16px' }}>
+                        <label style={labelStyle}>Nama MG</label>
+                        <input type="text" value={picName} onChange={(e) => setPicName(e.target.value)} placeholder="Enter name" required style={inputStyle} />
+                      </div>
+                      <div style={{ marginBottom: '16px' }}>
+                        <label style={labelStyle}>WhatsApp Number</label>
+                        <input type="tel" value={picPhone} onChange={(e) => setPicPhone(e.target.value)} placeholder="628xxxxxxxxxx" required style={inputStyle} />
+                      </div>
+                    </>
                   )}
                   <div style={{ marginBottom: '16px' }}>
                     <label style={labelStyle}>Email</label>
                     <input type="email" value={picEmail} onChange={(e) => setPicEmail(e.target.value)} placeholder="you@brand.com" required style={inputStyle} />
                   </div>
-                  <div style={{ marginBottom: mode === 'signin' ? '12px' : '16px' }}>
+                  <div style={{ marginBottom: '12px' }}>
                     <label style={labelStyle}>Password</label>
                     <div style={{ position: 'relative' }}>
                       <input type={showPass ? 'text' : 'password'} value={picPassword} onChange={(e) => setPicPassword(e.target.value)} placeholder="••••••••" required minLength={mode === 'signup' ? 6 : undefined} style={{ ...inputStyle, paddingRight: '44px' }} />
@@ -212,13 +225,9 @@ export default function PortalLogin() {
                     </div>
                   </div>
                   {mode === 'signup' && (
-                    <div style={{ marginBottom: '12px' }}>
-                      <label style={labelStyle}>Campaign Access Code</label>
-                      <input type="text" value={accessCode} onChange={(e) => setAccessCode(e.target.value.toUpperCase())} placeholder="e.g. A1B2C3D4" required style={inputStyle} />
-                      <p style={{ fontSize: '0.75rem', color: '#8a8a99', fontFamily: f, marginTop: '6px' }}>
-                        Given by the admin for the campaign you're PIC/Handle-by for. You can link more campaigns later.
-                      </p>
-                    </div>
+                    <p style={{ fontSize: '0.75rem', color: '#8a8a99', fontFamily: f, marginTop: '-4px', marginBottom: '12px' }}>
+                      Your dashboard starts empty. Once the admin assigns you to a campaign, it will show up here automatically.
+                    </p>
                   )}
                 </>
               )}

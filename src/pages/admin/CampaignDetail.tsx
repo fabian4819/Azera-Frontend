@@ -32,6 +32,7 @@ interface Campaign {
   status: string; workflowStage: string; applyOpen: boolean; applySlug: string; waGroupLink?: string;
   customFields: CustomField[]; accessCode: string;
 }
+interface PicUser { _id: string; name: string; email: string; phone: string }
 
 const CUSTOM_FIELD_TYPE_LABELS: Record<CustomFieldType, string> = {
   text: 'Jawaban Singkat', textarea: 'Paragraf', number: 'Angka',
@@ -103,18 +104,24 @@ export default function CampaignDetail() {
   const [savingFields, setSavingFields] = useState(false);
   const [activeTab, setActiveTab] = useState<TabKey>('overview');
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [picUsers, setPicUsers] = useState<PicUser[]>([]);
+  const [picEmailDraft, setPicEmailDraft] = useState('');
+  const [addingPic, setAddingPic] = useState(false);
+  const [picError, setPicError] = useState('');
 
   const load = async () => {
     try {
-      const [cRes, aRes] = await Promise.all([
+      const [cRes, aRes, pRes] = await Promise.all([
         api.get(`/admin/campaigns/${id}`),
         api.get(`/admin/applications/campaign/${id}`),
+        api.get(`/admin/campaigns/${id}/pic`),
       ]);
       setCampaign(cRes.data);
       setBriefDraft(cRes.data.briefContent || '');
       setWaGroupLinkDraft(cRes.data.waGroupLink || '');
       setCustomFieldsDraft(cRes.data.customFields || []);
       setApplications(aRes.data);
+      setPicUsers(pRes.data);
     } catch {
       navigate('/admin/campaigns');
     } finally {
@@ -192,6 +199,31 @@ export default function CampaignDetail() {
     navigator.clipboard.writeText(url);
     setDashboardCopied(true);
     setTimeout(() => setDashboardCopied(false), 2000);
+  };
+
+  const addPic = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAddingPic(true);
+    setPicError('');
+    try {
+      const res = await api.post(`/admin/campaigns/${id}/pic`, { email: picEmailDraft });
+      setPicUsers((prev) => [...prev, res.data]);
+      setPicEmailDraft('');
+    } catch (err: unknown) {
+      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      setPicError(message || 'Gagal menambahkan PIC');
+    } finally {
+      setAddingPic(false);
+    }
+  };
+
+  const removePic = async (picUserId: string) => {
+    try {
+      await api.delete(`/admin/campaigns/${id}/pic/${picUserId}`);
+      setPicUsers((prev) => prev.filter((p) => p._id !== picUserId));
+    } catch {
+      setPicError('Gagal melepas PIC');
+    }
   };
 
   const saveWaGroupLink = async () => {
@@ -623,6 +655,42 @@ export default function CampaignDetail() {
               {dashboardCopied ? <Check size={14} /> : <LayoutDashboard size={14} />}
               {dashboardCopied ? 'Tersalin!' : 'Salin Link Dashboard'}
             </button>
+          </div>
+
+          <div style={cardStyle}>
+            <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: '1rem', color: '#191c20', marginBottom: '8px' }}>Akun PIC / Handle-by</p>
+            <p style={{ fontSize: '0.78rem', color: '#777683', marginBottom: '14px', lineHeight: 1.5 }}>
+              Assign akun PIC yang sudah sign up (di /login) ke campaign ini pakai email. Campaign ini otomatis muncul di dashboard mereka.
+            </p>
+            <form onSubmit={addPic} style={{ display: 'flex', gap: '8px', marginBottom: '10px' }}>
+              <input
+                value={picEmailDraft}
+                onChange={(e) => setPicEmailDraft(e.target.value)}
+                placeholder="email@pic.com"
+                type="email"
+                required
+                style={{ flex: 1, padding: '9px 12px', borderRadius: '8px', border: '1.5px solid #c7c8cf', fontSize: '0.8rem', fontFamily: "var(--font-display)", boxSizing: 'border-box' }}
+              />
+              <button type="submit" disabled={addingPic} className="btn-primary" style={{ padding: '9px 16px', fontSize: '0.78rem', opacity: addingPic ? 0.6 : 1 }}>
+                {addingPic ? '...' : 'Tambah'}
+              </button>
+            </form>
+            {picError && <p style={{ color: '#ba1a1a', fontSize: '0.76rem', marginBottom: '10px', fontFamily: "var(--font-display)" }}>{picError}</p>}
+            {picUsers.length > 0 && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                {picUsers.map((p) => (
+                  <div key={p._id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8f9ff', borderRadius: '8px', padding: '8px 10px' }}>
+                    <div>
+                      <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: '0.78rem', color: '#191c20' }}>{p.name}</p>
+                      <p style={{ fontSize: '0.72rem', color: '#777683' }}>{p.email}</p>
+                    </div>
+                    <button onClick={() => removePic(p._id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ba1a1a', fontSize: '0.72rem', fontWeight: 700, fontFamily: "var(--font-display)" }}>
+                      Lepas
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           <div style={cardStyle}>

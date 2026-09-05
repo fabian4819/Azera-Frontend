@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useLocation, Outlet } from 'react-router-dom';
-import { Megaphone, LogOut, ChevronsLeft, ChevronsRight } from 'lucide-react';
+import { Megaphone, LogOut, ChevronsLeft, ChevronsRight, Mail } from 'lucide-react';
 import { useTalentAuth } from '../../hooks/useTalentAuth';
+import talentApi from '../../lib/talentApi';
 
 const navItems = [
   { label: 'My Campaigns', to: '/talent/campaigns', icon: Megaphone },
@@ -12,11 +13,81 @@ const pageTitles: Record<string, string> = {
 };
 
 const COLLAPSE_KEY = 'azera_talent_sidebar_collapsed';
+const EMAIL_PROMPT_DISMISSED_KEY = 'azera_creator_email_prompt_dismissed';
+const f = "var(--font-display)";
+
+function CompleteEmailModal({ onClose, onSaved }: { onClose: () => void; onSaved: () => void }) {
+  const [email, setEmail] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    setError('');
+    try {
+      await talentApi.patch('/creator/me', { email });
+      onSaved();
+    } catch (err: unknown) {
+      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      setError(message || 'Gagal menyimpan email');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(21,21,125,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '20px' }}>
+      <div style={{ background: 'white', borderRadius: '20px', padding: '32px', width: '100%', maxWidth: '400px', boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }}>
+        <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: '#f0eeff', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px' }}>
+          <Mail size={22} color="#6728e4" />
+        </div>
+        <h2 style={{ fontFamily: f, fontWeight: 800, fontSize: '1.15rem', color: '#191c20', marginBottom: '8px' }}>Lengkapi Email Kamu</h2>
+        <p style={{ fontFamily: f, fontSize: '0.85rem', color: '#777683', marginBottom: '20px', lineHeight: 1.5 }}>
+          Supaya tim AzeraKOL bisa menghubungi kamu lewat email juga kalau diperlukan.
+        </p>
+        <form onSubmit={onSubmit}>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="you@email.com"
+            required
+            style={{ width: '100%', padding: '12px 14px', borderRadius: '12px', border: '1.5px solid #e1e0ff', fontSize: '0.9rem', outline: 'none', fontFamily: f, color: '#191c20', background: '#f8f9ff', marginBottom: '14px', boxSizing: 'border-box' }}
+          />
+          {error && <p style={{ color: '#ba1a1a', fontSize: '0.8rem', marginBottom: '14px', fontFamily: f }}>{error}</p>}
+          <button type="submit" disabled={saving} className="btn-primary" style={{ width: '100%', justifyContent: 'center', padding: '12px', opacity: saving ? 0.7 : 1, marginBottom: '12px' }}>
+            {saving ? 'Menyimpan...' : 'Simpan'}
+          </button>
+          <button type="button" onClick={onClose} style={{ width: '100%', background: 'none', border: 'none', cursor: 'pointer', color: '#777683', fontSize: '0.82rem', fontFamily: f, fontWeight: 600, padding: '4px' }}>
+            Nanti saja
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
 
 export default function TalentLayout() {
   const location = useLocation();
   const { creator, logout } = useTalentAuth();
   const [collapsed, setCollapsed] = useState(() => localStorage.getItem(COLLAPSE_KEY) === '1');
+  const [showEmailModal, setShowEmailModal] = useState(false);
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      if (sessionStorage.getItem(EMAIL_PROMPT_DISMISSED_KEY)) return;
+      talentApi.get('/creator/me')
+        .then((res) => { if (!res.data.email) setShowEmailModal(true); })
+        .catch(() => {});
+    }, 0);
+    return () => window.clearTimeout(timeoutId);
+  }, []);
+
+  const dismissEmailModal = () => {
+    sessionStorage.setItem(EMAIL_PROMPT_DISMISSED_KEY, '1');
+    setShowEmailModal(false);
+  };
 
   const toggleCollapsed = () => {
     setCollapsed((prev) => {
@@ -153,6 +224,10 @@ export default function TalentLayout() {
           <Outlet />
         </main>
       </div>
+
+      {showEmailModal && (
+        <CompleteEmailModal onClose={dismissEmailModal} onSaved={() => setShowEmailModal(false)} />
+      )}
 
       <style>{`
         @media (max-width: 640px) {
