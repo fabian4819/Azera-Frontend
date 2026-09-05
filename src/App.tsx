@@ -32,6 +32,7 @@ const CampaignDetail = lazy(() => import('./pages/admin/CampaignDetail'));
 const Import = lazy(() => import('./pages/admin/Import'));
 const WhatsApp = lazy(() => import('./pages/admin/WhatsApp'));
 const WaTemplates = lazy(() => import('./pages/admin/WaTemplates'));
+const LeadBotTemplates = lazy(() => import('./pages/admin/LeadBotTemplates'));
 const Broadcast = lazy(() => import('./pages/admin/Broadcast'));
 const Creators = lazy(() => import('./pages/admin/Creators'));
 const CreatorDetail = lazy(() => import('./pages/admin/CreatorDetail'));
@@ -109,6 +110,7 @@ export default function App() {
             <Route path="import" element={<Import />} />
             <Route path="whatsapp" element={<WhatsApp />} />
             <Route path="wa-templates" element={<WaTemplates />} />
+            <Route path="lead-bot-templates" element={<LeadBotTemplates />} />
             <Route path="campaigns/:id/broadcast" element={<Broadcast />} />
             <Route path="brands" element={<Brands />} />
             <Route path="brands/:id" element={<BrandDetail />} />

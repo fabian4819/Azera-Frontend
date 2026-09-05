@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation, Outlet } from 'react-router-dom';
-import { Building2, Users, ImageIcon, Megaphone, Upload, MessageCircle, MessageSquareText, LogOut, Menu, X, ChevronsLeft, ChevronsRight } from 'lucide-react';
+import { Building2, Users, ImageIcon, Megaphone, Upload, MessageCircle, MessageSquareText, Bot, LogOut, Menu, X, ChevronsLeft, ChevronsRight } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 
 const navItems = [
@@ -8,6 +8,7 @@ const navItems = [
   { label: 'Import Data', to: '/admin/import', icon: Upload },
   { label: 'WhatsApp', to: '/admin/whatsapp', icon: MessageCircle },
   { label: 'Template Pesan', to: '/admin/wa-templates', icon: MessageSquareText },
+  { label: 'Template Bot Lead', to: '/admin/lead-bot-templates', icon: Bot },
   { label: 'Brands', to: '/admin/brands', icon: Building2 },
   { label: 'Creators', to: '/admin/creators', icon: Users },
   { label: 'Portfolio', to: '/admin/portfolio', icon: ImageIcon },
@@ -18,6 +19,7 @@ const pageTitles: Record<string, string> = {
   '/admin/import': 'Import Data Historis',
   '/admin/whatsapp': 'WhatsApp',
   '/admin/wa-templates': 'Template Pesan WhatsApp',
+  '/admin/lead-bot-templates': 'Template Bot WhatsApp (Lead Masuk)',
   '/admin/brands': 'Brand Submissions',
   '/admin/creators': 'Creator Registrations',
   '/admin/portfolio': 'Portfolio Manager',
