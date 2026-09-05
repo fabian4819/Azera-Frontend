@@ -42,6 +42,10 @@ export default function Creators() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
+  const [domicileFilter, setDomicileFilter] = useState('');
+  const [nicheFilter, setNicheFilter] = useState('');
+  const [followerMin, setFollowerMin] = useState('');
+  const [followerMax, setFollowerMax] = useState('');
   const navigate = useNavigate();
 
   const fetchCreators = async () => {
@@ -66,10 +70,27 @@ export default function Creators() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [statusFilter]);
 
-  const filtered = search ? creators.filter((c) => c.name.toLowerCase().includes(search.toLowerCase()) || c.phone.includes(search)) : creators;
+  const getMaxFollowers = (socials: CreatorItem['socials']) => Math.max(0, ...socials.map((s) => s.followers));
+
+  const provinceOptions = Array.from(new Set(creators.map((c) => c.domicile?.province).filter((p): p is string => !!p))).sort();
+  const nicheOptions = Array.from(new Set(creators.flatMap((c) => c.niches || []))).sort();
+
+  const filtered = creators.filter((c) => {
+    if (search && !(c.name.toLowerCase().includes(search.toLowerCase()) || c.phone.includes(search))) return false;
+    if (domicileFilter && c.domicile?.province !== domicileFilter) return false;
+    if (nicheFilter && !c.niches?.includes(nicheFilter)) return false;
+    const maxF = getMaxFollowers(c.socials || []);
+    if (followerMin && maxF < Number(followerMin)) return false;
+    if (followerMax && maxF > Number(followerMax)) return false;
+    return true;
+  });
+
+  const resetFilters = () => {
+    setSearch(''); setStatusFilter(''); setDomicileFilter(''); setNicheFilter(''); setFollowerMin(''); setFollowerMax('');
+  };
 
   const maxFollowers = (socials: CreatorItem['socials']) => {
-    const max = Math.max(0, ...socials.map((s) => s.followers));
+    const max = getMaxFollowers(socials);
     if (max >= 1000000) return (max / 1000000).toFixed(1) + 'M';
     if (max >= 1000) return (max / 1000).toFixed(1) + 'K';
     return max.toString();
@@ -95,6 +116,33 @@ export default function Creators() {
             <RefreshCw size={16} />
           </button>
         </div>
+      </div>
+
+      <div style={{ display: 'flex', gap: '10px', marginBottom: '24px', flexWrap: 'wrap', alignItems: 'center' }}>
+        <select value={domicileFilter} onChange={(e) => setDomicileFilter(e.target.value)} style={controlStyle}>
+          <option value="">Semua Domisili</option>
+          {provinceOptions.map((p) => <option key={p} value={p}>{p}</option>)}
+        </select>
+        <select value={nicheFilter} onChange={(e) => setNicheFilter(e.target.value)} style={controlStyle}>
+          <option value="">Semua Niche</option>
+          {nicheOptions.map((n) => <option key={n} value={n}>{n}</option>)}
+        </select>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <input
+            type="number" min={0} value={followerMin} onChange={(e) => setFollowerMin(e.target.value)}
+            placeholder="Followers dari" style={{ ...controlStyle, width: '140px', cursor: 'text' }}
+          />
+          <span style={{ color: '#777683', fontFamily: "var(--font-display)", fontSize: '0.82rem' }}>—</span>
+          <input
+            type="number" min={0} value={followerMax} onChange={(e) => setFollowerMax(e.target.value)}
+            placeholder="sampai" style={{ ...controlStyle, width: '140px', cursor: 'text' }}
+          />
+        </div>
+        {(search || statusFilter || domicileFilter || nicheFilter || followerMin || followerMax) && (
+          <button onClick={resetFilters} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6728e4', fontSize: '0.8rem', fontWeight: 700, fontFamily: "var(--font-display)" }}>
+            Reset Filter
+          </button>
+        )}
       </div>
 
       <div style={{ background: 'white', borderRadius: '16px', border: '1px solid #e1e0ff', overflow: 'hidden', boxShadow: '0 2px 12px rgba(107,46,232,0.06)' }}>

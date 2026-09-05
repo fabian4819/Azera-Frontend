@@ -147,12 +147,13 @@ export default function AdminLayout() {
         </div>
       </aside>
 
-      <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '16px', overflow: 'hidden' }}>
+      <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '16px' }}>
         <header
           style={{
             background: '#f8f9ff', borderRadius: '999px', padding: '14px 28px',
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
             flexShrink: 0, boxShadow: '0 4px 16px rgba(21,21,125,0.06)',
+            position: 'sticky', top: '16px', zIndex: 5,
           }}
         >
           <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.15rem', color: 'var(--on-background)' }}>{pageTitle}</h1>
