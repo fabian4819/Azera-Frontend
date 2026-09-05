@@ -26,6 +26,7 @@ const AdminLogin = lazy(() => import('./pages/admin/Login'));
 const Brands = lazy(() => import('./pages/admin/Brands'));
 const BrandDetail = lazy(() => import('./pages/admin/BrandDetail'));
 const PortfolioManager = lazy(() => import('./pages/admin/PortfolioManager'));
+const Dashboard = lazy(() => import('./pages/admin/Dashboard'));
 const Campaigns = lazy(() => import('./pages/admin/Campaigns'));
 const CampaignNew = lazy(() => import('./pages/admin/CampaignNew'));
 const CampaignDetail = lazy(() => import('./pages/admin/CampaignDetail'));
@@ -104,7 +105,8 @@ export default function App() {
 
           {/* Admin protected routes */}
           <Route path="/admin" element={<ProtectedRoute />}>
-            <Route index element={<Navigate to="/admin/campaigns" replace />} />
+            <Route index element={<Navigate to="/admin/dashboard" replace />} />
+            <Route path="dashboard" element={<Dashboard />} />
             <Route path="campaigns" element={<Campaigns />} />
             <Route path="campaigns/new" element={<CampaignNew />} />
             <Route path="campaigns/:id" element={<CampaignDetail />} />

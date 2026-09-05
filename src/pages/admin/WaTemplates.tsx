@@ -102,7 +102,6 @@ export default function WaTemplates() {
 
   return (
     <div>
-      <h1 style={{ fontFamily: f, fontWeight: 800, fontSize: '1.3rem', color: '#191c20', marginBottom: '8px' }}>Template Pesan WhatsApp</h1>
       <p style={{ fontFamily: f, fontSize: '0.85rem', color: '#777683', marginBottom: '20px' }}>
         Placeholder tersedia: {'{{nama}}'}, {'{{campaign}}'}, {'{{password}}'}, {'{{grup_link}}'}, {'{{brief}}'}, {'{{invoice_number}}'}, {'{{bill_to}}'}, {'{{total}}'}, {'{{payment_link}}'}, {'{{pdf_url}}'}, dll, sesuaikan per trigger.
       </p>

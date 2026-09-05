@@ -21,7 +21,7 @@ export default function AdminLogin() {
       const res = await api.post('/admin/login', { email, password });
       const { token, admin } = res.data;
       login(token, admin);
-      navigate('/admin/campaigns');
+      navigate('/admin/dashboard');
     } catch {
       setError('Email atau password salah. Silakan coba lagi.');
     } finally {

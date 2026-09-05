@@ -65,7 +65,6 @@ export default function LeadBotTemplates() {
 
   return (
     <div>
-      <h1 style={{ fontFamily: f, fontWeight: 800, fontSize: '1.3rem', color: '#191c20', marginBottom: '8px' }}>Template Bot WhatsApp (Lead Masuk)</h1>
       <p style={{ fontFamily: f, fontSize: '0.85rem', color: '#777683', marginBottom: '20px' }}>
         Pesan yang dibalas otomatis bot saat ada orang chat nomor WhatsApp bisnis (pilihan Brand/KOL/Support) — beda dari Template Pesan di menu sebelah, yang itu untuk notifikasi ke creator/client yang sudah terdaftar.
       </p>

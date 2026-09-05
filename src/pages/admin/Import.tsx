@@ -56,8 +56,6 @@ export default function Import() {
 
   return (
     <div>
-      <h1 style={{ fontFamily: f, fontWeight: 800, fontSize: '1.3rem', color: '#191c20', marginBottom: '20px' }}>Import Data Historis</h1>
-
       <div style={cardStyle}>
         <p style={{ fontFamily: f, fontSize: '0.85rem', color: '#464652', marginBottom: '16px', lineHeight: 1.6 }}>
           Upload spreadsheet (.xlsx atau .csv) dengan kolom: <strong>Nama Campaign, Brand, Nama Creator, Platform, Link Konten,

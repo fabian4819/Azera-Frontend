@@ -96,8 +96,6 @@ export default function WhatsApp() {
 
   return (
     <div>
-      <h1 style={{ fontFamily: f, fontWeight: 800, fontSize: '1.3rem', color: '#191c20', marginBottom: '20px' }}>WhatsApp</h1>
-
       {actionError && (
         <div style={{ background: '#ffdad6', color: '#ba1a1a', borderRadius: '10px', padding: '12px 16px', marginBottom: '16px', fontSize: '0.82rem', fontFamily: f, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px' }}>
           <span>{actionError}</span>
