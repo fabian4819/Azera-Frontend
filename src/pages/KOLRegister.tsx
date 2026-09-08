@@ -204,7 +204,7 @@ export default function KOLRegister() {
           <p style={{ color: '#464652', lineHeight: 1.7, fontFamily: "var(--font-display)" }}>
             {alreadyExists
               ? 'Nomor WhatsApp kamu sudah terdaftar sebelumnya. Tim AzeraKOL akan segera menghubungi.'
-              : 'Profil kamu sedang kami review. Tim AzeraKOL akan menghubungi kamu dalam 1–3 hari kerja via WhatsApp.'}
+              : 'Profil kamu sedang kami review. Tim AzeraKOL akan menghubungi kamu via WhatsApp.'}
           </p>
         </div>
       </div>

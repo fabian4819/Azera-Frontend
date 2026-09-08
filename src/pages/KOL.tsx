@@ -12,7 +12,7 @@ const benefits = [
 
 const steps = [
   { num: '01', title: 'Daftar', desc: 'Isi form pendaftaran gratis dengan data profil dan media sosialmu.' },
-  { num: '02', title: 'Review', desc: 'Tim AzeraKOL akan meninjau profil dalam 1–3 hari kerja.' },
+  { num: '02', title: 'Review', desc: 'Tim AzeraKOL akan meninjau profilmu.' },
   { num: '03', title: 'Campaign', desc: 'Mulai terima tawaran kolaborasi brand yang sesuai dengan nichemu.' },
 ];
 
