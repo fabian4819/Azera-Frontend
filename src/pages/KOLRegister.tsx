@@ -77,6 +77,7 @@ export default function KOLRegister() {
 
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
   const [gender, setGender] = useState('');
   const [provinces, setProvinces] = useState<WilayahOption[]>([]);
   const [cities, setCities] = useState<WilayahOption[]>([]);
@@ -166,7 +167,7 @@ export default function KOLRegister() {
       const cityName = cities.find((c) => c.id === city)?.name || '';
 
       const res = await api.post('/creators/register', {
-        name, phone, gender,
+        name, phone, email, gender,
         domicile: { province: provinceName, city: cityName },
         socials: socialsPayload,
         activities: selectedActivities,
@@ -247,6 +248,10 @@ export default function KOLRegister() {
                 style={inputStyle}
               />
             </div>
+          </div>
+          <div style={{ marginBottom: '14px' }}>
+            <label style={labelStyle}>Email *</label>
+            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@email.com" required style={inputStyle} />
           </div>
           <div ref={genderRef} style={{ marginBottom: '14px' }}>
             <label style={labelStyle}>Jenis Kelamin *</label>
