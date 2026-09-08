@@ -33,6 +33,10 @@ export default function PortalLogin() {
   const [phone, setPhone] = useState('');
   const [creatorEmail, setCreatorEmail] = useState('');
   const [creatorPassword, setCreatorPassword] = useState('');
+  // null = belum dicek. Cuma tampilkan field Email kalau sudah dicek dan creator itu
+  // (creator lama, sebelum form KOL punya field email) memang belum punya email di data.
+  const [creatorHasEmail, setCreatorHasEmail] = useState<boolean | null>(null);
+  const [checkingPhone, setCheckingPhone] = useState(false);
 
   // PIC fields
   const [picName, setPicName] = useState('');
@@ -52,6 +56,19 @@ export default function PortalLogin() {
     setRole(next);
     setMode('signin');
     setError('');
+  };
+
+  const checkPhoneEmail = async (value: string) => {
+    if (mode !== 'signup' || !/^08[0-9]{8,11}$/.test(value)) return;
+    setCheckingPhone(true);
+    try {
+      const res = await talentApi.get('/creator/check-phone', { params: { phone: value } });
+      setCreatorHasEmail(!!res.data.hasEmail);
+    } catch {
+      setCreatorHasEmail(null);
+    } finally {
+      setCheckingPhone(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -177,7 +194,8 @@ export default function PortalLogin() {
                     <input
                       type="tel"
                       value={phone}
-                      onChange={(e) => setPhone(e.target.value.replace(/[^0-9]/g, ''))}
+                      onChange={(e) => { setPhone(e.target.value.replace(/[^0-9]/g, '')); setCreatorHasEmail(null); }}
+                      onBlur={(e) => void checkPhoneEmail(e.target.value)}
                       placeholder="08xxxxxxxxxx"
                       required
                       pattern="08[0-9]{8,11}"
@@ -186,11 +204,17 @@ export default function PortalLogin() {
                       maxLength={13}
                       style={inputStyle}
                     />
+                    {mode === 'signup' && checkingPhone && (
+                      <p style={{ fontSize: '0.75rem', color: '#8a8a99', fontFamily: f, marginTop: '6px' }}>Mengecek nomor...</p>
+                    )}
                   </div>
-                  {mode === 'signup' && (
+                  {mode === 'signup' && creatorHasEmail === false && (
                     <div style={{ marginBottom: '16px' }}>
                       <label style={labelStyle}>Email *</label>
                       <input type="email" value={creatorEmail} onChange={(e) => setCreatorEmail(e.target.value)} placeholder="you@email.com" required style={inputStyle} />
+                      <p style={{ fontSize: '0.75rem', color: '#8a8a99', fontFamily: f, marginTop: '6px' }}>
+                        Belum ada email di data kamu sebelumnya — isi dulu ya.
+                      </p>
                     </div>
                   )}
                   <div style={{ marginBottom: mode === 'signin' ? '12px' : '8px' }}>
