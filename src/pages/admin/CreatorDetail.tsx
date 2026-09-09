@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, ThumbsUp, ThumbsDown, Unlock, ExternalLink } from 'lucide-react';
+import { ArrowLeft, ThumbsUp, ThumbsDown, Unlock, ExternalLink, Radar } from 'lucide-react';
 import { SiInstagram, SiTiktok, SiThreads, SiX } from 'react-icons/si';
 import StatusBadge from '../../components/ui/StatusBadge';
+import SnapshotDetail, { type SnapshotView } from '../../components/ui/SnapshotDetail';
 import api from '../../lib/api';
 
 const socialIcons: Record<string, React.ComponentType<{ size?: number }>> = {
@@ -64,6 +65,8 @@ interface HistoryItem {
   uploadedOnTime: boolean; revisions: number; violation?: string; createdAt: string;
 }
 
+type Snapshot = SnapshotView & { _id: string; createdAt: string };
+
 const GENDER_LABELS: Record<string, string> = { male: 'Laki-laki', female_hijab: 'Perempuan (Hijab)', female_non_hijab: 'Perempuan (Non-Hijab)' };
 
 export default function CreatorDetail() {
@@ -72,6 +75,8 @@ export default function CreatorDetail() {
   const [creator, setCreator] = useState<Creator | null>(null);
   const [scoreBreakdown, setScoreBreakdown] = useState<ScoreBreakdown | null>(null);
   const [history, setHistory] = useState<HistoryItem[]>([]);
+  const [snapshots, setSnapshots] = useState<Snapshot[]>([]);
+  const [pulling, setPulling] = useState('');
   const [loading, setLoading] = useState(true);
   const [deciding, setDeciding] = useState(false);
   const [actionError, setActionError] = useState('');
@@ -82,6 +87,7 @@ export default function CreatorDetail() {
       setCreator(res.data.creator);
       setScoreBreakdown(res.data.scoreBreakdown);
       setHistory(res.data.history);
+      setSnapshots(res.data.snapshots || []);
     } catch {
       navigate('/admin/creators');
     } finally {
@@ -109,6 +115,16 @@ export default function CreatorDetail() {
     } finally {
       setDeciding(false);
     }
+  };
+
+  // Buka profil sosmed KOL di tab baru. Ekstensi KOL Lister muncul di sana; staf
+  // klik "Kirim ke AzeraKOL" dan snapshot otomatis nyangkut ke creator ini
+  // (dicocokkan lewat username akun sosialnya).
+  const pullMetrics = (platform: string, username: string, profileUrl?: string) => {
+    setPulling(platform);
+    const url = profileUrl ? normalizeUrl(profileUrl) : socialFallbackUrl(platform, username);
+    if (url) window.open(url, '_blank', 'noopener');
+    setTimeout(() => setPulling(''), 800);
   };
 
   const unlock = async () => {
@@ -184,13 +200,62 @@ export default function CreatorDetail() {
                           <span style={{ textTransform: 'capitalize', fontWeight: 700, color: '#6728e4' }}>{s.platform}</span>
                         )}
                       </span>
-                      <span>{s.username} · {s.followers.toLocaleString('id-ID')} followers</span>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <span>{s.username} · {s.followers.toLocaleString('id-ID')} followers</span>
+                        <button
+                          onClick={() => pullMetrics(s.platform, s.username, s.profileUrl)}
+                          disabled={pulling === s.platform}
+                          title="Buka profil di tab baru — kirim metrik lewat panel ekstensi KOL Lister"
+                          style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '4px 10px', background: 'white', color: '#6728e4', border: '1px solid #6728e4', borderRadius: '8px', cursor: 'pointer', fontSize: '0.72rem', fontWeight: 700, fontFamily: f, whiteSpace: 'nowrap' }}
+                        >
+                          <Radar size={12} /> {pulling === s.platform ? 'Membuka…' : 'Buka & tarik'}
+                        </button>
+                      </span>
                     </div>
                   );
                 })}
               </div>
             )}
           </div>
+
+          {snapshots.length > 0 && (() => {
+            // kelompokkan per platform, ambil snapshot terbaru + deret followers
+            const byPlat = new Map<string, Snapshot[]>();
+            for (const s of snapshots) {
+              const k = `${s.platform}:${s.username}`;
+              if (!byPlat.has(k)) byPlat.set(k, []);
+              byPlat.get(k)!.push(s);
+            }
+            return (
+              <div style={cardStyle}>
+                <p style={{ fontFamily: f, fontWeight: 700, fontSize: '1rem', color: '#191c20', marginBottom: '4px' }}>Metrik dari Ekstensi</p>
+                <p style={{ fontSize: '0.78rem', color: '#777683', marginBottom: '16px' }}>Tarikan terbaru KOL Lister per akun.</p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                  {[...byPlat.values()].map((list) => {
+                    const sorted = [...list].sort((a, b) => +new Date(a.createdAt) - +new Date(b.createdAt));
+                    const latest = sorted[sorted.length - 1];
+                    const oldest = sorted[0];
+                    const view: SnapshotView = {
+                      ...latest,
+                      followersDeltaAll:
+                        sorted.length > 1 && latest.followers != null && oldest.followers != null
+                          ? latest.followers - oldest.followers
+                          : null,
+                      snapshotCount: sorted.length,
+                      firstCapturedAt: oldest.createdAt,
+                      capturedAt: latest.createdAt,
+                      followerSeries: sorted.map((s) => ({ t: s.createdAt, v: s.followers ?? null })),
+                    };
+                    return (
+                      <div key={latest._id} style={{ borderTop: '1px solid #ececff', paddingTop: '14px' }}>
+                        <SnapshotDetail s={view} compact />
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })()}
 
           {scoreBreakdown && (
             <div style={cardStyle}>

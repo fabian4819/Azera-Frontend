@@ -1,5 +1,5 @@
 import { useEffect, useState, Fragment } from 'react';
-import { Sparkles, RefreshCw, FileText, ImageIcon, Plus, Trash2, ExternalLink } from 'lucide-react';
+import { Sparkles, RefreshCw, FileText, ImageIcon, Plus, Trash2, ExternalLink, Radar } from 'lucide-react';
 import api from '../../lib/api';
 
 /** AI insight text hanya pakai **bold** dan "- " bullet — render itu saja, bukan full markdown parser. */
@@ -131,6 +131,12 @@ export default function CampaignAnalyticsFinance({ campaignId }: { campaignId: s
     } finally {
       setParsingId(null);
     }
+  };
+
+  // Buka link post di tab baru. Ekstensi KOL Lister muncul di halaman post; staf
+  // klik "Kirim insight" dan server mencocokkannya ke submission ini lewat link.
+  const pullPostInsight = (link?: string) => {
+    if (link) window.open(link, '_blank', 'noopener');
   };
 
   const verifyInsight = async (submissionId: string, field: string, value: string) => {
@@ -286,11 +292,18 @@ export default function CampaignAnalyticsFinance({ campaignId }: { campaignId: s
                   <p style={{ fontFamily: f, fontWeight: 700, fontSize: '0.85rem', textTransform: 'capitalize' }}>
                     {s.creatorId?.name || '-'} · {s.type} · {s.platform}
                   </p>
-                  {s.insightScreenshotUrls.length > 0 && (
-                    <button onClick={() => parseInsight(s._id)} disabled={parsingId === s._id} style={{ ...smallBtn, padding: '6px 12px', fontSize: '0.75rem' }}>
-                      <Sparkles size={12} /> {parsingId === s._id ? 'Membaca...' : 'Baca Insight AI'}
-                    </button>
-                  )}
+                  <div style={{ display: 'flex', gap: '6px' }}>
+                    {s.link && (
+                      <button onClick={() => pullPostInsight(s.link)} style={{ ...smallBtn, padding: '6px 12px', fontSize: '0.75rem', background: 'white', color: '#6728e4', border: '1px solid #6728e4' }}>
+                        <Radar size={12} /> Buka post
+                      </button>
+                    )}
+                    {s.insightScreenshotUrls.length > 0 && (
+                      <button onClick={() => parseInsight(s._id)} disabled={parsingId === s._id} style={{ ...smallBtn, padding: '6px 12px', fontSize: '0.75rem' }}>
+                        <Sparkles size={12} /> {parsingId === s._id ? 'Membaca...' : 'Baca Insight AI'}
+                      </button>
+                    )}
+                  </div>
                 </div>
                 {s.link && <a href={s.link} target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.78rem', color: '#6728e4', fontFamily: f, wordBreak: 'break-all' }}>{s.link}</a>}
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '8px', marginTop: '10px' }}>
