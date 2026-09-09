@@ -135,6 +135,10 @@ function absoluteUrl(path) {
 }
 
 function fallbackContent(route) {
+  // #app-loading menutupi <main data-seo-fallback> secara visual sampai React mount —
+  // markup-nya harus persis sama dengan yang ada di index.html (lihat komentar CSS
+  // #app-loading di sana), karena fungsi ini yang REGENERATE isi #root saat build
+  // (bukan dibaca dari index.html), jadi kalau beda satu ini yang menang di dist/.
   return `<main data-seo-fallback>
         <h1>${route.fallbackHeading || route.title}</h1>
         <p>${route.fallbackBody || route.description}</p>
@@ -144,7 +148,11 @@ function fallbackContent(route) {
           <a href="/kol">Daftar KOL dan Creator Network</a>
           <a href="/portfolio">Portfolio Campaign KOL AzeraKOL</a>
         </nav>
-      </main>`;
+      </main>
+      <div id="app-loading" aria-hidden="true">
+        <img src="/logo-transparent.png" alt="" />
+        <div class="dots"><span></span><span></span><span></span></div>
+      </div>`;
 }
 
 function replaceMeta(html, route) {
