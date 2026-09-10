@@ -19,7 +19,13 @@ function contactLabel(c: WaContact) {
   return isGroup ? `Grup ${raw}` : raw;
 }
 
+const BOT_TABS = [
+  { id: 'partnership', label: 'Partnership / Brand' },
+  { id: 'creator', label: 'Creator / KOL' },
+] as const;
+
 export default function WhatsAppInbox() {
+  const [bot, setBot] = useState<(typeof BOT_TABS)[number]['id']>('partnership');
   const [contacts, setContacts] = useState<WaContact[]>([]);
   const [selectedJid, setSelectedJid] = useState<string | null>(null);
   const [messages, setMessages] = useState<WaChatMessage[]>([]);
@@ -30,14 +36,25 @@ export default function WhatsAppInbox() {
   const messagesPollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  const base = `/admin/whatsapp/${bot}`;
+
   const fetchContacts = async () => {
-    const res = await api.get('/admin/whatsapp/contacts');
+    const res = await api.get(`${base}/contacts`);
     setContacts(res.data);
   };
 
   const fetchMessages = async (jid: string) => {
-    const res = await api.get(`/admin/whatsapp/contacts/${encodeURIComponent(jid)}/messages`);
+    const res = await api.get(`${base}/contacts/${encodeURIComponent(jid)}/messages`);
     setMessages(res.data);
+  };
+
+  // Ganti bot → kosongkan pilihan & daftar lama supaya tidak nyampur antar nomor.
+  const switchBot = (id: typeof bot) => {
+    if (id === bot) return;
+    setBot(id);
+    setSelectedJid(null);
+    setContacts([]);
+    setMessages([]);
   };
 
   useEffect(() => {
@@ -47,20 +64,22 @@ export default function WhatsAppInbox() {
       window.clearTimeout(timeoutId);
       if (contactsPollRef.current) clearInterval(contactsPollRef.current);
     };
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [bot]);
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
       if (!selectedJid) { setMessages([]); return; }
       void fetchMessages(selectedJid);
-      api.post(`/admin/whatsapp/contacts/${encodeURIComponent(selectedJid)}/read`).then(() => void fetchContacts()).catch(() => {});
+      api.post(`${base}/contacts/${encodeURIComponent(selectedJid)}/read`).then(() => void fetchContacts()).catch(() => {});
     }, 0);
     messagesPollRef.current = selectedJid ? setInterval(() => void fetchMessages(selectedJid), 3000) : null;
     return () => {
       window.clearTimeout(timeoutId);
       if (messagesPollRef.current) clearInterval(messagesPollRef.current);
     };
-  }, [selectedJid]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedJid, bot]);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight });
@@ -73,7 +92,7 @@ export default function WhatsAppInbox() {
     setSending(true);
     setActionError('');
     try {
-      await api.post(`/admin/whatsapp/contacts/${encodeURIComponent(selectedJid)}/reply`, { text: replyText });
+      await api.post(`${base}/contacts/${encodeURIComponent(selectedJid)}/reply`, { text: replyText });
       setReplyText('');
       await fetchMessages(selectedJid);
       await fetchContacts();
@@ -88,7 +107,7 @@ export default function WhatsAppInbox() {
   const toggleBotPause = async () => {
     if (!selectedJid || !selected) return;
     try {
-      await api.post(`/admin/whatsapp/contacts/${encodeURIComponent(selectedJid)}/bot-pause`, { paused: !selected.botPaused });
+      await api.post(`${base}/contacts/${encodeURIComponent(selectedJid)}/bot-pause`, { paused: !selected.botPaused });
       await fetchContacts();
     } catch {
       setActionError('Gagal mengubah status bot');
@@ -97,6 +116,19 @@ export default function WhatsAppInbox() {
 
   return (
     <div>
+      <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
+        {BOT_TABS.map((t) => (
+          <button
+            key={t.id}
+            onClick={() => switchBot(t.id)}
+            className={bot === t.id ? 'btn-primary' : 'btn-secondary'}
+            style={{ padding: '8px 16px', fontSize: '0.8rem', fontFamily: f }}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+
       {actionError && (
         <div style={{ background: '#ffdad6', color: '#ba1a1a', borderRadius: '10px', padding: '12px 16px', marginBottom: '16px', fontSize: '0.82rem', fontFamily: f, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px' }}>
           <span>{actionError}</span>

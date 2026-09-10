@@ -15,7 +15,13 @@ interface WaMessageLog {
   status: 'queued' | 'sent' | 'failed'; error?: string; createdAt: string;
 }
 
-export default function WhatsApp() {
+// Dua bot WhatsApp terpisah — nomor & pairing sendiri-sendiri.
+const BOTS = [
+  { id: 'partnership', label: 'Bot Partnership / Brand', hint: 'Nomor untuk brand & klien. Menerima lead brand + notifikasi invoice/pembayaran/campaign.' },
+  { id: 'creator', label: 'Bot Creator / KOL', hint: 'Nomor untuk KOL/creator. Balas link pendaftaran + notifikasi brief/reminder ke creator.' },
+] as const;
+
+function BotPanel({ botId, label, hint }: { botId: string; label: string; hint: string }) {
   const [status, setStatus] = useState<WaStatus>('disconnected');
   const [connectedNumber, setConnectedNumber] = useState<string | null>(null);
   const [qr, setQr] = useState<string | null>(null);
@@ -26,12 +32,14 @@ export default function WhatsApp() {
   const [actionError, setActionError] = useState('');
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  const base = `/admin/whatsapp/${botId}`;
+
   const fetchStatus = async () => {
-    const res = await api.get('/admin/whatsapp/status');
+    const res = await api.get(`${base}/status`);
     setStatus(res.data.status);
     setConnectedNumber(res.data.connectedNumber);
     if (res.data.status === 'qr') {
-      const qrRes = await api.get('/admin/whatsapp/qr');
+      const qrRes = await api.get(`${base}/qr`);
       setQr(qrRes.data.qr);
     } else {
       setQr(null);
@@ -39,7 +47,7 @@ export default function WhatsApp() {
   };
 
   const fetchLogs = async () => {
-    const res = await api.get('/admin/whatsapp/logs');
+    const res = await api.get(`${base}/logs`);
     setLogs(res.data);
   };
 
@@ -55,12 +63,13 @@ export default function WhatsApp() {
       window.clearTimeout(timeoutId);
       if (pollRef.current) clearInterval(pollRef.current);
     };
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [botId]);
 
   const connect = async () => {
     setActionError('');
     try {
-      await api.post('/admin/whatsapp/connect');
+      await api.post(`${base}/connect`);
       await fetchStatus();
     } catch (err: unknown) {
       const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
@@ -71,7 +80,7 @@ export default function WhatsApp() {
   const logout = async () => {
     setActionError('');
     try {
-      await api.post('/admin/whatsapp/logout');
+      await api.post(`${base}/logout`);
       await fetchStatus();
     } catch (err: unknown) {
       const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
@@ -83,7 +92,7 @@ export default function WhatsApp() {
     setActionError('');
     setSending(true);
     try {
-      await api.post('/admin/whatsapp/test-send', { to: testTo, message: testMessage });
+      await api.post(`${base}/test-send`, { to: testTo, message: testMessage });
       setTestMessage('');
       await fetchLogs();
     } catch (err: unknown) {
@@ -95,7 +104,10 @@ export default function WhatsApp() {
   };
 
   return (
-    <div>
+    <div style={cardStyle}>
+      <p style={{ fontFamily: f, fontWeight: 700, fontSize: '1.05rem', marginBottom: '4px' }}>{label}</p>
+      <p style={{ fontFamily: f, fontSize: '0.8rem', color: '#8a8a99', marginBottom: '18px' }}>{hint}</p>
+
       {actionError && (
         <div style={{ background: '#ffdad6', color: '#ba1a1a', borderRadius: '10px', padding: '12px 16px', marginBottom: '16px', fontSize: '0.82rem', fontFamily: f, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px' }}>
           <span>{actionError}</span>
@@ -103,8 +115,8 @@ export default function WhatsApp() {
         </div>
       )}
 
-      <div style={cardStyle}>
-        <p style={{ fontFamily: f, fontWeight: 700, fontSize: '0.95rem', marginBottom: '16px' }}>Status Koneksi</p>
+      <div style={{ borderTop: '1px solid #efeeff', paddingTop: '16px' }}>
+        <p style={{ fontFamily: f, fontWeight: 700, fontSize: '0.9rem', marginBottom: '14px' }}>Status Koneksi</p>
 
         {status === 'connected' && (
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -124,7 +136,7 @@ export default function WhatsApp() {
         {status === 'qr' && qr && (
           <div style={{ textAlign: 'center' }}>
             <p style={{ fontFamily: f, fontSize: '0.85rem', color: '#464652', marginBottom: '14px' }}>
-              Scan QR ini dengan WhatsApp (Perangkat Tertaut). Gunakan nomor testing dulu, ganti ke nomor resmi client nanti dengan Logout lalu scan ulang.
+              Scan QR ini dengan WhatsApp (Perangkat Tertaut) memakai nomor untuk bot ini.
             </p>
             <img src={qr} alt="QR WhatsApp" style={{ width: '220px', height: '220px', border: '1px solid #e1e0ff', borderRadius: '12px' }} />
           </div>
@@ -145,9 +157,9 @@ export default function WhatsApp() {
       </div>
 
       {status === 'connected' && (
-        <div style={cardStyle}>
-          <p style={{ fontFamily: f, fontWeight: 700, fontSize: '0.95rem', marginBottom: '16px' }}>Kirim Pesan Uji</p>
-          <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
+        <div style={{ borderTop: '1px solid #efeeff', paddingTop: '16px', marginTop: '16px' }}>
+          <p style={{ fontFamily: f, fontWeight: 700, fontSize: '0.9rem', marginBottom: '14px' }}>Kirim Pesan Uji</p>
+          <div style={{ display: 'flex', gap: '10px', marginBottom: '10px', flexWrap: 'wrap' }}>
             <input
               placeholder="Nomor WA (mis. 6281234567890)"
               value={testTo}
@@ -158,7 +170,7 @@ export default function WhatsApp() {
               placeholder="Isi pesan"
               value={testMessage}
               onChange={(e) => setTestMessage(e.target.value)}
-              style={{ flex: 1, padding: '9px 12px', borderRadius: '8px', border: '1px solid #e1e0ff', fontFamily: f, fontSize: '0.82rem' }}
+              style={{ flex: 1, minWidth: '160px', padding: '9px 12px', borderRadius: '8px', border: '1px solid #e1e0ff', fontFamily: f, fontSize: '0.82rem' }}
             />
             <button onClick={sendTest} disabled={sending || !testTo || !testMessage} className="btn-primary" style={{ padding: '9px 18px', fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: '6px', opacity: sending || !testTo || !testMessage ? 0.6 : 1 }}>
               <Send size={14} /> {sending ? 'Mengirim...' : 'Kirim'}
@@ -167,9 +179,9 @@ export default function WhatsApp() {
         </div>
       )}
 
-      <div style={cardStyle}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-          <p style={{ fontFamily: f, fontWeight: 700, fontSize: '0.95rem' }}>Log Pesan</p>
+      <div style={{ borderTop: '1px solid #efeeff', paddingTop: '16px', marginTop: '16px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+          <p style={{ fontFamily: f, fontWeight: 700, fontSize: '0.9rem' }}>Log Pesan</p>
           <button onClick={fetchLogs} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6728e4' }}>
             <RefreshCw size={16} />
           </button>
@@ -204,6 +216,16 @@ export default function WhatsApp() {
           </table>
         </div>
       </div>
+    </div>
+  );
+}
+
+export default function WhatsApp() {
+  return (
+    <div>
+      {BOTS.map((b) => (
+        <BotPanel key={b.id} botId={b.id} label={b.label} hint={b.hint} />
+      ))}
     </div>
   );
 }
