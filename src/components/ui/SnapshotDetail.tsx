@@ -1,6 +1,10 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { SiInstagram, SiTiktok, SiThreads, SiX, SiFacebook, SiYoutube } from 'react-icons/si';
 import { ExternalLink, BadgeCheck, TrendingUp, TrendingDown } from 'lucide-react';
+import {
+  ResponsiveContainer, AreaChart, Area, LineChart, Line, XAxis, YAxis, Tooltip,
+  type DotProps,
+} from 'recharts';
 
 const f = 'var(--font-display)';
 
@@ -10,6 +14,7 @@ const platformIcon: Record<string, React.ComponentType<{ size?: number }>> = {
 
 export interface SampleRow {
   post?: string; url?: string; date?: string; approxDate?: boolean; format?: string; title?: string;
+  thumb?: string;
   likes?: number | null; comments?: number | null; views?: number | null; shares?: number | null;
   saves?: number | null; paid?: boolean;
 }
@@ -34,7 +39,7 @@ export interface SnapshotView {
   capturedBy?: { name?: string } | null;
 }
 
-/** 12800 -> "12,8rb" · 1_420_000 -> "1,4jt" — sama gaya dengan panel ekstensi */
+/* ---------- format ---------- */
 function fmt(n?: number | null): string {
   if (n === null || n === undefined || !Number.isFinite(n)) return '—';
   const abs = Math.abs(n);
@@ -58,10 +63,59 @@ function ringkasRentang(hari?: number | null): string {
   if (hari < 730) return (Math.round((hari / 30.4) * 10) / 10).toString().replace('.', ',') + ' bulan';
   return (Math.round((hari / 365) * 10) / 10).toString().replace('.', ',') + ' tahun';
 }
+function num1(n?: number | null): string {
+  return n == null || !Number.isFinite(n) ? '—' : String(Math.round(n * 100) / 100).replace('.', ',');
+}
 
-const box: React.CSSProperties = {
-  background: '#f8f9ff', borderRadius: '10px', padding: '10px 12px',
-};
+/* ---------- recompute dari baris (port dari KolxMetrics.compute ekstensi) ---------- */
+interface Computed {
+  n: number; avgLikes: number | null; avgComments: number | null; avgViews: number | null; avgShares: number | null;
+  medLikes: number | null; medComments: number | null; medViews: number | null;
+  er: number | null; erMedian: number | null; erViews: number | null;
+  perMinggu: number | null; rangeDays: number | null; paid: number; organic: number; outlier: number | null;
+}
+function avg(a: number[]): number | null { return a.length ? a.reduce((s, v) => s + v, 0) / a.length : null; }
+function median(a: number[]): number | null {
+  if (!a.length) return null;
+  const v = [...a].sort((x, y) => x - y); const t = Math.floor(v.length / 2);
+  return v.length % 2 ? v[t] : (v[t - 1] + v[t]) / 2;
+}
+function computeFromRows(rows: SampleRow[], followers?: number | null, erBasis?: string, platform?: string): Computed {
+  const pakaiShare = platform === 'facebook';
+  const col = (k: 'likes' | 'comments' | 'views' | 'shares') =>
+    rows.map((r) => r[k]).filter((x): x is number => typeof x === 'number');
+  const avgLikes = avg(col('likes')), avgComments = avg(col('comments'));
+  const avgViews = avg(col('views')), avgShares = avg(col('shares'));
+  const medLikes = median(col('likes')), medComments = median(col('comments')), medViews = median(col('views'));
+  const inter = (l: number | null, c: number | null, sh: number | null): number | null => {
+    const parts: (number | null)[] = [l, c].concat(pakaiShare ? [sh] : []);
+    return parts.some((v) => v !== null) ? parts.reduce<number>((acc, v) => acc + (v || 0), 0) : null;
+  };
+  const interactions = inter(avgLikes, avgComments, avgShares);
+  const interMed = inter(medLikes, medComments, median(col('shares')));
+  const basis = erBasis === 'views' ? avgViews : followers;
+  const basisMed = erBasis === 'views' ? medViews : followers;
+  const er = interactions != null && basis ? (interactions / basis) * 100 : null;
+  const erMedian = interMed != null && basisMed ? (interMed / basisMed) * 100 : null;
+  const erViews = erBasis !== 'views' && interactions != null && avgViews ? (interactions / avgViews) * 100 : null;
+  const ts = rows.map((r) => (r.date ? +new Date(r.date) : 0)).filter(Boolean).sort((a, b) => b - a);
+  let perMinggu: number | null = null, rangeDays: number | null = null;
+  if (ts.length >= 2) {
+    const days = (ts[0] - ts[ts.length - 1]) / 86400000;
+    rangeDays = Math.round(days);
+    perMinggu = days > 0 ? (ts.length - 1) / (days / 7) : null;
+  }
+  const likesArr = col('likes');
+  const top = likesArr.length ? Math.max(...likesArr) : null;
+  const outlier = medLikes && top ? top / medLikes : null;
+  const paid = rows.filter((r) => r.paid).length;
+  return {
+    n: rows.length, avgLikes, avgComments, avgViews, avgShares, medLikes, medComments, medViews,
+    er, erMedian, erViews, perMinggu, rangeDays, paid, organic: rows.length - paid, outlier,
+  };
+}
+
+const box: React.CSSProperties = { background: '#f8f9ff', borderRadius: '10px', padding: '10px 12px' };
 const lbl: React.CSSProperties = {
   fontSize: '0.62rem', fontFamily: f, fontWeight: 700, color: '#8a869c',
   textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '2px',
@@ -79,105 +133,192 @@ function Stat({ label, value, sub }: { label: string; value: string; sub?: strin
 }
 
 function Sparkline({ series }: { series: { t: string; v: number | null }[] }) {
-  const pts = series.filter((p) => typeof p.v === 'number') as { t: string; v: number }[];
+  const pts = series
+    .filter((p) => typeof p.v === 'number')
+    .map((p) => ({ t: p.t, v: p.v as number }));
   if (pts.length < 2) return null;
-  const vals = pts.map((p) => p.v);
-  const min = Math.min(...vals), max = Math.max(...vals), range = max - min || 1;
-  const W = 240, H = 40;
-  const coords = pts.map((p, i) => {
-    const x = (i / (pts.length - 1)) * W;
-    const y = H - ((p.v - min) / range) * H;
-    return `${x.toFixed(1)},${y.toFixed(1)}`;
-  });
-  const up = vals[vals.length - 1] >= vals[0];
+  const up = pts[pts.length - 1].v >= pts[0].v;
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" style={{ width: '100%', height: '40px', display: 'block' }}>
-      <polyline points={coords.join(' ')} fill="none" stroke={up ? '#12b76a' : '#f04438'} strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
-    </svg>
+    <ResponsiveContainer width="100%" height={44}>
+      <LineChart data={pts} margin={{ top: 4, right: 4, bottom: 4, left: 4 }}>
+        <YAxis hide domain={['dataMin', 'dataMax']} />
+        <XAxis dataKey="t" hide />
+        <Line type="monotone" dataKey="v" stroke={up ? '#12b76a' : '#f04438'} strokeWidth={2} dot={false} isAnimationActive={false} />
+      </LineChart>
+    </ResponsiveContainer>
+  );
+}
+
+interface ErDatum {
+  i: number; er: number; label: string; row: SampleRow;
+}
+
+/** titik kuning kecil untuk post berbayar */
+function PaidDot(props: DotProps & { payload?: ErDatum }) {
+  const { cx, cy, payload } = props;
+  if (!payload?.row.paid || cx == null || cy == null) return null;
+  return <circle cx={cx} cy={cy} r={3} fill="#f0c674" stroke="#fff" strokeWidth={1} />;
+}
+
+function ErTooltip({
+  active, payload, usesEr, komentarLabel,
+}: { active?: boolean; payload?: { payload: ErDatum }[]; usesEr: boolean; komentarLabel: string }) {
+  const [imgOk, setImgOk] = useState(true);
+  const d = active && payload && payload.length ? payload[0].payload : null;
+  if (!d) return null;
+  const r = d.row;
+  return (
+    <div style={{ width: 190, background: '#fff', border: '1px solid #e1e0ff', borderRadius: 10, boxShadow: '0 10px 28px rgba(30,10,94,0.2)', padding: 8, fontFamily: f }}>
+      {r.thumb && imgOk && (
+        <img src={r.thumb} alt="" onError={() => setImgOk(false)}
+          style={{ width: '100%', height: 100, objectFit: 'cover', borderRadius: 6, display: 'block', marginBottom: 6 }} />
+      )}
+      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.68rem', color: '#8a869c' }}>
+        <span>{r.approxDate ? '≈' : ''}{tgl(r.date)}</span>
+        {r.paid && <span style={{ color: '#b45309', fontWeight: 700 }}>BERBAYAR</span>}
+      </div>
+      <div style={{ fontWeight: 800, fontSize: '0.92rem', color: '#191c20' }}>
+        {usesEr ? pct(d.er) : fmt(d.er)}
+        {r.format && <span style={{ fontSize: '0.62rem', color: '#8a869c', fontWeight: 600 }}> · {r.format}</span>}
+      </div>
+      <div style={{ fontSize: '0.68rem', color: '#55516b' }}>
+        {fmt(r.likes)} suka · {fmt(r.comments)} {komentarLabel.toLowerCase()}
+        {typeof r.views === 'number' ? ` · ${fmt(r.views)} views` : ''}
+      </div>
+      {r.title && <div style={{ fontSize: '0.66rem', color: '#8a869c', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.title}</div>}
+      {r.url && <div style={{ fontSize: '0.62rem', color: '#6728e4', marginTop: 3, fontWeight: 700 }}>klik untuk buka post ↗</div>}
+    </div>
   );
 }
 
 /**
- * Tren ER per post — sama seperti panel ekstensi: (likes + komentar) ÷ followers
- * per post, urut lama → baru; hijau kalau naik, merah kalau turun; titik kuning
- * = post berbayar.
+ * Tren ER per post — (likes + komentar) ÷ followers per post, urut lama → baru.
+ * Recharts area chart; hijau naik / merah turun; titik kuning = berbayar.
+ * Hover → popup gambar + info post; klik → buka post-nya.
  */
 function ErTrendChart({ rows, followers, komentarLabel }: { rows: SampleRow[]; followers?: number | null; komentarLabel: string }) {
-  const pts = rows
-    .filter((r) => typeof r.likes === 'number')
-    .map((r) => ({
-      row: r,
-      er: followers && followers > 0 ? ((r.likes! + (r.comments || 0)) / followers) * 100 : (r.likes as number),
-      d: r.date ? +new Date(r.date) : 0,
-    }))
-    .sort((a, b) => a.d - b.d);
-  const [hover, setHover] = useState<number | null>(null);
-  if (pts.length < 2) return null;
-
-  const W = 300, H = 80, pad = 6;
-  const vals = pts.map((p) => p.er);
-  const min = Math.min(...vals), max = Math.max(...vals), range = max - min || 1;
-  const coords = pts.map((p, i) => ({
-    x: pad + (i / (pts.length - 1)) * (W - pad * 2),
-    y: H - pad - ((p.er - min) / range) * (H - pad * 2),
-  }));
-  const up = vals[vals.length - 1] >= vals[0];
-  const color = up ? '#4ecb85' : '#f4796b';
-  const line = coords.map((c) => `${c.x.toFixed(1)},${c.y.toFixed(1)}`).join(' ');
-  const area = `${pad},${H} ${line} ${W - pad},${H}`;
   const usesEr = !!(followers && followers > 0);
-  const h = hover != null ? pts[hover] : null;
+  const data = useMemo<ErDatum[]>(
+    () =>
+      rows
+        .filter((r) => typeof r.likes === 'number')
+        .map((r) => ({
+          row: r,
+          er: usesEr ? ((r.likes! + (r.comments || 0)) / followers!) * 100 : (r.likes as number),
+          d: r.date ? +new Date(r.date) : 0,
+          label: tgl(r.date),
+        }))
+        .sort((a, b) => a.d - b.d)
+        .map((x, i) => ({ i, er: x.er, label: x.label, row: x.row })),
+    [rows, followers, usesEr]
+  );
+  if (data.length < 2) return null;
+  const up = data[data.length - 1].er >= data[0].er;
+  const color = up ? '#12b76a' : '#e0463e';
+  const gid = 'erfill-' + (up ? 'up' : 'dn');
 
   return (
     <div>
       <p style={{ ...lbl, display: 'flex', justifyContent: 'space-between' }}>
         <span>Tren ER post{usesEr ? ` · (suka + ${komentarLabel.toLowerCase()}) ÷ ${fmt(followers)} followers` : ' · suka'}</span>
-        <span style={{ color: rows.some((r) => r.paid) ? '#b45309' : 'transparent' }}>● berbayar</span>
+        {rows.some((r) => r.paid) && <span style={{ color: '#b45309' }}>● berbayar</span>}
       </p>
-      <div style={{ position: 'relative' }}>
-        <svg
-          viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none"
-          style={{ width: '100%', height: '80px', display: 'block' }}
-          onMouseLeave={() => setHover(null)}
-          onMouseMove={(e) => {
-            const r = (e.currentTarget as SVGSVGElement).getBoundingClientRect();
-            const ratio = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width));
-            setHover(Math.round(ratio * (pts.length - 1)));
+      <ResponsiveContainer width="100%" height={120}>
+        <AreaChart
+          data={data}
+          margin={{ top: 6, right: 8, bottom: 0, left: 8 }}
+          onClick={(state) => {
+            const idx = Number((state as { activeIndex?: number | string } | undefined)?.activeIndex);
+            const p = Number.isInteger(idx) ? data[idx] : undefined;
+            if (p?.row.url) window.open(p.row.url, '_blank', 'noopener');
           }}
+          style={{ cursor: 'pointer' }}
         >
-          <polygon points={area} fill={color} opacity={0.13} />
-          <polyline points={line} fill="none" stroke={color} strokeWidth={1.6} strokeLinejoin="round" strokeLinecap="round" />
-          {pts.map((p, i) => (p.row.paid ? <circle key={i} cx={coords[i].x} cy={coords[i].y} r={2.4} fill="#f0c674" /> : null))}
-          <circle cx={coords[coords.length - 1].x} cy={coords[coords.length - 1].y} r={2.6} fill={color} />
-          {h && <line x1={coords[hover!].x} y1={0} x2={coords[hover!].x} y2={H} stroke="#bbb" strokeWidth={0.8} strokeDasharray="2 2" />}
-          {h && <circle cx={coords[hover!].x} cy={coords[hover!].y} r={3.4} fill="#fff" stroke={color} strokeWidth={1.8} />}
-        </svg>
-        {h && (
-          <div style={{ fontSize: '0.7rem', color: '#55516b', marginTop: '2px', textAlign: 'center' }}>
-            {tgl(h.row.date)}{h.row.paid ? ' · berbayar' : ''} — {usesEr ? pct(h.er) : fmt(h.er)} · {fmt(h.row.likes)} suka · {fmt(h.row.comments)} {komentarLabel.toLowerCase()}
-            {typeof h.row.views === 'number' ? ` · ${fmt(h.row.views)} views` : ''}
-          </div>
-        )}
-      </div>
+          <defs>
+            <linearGradient id={gid} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor={color} stopOpacity={0.28} />
+              <stop offset="100%" stopColor={color} stopOpacity={0.02} />
+            </linearGradient>
+          </defs>
+          <XAxis dataKey="i" hide />
+          <YAxis hide domain={['dataMin', 'dataMax']} />
+          <Tooltip
+            content={<ErTooltip usesEr={usesEr} komentarLabel={komentarLabel} />}
+            cursor={{ stroke: '#b9b6cc', strokeWidth: 1, strokeDasharray: '3 3' }}
+            wrapperStyle={{ zIndex: 10, outline: 'none' }}
+            isAnimationActive={false}
+          />
+          <Area
+            type="monotone" dataKey="er" stroke={color} strokeWidth={2}
+            fill={`url(#${gid})`} isAnimationActive={false}
+            dot={<PaidDot />} activeDot={{ r: 4, stroke: '#fff', strokeWidth: 2, fill: color }}
+          />
+        </AreaChart>
+      </ResponsiveContainer>
     </div>
   );
 }
 
 type SortKey = 'date' | 'likes' | 'comments' | 'views' | 'shares';
 
+const SAMPLE_OPTS: { key: string; label: string; take: (rows: SampleRow[]) => SampleRow[] }[] = [
+  { key: '12', label: '12 post terakhir', take: (r) => r.slice(0, 12) },
+  { key: '24', label: '24 post terakhir', take: (r) => r.slice(0, 24) },
+  { key: '48', label: '48 post terakhir', take: (r) => r.slice(0, 48) },
+  { key: 'all', label: 'Semua terkumpul', take: (r) => r },
+  { key: '90d', label: '90 hari terakhir', take: (r) => byDays(r, 90) },
+  { key: '180d', label: '180 hari terakhir', take: (r) => byDays(r, 180) },
+];
+function byDays(rows: SampleRow[], days: number): SampleRow[] {
+  const cutoff = Date.now() - days * 86400000;
+  return rows.filter((r) => !r.date || +new Date(r.date) >= cutoff);
+}
+
 export default function SnapshotDetail({ s, compact }: { s: SnapshotView; compact?: boolean }) {
+  const allRows = useMemo(
+    () => [...(s.sampleRows || [])].sort((a, b) => (b.date ? +new Date(b.date) : 0) - (a.date ? +new Date(a.date) : 0)),
+    [s.sampleRows]
+  );
+
+  // default: seukuran yang dipakai ekstensi saat capture
+  const defaultKey = (s.postsSampled && s.postsSampled > 12 ? (s.postsSampled >= 48 ? '48' : '24') : '12');
+  const [sampleKey, setSampleKey] = useState(allRows.length ? defaultKey : 'all');
   const [showAll, setShowAll] = useState(false);
   const [sortKey, setSortKey] = useState<SortKey>('date');
   const [sortAsc, setSortAsc] = useState(false);
+
   const Icon = platformIcon[s.platform];
-  const rows = s.sampleRows || [];
-  const anyViews = rows.some((r) => typeof r.views === 'number');
-  const anyShares = rows.some((r) => typeof r.shares === 'number');
   const capturedAt = s.capturedAt || s.createdAt;
   const erLabel = s.erBasis === 'views' ? 'ER (per views)' : 'Engagement rate';
   const komentarLabel = s.platform === 'threads' ? 'Replies' : 'Komentar';
 
-  // urutkan seperti ekstensi: nilai kosong selalu di bawah
+  const rows = useMemo(() => {
+    const opt = SAMPLE_OPTS.find((o) => o.key === sampleKey) || SAMPLE_OPTS[0];
+    return allRows.length ? opt.take(allRows) : [];
+  }, [allRows, sampleKey]);
+  const live = useMemo(() => computeFromRows(rows, s.followers, s.erBasis, s.platform), [rows, s.followers, s.erBasis, s.platform]);
+  const hasRows = allRows.length > 0;
+
+  // kalau ada baris per-post → pakai hitungan live; kalau tidak → angka bawaan snapshot
+  const m = hasRows
+    ? {
+        avgLikes: live.avgLikes, avgComments: live.avgComments, avgViews: live.avgViews, avgShares: live.avgShares,
+        medLikes: live.medLikes, medComments: live.medComments, medViews: live.medViews,
+        er: live.er, erMedian: live.erMedian, erViews: live.erViews,
+        perMinggu: live.perMinggu, rangeDays: live.rangeDays, paid: live.paid, organic: live.organic,
+        outlier: live.outlier, n: live.n,
+      }
+    : {
+        avgLikes: s.avgLikes ?? null, avgComments: s.avgComments ?? null, avgViews: s.avgViews ?? null, avgShares: s.avgShares ?? null,
+        medLikes: s.medLikes ?? null, medComments: s.medComments ?? null, medViews: s.medViews ?? null,
+        er: s.engagementRate ?? null, erMedian: s.engagementRateMedian ?? null, erViews: s.engagementRateViews ?? null,
+        perMinggu: s.postsPerWeek ?? null, rangeDays: s.postRangeDays ?? null,
+        paid: s.paidPosts ?? 0, organic: s.organicPosts ?? 0, outlier: s.outlierRatio ?? null, n: s.postsSampled ?? 0,
+      };
+
+  const anyViews = rows.some((r) => typeof r.views === 'number');
+  const anyShares = rows.some((r) => typeof r.shares === 'number');
+
   const sortVal = (r: SampleRow): number | null => {
     if (sortKey === 'date') return r.date ? +new Date(r.date) : null;
     const v = r[sortKey];
@@ -188,24 +329,19 @@ export default function SnapshotDetail({ s, compact }: { s: SnapshotView; compac
     if (x == null || y == null) return x == null && y == null ? 0 : x == null ? 1 : -1;
     return sortAsc ? x - y : y - x;
   });
-  const shown = showAll ? sortedRows : sortedRows.slice(0, 6);
+  const shown = showAll ? sortedRows : sortedRows.slice(0, 8);
   const toggleSort = (k: SortKey) => {
     if (sortKey === k) setSortAsc((v) => !v);
     else { setSortKey(k); setSortAsc(false); }
   };
   const sortableTh = (k: SortKey, label: string) => (
-    <th
-      key={k}
-      onClick={() => toggleSort(k)}
-      style={{ padding: '4px 6px', cursor: 'pointer', color: sortKey === k ? '#6728e4' : '#8a869c', whiteSpace: 'nowrap' }}
-    >
+    <th key={k} onClick={() => toggleSort(k)} style={{ padding: '4px 6px', cursor: 'pointer', color: sortKey === k ? '#6728e4' : '#8a869c', whiteSpace: 'nowrap' }}>
       {label}{sortKey === k ? (sortAsc ? ' ▲' : ' ▼') : ''}
     </th>
   );
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', fontFamily: f }}>
-      {/* identitas ringkas (mode compact) */}
       {compact && (
         <p style={{ fontWeight: 800, fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px', color: '#191c20' }}>
           {Icon && <Icon size={13} />}
@@ -217,7 +353,6 @@ export default function SnapshotDetail({ s, compact }: { s: SnapshotView; compac
         </p>
       )}
 
-      {/* identitas penuh */}
       {!compact && (
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           {s.avatarUrl
@@ -236,6 +371,21 @@ export default function SnapshotDetail({ s, compact }: { s: SnapshotView; compac
       )}
       {s.bio && !compact && <p style={{ fontSize: '0.78rem', color: '#55516b', whiteSpace: 'pre-wrap' }}>{s.bio}</p>}
 
+      {/* pemilih ukuran sampel — seperti dropdown "Sampel" di ekstensi */}
+      {hasRows && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.75rem', color: '#55516b' }}>
+          <span style={lbl}>Sampel</span>
+          <select
+            value={sampleKey}
+            onChange={(e) => setSampleKey(e.target.value)}
+            style={{ padding: '4px 8px', borderRadius: '8px', border: '1px solid #ddd9ec', fontSize: '0.78rem', fontFamily: f }}
+          >
+            {SAMPLE_OPTS.map((o) => <option key={o.key} value={o.key}>{o.label}</option>)}
+          </select>
+          <span style={{ color: '#8a869c' }}>{rows.length} dari {allRows.length} terkumpul</span>
+        </div>
+      )}
+
       {/* angka utama */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(96px, 1fr))', gap: '8px' }}>
         <Stat
@@ -251,29 +401,29 @@ export default function SnapshotDetail({ s, compact }: { s: SnapshotView; compac
         />
         <Stat label="Following" value={fmt(s.following)} />
         <Stat label="Total post" value={fmt(s.postsCount)} />
-        <Stat label={erLabel} value={pct(s.engagementRate)} sub={s.engagementRateMedian != null ? `median ${pct(s.engagementRateMedian)}` : undefined} />
-        {s.engagementRateViews != null && <Stat label="ER by views" value={pct(s.engagementRateViews)} />}
+        <Stat label={erLabel} value={pct(m.er)} sub={m.erMedian != null ? `median ${pct(m.erMedian)}` : undefined} />
+        {m.erViews != null && <Stat label="ER by views" value={pct(m.erViews)} />}
       </div>
 
       {/* avg / median */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(96px, 1fr))', gap: '8px' }}>
-        <Stat label="Avg likes" value={fmt(s.avgLikes)} sub={s.medLikes != null ? `median ${fmt(s.medLikes)}` : undefined} />
-        <Stat label="Avg komentar" value={fmt(s.avgComments)} sub={s.medComments != null ? `median ${fmt(s.medComments)}` : undefined} />
-        {(s.avgViews != null || s.medViews != null) && (
-          <Stat label="Avg views" value={fmt(s.avgViews)} sub={s.medViews != null ? `median ${fmt(s.medViews)}` : undefined} />
+        <Stat label="Avg likes" value={fmt(m.avgLikes)} sub={m.medLikes != null ? `median ${fmt(m.medLikes)}` : undefined} />
+        <Stat label="Avg komentar" value={fmt(m.avgComments)} sub={m.medComments != null ? `median ${fmt(m.medComments)}` : undefined} />
+        {(m.avgViews != null || m.medViews != null) && (
+          <Stat label="Avg views" value={fmt(m.avgViews)} sub={m.medViews != null ? `median ${fmt(m.medViews)}` : undefined} />
         )}
-        {s.avgShares != null && <Stat label="Avg shares" value={fmt(s.avgShares)} />}
+        {m.avgShares != null && <Stat label="Avg shares" value={fmt(m.avgShares)} />}
       </div>
 
       {/* konteks sampel */}
       <div style={{ fontSize: '0.75rem', color: '#55516b', lineHeight: 1.6 }}>
-        Dihitung dari <b>{s.postsSampled ?? '—'} post</b>
-        {s.totalCollected != null ? ` (dari ${s.totalCollected} terkumpul)` : ''}
-        {s.postRangeDays != null ? ` dalam ${ringkasRentang(s.postRangeDays)}` : ''}
-        {s.postsPerWeek != null ? ` · ${String(Math.round(s.postsPerWeek * 100) / 100).replace('.', ',')} post/minggu` : ''}
-        {(s.paidPosts ?? 0) > 0 ? ` · ${s.paidPosts} berbayar / ${s.organicPosts ?? 0} organik` : ''}
+        Dihitung dari <b>{m.n} post</b>
+        {allRows.length ? ` (dari ${allRows.length} terkumpul)` : s.totalCollected != null ? ` (dari ${s.totalCollected} terkumpul)` : ''}
+        {m.rangeDays != null ? ` dalam ${ringkasRentang(m.rangeDays)}` : ''}
+        {m.perMinggu != null ? ` · ${num1(m.perMinggu)} post/minggu` : ''}
+        {m.paid > 0 ? ` · ${m.paid} berbayar / ${m.organic} organik` : ''}
         {s.roundedNumbers ? ' · angka platform dibulatkan' : ''}
-        {s.outlierRatio != null && s.outlierRatio >= 5 ? ` · ⚠ 1 post ${Math.round(s.outlierRatio)}× di atas median` : ''}
+        {m.outlier != null && m.outlier >= 5 ? ` · ⚠ 1 post ${Math.round(m.outlier)}× di atas median` : ''}
       </div>
 
       {(s.niche || s.shortlistCampaign || s.notes) && (
@@ -284,10 +434,10 @@ export default function SnapshotDetail({ s, compact }: { s: SnapshotView; compac
         </div>
       )}
 
-      {/* tren ER per post — sama seperti panel ekstensi */}
+      {/* tren ER per post — grafik + popup gambar seperti ekstensi */}
       <ErTrendChart rows={rows} followers={s.followers} komentarLabel={komentarLabel} />
 
-      {/* tren followers antar snapshot — data yang ekstensi tidak punya */}
+      {/* tren followers antar snapshot */}
       {s.followerSeries && s.followerSeries.filter((p) => typeof p.v === 'number').length >= 2 && (
         <div>
           <p style={{ ...lbl, display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -300,7 +450,7 @@ export default function SnapshotDetail({ s, compact }: { s: SnapshotView; compac
       {/* rincian per post */}
       {rows.length > 0 && (
         <div>
-          <p style={lbl}>Rincian {rows.length} post di sampel</p>
+          <p style={lbl}>Rincian {rows.length} post</p>
           <div style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.75rem' }}>
               <thead>
@@ -317,7 +467,9 @@ export default function SnapshotDetail({ s, compact }: { s: SnapshotView; compac
                 {shown.map((r, i) => (
                   <tr key={i} style={{ borderTop: '1px solid #eee', textAlign: 'right' }}>
                     <td style={{ textAlign: 'left', padding: '4px 6px', whiteSpace: 'nowrap' }}>
-                      {r.url ? <a href={r.url} target="_blank" rel="noopener noreferrer" style={{ color: '#6728e4', textDecoration: 'none' }}>{r.approxDate ? '≈' : ''}{tgl(r.date)}</a> : `${r.approxDate ? '≈' : ''}${tgl(r.date)}`}
+                      {r.url
+                        ? <a href={r.url} target="_blank" rel="noopener noreferrer" style={{ color: '#6728e4', textDecoration: 'none' }}>{r.approxDate ? '≈' : ''}{tgl(r.date)}</a>
+                        : `${r.approxDate ? '≈' : ''}${tgl(r.date)}`}
                       {r.paid && <span style={{ marginLeft: 4, color: '#b45309', fontWeight: 700 }} title="berbayar">$</span>}
                     </td>
                     <td style={{ textAlign: 'left', padding: '4px 6px', color: '#8a869c' }}>{r.format || '—'}</td>
@@ -330,7 +482,7 @@ export default function SnapshotDetail({ s, compact }: { s: SnapshotView; compac
               </tbody>
             </table>
           </div>
-          {rows.length > 6 && (
+          {rows.length > 8 && (
             <button onClick={() => setShowAll((v) => !v)} style={{ marginTop: 6, background: 'none', border: 'none', color: '#6728e4', fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer', fontFamily: f }}>
               {showAll ? 'Tampilkan lebih sedikit' : `Tampilkan semua ${rows.length}`}
             </button>
