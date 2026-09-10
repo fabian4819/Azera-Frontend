@@ -36,8 +36,8 @@ function TestimonialCard({ item, styleIdx }: { item: QuoteItem; styleIdx: number
       style={{
         background: s.bg,
         borderRadius: '20px',
-        padding: '26px',
-        width: '300px',
+        padding: '28px',
+        width: '420px',
         flexShrink: 0,
         display: 'flex',
         flexDirection: 'column',
