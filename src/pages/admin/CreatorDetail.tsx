@@ -56,6 +56,8 @@ interface Creator {
   activities: string[]; niches: string[]; nicheOther?: string;
   contentStyles: string[]; contentStyleOther?: string;
   bankAccount?: { bankName: string; accountNumber: string; accountName: string };
+  rateEstimateType?: 'nominal' | 'unknown'; rateEstimateAmount?: number;
+  rateNegotiable?: 'yes' | 'no' | 'depends';
   npwp?: string; mediaKitUrl?: string; portfolioLink?: string;
   complianceStatus: string; cancelCount: number; status: string; createdAt: string;
 }
@@ -68,6 +70,18 @@ interface HistoryItem {
 type Snapshot = SnapshotView & { _id: string; createdAt: string };
 
 const GENDER_LABELS: Record<string, string> = { male: 'Laki-laki', female_hijab: 'Perempuan (Hijab)', female_non_hijab: 'Perempuan (Non-Hijab)' };
+const RATE_NEGO_LABELS: Record<string, string> = { yes: 'bisa nego', no: 'tidak nego', depends: 'tergantung campaign' };
+
+function rateSummary(c: Pick<Creator, 'rateEstimateType' | 'rateEstimateAmount' | 'rateNegotiable'>): string {
+  const base =
+    c.rateEstimateType === 'nominal' && c.rateEstimateAmount
+      ? `Rp ${c.rateEstimateAmount.toLocaleString('id-ID')}`
+      : c.rateEstimateType === 'unknown'
+        ? 'Belum ada patokan'
+        : '';
+  if (!base) return '—';
+  return c.rateNegotiable ? `${base} · ${RATE_NEGO_LABELS[c.rateNegotiable]}` : base;
+}
 
 export default function CreatorDetail() {
   const { id } = useParams();
@@ -172,7 +186,7 @@ export default function CreatorDetail() {
               <div><p style={labelSmall}>Niche</p><p style={{ fontSize: '0.85rem', color: '#191c20' }}>{creator.niches.join(', ')}{creator.nicheOther ? `, ${creator.nicheOther}` : ''}</p></div>
               <div><p style={labelSmall}>Gaya Konten</p><p style={{ fontSize: '0.85rem', color: '#191c20' }}>{creator.contentStyles.join(', ')}{creator.contentStyleOther ? `, ${creator.contentStyleOther}` : ''}</p></div>
               <div><p style={labelSmall}>Aktivitas</p><p style={{ fontSize: '0.85rem', color: '#191c20' }}>{creator.activities.join(', ') || '—'}</p></div>
-              <div><p style={labelSmall}>NPWP</p><p style={{ fontSize: '0.85rem', color: '#191c20' }}>{creator.npwp || '—'}</p></div>
+              <div><p style={labelSmall}>Estimasi Rate (1&times; video)</p><p style={{ fontSize: '0.85rem', color: '#191c20' }}>{rateSummary(creator)}</p></div>
             </div>
           </div>
 
@@ -344,6 +358,13 @@ export default function CreatorDetail() {
               <p style={{ fontFamily: f, fontWeight: 700, fontSize: '1rem', color: '#191c20', marginBottom: '14px' }}>Rekening</p>
               <p style={{ fontSize: '0.85rem', color: '#191c20' }}>{creator.bankAccount.bankName} · {creator.bankAccount.accountNumber}</p>
               <p style={{ fontSize: '0.85rem', color: '#777683' }}>a.n. {creator.bankAccount.accountName}</p>
+              {creator.npwp && <p style={{ fontSize: '0.85rem', color: '#777683', marginTop: '6px' }}>NPWP: {creator.npwp}</p>}
+            </div>
+          )}
+          {!creator.bankAccount && creator.npwp && (
+            <div style={cardStyle}>
+              <p style={{ fontFamily: f, fontWeight: 700, fontSize: '1rem', color: '#191c20', marginBottom: '14px' }}>NPWP</p>
+              <p style={{ fontSize: '0.85rem', color: '#191c20' }}>{creator.npwp}</p>
             </div>
           )}
 
