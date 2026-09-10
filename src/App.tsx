@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { Agentation } from 'agentation';
+import ScrollToTop from './components/ScrollToTop';
 import Navbar from './components/layout/Navbar';
 import Footer from './components/layout/Footer';
 import FloatingWhatsApp from './components/layout/FloatingWhatsApp';
@@ -91,6 +92,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <SEOManager />
+      <ScrollToTop />
       <Suspense fallback={<RouteFallback />}>
         <Routes>
           {/* Public routes with Navbar + Footer */}
