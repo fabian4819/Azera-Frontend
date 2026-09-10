@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { QrCode, CheckCircle2, LogOut, RefreshCw, Send } from 'lucide-react';
+import { QrCode, CheckCircle2, LogOut, RefreshCw, Send, ChevronDown, ChevronUp } from 'lucide-react';
 import api from '../../lib/api';
 
 const f = "var(--font-display)";
@@ -30,6 +30,7 @@ function BotPanel({ botId, label, hint }: { botId: string; label: string; hint: 
   const [testMessage, setTestMessage] = useState('');
   const [sending, setSending] = useState(false);
   const [actionError, setActionError] = useState('');
+  const [collapsed, setCollapsed] = useState(false);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const base = `/admin/whatsapp/${botId}`;
@@ -105,8 +106,21 @@ function BotPanel({ botId, label, hint }: { botId: string; label: string; hint: 
 
   return (
     <div style={cardStyle}>
-      <p style={{ fontFamily: f, fontWeight: 700, fontSize: '1.05rem', marginBottom: '4px' }}>{label}</p>
-      <p style={{ fontFamily: f, fontSize: '0.8rem', color: '#8a8a99', marginBottom: '18px' }}>{hint}</p>
+      <button
+        onClick={() => setCollapsed((c) => !c)}
+        style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '12px', width: '100%', background: 'none', border: 'none', padding: 0, cursor: 'pointer', textAlign: 'left', marginBottom: collapsed ? 0 : '18px' }}
+      >
+        <span>
+          <span style={{ display: 'block', fontFamily: f, fontWeight: 700, fontSize: '1.05rem', marginBottom: '4px', color: '#191c20' }}>{label}</span>
+          <span style={{ display: 'block', fontFamily: f, fontSize: '0.8rem', color: '#8a8a99' }}>{hint}</span>
+        </span>
+        <span style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0, color: '#6728e4', fontFamily: f, fontSize: '0.78rem', fontWeight: 700 }}>
+          {status === 'connected' ? 'Terhubung' : status === 'qr' ? 'Scan QR' : status === 'connecting' ? '...' : 'Offline'}
+          {collapsed ? <ChevronDown size={18} /> : <ChevronUp size={18} />}
+        </span>
+      </button>
+
+      {collapsed ? null : <>
 
       {actionError && (
         <div style={{ background: '#ffdad6', color: '#ba1a1a', borderRadius: '10px', padding: '12px 16px', marginBottom: '16px', fontSize: '0.82rem', fontFamily: f, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px' }}>
@@ -216,6 +230,8 @@ function BotPanel({ botId, label, hint }: { botId: string; label: string; hint: 
           </table>
         </div>
       </div>
+
+      </>}
     </div>
   );
 }
