@@ -5,18 +5,23 @@ import api from '../../lib/api';
 const f = "var(--font-display)";
 
 interface WaContact {
-  _id: string; jid: string; name?: string; botPaused: boolean;
+  _id: string; jid: string; phone?: string; name?: string; botPaused: boolean;
   lastMessageAt: string; lastMessagePreview: string; unreadCount: number;
 }
 interface WaChatMessage {
   _id: string; jid: string; direction: 'in' | 'out'; text: string; createdAt: string;
 }
 
+const fmtPhone = (p?: string) => (p ? `+${p}` : '');
+
 function contactLabel(c: WaContact) {
   if (c.name) return c.name;
+  if (c.phone) return fmtPhone(c.phone);
   const isGroup = c.jid.endsWith('@g.us');
   const raw = c.jid.split('@')[0];
-  return isGroup ? `Grup ${raw}` : raw;
+  if (isGroup) return `Grup ${raw}`;
+  // @lid = ID anonim WhatsApp, bukan nomor — jangan tampilkan angka acaknya.
+  return c.jid.endsWith('@lid') ? 'Kontak (nomor belum terbaca)' : raw;
 }
 
 const BOT_TABS = [
@@ -81,8 +86,19 @@ export default function WhatsAppInbox() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedJid, bot]);
 
+  // Auto-scroll ke bawah HANYA kalau admin memang sedang di dasar chat. Kalau lagi scroll ke
+  // atas baca histori, polling 3 detik tidak boleh menyentak balik ke bawah.
+  const atBottomRef = useRef(true);
+  const onMessagesScroll = () => {
+    const el = scrollRef.current;
+    if (el) atBottomRef.current = el.scrollHeight - el.scrollTop - el.clientHeight < 120;
+  };
+
+  // Buka thread baru → mulai dari bawah.
+  useEffect(() => { atBottomRef.current = true; }, [selectedJid]);
+
   useEffect(() => {
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight });
+    if (atBottomRef.current) scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight });
   }, [messages]);
 
   const selected = contacts.find((c) => c.jid === selectedJid);
@@ -165,6 +181,9 @@ export default function WhatsAppInbox() {
                     </span>
                   )}
                 </div>
+                {c.name && c.phone && (
+                  <p style={{ fontFamily: f, fontSize: '0.72rem', color: '#9a99a8', marginBottom: '2px' }}>{fmtPhone(c.phone)}</p>
+                )}
                 <p style={{ fontFamily: f, fontSize: '0.78rem', color: '#777683', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {c.lastMessagePreview}
                 </p>
@@ -181,7 +200,12 @@ export default function WhatsAppInbox() {
           ) : (
             <>
               <div style={{ padding: '14px 20px', borderBottom: '1px solid #f0f0f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <p style={{ fontFamily: f, fontWeight: 700, fontSize: '0.9rem', color: '#191c20' }}>{contactLabel(selected)}</p>
+                <div>
+                  <p style={{ fontFamily: f, fontWeight: 700, fontSize: '0.9rem', color: '#191c20' }}>{contactLabel(selected)}</p>
+                  {selected.name && selected.phone && (
+                    <p style={{ fontFamily: f, fontSize: '0.74rem', color: '#9a99a8' }}>{fmtPhone(selected.phone)}</p>
+                  )}
+                </div>
                 <button
                   onClick={toggleBotPause}
                   className={selected.botPaused ? 'btn-secondary' : 'btn-primary'}
@@ -191,7 +215,7 @@ export default function WhatsAppInbox() {
                 </button>
               </div>
 
-              <div ref={scrollRef} style={{ flex: 1, overflowY: 'auto', padding: '20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <div ref={scrollRef} onScroll={onMessagesScroll} style={{ flex: 1, overflowY: 'auto', padding: '20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 {messages.map((m) => (
                   <div key={m._id} style={{ display: 'flex', justifyContent: m.direction === 'out' ? 'flex-end' : 'flex-start' }}>
                     <div style={{
