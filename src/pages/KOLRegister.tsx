@@ -12,11 +12,18 @@ const activities = [
   { value: 'live_streamer', label: 'Live Streamer', desc: 'Siaran langsung untuk interaksi dengan audiens atau bantu penjualan.' },
 ];
 const socialPlatforms = [
-  { value: 'instagram', label: 'Instagram', icon: Camera, color: '#ff81aa' },
-  { value: 'tiktok', label: 'TikTok', icon: Music2, color: '#10B981' },
-  { value: 'threads', label: 'Threads', icon: AtSign, color: '#464652' },
-  { value: 'x', label: 'X', icon: Hash, color: '#191c20' },
+  { value: 'instagram', label: 'Instagram', icon: Camera, color: '#ff81aa', prefix: 'instagram.com/' },
+  { value: 'tiktok', label: 'TikTok', icon: Music2, color: '#10B981', prefix: 'tiktok.com/' },
+  { value: 'threads', label: 'Threads', icon: AtSign, color: '#464652', prefix: 'threads.net/' },
+  { value: 'x', label: 'X', icon: Hash, color: '#191c20', prefix: 'x.com/' },
 ];
+
+const buildProfileUrl = (platform: string, username: string) => {
+  const clean = username.replace(/^@+/, '').trim();
+  if (!clean) return '';
+  const p = socialPlatforms.find((s) => s.value === platform);
+  return p ? `https://${p.prefix}${clean}` : '';
+};
 
 const WILAYAH_API = 'https://www.emsifa.com/api-wilayah-indonesia/api';
 
@@ -161,7 +168,7 @@ export default function KOLRegister() {
     try {
       const socialsPayload = Object.entries(socials)
         .filter(([, v]) => v?.username)
-        .map(([platform, v]) => ({ platform, username: v.username, profileUrl: v.profileUrl || '', followers: Number(v.followers) || 0 }));
+        .map(([platform, v]) => ({ platform, username: v.username, profileUrl: v.profileUrl || buildProfileUrl(platform, v.username), followers: Number(v.followers) || 0 }));
 
       const provinceName = provinces.find((p) => p.id === province)?.name || '';
       const cityName = cities.find((c) => c.id === city)?.name || '';
@@ -283,22 +290,22 @@ export default function KOLRegister() {
           <div ref={socialsRef}>
             <p style={{ color: '#777683', fontSize: '0.85rem', marginBottom: '8px', fontFamily: "var(--font-display)" }}>Isi minimal 1 platform. *</p>
             {fieldError?.section === 'socials' && <p style={fieldErrorTextStyle}>{fieldError.message}</p>}
-            {socialPlatforms.map(({ value, label, icon: Icon, color }) => (
+            {socialPlatforms.map(({ value, label, icon: Icon, color, prefix }) => (
               <div key={value} style={{ background: '#f8f9ff', border: `1px solid ${color}22`, borderRadius: '16px', padding: '20px', marginBottom: '16px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
                   <Icon size={18} color={color} />
                   <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, color, fontSize: '0.9rem' }}>{label}</p>
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }} className="form-2col">
+                <div style={{ display: 'grid', gridTemplateColumns: '1.7fr 1fr', gap: '10px' }} className="form-2col">
                   <div>
                     <label style={labelStyle}>Username</label>
                     <div style={{ display: 'flex', alignItems: 'stretch', border: '1.5px solid #c7c8cf', borderRadius: '12px', background: 'white', overflow: 'hidden' }}>
-                      <span style={{ display: 'flex', alignItems: 'center', padding: '0 12px', color: '#8a8a99', fontFamily: "var(--font-display)", fontSize: '0.875rem', borderRight: '1.5px solid #e1e0ff' }}>@</span>
+                      <span style={{ display: 'flex', alignItems: 'center', paddingLeft: '14px', color: '#b7b7c2', fontFamily: "var(--font-display)", fontSize: '0.875rem', whiteSpace: 'nowrap' }}>{prefix}</span>
                       <input
                         value={socials[value]?.username || ''}
                         onChange={(e) => { setSocialField(value, 'username', e.target.value.replace(/^@+/, '')); setFieldError(null); }}
                         placeholder="username"
-                        style={{ flex: 1, minWidth: 0, border: 'none', outline: 'none', padding: '11px 14px', fontSize: '0.875rem', fontFamily: "var(--font-display)", color: '#191c20', background: 'transparent' }}
+                        style={{ flex: 1, minWidth: 0, border: 'none', outline: 'none', padding: '11px 14px 11px 2px', fontSize: '0.875rem', fontWeight: 600, fontFamily: "var(--font-display)", color: '#191c20', background: 'transparent' }}
                       />
                     </div>
                   </div>
