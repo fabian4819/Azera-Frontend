@@ -144,18 +144,16 @@ export default function ExtensionConnect() {
         {tokens.length > 0 && (
           <div style={{ marginTop: '18px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
             {tokens.map((t) => (
-              <div key={t._id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', background: '#f8f9ff', borderRadius: '10px', fontSize: '0.82rem', opacity: t.revokedAt ? 0.5 : 1 }}>
+              <div key={t._id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', background: '#f8f9ff', borderRadius: '10px', fontSize: '0.82rem' }}>
                 <div>
                   <b>{t.label}</b> <span style={{ color: '#999' }}>· AZK1-{t.hint}…</span>
                   <p style={{ fontSize: '0.72rem', color: '#777683' }}>
-                    {t.createdBy?.name || '—'} · {t.revokedAt ? 'dicabut' : t.lastUsedAt ? `dipakai ${new Date(t.lastUsedAt).toLocaleDateString('id-ID')}` : 'belum dipakai'}
+                    {t.createdBy?.name || '—'} · {t.lastUsedAt ? `dipakai ${new Date(t.lastUsedAt).toLocaleDateString('id-ID')}` : 'belum dipakai'}
                   </p>
                 </div>
-                {!t.revokedAt && (
-                  <button onClick={() => revoke(t._id)} title="Cabut" style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ba1a1a', display: 'flex' }}>
-                    <Trash2 size={15} />
-                  </button>
-                )}
+                <button onClick={() => revoke(t._id)} title="Cabut kode ini" style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ba1a1a', display: 'flex' }}>
+                  <Trash2 size={15} />
+                </button>
               </div>
             ))}
           </div>
