@@ -97,15 +97,111 @@ function Sparkline({ series }: { series: { t: string; v: number | null }[] }) {
   );
 }
 
+/**
+ * Tren ER per post — sama seperti panel ekstensi: (likes + komentar) ÷ followers
+ * per post, urut lama → baru; hijau kalau naik, merah kalau turun; titik kuning
+ * = post berbayar.
+ */
+function ErTrendChart({ rows, followers, komentarLabel }: { rows: SampleRow[]; followers?: number | null; komentarLabel: string }) {
+  const pts = rows
+    .filter((r) => typeof r.likes === 'number')
+    .map((r) => ({
+      row: r,
+      er: followers && followers > 0 ? ((r.likes! + (r.comments || 0)) / followers) * 100 : (r.likes as number),
+      d: r.date ? +new Date(r.date) : 0,
+    }))
+    .sort((a, b) => a.d - b.d);
+  const [hover, setHover] = useState<number | null>(null);
+  if (pts.length < 2) return null;
+
+  const W = 300, H = 80, pad = 6;
+  const vals = pts.map((p) => p.er);
+  const min = Math.min(...vals), max = Math.max(...vals), range = max - min || 1;
+  const coords = pts.map((p, i) => ({
+    x: pad + (i / (pts.length - 1)) * (W - pad * 2),
+    y: H - pad - ((p.er - min) / range) * (H - pad * 2),
+  }));
+  const up = vals[vals.length - 1] >= vals[0];
+  const color = up ? '#4ecb85' : '#f4796b';
+  const line = coords.map((c) => `${c.x.toFixed(1)},${c.y.toFixed(1)}`).join(' ');
+  const area = `${pad},${H} ${line} ${W - pad},${H}`;
+  const usesEr = !!(followers && followers > 0);
+  const h = hover != null ? pts[hover] : null;
+
+  return (
+    <div>
+      <p style={{ ...lbl, display: 'flex', justifyContent: 'space-between' }}>
+        <span>Tren ER post{usesEr ? ` · (suka + ${komentarLabel.toLowerCase()}) ÷ ${fmt(followers)} followers` : ' · suka'}</span>
+        <span style={{ color: rows.some((r) => r.paid) ? '#b45309' : 'transparent' }}>● berbayar</span>
+      </p>
+      <div style={{ position: 'relative' }}>
+        <svg
+          viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none"
+          style={{ width: '100%', height: '80px', display: 'block' }}
+          onMouseLeave={() => setHover(null)}
+          onMouseMove={(e) => {
+            const r = (e.currentTarget as SVGSVGElement).getBoundingClientRect();
+            const ratio = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width));
+            setHover(Math.round(ratio * (pts.length - 1)));
+          }}
+        >
+          <polygon points={area} fill={color} opacity={0.13} />
+          <polyline points={line} fill="none" stroke={color} strokeWidth={1.6} strokeLinejoin="round" strokeLinecap="round" />
+          {pts.map((p, i) => (p.row.paid ? <circle key={i} cx={coords[i].x} cy={coords[i].y} r={2.4} fill="#f0c674" /> : null))}
+          <circle cx={coords[coords.length - 1].x} cy={coords[coords.length - 1].y} r={2.6} fill={color} />
+          {h && <line x1={coords[hover!].x} y1={0} x2={coords[hover!].x} y2={H} stroke="#bbb" strokeWidth={0.8} strokeDasharray="2 2" />}
+          {h && <circle cx={coords[hover!].x} cy={coords[hover!].y} r={3.4} fill="#fff" stroke={color} strokeWidth={1.8} />}
+        </svg>
+        {h && (
+          <div style={{ fontSize: '0.7rem', color: '#55516b', marginTop: '2px', textAlign: 'center' }}>
+            {tgl(h.row.date)}{h.row.paid ? ' · berbayar' : ''} — {usesEr ? pct(h.er) : fmt(h.er)} · {fmt(h.row.likes)} suka · {fmt(h.row.comments)} {komentarLabel.toLowerCase()}
+            {typeof h.row.views === 'number' ? ` · ${fmt(h.row.views)} views` : ''}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+type SortKey = 'date' | 'likes' | 'comments' | 'views' | 'shares';
+
 export default function SnapshotDetail({ s, compact }: { s: SnapshotView; compact?: boolean }) {
   const [showAll, setShowAll] = useState(false);
+  const [sortKey, setSortKey] = useState<SortKey>('date');
+  const [sortAsc, setSortAsc] = useState(false);
   const Icon = platformIcon[s.platform];
   const rows = s.sampleRows || [];
-  const shown = showAll ? rows : rows.slice(0, 6);
   const anyViews = rows.some((r) => typeof r.views === 'number');
   const anyShares = rows.some((r) => typeof r.shares === 'number');
   const capturedAt = s.capturedAt || s.createdAt;
   const erLabel = s.erBasis === 'views' ? 'ER (per views)' : 'Engagement rate';
+  const komentarLabel = s.platform === 'threads' ? 'Replies' : 'Komentar';
+
+  // urutkan seperti ekstensi: nilai kosong selalu di bawah
+  const sortVal = (r: SampleRow): number | null => {
+    if (sortKey === 'date') return r.date ? +new Date(r.date) : null;
+    const v = r[sortKey];
+    return typeof v === 'number' ? v : null;
+  };
+  const sortedRows = [...rows].sort((a, b) => {
+    const x = sortVal(a), y = sortVal(b);
+    if (x == null || y == null) return x == null && y == null ? 0 : x == null ? 1 : -1;
+    return sortAsc ? x - y : y - x;
+  });
+  const shown = showAll ? sortedRows : sortedRows.slice(0, 6);
+  const toggleSort = (k: SortKey) => {
+    if (sortKey === k) setSortAsc((v) => !v);
+    else { setSortKey(k); setSortAsc(false); }
+  };
+  const sortableTh = (k: SortKey, label: string) => (
+    <th
+      key={k}
+      onClick={() => toggleSort(k)}
+      style={{ padding: '4px 6px', cursor: 'pointer', color: sortKey === k ? '#6728e4' : '#8a869c', whiteSpace: 'nowrap' }}
+    >
+      {label}{sortKey === k ? (sortAsc ? ' ▲' : ' ▼') : ''}
+    </th>
+  );
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', fontFamily: f }}>
@@ -188,11 +284,14 @@ export default function SnapshotDetail({ s, compact }: { s: SnapshotView; compac
         </div>
       )}
 
-      {/* tren followers */}
+      {/* tren ER per post — sama seperti panel ekstensi */}
+      <ErTrendChart rows={rows} followers={s.followers} komentarLabel={komentarLabel} />
+
+      {/* tren followers antar snapshot — data yang ekstensi tidak punya */}
       {s.followerSeries && s.followerSeries.filter((p) => typeof p.v === 'number').length >= 2 && (
         <div>
           <p style={{ ...lbl, display: 'flex', alignItems: 'center', gap: '4px' }}>
-            {(s.followersDeltaAll ?? 0) >= 0 ? <TrendingUp size={11} /> : <TrendingDown size={11} />} Tren followers ({s.snapshotCount ?? s.followerSeries.length} snapshot)
+            {(s.followersDeltaAll ?? 0) >= 0 ? <TrendingUp size={11} /> : <TrendingDown size={11} />} Tren followers · {s.snapshotCount ?? s.followerSeries.length} snapshot
           </p>
           <Sparkline series={s.followerSeries} />
         </div>
@@ -205,13 +304,13 @@ export default function SnapshotDetail({ s, compact }: { s: SnapshotView; compac
           <div style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.75rem' }}>
               <thead>
-                <tr style={{ color: '#8a869c', textAlign: 'right' }}>
-                  <th style={{ textAlign: 'left', padding: '4px 6px' }}>Tanggal</th>
-                  <th style={{ textAlign: 'left', padding: '4px 6px' }}>Format</th>
-                  <th style={{ padding: '4px 6px' }}>Likes</th>
-                  <th style={{ padding: '4px 6px' }}>Komentar</th>
-                  {anyViews && <th style={{ padding: '4px 6px' }}>Views</th>}
-                  {anyShares && <th style={{ padding: '4px 6px' }}>Shares</th>}
+                <tr style={{ textAlign: 'right' }}>
+                  {sortableTh('date', 'Tanggal')}
+                  <th style={{ textAlign: 'left', padding: '4px 6px', color: '#8a869c' }}>Format</th>
+                  {sortableTh('likes', 'Likes')}
+                  {sortableTh('comments', komentarLabel)}
+                  {anyViews && sortableTh('views', 'Views')}
+                  {anyShares && sortableTh('shares', 'Shares')}
                 </tr>
               </thead>
               <tbody>
@@ -219,7 +318,7 @@ export default function SnapshotDetail({ s, compact }: { s: SnapshotView; compac
                   <tr key={i} style={{ borderTop: '1px solid #eee', textAlign: 'right' }}>
                     <td style={{ textAlign: 'left', padding: '4px 6px', whiteSpace: 'nowrap' }}>
                       {r.url ? <a href={r.url} target="_blank" rel="noopener noreferrer" style={{ color: '#6728e4', textDecoration: 'none' }}>{r.approxDate ? '≈' : ''}{tgl(r.date)}</a> : `${r.approxDate ? '≈' : ''}${tgl(r.date)}`}
-                      {r.paid && <span style={{ marginLeft: 4, color: '#b45309', fontWeight: 700 }}>·$</span>}
+                      {r.paid && <span style={{ marginLeft: 4, color: '#b45309', fontWeight: 700 }} title="berbayar">$</span>}
                     </td>
                     <td style={{ textAlign: 'left', padding: '4px 6px', color: '#8a869c' }}>{r.format || '—'}</td>
                     <td style={{ padding: '4px 6px' }}>{fmt(r.likes)}</td>
