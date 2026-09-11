@@ -32,12 +32,22 @@ function normalizeHandle(input: string): string {
   return s.replace(/^@/, '').trim();
 }
 
+// Sebagian data lama (import historis / form manual) diisi "-", "0", "A", "tidakada"
+// dsb sebagai penanda "platform ini kosong" alih-alih benar-benar dikosongkan. Kalau
+// dipakai membangun link, hasilnya link yang kelihatan valid tapi menuju akun random
+// atau 404 — lebih baik dianggap belum diisi sama sekali.
+const PLACEHOLDER_HANDLES = new Set(['-', '0', 'a', 'na', 'n/a', 'tidakada', 'tidak ada', 'belum ada', 'none', 'null', 'xx']);
+function isRealHandle(raw: string): boolean {
+  const h = normalizeHandle(raw).toLowerCase();
+  return h.length >= 2 && !PLACEHOLDER_HANDLES.has(h);
+}
+
 // Link profil SELALU dibangun dari username, bukan dari profileUrl yang diketik manual —
 // TikTok/Threads wajib awalan "@", dan KOL sering lupa itu (link jadi 404 / ke search).
-// profileUrl cuma dipakai kalau username-nya kosong.
+// profileUrl cuma dipakai kalau username-nya kosong/placeholder.
 function platformProfileUrl(platform: string, username: string, profileUrl?: string): string {
-  const handle = normalizeHandle(username);
-  if (handle) {
+  if (isRealHandle(username)) {
+    const handle = normalizeHandle(username);
     switch (platform) {
       case 'instagram': return `https://instagram.com/${handle}`;
       case 'tiktok': return `https://www.tiktok.com/@${handle}`;
@@ -45,7 +55,9 @@ function platformProfileUrl(platform: string, username: string, profileUrl?: str
       case 'x': return `https://x.com/${handle}`;
     }
   }
-  return profileUrl ? normalizeUrl(profileUrl) : '';
+  if (!profileUrl) return '';
+  const lastSegment = profileUrl.split(/[/?#]/).filter(Boolean).pop() || '';
+  return isRealHandle(lastSegment) ? normalizeUrl(profileUrl) : '';
 }
 
 // KOL sering isi profileUrl tanpa "https://" (mis. "instagram.com/user"), yang bikin browser
@@ -232,11 +244,15 @@ export default function CreatorDetail() {
                         <span>{s.username} · {s.followers.toLocaleString('id-ID')} followers</span>
                         <button
                           onClick={() => pullMetrics(s.platform, s.username, s.profileUrl)}
-                          disabled={pulling === s.platform}
-                          title="Buka profil di tab baru — kirim metrik lewat panel ekstensi KOL Lister"
-                          style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '4px 10px', background: 'white', color: '#6728e4', border: '1px solid #6728e4', borderRadius: '8px', cursor: 'pointer', fontSize: '0.72rem', fontWeight: 700, fontFamily: f, whiteSpace: 'nowrap' }}
+                          disabled={pulling === s.platform || !href}
+                          title={href ? 'Buka profil di tab baru — kirim metrik lewat panel ekstensi KOL Lister' : 'Username-nya belum valid (mis. "-"/"0") — perbaiki dulu sebelum bisa ditarik'}
+                          style={{
+                            display: 'flex', alignItems: 'center', gap: '5px', padding: '4px 10px',
+                            background: 'white', color: href ? '#6728e4' : '#bbb', border: `1px solid ${href ? '#6728e4' : '#ddd'}`,
+                            borderRadius: '8px', cursor: href ? 'pointer' : 'not-allowed', fontSize: '0.72rem', fontWeight: 700, fontFamily: f, whiteSpace: 'nowrap',
+                          }}
                         >
-                          <Radar size={12} /> {pulling === s.platform ? 'Membuka…' : 'Buka & tarik'}
+                          <Radar size={12} /> {pulling === s.platform ? 'Membuka…' : href ? 'Buka & tarik' : 'Username belum valid'}
                         </button>
                       </span>
                     </div>
