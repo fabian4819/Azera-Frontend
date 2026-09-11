@@ -20,17 +20,32 @@ const labelSmall: React.CSSProperties = {
   marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.06em',
 };
 
-// profileUrl kosong (data lama sebelum field ini wajib) -> tebak link dari username per platform
-function socialFallbackUrl(platform: string, username: string) {
-  const handle = username.replace(/^@/, '').trim();
-  if (!handle) return '';
-  switch (platform) {
-    case 'instagram': return `https://instagram.com/${handle}`;
-    case 'tiktok': return `https://tiktok.com/@${handle}`;
-    case 'threads': return `https://threads.net/@${handle}`;
-    case 'x': return `https://x.com/${handle}`;
-    default: return '';
+// Username sering ketulis "@handle", "tiktok.com/@handle", atau ada spasi nyasar —
+// buang semuanya sampai tersisa handle polosnya.
+function normalizeHandle(input: string): string {
+  let s = (input || '').trim();
+  if (/\//.test(s)) {
+    s = s.split(/[?#]/)[0].replace(/\/+$/, '');
+    const seg = s.split('/').filter(Boolean);
+    s = seg[seg.length - 1] || '';
   }
+  return s.replace(/^@/, '').trim();
+}
+
+// Link profil SELALU dibangun dari username, bukan dari profileUrl yang diketik manual —
+// TikTok/Threads wajib awalan "@", dan KOL sering lupa itu (link jadi 404 / ke search).
+// profileUrl cuma dipakai kalau username-nya kosong.
+function platformProfileUrl(platform: string, username: string, profileUrl?: string): string {
+  const handle = normalizeHandle(username);
+  if (handle) {
+    switch (platform) {
+      case 'instagram': return `https://instagram.com/${handle}`;
+      case 'tiktok': return `https://www.tiktok.com/@${handle}`;
+      case 'threads': return `https://www.threads.com/@${handle}`;
+      case 'x': return `https://x.com/${handle}`;
+    }
+  }
+  return profileUrl ? normalizeUrl(profileUrl) : '';
 }
 
 // KOL sering isi profileUrl tanpa "https://" (mis. "instagram.com/user"), yang bikin browser
@@ -136,7 +151,7 @@ export default function CreatorDetail() {
   // (dicocokkan lewat username akun sosialnya).
   const pullMetrics = (platform: string, username: string, profileUrl?: string) => {
     setPulling(platform);
-    const url = profileUrl ? normalizeUrl(profileUrl) : socialFallbackUrl(platform, username);
+    const url = platformProfileUrl(platform, username, profileUrl);
     if (url) window.open(url, '_blank', 'noopener');
     setTimeout(() => setPulling(''), 800);
   };
@@ -195,8 +210,7 @@ export default function CreatorDetail() {
             {creator.socials.length === 0 ? <p style={{ color: '#777683', fontSize: '0.85rem' }}>Belum ada.</p> : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 {creator.socials.map((s, i) => {
-                  const raw = s.profileUrl || socialFallbackUrl(s.platform, s.username);
-                  const href = raw ? normalizeUrl(raw) : '';
+                  const href = platformProfileUrl(s.platform, s.username, s.profileUrl);
                   const Icon = socialIcons[s.platform];
                   return (
                     <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', background: '#f8f9ff', borderRadius: '10px', fontSize: '0.85rem' }}>
