@@ -37,9 +37,12 @@ function normalizeHandle(input: string): string {
 // dipakai membangun link, hasilnya link yang kelihatan valid tapi menuju akun random
 // atau 404 — lebih baik dianggap belum diisi sama sekali.
 const PLACEHOLDER_HANDLES = new Set(['-', '0', 'a', 'na', 'n/a', 'tidakada', 'tidak ada', 'belum ada', 'none', 'null', 'xx']);
+// Handle sosmed cuma huruf/angka/titik/underscore/dash. Apa pun di luar itu (spasi,
+// kurung, dst — mis. data platform lain yang nyasar ke field ini) bukan handle asli.
 function isRealHandle(raw: string): boolean {
-  const h = normalizeHandle(raw).toLowerCase();
-  return h.length >= 2 && !PLACEHOLDER_HANDLES.has(h);
+  const h = normalizeHandle(raw);
+  if (h.length < 2 || PLACEHOLDER_HANDLES.has(h.toLowerCase())) return false;
+  return /^[a-zA-Z0-9._-]+$/.test(h);
 }
 
 // Link profil SELALU dibangun dari username, bukan dari profileUrl yang diketik manual —
