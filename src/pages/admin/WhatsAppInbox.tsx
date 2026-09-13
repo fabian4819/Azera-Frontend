@@ -5,7 +5,7 @@ import api from '../../lib/api';
 const f = "var(--font-display)";
 
 interface WaContact {
-  _id: string; jid: string; phone?: string; name?: string; botPaused: boolean;
+  _id: string; jid: string; phone?: string; name?: string; botPaused: boolean; botEngaged: boolean;
   lastMessageAt: string; lastMessagePreview: string; unreadCount: number;
 }
 interface WaChatMessage {
@@ -120,10 +120,21 @@ export default function WhatsAppInbox() {
     }
   };
 
+  // Bot beneran akan merespon chat berikutnya hanya kalau tidak di-pause admin DAN belum
+  // pernah dilayani sebelumnya (leadBot.service.ts cuma merespon chat pertama per nomor).
+  const isBotActive = (c: WaContact) => !c.botPaused && !c.botEngaged;
+
   const toggleBotPause = async () => {
     if (!selectedJid || !selected) return;
     try {
-      await api.post(`${base}/contacts/${encodeURIComponent(selectedJid)}/bot-pause`, { paused: !selected.botPaused });
+      if (isBotActive(selected)) {
+        // Aktif → Nonaktif: admin ambil alih manual.
+        await api.post(`${base}/contacts/${encodeURIComponent(selectedJid)}/bot-pause`, { paused: true });
+      } else {
+        // Nonaktif (di-pause dan/atau sudah pernah dilayani) → Aktif: anggap belum pernah
+        // chat lagi supaya bot menyapa dari awal, sekaligus lepas pause.
+        await api.post(`${base}/contacts/${encodeURIComponent(selectedJid)}/reset-bot`);
+      }
       await fetchContacts();
     } catch {
       setActionError('Gagal mengubah status bot');
@@ -208,10 +219,11 @@ export default function WhatsAppInbox() {
                 </div>
                 <button
                   onClick={toggleBotPause}
-                  className={selected.botPaused ? 'btn-secondary' : 'btn-primary'}
+                  className={isBotActive(selected) ? 'btn-primary' : 'btn-secondary'}
+                  title={isBotActive(selected) ? 'Klik untuk nonaktifkan bot (ambil alih manual)' : 'Klik untuk aktifkan bot lagi (menyapa dari awal)'}
                   style={{ padding: '7px 14px', fontSize: '0.76rem', display: 'flex', alignItems: 'center', gap: '6px' }}
                 >
-                  {selected.botPaused ? <><BotOff size={13} /> Bot Nonaktif</> : <><Bot size={13} /> Bot Aktif</>}
+                  {isBotActive(selected) ? <><Bot size={13} /> Bot Aktif</> : <><BotOff size={13} /> Bot Nonaktif</>}
                 </button>
               </div>
 
