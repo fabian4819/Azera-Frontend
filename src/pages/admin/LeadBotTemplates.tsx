@@ -66,7 +66,7 @@ export default function LeadBotTemplates() {
   return (
     <div>
       <p style={{ fontFamily: f, fontSize: '0.85rem', color: '#777683', marginBottom: '20px' }}>
-        Pesan yang dibalas otomatis bot saat ada orang chat nomor WhatsApp bisnis (pilihan Brand/KOL/Support) — beda dari Template Pesan di menu sebelah, yang itu untuk notifikasi ke creator/client yang sudah terdaftar.
+        Pesan yang dibalas otomatis bot di CHAT PERTAMA nomor yang belum pernah chat (2 pilihan: daftar info / langsung ke Admin) — beda dari Template Pesan di menu sebelah, yang itu untuk notifikasi ke creator/client yang sudah terdaftar.
       </p>
       {message && (
         <div style={{ background: '#d1fae5', color: '#065F46', borderRadius: '10px', padding: '10px 16px', marginBottom: '16px', fontSize: '0.82rem', fontFamily: f }}>
