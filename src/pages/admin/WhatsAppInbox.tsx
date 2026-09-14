@@ -9,7 +9,7 @@ interface WaContact {
   lastMessageAt: string; lastMessagePreview: string; unreadCount: number;
 }
 interface WaChatMessage {
-  _id: string; jid: string; direction: 'in' | 'out'; text: string; createdAt: string; senderName?: string;
+  _id: string; jid: string; direction: 'in' | 'out'; text: string; createdAt: string; senderName?: string; senderPhone?: string;
 }
 
 const fmtPhone = (p?: string) => (p ? `+${p}` : '');
@@ -236,7 +236,12 @@ export default function WhatsAppInbox() {
                       color: m.direction === 'out' ? 'white' : '#191c20',
                     }}>
                       {m.direction === 'in' && m.senderName && (
-                        <div style={{ fontWeight: 700, fontSize: '0.76rem', color: '#6728e4', marginBottom: '2px' }}>{m.senderName}</div>
+                        <div style={{ marginBottom: '2px' }}>
+                          <div style={{ fontWeight: 700, fontSize: '0.76rem', color: '#6728e4' }}>{m.senderName}</div>
+                          {m.senderPhone && (
+                            <div style={{ fontSize: '0.68rem', color: '#9a99a8' }}>{fmtPhone(m.senderPhone)}</div>
+                          )}
+                        </div>
                       )}
                       {m.text}
                       <div style={{ fontSize: '0.65rem', opacity: 0.65, marginTop: '4px' }}>
