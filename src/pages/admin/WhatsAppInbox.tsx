@@ -181,16 +181,11 @@ export default function WhatsAppInbox() {
                   background: active ? '#f0eeff' : 'transparent',
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px', gap: '8px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', marginBottom: '4px', gap: '8px' }}>
                   <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontFamily: f, fontWeight: 700, fontSize: '0.85rem', color: '#191c20', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     {isGroup ? <UsersIcon size={13} style={{ flexShrink: 0 }} /> : <User size={13} style={{ flexShrink: 0 }} />}
                     {contactLabel(c)}
                   </span>
-                  {c.unreadCount > 0 && (
-                    <span style={{ flexShrink: 0, background: '#6728e4', color: 'white', borderRadius: '999px', fontSize: '0.68rem', fontWeight: 700, padding: '2px 7px', fontFamily: f }}>
-                      {c.unreadCount}
-                    </span>
-                  )}
                 </div>
                 {c.name && c.phone && (
                   <p style={{ fontFamily: f, fontSize: '0.72rem', color: '#9a99a8', marginBottom: '2px' }}>{fmtPhone(c.phone)}</p>
