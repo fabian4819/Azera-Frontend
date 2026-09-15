@@ -80,7 +80,7 @@ interface ScoreBreakdown {
 }
 
 interface Creator {
-  _id: string; name: string; phone: string; email?: string; gender?: string;
+  _id: string; name: string; phone: string; email?: string; gender?: string; age?: number;
   domicile?: { province?: string; city?: string };
   socials: { platform: string; username: string; profileUrl: string; followers: number }[];
   activities: string[]; niches: string[]; nicheOther?: string;
@@ -212,6 +212,7 @@ export default function CreatorDetail() {
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
               <div><p style={labelSmall}>Jenis Kelamin</p><p style={{ fontSize: '0.85rem', color: '#191c20' }}>{creator.gender ? GENDER_LABELS[creator.gender] : '—'}</p></div>
+              <div><p style={labelSmall}>Usia</p><p style={{ fontSize: '0.85rem', color: '#191c20' }}>{creator.age ?? '—'}</p></div>
               <div><p style={labelSmall}>Domisili</p><p style={{ fontSize: '0.85rem', color: '#191c20' }}>{creator.domicile?.city || '—'}, {creator.domicile?.province || '—'}</p></div>
               <div><p style={labelSmall}>Niche</p><p style={{ fontSize: '0.85rem', color: '#191c20' }}>{creator.niches.join(', ')}{creator.nicheOther ? `, ${creator.nicheOther}` : ''}</p></div>
               <div><p style={labelSmall}>Gaya Konten</p><p style={{ fontSize: '0.85rem', color: '#191c20' }}>{creator.contentStyles.join(', ')}{creator.contentStyleOther ? `, ${creator.contentStyleOther}` : ''}</p></div>

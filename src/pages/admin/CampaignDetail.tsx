@@ -332,9 +332,11 @@ export default function CampaignDetail() {
           <div style={{ width: '40px', height: '3px', background: 'linear-gradient(135deg, #6728e4, #ff81aa)', borderRadius: '2px', marginBottom: '12px' }} />
           <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: '1.4rem', color: '#191c20' }}>{campaign.name}</h2>
         </div>
-        <span style={{ background: '#e1e0ff', color: '#6728e4', borderRadius: '999px', padding: '4px 12px', fontSize: '0.75rem', fontWeight: 700 }}>
-          {campaign.workflowStage.replace(/_/g, ' ')}
-        </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+          <span style={{ background: '#e1e0ff', color: '#6728e4', borderRadius: '999px', padding: '4px 12px', fontSize: '0.75rem', fontWeight: 700 }}>
+            {campaign.workflowStage.replace(/_/g, ' ')}
+          </span>
+        </div>
       </div>
 
       {actionMessage && (

@@ -9,6 +9,7 @@ interface CreatorItem {
   name: string;
   phone: string;
   email?: string;
+  age?: number;
   domicile?: { province?: string; city?: string };
   niches: string[];
   socials: { platform: string; followers: number }[];
@@ -150,16 +151,16 @@ export default function Creators() {
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem' }}>
             <thead>
               <tr style={{ background: '#f8f9ff', borderBottom: '1px solid #e1e0ff' }}>
-                {['Nama', 'WA', 'Email', 'Domisili', 'Niche', 'Followers', 'Skor', 'Compliance', 'Status', 'Tanggal', 'Aksi'].map((h) => (
+                {['Nama', 'WA', 'Email', 'Usia', 'Domisili', 'Niche', 'Followers', 'Skor', 'Compliance', 'Status', 'Tanggal', 'Aksi'].map((h) => (
                   <th key={h} style={thStyle}>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {loading ? (
-                <tr><td colSpan={11} style={{ ...tdStyle, textAlign: 'center', padding: '48px' }}>Memuat...</td></tr>
+                <tr><td colSpan={12} style={{ ...tdStyle, textAlign: 'center', padding: '48px' }}>Memuat...</td></tr>
               ) : filtered.length === 0 ? (
-                <tr><td colSpan={11} style={{ ...tdStyle, textAlign: 'center', padding: '48px' }}>Belum ada creator.</td></tr>
+                <tr><td colSpan={12} style={{ ...tdStyle, textAlign: 'center', padding: '48px' }}>Belum ada creator.</td></tr>
               ) : filtered.map((c, i) => {
                 const comp = complianceLabels[c.complianceStatus] || complianceLabels.ok;
                 return (
@@ -172,6 +173,7 @@ export default function Creators() {
                     <td style={{ ...tdStyle, fontWeight: 600, color: '#191c20' }}>{c.name}</td>
                     <td style={tdStyle}>{c.phone}</td>
                     <td style={tdStyle}>{c.email || '—'}</td>
+                    <td style={tdStyle}>{c.age ?? '—'}</td>
                     <td style={tdStyle}>{c.domicile?.city || c.domicile?.province || '—'}</td>
                     <td style={tdStyle}>{c.niches?.slice(0, 2).join(', ') || '—'}</td>
                     <td style={tdStyle}>{maxFollowers(c.socials || [])}</td>

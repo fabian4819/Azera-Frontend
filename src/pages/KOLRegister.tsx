@@ -89,6 +89,7 @@ export default function KOLRegister() {
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
+  const [birthDate, setBirthDate] = useState('');
   const [gender, setGender] = useState('');
   const [provinces, setProvinces] = useState<WilayahOption[]>([]);
   const [cities, setCities] = useState<WilayahOption[]>([]);
@@ -178,7 +179,7 @@ export default function KOLRegister() {
       const cityName = cities.find((c) => c.id === city)?.name || '';
 
       const res = await api.post('/creators/register', {
-        name, phone, email, gender,
+        name, phone, email, birthDate, gender,
         domicile: { province: provinceName, city: cityName },
         socials: socialsPayload,
         activities: selectedActivities,
@@ -260,9 +261,15 @@ export default function KOLRegister() {
               />
             </div>
           </div>
-          <div style={{ marginBottom: '14px' }}>
-            <label style={labelStyle}>Email *</label>
-            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@email.com" required style={inputStyle} />
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }} className="form-2col">
+            <div>
+              <label style={labelStyle}>Email *</label>
+              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@email.com" required style={inputStyle} />
+            </div>
+            <div>
+              <label style={labelStyle}>Tanggal Lahir *</label>
+              <input type="date" value={birthDate} onChange={(e) => setBirthDate(e.target.value)} max={new Date().toISOString().slice(0, 10)} required style={inputStyle} />
+            </div>
           </div>
           <div ref={genderRef} style={{ marginBottom: '14px' }}>
             <label style={labelStyle}>Jenis Kelamin *</label>
