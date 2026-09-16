@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, ThumbsUp, ThumbsDown, Unlock, ExternalLink, Radar } from 'lucide-react';
+import { ArrowLeft, ThumbsUp, ThumbsDown, Unlock, ExternalLink, Radar, ChevronDown, ChevronUp } from 'lucide-react';
 import { SiInstagram, SiTiktok, SiThreads, SiX } from 'react-icons/si';
 import StatusBadge from '../../components/ui/StatusBadge';
 import SnapshotDetail, { type SnapshotView } from '../../components/ui/SnapshotDetail';
@@ -121,6 +121,7 @@ export default function CreatorDetail() {
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [snapshots, setSnapshots] = useState<Snapshot[]>([]);
   const [pulling, setPulling] = useState('');
+  const [expandedSocials, setExpandedSocials] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [deciding, setDeciding] = useState(false);
   const [actionError, setActionError] = useState('');
@@ -185,6 +186,27 @@ export default function CreatorDetail() {
   if (loading) return <div style={{ textAlign: 'center', padding: '80px', color: '#777683' }}>Memuat...</div>;
   if (!creator) return null;
 
+  // Snapshot ekstensi (KOL Lister) dikelompokkan per akun — dipakai buat expand/collapse
+  // di baris Media Sosial yang cocok, bukan card terpisah lagi.
+  // SocialSnapshot.username tersimpan lowercase+trim di server (kunci pencocokan resmi ke
+  // Creator.socials.username) — tapi Creator.socials.username disimpan APA ADANYA (casing user
+  // pas isi form), jadi cocokkan dua-duanya lewat normalizer yang sama di sini.
+  const normalizeUsername = (u: string) => u.trim().toLowerCase();
+  const snapshotsByAccount = new Map<string, Snapshot[]>();
+  for (const s of snapshots) {
+    const k = `${s.platform}:${normalizeUsername(s.username)}`;
+    if (!snapshotsByAccount.has(k)) snapshotsByAccount.set(k, []);
+    snapshotsByAccount.get(k)!.push(s);
+  }
+
+  const toggleExpanded = (key: string) => {
+    setExpandedSocials((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key); else next.add(key);
+      return next;
+    });
+  };
+
   return (
     <div>
       <button
@@ -228,62 +250,16 @@ export default function CreatorDetail() {
                 {creator.socials.map((s, i) => {
                   const href = platformProfileUrl(s.platform, s.username, s.profileUrl);
                   const Icon = socialIcons[s.platform];
-                  return (
-                    <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', background: '#f8f9ff', borderRadius: '10px', fontSize: '0.85rem' }}>
-                      <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        {href && Icon && (
-                          <a href={href} target="_blank" rel="noopener noreferrer" aria-label={`Buka ${s.platform}`} style={{ display: 'flex', color: '#6728e4' }}>
-                            <Icon size={16} />
-                          </a>
-                        )}
-                        {href ? (
-                          <a href={href} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '4px', textTransform: 'capitalize', fontWeight: 700, color: '#6728e4', textDecoration: 'none' }}>
-                            {s.platform} <ExternalLink size={11} />
-                          </a>
-                        ) : (
-                          <span style={{ textTransform: 'capitalize', fontWeight: 700, color: '#6728e4' }}>{s.platform}</span>
-                        )}
-                      </span>
-                      <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <span>{s.username} · {s.followers.toLocaleString('id-ID')} followers</span>
-                        <button
-                          onClick={() => pullMetrics(s.platform, s.username, s.profileUrl)}
-                          disabled={pulling === s.platform || !href}
-                          title={href ? 'Buka profil di tab baru — kirim metrik lewat panel ekstensi KOL Lister' : 'Username-nya belum valid (mis. "-"/"0") — perbaiki dulu sebelum bisa ditarik'}
-                          style={{
-                            display: 'flex', alignItems: 'center', gap: '5px', padding: '4px 10px',
-                            background: 'white', color: href ? '#6728e4' : '#bbb', border: `1px solid ${href ? '#6728e4' : '#ddd'}`,
-                            borderRadius: '8px', cursor: href ? 'pointer' : 'not-allowed', fontSize: '0.72rem', fontWeight: 700, fontFamily: f, whiteSpace: 'nowrap',
-                          }}
-                        >
-                          <Radar size={12} /> {pulling === s.platform ? 'Membuka…' : href ? 'Buka & tarik' : 'Username belum valid'}
-                        </button>
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-
-          {snapshots.length > 0 && (() => {
-            // kelompokkan per platform, ambil snapshot terbaru + deret followers
-            const byPlat = new Map<string, Snapshot[]>();
-            for (const s of snapshots) {
-              const k = `${s.platform}:${s.username}`;
-              if (!byPlat.has(k)) byPlat.set(k, []);
-              byPlat.get(k)!.push(s);
-            }
-            return (
-              <div style={cardStyle}>
-                <p style={{ fontFamily: f, fontWeight: 700, fontSize: '1rem', color: '#191c20', marginBottom: '4px' }}>Metrik dari Ekstensi</p>
-                <p style={{ fontSize: '0.78rem', color: '#777683', marginBottom: '16px' }}>Tarikan terbaru KOL Lister per akun.</p>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                  {[...byPlat.values()].map((list) => {
-                    const sorted = [...list].sort((a, b) => +new Date(a.createdAt) - +new Date(b.createdAt));
+                  const key = `${s.platform}:${normalizeUsername(s.username)}`;
+                  const list = snapshotsByAccount.get(key);
+                  const hasMetrics = !!list && list.length > 0;
+                  const isExpanded = expandedSocials.has(key);
+                  let view: SnapshotView | null = null;
+                  if (hasMetrics) {
+                    const sorted = [...list!].sort((a, b) => +new Date(a.createdAt) - +new Date(b.createdAt));
                     const latest = sorted[sorted.length - 1];
                     const oldest = sorted[0];
-                    const view: SnapshotView = {
+                    view = {
                       ...latest,
                       followersDeltaAll:
                         sorted.length > 1 && latest.followers != null && oldest.followers != null
@@ -292,18 +268,65 @@ export default function CreatorDetail() {
                       snapshotCount: sorted.length,
                       firstCapturedAt: oldest.createdAt,
                       capturedAt: latest.createdAt,
-                      followerSeries: sorted.map((s) => ({ t: s.createdAt, v: s.followers ?? null })),
+                      followerSeries: sorted.map((snap) => ({ t: snap.createdAt, v: snap.followers ?? null })),
                     };
-                    return (
-                      <div key={latest._id} style={{ borderTop: '1px solid #ececff', paddingTop: '14px' }}>
-                        <SnapshotDetail s={view} compact />
+                  }
+                  return (
+                    <div key={i} style={{ background: '#f8f9ff', borderRadius: '10px', overflow: 'hidden' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', fontSize: '0.85rem' }}>
+                        <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          {href && Icon && (
+                            <a href={href} target="_blank" rel="noopener noreferrer" aria-label={`Buka ${s.platform}`} style={{ display: 'flex', color: '#6728e4' }}>
+                              <Icon size={16} />
+                            </a>
+                          )}
+                          {href ? (
+                            <a href={href} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '4px', textTransform: 'capitalize', fontWeight: 700, color: '#6728e4', textDecoration: 'none' }}>
+                              {s.platform} <ExternalLink size={11} />
+                            </a>
+                          ) : (
+                            <span style={{ textTransform: 'capitalize', fontWeight: 700, color: '#6728e4' }}>{s.platform}</span>
+                          )}
+                        </span>
+                        <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                          <span>{s.username} · {s.followers.toLocaleString('id-ID')} followers</span>
+                          <button
+                            onClick={() => pullMetrics(s.platform, s.username, s.profileUrl)}
+                            disabled={pulling === s.platform || !href}
+                            title={href ? 'Buka profil di tab baru — kirim metrik lewat panel ekstensi KOL Lister' : 'Username-nya belum valid (mis. "-"/"0") — perbaiki dulu sebelum bisa ditarik'}
+                            style={{
+                              display: 'flex', alignItems: 'center', gap: '5px', padding: '4px 10px',
+                              background: 'white', color: href ? '#6728e4' : '#bbb', border: `1px solid ${href ? '#6728e4' : '#ddd'}`,
+                              borderRadius: '8px', cursor: href ? 'pointer' : 'not-allowed', fontSize: '0.72rem', fontWeight: 700, fontFamily: f, whiteSpace: 'nowrap',
+                            }}
+                          >
+                            <Radar size={12} /> {pulling === s.platform ? 'Membuka…' : href ? 'Buka & tarik' : 'Username belum valid'}
+                          </button>
+                          {hasMetrics && (
+                            <button
+                              onClick={() => toggleExpanded(key)}
+                              aria-label={isExpanded ? 'Sembunyikan metrik ekstensi' : 'Tampilkan metrik ekstensi'}
+                              title={isExpanded ? 'Sembunyikan metrik ekstensi' : 'Tampilkan metrik ekstensi'}
+                              style={{ display: 'flex', alignItems: 'center', background: 'none', border: 'none', cursor: 'pointer', color: '#6728e4', padding: '4px' }}
+                            >
+                              {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                            </button>
+                          )}
+                        </span>
                       </div>
-                    );
-                  })}
-                </div>
+                      {hasMetrics && isExpanded && view && (
+                        <div style={{ padding: '0 14px 14px', borderTop: '1px solid #ececff' }}>
+                          <div style={{ paddingTop: '14px' }}>
+                            <SnapshotDetail s={view} compact />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
-            );
-          })()}
+            )}
+          </div>
 
           {scoreBreakdown && (
             <div style={cardStyle}>
