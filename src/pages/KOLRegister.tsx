@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { CheckCircle2, Camera, Music2, AtSign, Hash, Zap } from 'lucide-react';
 import api from '../lib/api';
+import DatePicker from '../components/ui/DatePicker';
 
 const niches = ['Beauty', 'Fashion', 'Food & Beverage', 'Travel', 'Tech', 'Fitness', 'Parenting', 'Gaming', 'Finance', 'Education', 'Lifestyle', 'Entertainment', 'Yang lain'];
 const contentStyles = ['Review', 'Tutorial', 'Challenge / Trend', 'Daily Vlog', 'Storytelling', 'Talking Head', 'GRWM', 'Before & After', 'Comedy', 'Unboxing', 'Cinematic', 'ASMR', 'Voice Over', 'Live Streaming', 'Podcast / Interview', 'Foto Estetik', 'UGC Style', 'Yang lain'];
@@ -63,7 +64,7 @@ const Pill = ({ label, selected, onClick }: { label: string; selected: boolean; 
 
 interface SocialState { username: string; profileUrl: string; followers: string }
 
-type Section = 'gender' | 'socials' | 'activities' | 'niches' | 'styles' | 'rate';
+type Section = 'birthDate' | 'gender' | 'socials' | 'activities' | 'niches' | 'styles' | 'rate';
 
 const fieldErrorTextStyle: React.CSSProperties = {
   color: '#ba1a1a', fontSize: '0.8rem', fontFamily: "var(--font-display)", fontWeight: 600, marginTop: '-4px', marginBottom: '12px',
@@ -76,6 +77,7 @@ export default function KOLRegister() {
   const [fieldError, setFieldError] = useState<{ section: Section; message: string } | null>(null);
   const [loading, setLoading] = useState(false);
 
+  const birthDateRef = useRef<HTMLDivElement>(null);
   const genderRef = useRef<HTMLDivElement>(null);
   const socialsRef = useRef<HTMLDivElement>(null);
   const activitiesRef = useRef<HTMLDivElement>(null);
@@ -83,7 +85,7 @@ export default function KOLRegister() {
   const stylesRef = useRef<HTMLDivElement>(null);
   const rateRef = useRef<HTMLDivElement>(null);
   const sectionRefs: Record<Section, React.RefObject<HTMLDivElement | null>> = {
-    gender: genderRef, socials: socialsRef, activities: activitiesRef, niches: nichesRef, styles: stylesRef, rate: rateRef,
+    birthDate: birthDateRef, gender: genderRef, socials: socialsRef, activities: activitiesRef, niches: nichesRef, styles: stylesRef, rate: rateRef,
   };
 
   const [name, setName] = useState('');
@@ -145,6 +147,10 @@ export default function KOLRegister() {
     e.preventDefault();
     setSubmitError('');
     setFieldError(null);
+    if (!birthDate) {
+      failSection('birthDate', 'Tanggal lahir wajib diisi.');
+      return;
+    }
     if (!gender) {
       failSection('gender', 'Jenis kelamin wajib dipilih.');
       return;
@@ -266,9 +272,10 @@ export default function KOLRegister() {
               <label style={labelStyle}>Email *</label>
               <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@email.com" required style={inputStyle} />
             </div>
-            <div>
+            <div ref={birthDateRef}>
               <label style={labelStyle}>Tanggal Lahir *</label>
-              <input type="date" value={birthDate} onChange={(e) => setBirthDate(e.target.value)} max={new Date().toISOString().slice(0, 10)} required style={inputStyle} />
+              <DatePicker value={birthDate} onChange={(v) => { setBirthDate(v); setFieldError(null); }} max={new Date()} style={inputStyle} />
+              {fieldError?.section === 'birthDate' && <p style={fieldErrorTextStyle}>{fieldError.message}</p>}
             </div>
           </div>
           <div ref={genderRef} style={{ marginBottom: '14px' }}>
