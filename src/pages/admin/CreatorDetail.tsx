@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, ThumbsUp, ThumbsDown, Unlock, ExternalLink, Radar, ChevronDown, ChevronUp } from 'lucide-react';
 import { SiInstagram, SiTiktok, SiThreads, SiX } from 'react-icons/si';
 import StatusBadge from '../../components/ui/StatusBadge';
@@ -19,6 +19,13 @@ const labelSmall: React.CSSProperties = {
   fontSize: '0.7rem', fontFamily: f, fontWeight: 700, color: '#777683',
   marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.06em',
 };
+
+// SocialSnapshot.username tersimpan lowercase+trim di server (kunci pencocokan resmi ke
+// Creator.socials.username) — tapi Creator.socials.username disimpan APA ADANYA (casing user
+// pas isi form), jadi cocokkan dua-duanya lewat normalizer yang sama.
+function normalizeUsername(u: string): string {
+  return u.trim().toLowerCase();
+}
 
 // Username sering ketulis "@handle", "tiktok.com/@handle", atau ada spasi nyasar —
 // buang semuanya sampai tersisa handle polosnya.
@@ -116,6 +123,7 @@ function rateSummary(c: Pick<Creator, 'rateEstimateType' | 'rateEstimateAmount' 
 export default function CreatorDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [creator, setCreator] = useState<Creator | null>(null);
   const [scoreBreakdown, setScoreBreakdown] = useState<ScoreBreakdown | null>(null);
   const [history, setHistory] = useState<HistoryItem[]>([]);
@@ -147,6 +155,16 @@ export default function CreatorDetail() {
     return () => window.clearTimeout(timeoutId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
+
+  // Link dari Google Sheet (?expand=instagram) — otomatis buka section metrik ekstensi
+  // platform itu begitu snapshot-nya kebaca, supaya staf langsung lihat datanya.
+  useEffect(() => {
+    const platform = searchParams.get('expand');
+    if (!platform) return;
+    const keys = snapshots.filter((s) => s.platform === platform).map((s) => `${s.platform}:${normalizeUsername(s.username)}`);
+    if (keys.length === 0) return;
+    setExpandedSocials((prev) => new Set([...prev, ...keys]));
+  }, [snapshots, searchParams]);
 
   const decide = async (status: 'approved' | 'rejected') => {
     setDeciding(true);
@@ -188,10 +206,6 @@ export default function CreatorDetail() {
 
   // Snapshot ekstensi (KOL Lister) dikelompokkan per akun — dipakai buat expand/collapse
   // di baris Media Sosial yang cocok, bukan card terpisah lagi.
-  // SocialSnapshot.username tersimpan lowercase+trim di server (kunci pencocokan resmi ke
-  // Creator.socials.username) — tapi Creator.socials.username disimpan APA ADANYA (casing user
-  // pas isi form), jadi cocokkan dua-duanya lewat normalizer yang sama di sini.
-  const normalizeUsername = (u: string) => u.trim().toLowerCase();
   const snapshotsByAccount = new Map<string, Snapshot[]>();
   for (const s of snapshots) {
     const k = `${s.platform}:${normalizeUsername(s.username)}`;
