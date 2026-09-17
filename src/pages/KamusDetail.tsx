@@ -1,6 +1,6 @@
 import { Link, Navigate, useParams } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
-import { glossaryTerms } from '../data/glossary';
+import { getTermPhoto, glossaryTerms } from '../data/glossary';
 
 export default function KamusDetail() {
   const { slug } = useParams<{ slug: string }>();
@@ -9,6 +9,7 @@ export default function KamusDetail() {
   if (!term) return <Navigate to="/kamus" replace />;
 
   const others = glossaryTerms.filter((t) => t.slug !== term.slug && t.term[0] === term.term[0]).slice(0, 5);
+  const photo = getTermPhoto(term);
 
   return (
     <div style={{ background: 'var(--surface)', minHeight: '100vh' }}>
@@ -19,6 +20,15 @@ export default function KamusDetail() {
         >
           <ArrowLeft size={16} /> Kamus KOL
         </Link>
+
+        <div style={{ aspectRatio: '16 / 9', borderRadius: '20px', overflow: 'hidden', marginBottom: '28px', background: 'var(--surface-container)' }}>
+          <img
+            src={photo.url}
+            alt={term.term}
+            loading="lazy"
+            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+          />
+        </div>
 
         <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 'clamp(2rem, 4.5vw, 2.8rem)', color: 'var(--on-background)', lineHeight: 1.15, marginBottom: '20px', letterSpacing: '-0.02em' }}>
           {term.term}

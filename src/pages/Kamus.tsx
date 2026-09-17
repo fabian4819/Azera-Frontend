@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Search } from 'lucide-react';
-import { glossaryTerms } from '../data/glossary';
+import { getTermPhoto, glossaryTerms } from '../data/glossary';
 
 export default function Kamus() {
   const [query, setQuery] = useState('');
@@ -10,7 +10,7 @@ export default function Kamus() {
     const q = query.trim().toLowerCase();
     if (!q) return glossaryTerms;
     return glossaryTerms.filter(
-      (t) => t.term.toLowerCase().includes(q) || t.definition.toLowerCase().includes(q)
+      (t) => t.term.toLowerCase().includes(q) || t.summary.toLowerCase().includes(q)
     );
   }, [query]);
 
@@ -97,15 +97,23 @@ export default function Kamus() {
                   key={t.slug}
                   to={`/kamus/${t.slug}`}
                   style={{
-                    display: 'block', padding: '18px', borderRadius: '16px', textDecoration: 'none',
+                    display: 'block', borderRadius: '16px', textDecoration: 'none', overflow: 'hidden',
                     background: '#fff', border: '1px solid var(--outline-variant)',
                   }}
                 >
-                  <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '0.98rem', color: 'var(--on-background)', marginBottom: '6px' }}>
-                    {t.term}
-                  </div>
-                  <div style={{ color: 'var(--on-surface-variant)', fontSize: '0.86rem', lineHeight: 1.55 }}>
-                    {t.summary}
+                  <img
+                    src={getTermPhoto(t).url}
+                    alt=""
+                    loading="lazy"
+                    style={{ width: '100%', aspectRatio: '2 / 1', objectFit: 'cover', display: 'block', background: 'var(--surface-container)' }}
+                  />
+                  <div style={{ padding: '14px 16px 16px' }}>
+                    <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '0.98rem', color: 'var(--on-background)', marginBottom: '6px' }}>
+                      {t.term}
+                    </div>
+                    <div style={{ color: 'var(--on-surface-variant)', fontSize: '0.86rem', lineHeight: 1.55 }}>
+                      {t.summary}
+                    </div>
                   </div>
                 </Link>
               ))}
