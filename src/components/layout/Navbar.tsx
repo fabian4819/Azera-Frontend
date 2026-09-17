@@ -176,6 +176,24 @@ export default function Navbar() {
             >
               Portfolio
             </Link>
+
+            <Link
+              to="/kamus"
+              onClick={() => setMenuOpen(false)}
+              style={{
+                padding: '8px 16px',
+                borderRadius: '8px',
+                fontFamily: "var(--font-display)",
+                fontWeight: isActive('/kamus') ? 700 : 600,
+                fontSize: '0.9rem',
+                textDecoration: 'none',
+                transition: 'color 0.2s ease',
+                color: isActive('/kamus') ? 'var(--secondary)' : 'var(--on-surface-variant)',
+                letterSpacing: '-0.01em',
+              }}
+            >
+              Kamus
+            </Link>
           </div>
 
           <div className="navbar-desktop-ctas" style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
@@ -318,6 +336,23 @@ export default function Navbar() {
               }}
             >
               Portfolio
+            </Link>
+
+            <Link
+              to="/kamus"
+              onClick={() => setMenuOpen(false)}
+              style={{
+                padding: '12px 14px',
+                borderRadius: '10px',
+                fontFamily: "var(--font-display)",
+                fontWeight: isActive('/kamus') ? 700 : 600,
+                fontSize: '0.98rem',
+                textDecoration: 'none',
+                color: isActive('/kamus') ? 'var(--secondary)' : 'var(--on-background)',
+                background: isActive('/kamus') ? 'rgba(103,40,228,0.06)' : 'transparent',
+              }}
+            >
+              Kamus
             </Link>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>

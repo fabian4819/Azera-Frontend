@@ -1,4 +1,5 @@
 import { faqs } from '../data/faq';
+import { glossaryTerms } from '../data/glossary';
 
 export const SITE_URL = (import.meta.env.VITE_SITE_URL || 'https://azerakol.id').replace(/\/$/, '');
 export const SITE_NAME = 'AzeraKOL';
@@ -167,6 +168,14 @@ export const seoByPath: Record<string, SEOConfig> = {
     keywords: 'event creator activation, aktivasi event KOC, live content event, exposure event media sosial',
     jsonLd: [kolServiceJsonLd, breadcrumb([{ name: 'Home', path: '/' }, { name: 'Event Creator Activation', path: '/service/event-creator-activation' }])],
   },
+  '/kamus': {
+    title: 'Kamus KOL | Istilah Influencer Marketing | AzeraKOL',
+    description:
+      'Kamus istilah KOL dan influencer marketing dari AzeraKOL — pahami arti nano influencer, engagement rate, KOC, GMV, dan istilah campaign lainnya.',
+    path: '/kamus',
+    keywords: 'kamus KOL, istilah influencer marketing, glosarium KOL, arti KOL, istilah campaign brand',
+    jsonLd: [breadcrumb([{ name: 'Home', path: '/' }, { name: 'Kamus KOL', path: '/kamus' }])],
+  },
 };
 
 export const defaultSeo: SEOConfig = seoByPath['/'];
@@ -179,6 +188,23 @@ export function getSeoForPath(pathname: string): SEOConfig {
       path: pathname,
       noindex: true,
     };
+  }
+
+  if (pathname.startsWith('/kamus/')) {
+    const slug = pathname.slice('/kamus/'.length);
+    const term = glossaryTerms.find((t) => t.slug === slug);
+    if (term) {
+      return {
+        title: `${term.term} — Arti & Penjelasan | Kamus KOL AzeraKOL`,
+        description: term.summary,
+        path: pathname,
+        jsonLd: breadcrumb([
+          { name: 'Home', path: '/' },
+          { name: 'Kamus KOL', path: '/kamus' },
+          { name: term.term, path: pathname },
+        ]),
+      };
+    }
   }
 
   return seoByPath[pathname] || defaultSeo;

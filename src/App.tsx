@@ -14,6 +14,8 @@ import BrandForm from './pages/BrandForm';
 import KOL from './pages/KOL';
 import KOLRegister from './pages/KOLRegister';
 import Portfolio from './pages/Portfolio';
+import Kamus from './pages/Kamus';
+import KamusDetail from './pages/KamusDetail';
 import CaseStudyDetail from './pages/CaseStudyDetail';
 import ServiceDetail from './pages/ServiceDetail';
 import PrivacyPolicy from './pages/PrivacyPolicy';
@@ -104,6 +106,8 @@ export default function App() {
             <Route path="/kol/register" element={<KOLRegister />} />
             <Route path="/portfolio" element={<Portfolio />} />
             <Route path="/portfolio/case-study/:id" element={<CaseStudyDetail />} />
+            <Route path="/kamus" element={<Kamus />} />
+            <Route path="/kamus/:slug" element={<KamusDetail />} />
             <Route path="/service/:slug" element={<ServiceDetail />} />
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             <Route path="/apply/:slug" element={<CampaignApply />} />
