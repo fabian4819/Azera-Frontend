@@ -5,7 +5,7 @@ import {
   useReactTable, getCoreRowModel, getSortedRowModel, getFilteredRowModel, getFacetedRowModel,
   flexRender, type ColumnDef, type SortingState, type ColumnFiltersState, type Column, type Table as ReactTableInstance,
 } from '@tanstack/react-table';
-import { Search, Eye, RefreshCw, ChevronUp, ChevronDown, ChevronsUpDown, Filter, X as XIcon } from 'lucide-react';
+import { Search, Eye, RefreshCw, ChevronUp, ChevronDown, ChevronsUpDown, Filter, X as XIcon, ExternalLink } from 'lucide-react';
 import StatusBadge from '../../components/ui/StatusBadge';
 import api from '../../lib/api';
 
@@ -77,6 +77,7 @@ export default function Creators() {
   const [globalFilter, setGlobalFilter] = useState('');
   const [sorting, setSorting] = useState<SortingState>([{ id: 'performanceScore', desc: true }]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [sheetUrl, setSheetUrl] = useState<string | null>(null);
   const navigate = useNavigate();
 
   const fetchCreators = async () => {
@@ -94,6 +95,10 @@ export default function Creators() {
   useEffect(() => {
     const timeoutId = window.setTimeout(() => { void fetchCreators(); }, 0);
     return () => window.clearTimeout(timeoutId);
+  }, []);
+
+  useEffect(() => {
+    api.get('/admin/creators/sheet-url').then((res) => setSheetUrl(res.data.url)).catch(() => setSheetUrl(null));
   }, []);
 
   const formatDate = (d: string) => new Date(d).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
@@ -240,6 +245,14 @@ export default function Creators() {
           <button onClick={fetchCreators} style={{ padding: '10px', borderRadius: '10px', border: '1.5px solid #c7c8cf', background: 'white', cursor: 'pointer', color: '#777683', display: 'flex' }}>
             <RefreshCw size={16} />
           </button>
+          {sheetUrl && (
+            <a
+              href={sheetUrl} target="_blank" rel="noopener noreferrer"
+              style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '10px 16px', borderRadius: '10px', border: '1.5px solid #c7c8cf', background: 'white', color: '#464652', fontSize: '0.82rem', fontWeight: 700, fontFamily: "var(--font-display)", textDecoration: 'none', whiteSpace: 'nowrap' }}
+            >
+              <ExternalLink size={14} />Buka Sheet
+            </a>
+          )}
         </div>
       </div>
 

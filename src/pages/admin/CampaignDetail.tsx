@@ -1,6 +1,6 @@
 import { Fragment, useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, Sparkles, Copy, Check, ThumbsUp, ThumbsDown, Send, MessageCircle, Megaphone, Plus, Trash2, ChevronDown, ChevronUp, LayoutDashboard } from 'lucide-react';
+import { ArrowLeft, Sparkles, Copy, Check, ThumbsUp, ThumbsDown, Send, MessageCircle, Megaphone, Plus, Trash2, ChevronDown, ChevronUp, LayoutDashboard, ExternalLink } from 'lucide-react';
 import api from '../../lib/api';
 import CampaignAnalyticsFinance from './CampaignAnalyticsFinance';
 import WorkflowTracker from './WorkflowTracker';
@@ -30,7 +30,7 @@ interface Campaign {
   _id: string; name: string; objective: string; briefContent?: string; deliverables: string[];
   budget: number; criteria: { niches: string[]; minFollowers?: number; provinces: string[]; platforms: string[] };
   status: string; workflowStage: string; applyOpen: boolean; applySlug: string; waGroupLink?: string;
-  customFields: CustomField[]; accessCode: string;
+  customFields: CustomField[]; accessCode: string; sheetUrl?: string | null;
 }
 interface PicUser { _id: string; name: string; email: string; phone: string }
 
@@ -658,6 +658,22 @@ export default function CampaignDetail() {
               {dashboardCopied ? 'Tersalin!' : 'Salin Link Dashboard'}
             </button>
           </div>
+
+          {campaign.sheetUrl && (
+            <div style={cardStyle}>
+              <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: '1rem', color: '#191c20', marginBottom: '8px' }}>Google Sheet</p>
+              <p style={{ fontSize: '0.78rem', color: '#777683', marginBottom: '14px', lineHeight: 1.5 }}>
+                Buka tab pendaftar campaign ini di master spreadsheet.
+              </p>
+              <a
+                href={campaign.sheetUrl} target="_blank" rel="noopener noreferrer"
+                style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '10px', borderRadius: '10px', border: '1.5px solid #c7c8cf', background: 'white', color: '#464652', fontSize: '0.82rem', fontWeight: 600, cursor: 'pointer', fontFamily: "var(--font-display)", textDecoration: 'none', boxSizing: 'border-box' }}
+              >
+                <ExternalLink size={14} />
+                Buka Sheet
+              </a>
+            </div>
+          )}
 
           <div style={cardStyle}>
             <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: '1rem', color: '#191c20', marginBottom: '8px' }}>Akun PIC / Handle-by</p>
