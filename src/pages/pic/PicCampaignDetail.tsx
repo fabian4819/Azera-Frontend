@@ -29,7 +29,7 @@ interface DashboardData {
   applications: ApplicationRow[];
   submissions: SubmissionRow[];
   histories: HistoryRow[];
-  sheetUrl?: string | null;
+  masterSheetUrl?: string | null;
 }
 
 const curationColors: Record<string, { bg: string; color: string; label: string }> = {
@@ -102,9 +102,9 @@ export default function PicCampaignDetail() {
           <span style={{ background: '#eceef3', color: '#464652', borderRadius: '999px', padding: '5px 14px', fontSize: '0.75rem', fontWeight: 700, textTransform: 'capitalize' }}>
             {data.campaign.status}
           </span>
-          {data.sheetUrl && (
+          {data.masterSheetUrl && (
             <a
-              href={data.sheetUrl} target="_blank" rel="noopener noreferrer"
+              href={data.masterSheetUrl} target="_blank" rel="noopener noreferrer"
               style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'white', color: '#6728e4', border: '1.5px solid #e1e0ff', borderRadius: '999px', padding: '5px 14px', fontSize: '0.75rem', fontWeight: 700, fontFamily: f, textDecoration: 'none' }}
             >
               <ExternalLink size={13} />Buka Sheet

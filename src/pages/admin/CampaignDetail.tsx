@@ -20,9 +20,15 @@ interface Creator {
   domicile: { province: string; city: string }; socials: Social[]; niches: string[];
   performanceScore: { overall: number };
 }
+interface Submission {
+  type: string; platform: string; link?: string; status: string; createdAt: string;
+  parsedInsight?: { views?: number; likes?: number; comments?: number; shares?: number };
+}
 interface Application {
   _id: string; creatorId: Creator; curationResult: string; curationReason?: string; status: string;
   customAnswers?: Record<string, string | string[]>;
+  picUserId?: { _id: string; name: string; email: string } | null;
+  latestSubmission?: Submission | null;
 }
 type CustomFieldType = 'text' | 'textarea' | 'number' | 'select' | 'checkbox';
 interface CustomField { id: string; label: string; type: CustomFieldType; required: boolean; options?: string[] }
@@ -30,7 +36,8 @@ interface Campaign {
   _id: string; name: string; objective: string; briefContent?: string; deliverables: string[];
   budget: number; criteria: { niches: string[]; minFollowers?: number; provinces: string[]; platforms: string[] };
   status: string; workflowStage: string; applyOpen: boolean; applySlug: string; waGroupLink?: string;
-  customFields: CustomField[]; accessCode: string; sheetUrl?: string | null;
+  customFields: CustomField[]; accessCode: string;
+  masterSheetUrl?: string | null; reportSheetUrl?: string | null; recapPaymentSheetUrl?: string | null;
 }
 interface PicUser { _id: string; name: string; email: string; phone: string }
 
@@ -98,6 +105,7 @@ export default function CampaignDetail() {
   const [waGroupLinkDraft, setWaGroupLinkDraft] = useState('');
   const [sendingBrief, setSendingBrief] = useState(false);
   const [remindingId, setRemindingId] = useState<string | null>(null);
+  const [assigningPicId, setAssigningPicId] = useState<string | null>(null);
   const [actionMessage, setActionMessage] = useState('');
   const [actionError, setActionError] = useState('');
   const [customFieldsDraft, setCustomFieldsDraft] = useState<CustomField[]>([]);
@@ -314,6 +322,21 @@ export default function CampaignDetail() {
     }
   };
 
+  // picUserId kosong ('') = lepas assignment (dikirim sebagai null ke server).
+  const assignPic = async (appId: string, picUserId: string) => {
+    setAssigningPicId(appId);
+    setActionError('');
+    try {
+      const res = await api.patch(`/admin/applications/${appId}/pic`, { picUserId: picUserId || null });
+      setApplications((prev) => prev.map((a) => (a._id === appId ? res.data : a)));
+    } catch (err: unknown) {
+      const data = (err as { response?: { data?: { message?: string } } })?.response?.data;
+      setActionError(data?.message || 'Gagal menugaskan PIC.');
+    } finally {
+      setAssigningPicId(null);
+    }
+  };
+
   if (loading) return <div style={{ textAlign: 'center', padding: '80px', color: '#777683' }}>Memuat...</div>;
   if (!campaign) return null;
 
@@ -465,6 +488,16 @@ export default function CampaignDetail() {
                     <th style={th}>Skor</th>
                     <th style={th}>Kurasi</th>
                     <th style={th}>Status</th>
+                    <th style={th}>Tipe Submission</th>
+                    <th style={th}>Platform</th>
+                    <th style={th}>Link Submission</th>
+                    <th style={th}>Status Submission</th>
+                    <th style={th}>Views</th>
+                    <th style={th}>Likes</th>
+                    <th style={th}>Comments</th>
+                    <th style={th}>Shares</th>
+                    <th style={th}>Tanggal Submission</th>
+                    <th style={th}>PIC</th>
                     <th style={th}>Aksi</th>
                   </tr>
                 </thead>
@@ -496,6 +529,33 @@ export default function CampaignDetail() {
                           </td>
                           <td style={td}>
                             <span style={{ background: sc.bg, color: sc.color, borderRadius: '999px', padding: '3px 10px', fontSize: '0.7rem', fontWeight: 700, textTransform: 'capitalize' }}>{a.status}</span>
+                          </td>
+                          <td style={{ ...td, textTransform: 'capitalize' }}>{a.latestSubmission?.type || '—'}</td>
+                          <td style={{ ...td, textTransform: 'capitalize' }}>{a.latestSubmission?.platform || '—'}</td>
+                          <td style={td}>
+                            {a.latestSubmission?.link ? (
+                              <a href={a.latestSubmission.link} target="_blank" rel="noopener noreferrer" style={{ color: '#6728e4', textDecoration: 'none' }}>Buka link</a>
+                            ) : '—'}
+                          </td>
+                          <td style={{ ...td, textTransform: 'capitalize' }}>{a.latestSubmission?.status || '—'}</td>
+                          <td style={td}>{a.latestSubmission?.parsedInsight?.views ?? '—'}</td>
+                          <td style={td}>{a.latestSubmission?.parsedInsight?.likes ?? '—'}</td>
+                          <td style={td}>{a.latestSubmission?.parsedInsight?.comments ?? '—'}</td>
+                          <td style={td}>{a.latestSubmission?.parsedInsight?.shares ?? '—'}</td>
+                          <td style={td}>{a.latestSubmission ? new Date(a.latestSubmission.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}</td>
+                          <td style={td}>
+                            <select
+                              value={a.picUserId?._id || ''}
+                              disabled={assigningPicId === a._id || picUsers.length === 0}
+                              onChange={(e) => assignPic(a._id, e.target.value)}
+                              title={picUsers.length === 0 ? 'Belum ada PIC di-assign ke campaign ini (tab Pendaftaran & Distribusi)' : undefined}
+                              style={{ padding: '6px 8px', borderRadius: '8px', border: '1.5px solid #c7c8cf', fontSize: '0.74rem', fontFamily: "var(--font-display)", color: '#464652', cursor: picUsers.length === 0 ? 'not-allowed' : 'pointer', maxWidth: '140px' }}
+                            >
+                              <option value="">Belum ditugaskan</option>
+                              {picUsers.map((p) => (
+                                <option key={p._id} value={p._id}>{p.name}</option>
+                              ))}
+                            </select>
                           </td>
                           <td style={td}>
                             {a.status === 'pending' && (
@@ -534,7 +594,7 @@ export default function CampaignDetail() {
                         {expanded && hasDetail && (
                           <tr>
                             <td></td>
-                            <td colSpan={7} style={{ ...td, background: '#f8f9ff' }}>
+                            <td colSpan={17} style={{ ...td, background: '#f8f9ff' }}>
                               {a.curationReason && <p style={{ fontSize: '0.78rem', color: '#464652', marginBottom: '8px', lineHeight: 1.5 }}>{a.curationReason}</p>}
                               {a.customAnswers && Object.keys(a.customAnswers).length > 0 && campaign.customFields.length > 0 && (
                                 <div>
@@ -659,19 +719,28 @@ export default function CampaignDetail() {
             </button>
           </div>
 
-          {campaign.sheetUrl && (
+          {(campaign.masterSheetUrl || campaign.reportSheetUrl || campaign.recapPaymentSheetUrl) && (
             <div style={cardStyle}>
               <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: '1rem', color: '#191c20', marginBottom: '8px' }}>Google Sheet</p>
               <p style={{ fontSize: '0.78rem', color: '#777683', marginBottom: '14px', lineHeight: 1.5 }}>
-                Buka tab pendaftar campaign ini di master spreadsheet.
+                Sheet operasional campaign ini — data pendaftar & submission (master) tersinkron otomatis dari platform, report & recap payment dikelola manual.
               </p>
-              <a
-                href={campaign.sheetUrl} target="_blank" rel="noopener noreferrer"
-                style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '10px', borderRadius: '10px', border: '1.5px solid #c7c8cf', background: 'white', color: '#464652', fontSize: '0.82rem', fontWeight: 600, cursor: 'pointer', fontFamily: "var(--font-display)", textDecoration: 'none', boxSizing: 'border-box' }}
-              >
-                <ExternalLink size={14} />
-                Buka Sheet
-              </a>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                {[
+                  { url: campaign.masterSheetUrl, label: 'Buka Master Sheet' },
+                  { url: campaign.reportSheetUrl, label: 'Buka Report Sheet' },
+                  { url: campaign.recapPaymentSheetUrl, label: 'Buka Recap Payment' },
+                ].filter((s) => s.url).map((s) => (
+                  <a
+                    key={s.label}
+                    href={s.url!} target="_blank" rel="noopener noreferrer"
+                    style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '10px', borderRadius: '10px', border: '1.5px solid #c7c8cf', background: 'white', color: '#464652', fontSize: '0.82rem', fontWeight: 600, cursor: 'pointer', fontFamily: "var(--font-display)", textDecoration: 'none', boxSizing: 'border-box' }}
+                  >
+                    <ExternalLink size={14} />
+                    {s.label}
+                  </a>
+                ))}
+              </div>
             </div>
           )}
 

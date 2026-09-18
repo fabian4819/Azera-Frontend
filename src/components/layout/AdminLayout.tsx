@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { Link, useLocation, Outlet } from 'react-router-dom';
-import { LayoutDashboard, Building2, Users, UserCheck, ImageIcon, Megaphone, Upload, MessageCircle, Inbox, MessageSquareText, Bot, Plug, LogOut, ChevronsLeft, ChevronsRight } from 'lucide-react';
+import { LayoutDashboard, Building2, Users, UserCheck, ImageIcon, Megaphone, PanelsTopLeft, Upload, MessageCircle, Inbox, MessageSquareText, Bot, Plug, LogOut, ChevronsLeft, ChevronsRight } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 
 const navItems = [
   { label: 'Dashboard', to: '/admin/dashboard', icon: LayoutDashboard },
   { label: 'Campaigns', to: '/admin/campaigns', icon: Megaphone },
+  { label: 'Dashboard Campaign', to: '/admin/campaign-dashboard', icon: PanelsTopLeft },
   { label: 'Import Data', to: '/admin/import', icon: Upload },
   { label: 'WhatsApp', to: '/admin/whatsapp', icon: MessageCircle },
   { label: 'Inbox WhatsApp', to: '/admin/whatsapp/inbox', icon: Inbox },
@@ -21,6 +22,7 @@ const navItems = [
 const pageTitles: Record<string, string> = {
   '/admin/dashboard': 'Dashboard',
   '/admin/campaigns': 'Campaigns',
+  '/admin/campaign-dashboard': 'Dashboard Campaign',
   '/admin/import': 'Import Data Historis',
   '/admin/whatsapp': 'WhatsApp',
   '/admin/whatsapp/inbox': 'Inbox WhatsApp',

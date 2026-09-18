@@ -97,6 +97,9 @@ export default function KOLRegister() {
   const [cities, setCities] = useState<WilayahOption[]>([]);
   const [province, setProvince] = useState('');
   const [city, setCity] = useState('');
+  const [address, setAddress] = useState('');
+  const [postalCode, setPostalCode] = useState('');
+  const [school, setSchool] = useState('');
   const [socials, setSocials] = useState<Record<string, SocialState>>({});
   const [selectedActivities, setSelectedActivities] = useState<string[]>([]);
   const [selectedNiches, setSelectedNiches] = useState<string[]>([]);
@@ -194,6 +197,9 @@ export default function KOLRegister() {
         contentStyles: selectedStyles.filter((s) => s !== 'Yang lain'),
         contentStyleOther: selectedStyles.includes('Yang lain') ? styleOther : undefined,
         bankAccount: bankName ? { bankName, accountNumber, accountName } : undefined,
+        address: address || undefined,
+        postalCode: postalCode || undefined,
+        school: school || undefined,
         rateEstimateType: rateType || undefined,
         rateEstimateAmount: rateType === 'nominal' && rateAmount ? Number(rateAmount) : undefined,
         rateNegotiable: rateNegotiable || undefined,
@@ -287,7 +293,7 @@ export default function KOLRegister() {
             </div>
             {fieldError?.section === 'gender' && <p style={fieldErrorTextStyle}>{fieldError.message}</p>}
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '28px' }} className="form-2col">
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }} className="form-2col">
             <div>
               <label style={labelStyle}>Provinsi *</label>
               <select value={province} onChange={(e) => onProvinceChange(e.target.value)} required style={inputStyle}>
@@ -302,6 +308,14 @@ export default function KOLRegister() {
                 {cities.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
               </select>
             </div>
+          </div>
+          <div style={{ marginBottom: '14px' }}>
+            <label style={labelStyle}>Alamat Lengkap</label>
+            <input value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Jl. ..." style={inputStyle} />
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '28px' }} className="form-2col">
+            <div><label style={labelStyle}>Kode Pos</label><input value={postalCode} onChange={(e) => setPostalCode(e.target.value)} placeholder="50xxx" style={inputStyle} /></div>
+            <div><label style={labelStyle}>Asal Univ/Sekolah</label><input value={school} onChange={(e) => setSchool(e.target.value)} placeholder="Universitas Diponegoro" style={inputStyle} /></div>
           </div>
 
           <SectionTitle title="2. Media Sosial" />
