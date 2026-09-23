@@ -88,9 +88,7 @@ export default function Hero() {
         marginTop: '-88px',
         paddingTop: '132px',
         paddingBottom: '80px',
-        background:
-          'radial-gradient(85% 65% at 50% -8%, #6f4ab8, rgba(111,74,184,0) 58%),' +
-          'linear-gradient(180deg, #5c3aa8 0%, #562fa0 52%, #4a2f8c 100%)',
+        background: 'var(--hero-bg)',
       }}
     >
       {/* Foto konten tersebar (ghosting) */}

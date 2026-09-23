@@ -50,11 +50,16 @@ export default function Stats() {
   const statsInView = useInView(statsRef, { once: true, margin: '-60px' });
 
   return (
-    <section style={{ background: '#ffffff', padding: '120px 24px' }}>
+    <section
+      style={{
+        padding: '120px 24px',
+        background: 'var(--hero-bg)',
+      }}
+    >
       <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
         <div style={{ display: 'grid', gridTemplateColumns: '200px 1fr', gap: '24px' }} className="payoff-grid">
           <div>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--secondary)' }}>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--lime)' }}>
               The Payoff
             </span>
           </div>
@@ -68,7 +73,7 @@ export default function Stats() {
                 fontSize: 'clamp(1.7rem, 3.6vw, 2.8rem)',
                 lineHeight: 1.25,
                 letterSpacing: '-0.02em',
-                color: 'var(--secondary)',
+                color: '#ffffff',
                 maxWidth: '900px',
                 marginBottom: '76px',
               }}
@@ -92,10 +97,10 @@ export default function Stats() {
                   animate={statsInView ? { opacity: 1, y: 0 } : {}}
                   transition={{ duration: 0.5, delay: i * 0.1 }}
                 >
-                  <p style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 'clamp(2.4rem, 5vw, 3.4rem)', color: 'var(--secondary)', lineHeight: 1, marginBottom: '14px' }}>
+                  <p style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 'clamp(2.4rem, 5vw, 3.4rem)', color: 'var(--lime)', lineHeight: 1, marginBottom: '14px' }}>
                     <CountUp target={s.target} suffix={s.suffix} started={statsInView} />
                   </p>
-                  <p style={{ color: 'var(--on-surface-variant)', fontSize: '0.95rem', lineHeight: 1.6, maxWidth: '260px' }}>
+                  <p style={{ color: 'rgba(255,255,255,0.72)', fontSize: '0.95rem', lineHeight: 1.6, maxWidth: '260px' }}>
                     {s.desc}
                   </p>
                 </motion.div>

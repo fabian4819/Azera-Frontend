@@ -45,6 +45,10 @@
   --error: #ba1a1a;
   --error-container: #ffdad6;
 
+  /* Latar ungu hero — dipakai juga oleh Payoff, Solutions, For Brand, FAQ */
+  --hero-bg: radial-gradient(85% 65% at 50% -8%, #6f4ab8, rgba(111,74,184,0) 58%),
+    linear-gradient(180deg, #5c3aa8 0%, #562fa0 52%, #4a2f8c 100%);
+
   --surface: #f8f9ff;
   --surface-low: #f2f3f9;
   --surface-container: #eceef3;

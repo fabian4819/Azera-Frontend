@@ -8,19 +8,19 @@ const solutions = [
     tab: 'Matching Berbasis Data',
     title: 'Matching Berbasis Data',
     desc: 'Algoritma kami mencocokkan brand dengan KOL berdasarkan demografi, engagement, dan performa nyata.',
-    image: '/solutions/matching.jpg',
+    image: '/solutions/1-matching.webp',
   },
   {
     tab: 'Budget Transparan',
     title: 'Budget Transparan',
     desc: 'Paket harga jelas, laporan terukur, dan ROI yang bisa diprediksi dari awal campaign.',
-    image: '/solutions/budget.jpg',
+    image: '/solutions/2-budget.webp',
   },
   {
     tab: 'End-to-End Management',
     title: 'End-to-End Management',
     desc: 'Tim AzeraKOL menangani seluruh proses, dari briefing hingga laporan akhir campaign.',
-    image: '/solutions/management.jpg',
+    image: '/solutions/3-management.webp',
   },
 ];
 
@@ -83,7 +83,7 @@ export default function ProblemSolution() {
   const isInView = useInView(ref, { once: true, margin: '-80px' });
 
   return (
-    <section ref={ref} style={{ background: 'linear-gradient(160deg, #2c1065 0%, #1c0a44 100%)', padding: '100px 24px' }}>
+    <section ref={ref} style={{ background: 'var(--hero-bg)', padding: '100px 24px' }}>
       <div style={{ maxWidth: '1160px', margin: '0 auto' }}>
         <motion.div
           style={{ textAlign: 'center', marginBottom: '48px' }}
@@ -96,7 +96,7 @@ export default function ProblemSolution() {
           </span>
           <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 'clamp(2.2rem, 5vw, 3.6rem)', lineHeight: 1.1, letterSpacing: '-0.03em' }}>
             <span style={{ color: '#fff' }}>AzeraKOL, untuk brand</span><br />
-            <span style={{ color: '#c6a5ff' }}>yang serius mau bertumbuh.</span>
+            <span style={{ color: 'var(--lime)' }}>yang serius mau bertumbuh.</span>
           </h2>
         </motion.div>
 
@@ -113,9 +113,9 @@ export default function ProblemSolution() {
               style={{
                 padding: '11px 20px',
                 background: 'transparent',
-                border: i === active ? '1.5px solid #a684ff' : '1.5px solid transparent',
+                border: i === active ? '1.5px solid var(--lime)' : '1.5px solid transparent',
                 borderRadius: '10px',
-                color: i === active ? '#fff' : 'rgba(255,255,255,0.4)',
+                color: i === active ? '#fff' : 'rgba(255,255,255,0.55)',
                 fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '0.9rem',
                 cursor: 'pointer', transition: 'color 0.25s ease, border-color 0.25s ease',
               }}
@@ -133,9 +133,9 @@ export default function ProblemSolution() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -14 }}
               transition={{ duration: 0.35, ease }}
-              style={{ borderRadius: '24px', overflow: 'hidden', height: '440px' }}
+              style={{ aspectRatio: '3 / 2' }}
             >
-              <img src={current.image} alt={current.title} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+              <img src={current.image} alt={current.title} style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />
             </motion.div>
           </AnimatePresence>
 
