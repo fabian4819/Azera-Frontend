@@ -11,9 +11,13 @@ const cardStyle: React.CSSProperties = {
 interface ImportRow {
   rowNumber: number; campaignName: string; brandName: string; creatorName: string; platform: string;
   link?: string; views?: number; reach?: number; likes?: number; comments?: number; shares?: number; saved?: number;
-  feeCreator?: number; feePic?: number; feeMg?: number;
+  niche?: string; postedAt?: string; feeCreator?: number; feePic?: number; feeMg?: number;
   errors: string[];
 }
+
+const num = (n?: number) => (n === undefined || n === null ? '-' : n.toLocaleString('id-ID'));
+const rp = (n?: number) => (n === undefined || n === null ? '-' : `Rp${n.toLocaleString('id-ID')}`);
+const td: React.CSSProperties = { padding: '8px 10px', whiteSpace: 'nowrap' };
 
 export default function Import() {
   const [file, setFile] = useState<File | null>(null);
@@ -120,7 +124,7 @@ export default function Import() {
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.78rem', fontFamily: f }}>
               <thead>
                 <tr style={{ background: '#f8f9ff', textAlign: 'left' }}>
-                  {['#', 'Campaign', 'Brand', 'Creator', 'Platform', 'Views', 'Fee Creator', 'Status'].map((h) => (
+                  {['#', 'Campaign', 'Brand', 'Creator', 'Platform', 'Link', 'Niche', 'Views', 'Reach', 'Likes', 'Comments', 'Shares', 'Saved', 'Tanggal', 'Fee Creator', 'Fee PIC', 'Fee MG', 'Status'].map((h) => (
                     <th key={h} style={{ padding: '8px 10px', fontWeight: 700 }}>{h}</th>
                   ))}
                 </tr>
@@ -128,13 +132,25 @@ export default function Import() {
               <tbody>
                 {rows.map((r) => (
                   <tr key={r.rowNumber} style={{ borderBottom: '1px solid #f0f0f0', background: r.errors.length ? '#fff5f5' : 'transparent' }}>
-                    <td style={{ padding: '8px 10px' }}>{r.rowNumber}</td>
-                    <td style={{ padding: '8px 10px' }}>{r.campaignName}</td>
-                    <td style={{ padding: '8px 10px' }}>{r.brandName}</td>
-                    <td style={{ padding: '8px 10px' }}>{r.creatorName}</td>
-                    <td style={{ padding: '8px 10px', textTransform: 'capitalize' }}>{r.platform}</td>
-                    <td style={{ padding: '8px 10px' }}>{r.views?.toLocaleString('id-ID') || '-'}</td>
-                    <td style={{ padding: '8px 10px' }}>{r.feeCreator ? `Rp${r.feeCreator.toLocaleString('id-ID')}` : '-'}</td>
+                    <td style={td}>{r.rowNumber}</td>
+                    <td style={td}>{r.campaignName}</td>
+                    <td style={td}>{r.brandName}</td>
+                    <td style={td}>{r.creatorName}</td>
+                    <td style={{ ...td, textTransform: 'capitalize' }}>{r.platform}</td>
+                    <td style={{ ...td, maxWidth: '180px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {r.link ? <a href={r.link} target="_blank" rel="noreferrer" title={r.link} style={{ color: '#6B2EE8' }}>{r.link}</a> : '-'}
+                    </td>
+                    <td style={td}>{r.niche || '-'}</td>
+                    <td style={td}>{num(r.views)}</td>
+                    <td style={td}>{num(r.reach)}</td>
+                    <td style={td}>{num(r.likes)}</td>
+                    <td style={td}>{num(r.comments)}</td>
+                    <td style={td}>{num(r.shares)}</td>
+                    <td style={td}>{num(r.saved)}</td>
+                    <td style={td}>{r.postedAt && !Number.isNaN(Date.parse(r.postedAt)) ? new Date(r.postedAt).toLocaleDateString('id-ID', { timeZone: 'UTC' }) : (r.postedAt || '-')}</td>
+                    <td style={td}>{rp(r.feeCreator)}</td>
+                    <td style={td}>{rp(r.feePic)}</td>
+                    <td style={td}>{rp(r.feeMg)}</td>
                     <td style={{ padding: '8px 10px' }}>
                       {r.errors.length > 0 ? (
                         <span style={{ color: '#ba1a1a', display: 'flex', alignItems: 'center', gap: '4px' }}>
