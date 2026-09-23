@@ -11,6 +11,7 @@ const cardStyle: React.CSSProperties = {
 interface ImportRow {
   rowNumber: number; campaignName: string; brandName: string; creatorName: string; platform: string;
   link?: string; views?: number; reach?: number; likes?: number; comments?: number; shares?: number; saved?: number;
+  feeCreator?: number; feePic?: number; feeMg?: number;
   errors: string[];
 }
 
@@ -18,7 +19,9 @@ export default function Import() {
   const [file, setFile] = useState<File | null>(null);
   const [rows, setRows] = useState<ImportRow[]>([]);
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<{ created: number; skipped: { rowNumber: number; reason: string }[] } | null>(null);
+  const [ignoredHeaders, setIgnoredHeaders] = useState<string[]>([]);
+  const [sheetCount, setSheetCount] = useState(1);
+  const [result, setResult] = useState<{ created: number; updated: number; skipped: { rowNumber: number; reason: string }[] } | null>(null);
   const [error, setError] = useState('');
 
   const preview = async () => {
@@ -31,8 +34,10 @@ export default function Import() {
       formData.append('file', file);
       const res = await api.post('/admin/import/preview', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
       setRows(res.data.rows);
+      setIgnoredHeaders(res.data.ignoredHeaders || []);
+      setSheetCount(res.data.sheetCount || 1);
     } catch {
-      setError('Gagal membaca file. Pastikan format sesuai (Nama Campaign, Brand, Nama Creator, Platform, Link Konten, Niche Akun, Views, Reach, Likes, Comments, Shares, Saved, Tanggal Posting).');
+      setError('Gagal membaca file. Pastikan format sesuai (Nama Campaign, Brand, Nama Creator, Platform, Link Konten, Niche Akun, Views, Reach, Likes, Comments, Shares, Saved, Tanggal Posting, Fee Creator, Fee PIC, Fee MG).');
     } finally {
       setLoading(false);
     }
@@ -44,6 +49,7 @@ export default function Import() {
       const res = await api.post('/admin/import/confirm', { rows });
       setResult(res.data);
       setRows([]);
+      setIgnoredHeaders([]);
       setFile(null);
     } catch {
       setError('Gagal import data.');
@@ -59,7 +65,9 @@ export default function Import() {
       <div style={cardStyle}>
         <p style={{ fontFamily: f, fontSize: '0.85rem', color: '#464652', marginBottom: '16px', lineHeight: 1.6 }}>
           Upload spreadsheet (.xlsx atau .csv) dengan kolom: <strong>Nama Campaign, Brand, Nama Creator, Platform, Link Konten,
-          Niche Akun, Views, Reach, Likes, Comments, Shares, Saved, Tanggal Posting</strong>. Satu baris = satu platform per creator per campaign.
+          Niche Akun, Views, Reach, Likes, Comments, Shares, Saved, Tanggal Posting, Fee Creator, Fee PIC, Fee MG</strong>. Satu file = satu campaign = satu brand (sheet pertama saja yang dibaca). Satu baris = satu platform per creator.
+          Fee = fee per creator untuk campaign tsb (cukup diisi di salah satu baris kalau creator punya lebih dari satu platform). Tanggal pakai format dd/mm/yyyy.
+          Import ulang file yang sama akan meng-update angka, bukan menggandakan data.
         </p>
         <input type="file" accept=".xlsx,.csv" onChange={(e) => setFile(e.target.files?.[0] || null)} style={{ marginBottom: '14px', fontFamily: f, fontSize: '0.85rem' }} />
         <br />
@@ -73,7 +81,7 @@ export default function Import() {
         <div style={{ ...cardStyle, background: '#d1fae5' }}>
           <p style={{ fontFamily: f, fontWeight: 700, color: '#065F46' }}>
             <CheckCircle2 size={16} style={{ verticalAlign: 'middle', marginRight: '6px' }} />
-            {result.created} baris berhasil diimport.
+            {result.created} baris baru diimport{result.updated > 0 ? `, ${result.updated} baris diperbarui` : ''}.
           </p>
           {result.skipped.length > 0 && (
             <div style={{ marginTop: '10px' }}>
@@ -96,11 +104,23 @@ export default function Import() {
               {loading ? 'Mengimport...' : `Import ${validCount} Baris`}
             </button>
           </div>
+          {sheetCount > 1 && (
+            <p style={{ fontFamily: f, fontSize: '0.8rem', color: '#92400E', marginBottom: '12px' }}>
+              <AlertTriangle size={12} style={{ verticalAlign: 'middle', marginRight: '4px' }} />
+              File ini punya {sheetCount} sheet — yang dibaca hanya sheet pertama. Pisahkan tiap campaign ke file sendiri.
+            </p>
+          )}
+          {ignoredHeaders.length > 0 && (
+            <p style={{ fontFamily: f, fontSize: '0.8rem', color: '#92400E', marginBottom: '12px' }}>
+              <AlertTriangle size={12} style={{ verticalAlign: 'middle', marginRight: '4px' }} />
+              Kolom tidak dikenali & diabaikan: <strong>{ignoredHeaders.join(', ')}</strong>. Ganti nama header kalau kolom ini seharusnya ikut diimport.
+            </p>
+          )}
           <div style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.78rem', fontFamily: f }}>
               <thead>
                 <tr style={{ background: '#f8f9ff', textAlign: 'left' }}>
-                  {['#', 'Campaign', 'Brand', 'Creator', 'Platform', 'Views', 'Status'].map((h) => (
+                  {['#', 'Campaign', 'Brand', 'Creator', 'Platform', 'Views', 'Fee Creator', 'Status'].map((h) => (
                     <th key={h} style={{ padding: '8px 10px', fontWeight: 700 }}>{h}</th>
                   ))}
                 </tr>
@@ -114,6 +134,7 @@ export default function Import() {
                     <td style={{ padding: '8px 10px' }}>{r.creatorName}</td>
                     <td style={{ padding: '8px 10px', textTransform: 'capitalize' }}>{r.platform}</td>
                     <td style={{ padding: '8px 10px' }}>{r.views?.toLocaleString('id-ID') || '-'}</td>
+                    <td style={{ padding: '8px 10px' }}>{r.feeCreator ? `Rp${r.feeCreator.toLocaleString('id-ID')}` : '-'}</td>
                     <td style={{ padding: '8px 10px' }}>
                       {r.errors.length > 0 ? (
                         <span style={{ color: '#ba1a1a', display: 'flex', alignItems: 'center', gap: '4px' }}>
