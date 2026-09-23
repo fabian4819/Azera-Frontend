@@ -9,10 +9,16 @@ import { getServiceBySlug } from '../data/services';
 import { ease } from '../lib/motion';
 import api from '../lib/api';
 import SocialEmbed from '../components/SocialEmbed';
-import HeroFloatingPhotos from '../components/HeroFloatingPhotos';
 
 const scopeIcons = [ShieldCheck, Layers, Target, TrendingUp, ClipboardCheck, BarChart3];
 const workflowIcons = [Target, Users, Rocket, TrendingUp];
+
+const serviceHeroImages: Record<string, string> = {
+  'nano-micro-kol-campaign': '/service-heroes/nano-micro-kol-campaign.webp',
+  'koc-campaign': '/service-heroes/koc-campaign.webp',
+  'affiliate-creator-campaign': '/service-heroes/affiliate-creator-campaign.webp',
+  'event-creator-activation': '/service-heroes/event-creator-activation.webp',
+};
 
 interface TopCreator {
   name: string;
@@ -301,36 +307,39 @@ export default function ServiceDetail() {
           position: 'relative',
           overflow: 'hidden',
           marginTop: '-88px',
+          minHeight: '100svh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
           paddingTop: '132px',
           paddingBottom: '80px',
           paddingLeft: '24px',
           paddingRight: '24px',
           textAlign: 'center',
           background:
-            'radial-gradient(85% 65% at 50% -8%, #6f4ab8, rgba(111,74,184,0) 58%),' +
-            'linear-gradient(180deg, #5c3aa8 0%, #562fa0 52%, #4a2f8c 100%)',
+            'linear-gradient(90deg, rgba(247,249,255,0.18) 0%, rgba(248,249,255,0.82) 35%, rgba(248,249,255,0.9) 50%, rgba(248,249,255,0.82) 65%, rgba(247,249,255,0.18) 100%), ' +
+            `url(${serviceHeroImages[service.slug]}) center / cover no-repeat`,
         }}
       >
-        <HeroFloatingPhotos />
         <div style={{ position: 'relative', zIndex: 1, maxWidth: '760px', margin: '0 auto' }}>
-          <span className="tag-pill tag-pill-white" style={{ margin: '0 auto 20px' }}>{service.eyebrow}</span>
+          <span className="tag-pill tag-pill-navy" style={{ margin: '0 auto 20px', backdropFilter: 'blur(8px)' }}>{service.eyebrow}</span>
           <h1
             style={{
               fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 'clamp(2.2rem, 5.5vw, 3.6rem)',
-              color: '#fff', lineHeight: 1.1, marginBottom: '18px', letterSpacing: '-0.03em',
+              color: 'var(--on-background)', lineHeight: 1.1, marginBottom: '18px', letterSpacing: '-0.03em',
             }}
           >
             {service.headlinePlain}{' '}
             <span className="mark-lime">{service.headlineHighlight}</span>
           </h1>
-          <p style={{ color: 'rgba(255,255,255,0.85)', fontSize: '1.05rem', marginBottom: '24px' }}>{service.subheading}</p>
+          <p style={{ color: 'var(--on-surface-variant)', fontSize: '1.05rem', marginBottom: '24px' }}>{service.subheading}</p>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', justifyContent: 'center', marginBottom: '28px' }}>
             {service.tags.map((tag) => (
-              <span key={tag} className="tag-pill tag-pill-white" style={{ fontSize: '0.78rem', color: 'var(--lime)' }}>{tag}</span>
+              <span key={tag} className="tag-pill tag-pill-purple" style={{ fontSize: '0.78rem', backdropFilter: 'blur(8px)' }}>{tag}</span>
             ))}
           </div>
           {service.description.map((p, i) => (
-            <p key={i} style={{ color: i === 0 ? '#fff' : 'rgba(255,255,255,0.75)', fontWeight: i === 0 ? 700 : 400, fontSize: '0.95rem', lineHeight: 1.7, marginBottom: '8px' }}>
+            <p key={i} style={{ color: i === 0 ? 'var(--primary)' : 'var(--on-surface-variant)', fontWeight: i === 0 ? 700 : 400, fontSize: '0.95rem', lineHeight: 1.7, marginBottom: '8px' }}>
               {p}
             </p>
           ))}
