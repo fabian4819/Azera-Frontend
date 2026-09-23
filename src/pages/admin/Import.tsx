@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Upload, CheckCircle2, AlertTriangle } from 'lucide-react';
 import api from '../../lib/api';
 
@@ -21,6 +21,7 @@ const td: React.CSSProperties = { padding: '8px 10px', whiteSpace: 'nowrap' };
 
 export default function Import() {
   const [file, setFile] = useState<File | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const [rows, setRows] = useState<ImportRow[]>([]);
   const [loading, setLoading] = useState(false);
   const [ignoredHeaders, setIgnoredHeaders] = useState<string[]>([]);
@@ -28,14 +29,16 @@ export default function Import() {
   const [result, setResult] = useState<{ created: number; updated: number; skipped: { rowNumber: number; reason: string }[] } | null>(null);
   const [error, setError] = useState('');
 
-  const preview = async () => {
-    if (!file) return;
+  // Langsung preview begitu file dipilih — tidak ada tombol Preview terpisah
+  const preview = async (picked: File) => {
+    setFile(picked);
+    setRows([]);
     setLoading(true);
     setError('');
     setResult(null);
     try {
       const formData = new FormData();
-      formData.append('file', file);
+      formData.append('file', picked);
       const res = await api.post('/admin/import/preview', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
       setRows(res.data.rows);
       setIgnoredHeaders(res.data.ignoredHeaders || []);
@@ -73,11 +76,20 @@ export default function Import() {
           Fee = fee per creator untuk campaign tsb (cukup diisi di salah satu baris kalau creator punya lebih dari satu platform). Tanggal pakai format dd/mm/yyyy.
           Import ulang file yang sama akan meng-update angka, bukan menggandakan data.
         </p>
-        <input type="file" accept=".xlsx,.csv" onChange={(e) => setFile(e.target.files?.[0] || null)} style={{ marginBottom: '14px', fontFamily: f, fontSize: '0.85rem' }} />
-        <br />
-        <button onClick={preview} disabled={!file || loading} className="btn-primary" style={{ padding: '9px 18px', fontSize: '0.82rem', opacity: !file || loading ? 0.6 : 1 }}>
-          <Upload size={14} /> {loading ? 'Memproses...' : 'Preview'}
-        </button>
+        <input
+          ref={inputRef} type="file" accept=".xlsx,.csv" hidden
+          onChange={(e) => {
+            const picked = e.target.files?.[0];
+            e.target.value = ''; // supaya file yang sama bisa dipilih lagi (import ulang)
+            if (picked) preview(picked);
+          }}
+        />
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+          <button onClick={() => inputRef.current?.click()} disabled={loading} className="btn-primary" style={{ padding: '9px 18px', fontSize: '0.82rem', opacity: loading ? 0.6 : 1 }}>
+            <Upload size={14} /> {loading ? 'Memproses...' : 'Pilih File'}
+          </button>
+          {file && <span style={{ fontFamily: f, fontSize: '0.82rem', color: '#464652' }}>{file.name}</span>}
+        </div>
         {error && <p style={{ color: '#ba1a1a', fontSize: '0.82rem', marginTop: '12px', fontFamily: f }}>{error}</p>}
       </div>
 
