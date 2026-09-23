@@ -1,13 +1,10 @@
-import { useEffect, useRef, useState } from 'react';
-import { useParams, Navigate, Link } from 'react-router-dom';
-import { motion, AnimatePresence, useInView } from 'framer-motion';
-import {
-  Users, TrendingUp, ChevronLeft, ChevronRight, Check, Eye, Plus,
-} from 'lucide-react';
+import { useRef, useState } from 'react';
+import { useParams, Navigate } from 'react-router-dom';
+import { motion, AnimatePresence, useInView, useMotionValue, useReducedMotion, useScroll, useSpring, useTransform } from 'framer-motion';
+import type { MouseEvent as ReactMouseEvent, RefObject } from 'react';
+import { Check, Plus } from 'lucide-react';
 import { getServiceBySlug } from '../data/services';
-import { ease } from '../lib/motion';
-import api from '../lib/api';
-import SocialEmbed from '../components/SocialEmbed';
+import { ease, fadeUp, stagger, useParallax } from '../lib/motion';
 
 const serviceHeroImages: Record<string, string> = {
   'nano-micro-kol-campaign': '/service-heroes/nano-micro-kol-campaign-purple.webp',
@@ -15,229 +12,6 @@ const serviceHeroImages: Record<string, string> = {
   'affiliate-creator-campaign': '/service-heroes/affiliate-creator-campaign-purple.webp',
   'event-creator-activation': '/service-heroes/event-creator-activation-purple.webp',
 };
-
-interface TopCreator {
-  name: string;
-  platform: 'instagram' | 'tiktok';
-  postLink: string;
-  views?: string;
-  likes?: string;
-  comments?: string;
-  shares?: string;
-}
-interface PortfolioItem {
-  _id: string;
-  brand: string;
-  category: string;
-  kolCount: number;
-  reach: string;
-  engagement: number;
-  logo?: string;
-  title?: string;
-  objective?: string;
-  topCreators?: TopCreator[];
-}
-
-function RelatedSuccess({ category }: { category: string }) {
-  const [items, setItems] = useState<PortfolioItem[]>([]);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [creatorIndex, setCreatorIndex] = useState(0);
-  const [creatorScrollKey, setCreatorScrollKey] = useState<string | undefined>(undefined);
-  const creatorScrollRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    api.get('/portfolio')
-      .then((res) => {
-        const filtered = (res.data as PortfolioItem[]).filter((i) => i.category === category);
-        if (filtered.length) {
-          setItems(filtered);
-          setSelectedId(filtered[0]._id);
-        }
-      })
-      .catch(() => {});
-  }, [category]);
-
-  const selected = items.find((i) => i._id === selectedId) || items[0];
-  const hasCreators = selected?.topCreators && selected.topCreators.length > 0;
-  const creatorCount = selected?.topCreators?.length ?? 0;
-
-  if (selected?._id !== creatorScrollKey) {
-    setCreatorScrollKey(selected?._id);
-    if (creatorIndex !== 0) setCreatorIndex(0);
-  }
-
-  function handleCreatorScroll() {
-    const el = creatorScrollRef.current;
-    if (!el || el.clientWidth === 0) return;
-    setCreatorIndex(Math.round(el.scrollLeft / el.clientWidth));
-  }
-  function goToCreator(i: number) {
-    const el = creatorScrollRef.current;
-    if (!el) return;
-    const clamped = Math.max(0, Math.min(i, creatorCount - 1));
-    el.scrollTo({ left: clamped * el.clientWidth, behavior: 'smooth' });
-    setCreatorIndex(clamped);
-  }
-
-  if (!items.length) return null;
-
-  return (
-    <div>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', justifyContent: 'center', marginBottom: '32px' }}>
-        {items.map((item) => {
-          const active = selected?._id === item._id;
-          return (
-            <button
-              key={item._id}
-              onClick={() => setSelectedId(item._id)}
-              style={{
-                padding: '11px 22px', borderRadius: '999px',
-                border: active ? '1.5px solid var(--secondary)' : '1.5px solid var(--outline-variant)',
-                background: active ? 'var(--secondary)' : '#fff',
-                color: active ? '#fff' : 'var(--on-background)',
-                fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '0.88rem', cursor: 'pointer',
-                transition: 'all 0.2s',
-              }}
-            >
-              {item.brand}
-            </button>
-          );
-        })}
-      </div>
-
-      <AnimatePresence mode="wait">
-        {selected && (
-          <motion.div
-            key={selected._id}
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -16 }}
-            transition={{ duration: 0.3, ease }}
-            style={{ background: 'var(--primary)', borderRadius: '28px', padding: '36px', display: 'grid', gridTemplateColumns: '1fr 1.1fr', gap: '36px' }}
-            className="service-detail-grid"
-          >
-            <div>
-              {hasCreators ? (
-                <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }}>
-                    <button
-                      onClick={() => goToCreator(creatorIndex - 1)}
-                      disabled={creatorIndex === 0}
-                      style={{
-                        flexShrink: 0, width: '32px', height: '32px', borderRadius: '50%', border: 'none',
-                        background: 'rgba(255,255,255,0.12)', color: '#fff', display: creatorCount > 1 ? 'flex' : 'none',
-                        alignItems: 'center', justifyContent: 'center', cursor: creatorIndex === 0 ? 'default' : 'pointer',
-                        opacity: creatorIndex === 0 ? 0.35 : 1, transition: 'opacity 0.2s',
-                      }}
-                    >
-                      <ChevronLeft size={16} />
-                    </button>
-
-                    <div
-                      key={selected._id}
-                      ref={creatorScrollRef}
-                      onScroll={handleCreatorScroll}
-                      style={{ width: '340px', minWidth: 0, display: 'flex', overflowX: 'auto', scrollSnapType: 'x mandatory' }}
-                      className="service-creator-scroll"
-                    >
-                      {selected.topCreators!.slice(0, 3).map((c, i) => (
-                        <div key={i} style={{ flex: '0 0 100%', minWidth: 0, scrollSnapAlign: 'center' }}>
-                          <SocialEmbed platform={c.platform} url={c.postLink} />
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginTop: '8px', fontSize: '0.76rem', color: 'rgba(255,255,255,0.7)' }}>
-                            <span
-                              style={{
-                                flexShrink: 0, width: '20px', height: '20px', borderRadius: '50%',
-                                background: 'var(--lime)', color: 'var(--on-lime)', display: 'flex',
-                                alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-display)',
-                                fontWeight: 800, fontSize: '0.66rem',
-                              }}
-                            >
-                              {i + 1}
-                            </span>
-                            <span style={{ fontWeight: 700, color: '#fff' }}>{c.name}</span>
-                            {c.views && <span>{c.views} views</span>}
-                            {c.likes && <span>{c.likes} likes</span>}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-
-                    <button
-                      onClick={() => goToCreator(creatorIndex + 1)}
-                      disabled={creatorIndex === creatorCount - 1}
-                      style={{
-                        flexShrink: 0, width: '32px', height: '32px', borderRadius: '50%', border: 'none',
-                        background: 'rgba(255,255,255,0.12)', color: '#fff', display: creatorCount > 1 ? 'flex' : 'none',
-                        alignItems: 'center', justifyContent: 'center', cursor: creatorIndex === creatorCount - 1 ? 'default' : 'pointer',
-                        opacity: creatorIndex === creatorCount - 1 ? 0.35 : 1, transition: 'opacity 0.2s',
-                      }}
-                    >
-                      <ChevronRight size={16} />
-                    </button>
-                  </div>
-                  {creatorCount > 1 && (
-                    <div style={{ display: 'flex', gap: '6px', justifyContent: 'center', marginTop: '14px' }}>
-                      {selected.topCreators!.slice(0, 3).map((_, i) => (
-                        <button
-                          key={i}
-                          onClick={() => goToCreator(i)}
-                          style={{
-                            width: i === creatorIndex ? '20px' : '6px', height: '6px', borderRadius: '999px', border: 'none',
-                            background: i === creatorIndex ? 'var(--lime)' : 'rgba(255,255,255,0.25)', cursor: 'pointer', transition: 'all 0.2s',
-                          }}
-                        />
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div
-                  style={{
-                    borderRadius: '20px', overflow: 'hidden', height: '100%', minHeight: '260px',
-                    background: 'rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '32px',
-                  }}
-                >
-                  {selected.logo ? (
-                    <img src={selected.logo} alt={selected.brand} style={{ maxWidth: '70%', maxHeight: '140px', objectFit: 'contain' }} />
-                  ) : (
-                    <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '4rem', color: 'rgba(255,255,255,0.25)' }}>{selected.brand[0]}</span>
-                  )}
-                </div>
-              )}
-            </div>
-
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
-                <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '1.05rem', color: 'var(--lime)' }}>{selected.brand}</span>
-                <span className="tag-pill tag-pill-white">{selected.category}</span>
-              </div>
-              <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 'clamp(1.4rem, 3vw, 1.8rem)', color: '#fff', lineHeight: 1.2, marginBottom: '16px' }}>
-                {selected.title || `${selected.brand} Campaign`}
-              </h3>
-              {selected.objective && (
-                <p style={{ color: 'rgba(255,255,255,0.78)', fontSize: '0.92rem', lineHeight: 1.7, marginBottom: '16px' }}>{selected.objective}</p>
-              )}
-              <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'rgba(255,255,255,0.75)', fontSize: '0.85rem' }}><Users size={14} /> {selected.kolCount} KOL</div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'rgba(255,255,255,0.75)', fontSize: '0.85rem' }}><Eye size={14} /> {selected.reach} Reach</div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--lime)', fontSize: '0.85rem', fontWeight: 700 }}><TrendingUp size={14} /> {selected.engagement}% ER</div>
-              </div>
-              <Link to="/portfolio" style={{ display: 'inline-block', marginTop: '20px', color: 'var(--lime)', fontSize: '0.85rem', fontWeight: 700, textDecoration: 'none' }}>
-                Lihat semua portfolio &rarr;
-              </Link>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      <style>{`
-        @media (max-width: 900px) { .service-detail-grid { grid-template-columns: 1fr !important; } }
-        .service-creator-scroll { scrollbar-width: none; -ms-overflow-style: none; }
-        .service-creator-scroll::-webkit-scrollbar { display: none; }
-      `}</style>
-    </div>
-  );
-}
 
 function FAQAccordion({ items }: { items: { question: string; answer: string }[] }) {
   const [open, setOpen] = useState<number | null>(null);
@@ -309,6 +83,33 @@ export default function ServiceDetail() {
   const isInView = useInView(ref, { once: true, margin: '-80px' });
   const workflowRef = useRef(null);
   const isWorkflowInView = useInView(workflowRef, { once: true, margin: '-100px' });
+  const pricingRef = useRef(null);
+  const isPricingInView = useInView(pricingRef, { once: true, margin: '-80px' });
+
+  // Motion ala homepage: hero bg ikut mouse + scroll, teks hero memudar saat di-scroll lewat
+  const reduceMotion = useReducedMotion();
+  const heroRef = useRef<HTMLElement>(null);
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+  const springX = useSpring(mouseX, { stiffness: 60, damping: 20, mass: 0.5 });
+  const springY = useSpring(mouseY, { stiffness: 60, damping: 20, mass: 0.5 });
+  const { scrollYProgress: heroProgress } = useScroll({ target: heroRef, offset: ['start start', 'end start'] });
+  const bgX = useTransform(springX, (v) => v * -24);
+  const bgScrollY = useTransform(heroProgress, [0, 1], [0, 160]);
+  const bgY = useTransform([bgScrollY, springY], ([s, m]: number[]) => s + m * -24);
+  const copyY = useTransform(heroProgress, [0, 1], [0, -80]);
+  const copyOpacity = useTransform(heroProgress, [0, 0.7], [1, 0]);
+  const handleHeroMove = (e: ReactMouseEvent<HTMLElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    mouseX.set((e.clientX - rect.left) / rect.width - 0.5);
+    mouseY.set((e.clientY - rect.top) / rect.height - 0.5);
+  };
+  const resetHeroMouse = () => { mouseX.set(0); mouseY.set(0); };
+
+  const scopeParallax = useParallax(36);
+  const workflowParallax = useParallax(28);
+  const pricingParallax = useParallax(70);
+  const hoverLift = { y: -6, transition: { duration: 0.3, ease } };
 
   const WA_LINK = 'https://wa.me/6281919525186?text=' + encodeURIComponent(`Halo AzeraKOL!\nSaya ingin tanya-tanya soal layanan ${service?.navLabel || ''}, boleh dibantu?`);
 
@@ -318,12 +119,26 @@ export default function ServiceDetail() {
     <div style={{ background: 'var(--surface)' }}>
       {/* Hero */}
       <section
+        ref={heroRef}
         className="service-hero"
-        style={{ backgroundImage: `url(${serviceHeroImages[service.slug]})` }}
+        onMouseMove={reduceMotion ? undefined : handleHeroMove}
+        onMouseLeave={resetHeroMouse}
       >
-        <div className="service-hero-copy">
-          <span className="tag-pill tag-pill-white service-hero-eyebrow">{service.eyebrow}</span>
-          <h1
+        <motion.div
+          aria-hidden="true"
+          className="service-hero-bg"
+          style={{ backgroundImage: `url(${serviceHeroImages[service.slug]})`, ...(reduceMotion ? {} : { x: bgX, y: bgY }) }}
+        />
+        <motion.div
+          className="service-hero-copy"
+          variants={stagger(0.09, 0.05)}
+          initial="hidden"
+          animate="show"
+          style={reduceMotion ? undefined : { y: copyY, opacity: copyOpacity }}
+        >
+          <motion.span variants={fadeUp(0, 20)} className="tag-pill tag-pill-white service-hero-eyebrow">{service.eyebrow}</motion.span>
+          <motion.h1
+            variants={fadeUp()}
             style={{
               fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 'clamp(2.2rem, 5.5vw, 3.6rem)',
               color: '#fff', lineHeight: 1.1, marginBottom: '18px', letterSpacing: '-0.03em',
@@ -331,24 +146,26 @@ export default function ServiceDetail() {
           >
             {service.headlinePlain}{' '}
             <span className="mark-lime">{service.headlineHighlight}</span>
-          </h1>
-          <p style={{ color: 'rgba(255,255,255,0.9)', fontSize: '1.08rem', fontWeight: 500, lineHeight: 1.6, marginBottom: '24px' }}>{service.subheading}</p>
-          <div className="service-hero-tags">
+          </motion.h1>
+          <motion.p variants={fadeUp()} style={{ color: 'rgba(255,255,255,0.9)', fontSize: '1.08rem', fontWeight: 500, lineHeight: 1.6, marginBottom: '24px' }}>{service.subheading}</motion.p>
+          <motion.div variants={fadeUp()} className="service-hero-tags">
             {service.tags.map((tag) => (
               <span key={tag} className="tag-pill" style={{ fontSize: '0.78rem', color: 'var(--lime)', background: 'rgba(28,10,68,0.4)', border: '1px solid rgba(196,238,135,0.3)', backdropFilter: 'blur(8px)', textShadow: 'none' }}>{tag}</span>
             ))}
-          </div>
+          </motion.div>
+          <motion.div variants={fadeUp()}>
           {service.description.map((p, i) => (
             <p key={i} style={{ color: i === 0 ? '#fff' : 'rgba(255,255,255,0.82)', fontWeight: i === 0 ? 700 : 400, fontSize: '0.95rem', lineHeight: 1.7, marginBottom: '8px' }}>
               {p}
             </p>
           ))}
-          <div style={{ marginTop: '28px' }}>
+          </motion.div>
+          <motion.div variants={fadeUp()} style={{ marginTop: '28px' }}>
             <a href={WA_LINK} target="_blank" rel="noopener noreferrer" className="btn-lime">
               Diskusikan Campaign Kamu
             </a>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       </section>
 
       {/* Scope & Advantages */}
@@ -372,7 +189,12 @@ export default function ServiceDetail() {
               transition={{ duration: 0.7, ease }}
               className="service-scope-visual"
             >
-              <img src="/service-sections/scope-coverage.webp" alt="Ilustrasi cakupan pengelolaan campaign AzeraKOL" />
+              <motion.img
+                ref={scopeParallax.ref as RefObject<HTMLImageElement>}
+                style={reduceMotion ? undefined : { y: scopeParallax.y }}
+                src="/service-sections/scope-coverage.webp"
+                alt="Ilustrasi cakupan pengelolaan campaign AzeraKOL"
+              />
               <div className="service-visual-caption">
                 <span>{String(service.scope.length).padStart(2, '0')}</span>
                 <div>
@@ -389,6 +211,7 @@ export default function ServiceDetail() {
                     initial={{ opacity: 0, y: 24 }}
                     animate={isInView ? { opacity: 1, y: 0 } : {}}
                     transition={{ duration: 0.55, ease, delay: 0.08 + i * 0.06 }}
+                    whileHover={{ ...hoverLift, rotate: -0.4 }}
                     className="service-scope-card"
                   >
                     <span className="service-scope-index">0{i + 1}</span>
@@ -418,6 +241,8 @@ export default function ServiceDetail() {
           </div>
 
           <motion.img
+            ref={workflowParallax.ref as RefObject<HTMLImageElement>}
+            style={reduceMotion ? undefined : { y: workflowParallax.y }}
             src="/service-sections/campaign-workflow.webp"
             alt="Ilustrasi alur kerja campaign dari perencanaan hingga optimasi"
             initial={{ opacity: 0, scale: 0.94 }}
@@ -433,6 +258,7 @@ export default function ServiceDetail() {
                   initial={{ opacity: 0, y: 24 }}
                   animate={isWorkflowInView ? { opacity: 1, y: 0 } : {}}
                   transition={{ duration: 0.5, ease, delay: 0.2 + i * 0.08 }}
+                  whileHover={hoverLift}
                   className="service-workflow-card"
                 >
                   <span className="service-workflow-number">0{i + 1}</span>
@@ -445,55 +271,85 @@ export default function ServiceDetail() {
         </motion.div>
       </section>
 
-      {/* Pricing / Estimasi Paket */}
-      <section style={{ padding: '90px 24px', background: 'var(--surface-container)' }}>
-        <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
-          <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 'clamp(1.8rem, 4vw, 2.6rem)', textAlign: 'center', color: 'var(--on-background)', marginBottom: '12px', letterSpacing: '-0.02em' }}>
-            Paket Campaign
-          </h2>
-          <p style={{ textAlign: 'center', color: 'var(--on-surface-variant)', fontSize: '0.9rem', marginBottom: '48px' }}>
-            Paket disesuaikan dengan kebutuhan dan skala campaign brand kamu.
-          </p>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }} className="service-pricing-grid">
-            {service.pricing.map((tier) => (
-              <div
-                key={tier.badge}
-                style={{
-                  borderRadius: '24px', padding: '32px',
-                  background: tier.dark ? 'var(--primary)' : '#fff',
-                  border: tier.dark ? 'none' : '1.5px solid var(--outline-variant)',
-                }}
-              >
-                <span className={tier.dark ? 'tag-pill tag-pill-lime' : 'tag-pill tag-pill-navy'}>{tier.badge}</span>
-                <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.25rem', color: tier.dark ? '#fff' : 'var(--on-background)', margin: '16px 0 20px' }}>
-                  {tier.name}
-                </h3>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '28px' }}>
-                  {tier.features.map((f) => (
-                    <div key={f} style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
-                      <Check size={16} color={tier.dark ? 'var(--lime)' : 'var(--secondary)'} style={{ flexShrink: 0, marginTop: '2px' }} />
-                      <span style={{ fontSize: '0.88rem', color: tier.dark ? 'rgba(255,255,255,0.85)' : 'var(--on-surface-variant)', lineHeight: 1.5 }}>{f}</span>
-                    </div>
+      {/* Paket Campaign + CTA — gaya sama dengan CTA "Untuk Creator" di home */}
+      <section ref={pricingRef} style={{ position: 'relative', overflow: 'hidden', padding: '90px 24px' }}>
+        <div style={{ position: 'absolute', inset: 0, zIndex: 0 }} aria-hidden="true">
+          <motion.img
+            ref={pricingParallax.ref as RefObject<HTMLImageElement>}
+            src="/cta/creator-bg.jpg"
+            alt=""
+            style={{ width: '100%', height: '100%', objectFit: 'cover', scale: 1.2, ...(reduceMotion ? {} : { y: pricingParallax.y }) }}
+          />
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              background:
+                'linear-gradient(180deg, rgba(28,10,68,0.75) 0%, rgba(44,16,101,0.35) 30%, rgba(44,16,101,0.35) 65%, rgba(15,7,45,0.8) 100%)',
+            }}
+          />
+        </div>
+
+        <div style={{ position: 'relative', zIndex: 1, maxWidth: '980px', margin: '0 auto', textAlign: 'center' }}>
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            animate={isPricingInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.6, ease }}
+          >
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.6)', display: 'inline-block', marginBottom: '18px' }}>
+              Paket Campaign
+            </span>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 'clamp(2rem, 5vw, 3.4rem)', color: '#fff', lineHeight: 1.1, letterSpacing: '-0.03em', marginBottom: '18px' }}>
+              Siap jalankan <span className="mark-lime">{service.navLabel}?</span>
+            </h2>
+            <p style={{ color: 'rgba(255,255,255,0.75)', fontSize: '1.02rem', lineHeight: 1.7, maxWidth: '560px', margin: '0 auto 44px' }}>
+              Paket disesuaikan dengan kebutuhan dan skala campaign brand kamu. Diskusikan dengan tim kami untuk gambaran strateginya.
+            </p>
+          </motion.div>
+
+          <motion.div
+            className="service-pricing-grid"
+            style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '28px', marginBottom: '40px', textAlign: 'left' }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={isPricingInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.6, ease, delay: 0.1 }}
+          >
+            {service.pricing.map((tier, ti) => (
+              <div key={tier.badge}>
+                <div style={{ padding: '0 8px 14px' }}>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--lime)' }}>{tier.badge}</span>
+                  <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.2rem', color: '#fff', marginTop: '4px' }}>{tier.name}</h3>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  {tier.features.map((f, fi) => (
+                    <motion.div
+                      key={f}
+                      initial={{ opacity: 0, x: ti === 0 ? -20 : 20 }}
+                      animate={isPricingInView ? { opacity: 1, x: 0 } : {}}
+                      transition={{ duration: 0.5, ease, delay: 0.2 + fi * 0.07 + ti * 0.05 }}
+                      whileHover={{ scale: 1.02, transition: { duration: 0.25, ease } }}
+                      style={{ background: '#fff', borderRadius: '999px', padding: '10px 20px 10px 10px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <div style={{ width: '34px', height: '34px', borderRadius: '50%', background: 'var(--secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <Check size={16} color="#fff" />
+                      </div>
+                      <p style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '0.88rem', color: 'var(--on-background)', lineHeight: 1.35 }}>{f}</p>
+                    </motion.div>
                   ))}
                 </div>
-                <a href={WA_LINK} target="_blank" rel="noopener noreferrer" className={tier.dark ? 'btn-lime' : 'btn-primary'} style={{ width: '100%', justifyContent: 'center' }}>
-                  Diskusikan Campaign Kamu
-                </a>
               </div>
             ))}
-          </div>
-        </div>
-      </section>
+          </motion.div>
 
-      {/* Related Success */}
-      <section style={{ padding: '90px 24px', maxWidth: '1160px', margin: '0 auto' }}>
-        <div style={{ textAlign: 'center', marginBottom: '40px' }}>
-          <span className="tag-pill tag-pill-navy" style={{ margin: '0 auto 16px' }}>Related Success</span>
-          <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 'clamp(1.8rem, 4vw, 2.6rem)', color: 'var(--on-background)', letterSpacing: '-0.02em' }}>
-            Campaign {service.navLabel} Kami
-          </h2>
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={isPricingInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.5, ease, delay: 0.2 }}
+          >
+            <a href={WA_LINK} target="_blank" rel="noopener noreferrer" className="btn-lime" style={{ fontSize: '1rem' }}>
+              Diskusikan Campaign Kamu <span style={{ fontSize: '1.1rem' }}>↗</span>
+            </a>
+          </motion.div>
         </div>
-        <RelatedSuccess category={service.portfolioCategory} />
       </section>
 
       {/* FAQ */}
@@ -511,21 +367,6 @@ export default function ServiceDetail() {
         </div>
       </section>
 
-      {/* Closing CTA */}
-      <section style={{ padding: '90px 24px', textAlign: 'center' }}>
-        <div style={{ maxWidth: '640px', margin: '0 auto' }}>
-          <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 'clamp(1.8rem, 4.5vw, 2.8rem)', color: 'var(--on-background)', marginBottom: '16px', letterSpacing: '-0.02em' }}>
-            Siap Jalankan Campaign {service.navLabel}?
-          </h2>
-          <p style={{ color: 'var(--on-surface-variant)', fontSize: '0.98rem', marginBottom: '28px' }}>
-            Jadwalkan diskusi dengan tim kami dan dapatkan gambaran strategi campaign untuk brand kamu.
-          </p>
-          <a href={WA_LINK} target="_blank" rel="noopener noreferrer" className="btn-lime">
-            Diskusikan Campaign Kamu
-          </a>
-        </div>
-      </section>
-
       <style>{`
         .service-hero {
           position: relative;
@@ -538,10 +379,15 @@ export default function ServiceDetail() {
           align-items: center;
           justify-content: center;
           background-color: #562fa0;
+          text-align: center;
+        }
+        .service-hero-bg {
+          position: absolute;
+          inset: -40px;
+          z-index: -1;
           background-position: center;
           background-size: cover;
           background-repeat: no-repeat;
-          text-align: center;
         }
         .service-hero::after {
           content: '';
@@ -669,7 +515,6 @@ export default function ServiceDetail() {
           transition: transform 0.3s var(--ease-spring), background 0.3s ease, box-shadow 0.3s ease;
         }
         .service-scope-card:hover {
-          transform: translateY(-5px) rotate(-0.4deg);
           background: #fff;
           box-shadow: var(--shadow-pitch);
         }
@@ -747,7 +592,6 @@ export default function ServiceDetail() {
           transition: transform 0.3s var(--ease-spring), background 0.3s ease;
         }
         .service-workflow-card:hover {
-          transform: translateY(-5px);
           background: rgba(255,255,255,0.14);
         }
         .service-workflow-number {
