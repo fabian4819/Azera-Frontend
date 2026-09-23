@@ -10,10 +10,10 @@ import api from '../lib/api';
 import SocialEmbed from '../components/SocialEmbed';
 
 const serviceHeroImages: Record<string, string> = {
-  'nano-micro-kol-campaign': '/service-heroes/nano-micro-kol-campaign.webp',
-  'koc-campaign': '/service-heroes/koc-campaign.webp',
-  'affiliate-creator-campaign': '/service-heroes/affiliate-creator-campaign.webp',
-  'event-creator-activation': '/service-heroes/event-creator-activation.webp',
+  'nano-micro-kol-campaign': '/service-heroes/nano-micro-kol-campaign-purple.webp',
+  'koc-campaign': '/service-heroes/koc-campaign-purple.webp',
+  'affiliate-creator-campaign': '/service-heroes/affiliate-creator-campaign-purple.webp',
+  'event-creator-activation': '/service-heroes/event-creator-activation-purple.webp',
 };
 
 interface TopCreator {
@@ -318,43 +318,28 @@ export default function ServiceDetail() {
     <div style={{ background: 'var(--surface)' }}>
       {/* Hero */}
       <section
-        style={{
-          position: 'relative',
-          overflow: 'hidden',
-          marginTop: '-88px',
-          minHeight: '100svh',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          paddingTop: '132px',
-          paddingBottom: '80px',
-          paddingLeft: '24px',
-          paddingRight: '24px',
-          textAlign: 'center',
-          background:
-            'linear-gradient(90deg, rgba(247,249,255,0.18) 0%, rgba(248,249,255,0.82) 35%, rgba(248,249,255,0.9) 50%, rgba(248,249,255,0.82) 65%, rgba(247,249,255,0.18) 100%), ' +
-            `url(${serviceHeroImages[service.slug]}) center / cover no-repeat`,
-        }}
+        className="service-hero"
+        style={{ backgroundImage: `url(${serviceHeroImages[service.slug]})` }}
       >
-        <div style={{ position: 'relative', zIndex: 1, maxWidth: '760px', margin: '0 auto' }}>
-          <span className="tag-pill tag-pill-navy" style={{ margin: '0 auto 20px', backdropFilter: 'blur(8px)' }}>{service.eyebrow}</span>
+        <div className="service-hero-copy">
+          <span className="tag-pill tag-pill-white service-hero-eyebrow">{service.eyebrow}</span>
           <h1
             style={{
               fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 'clamp(2.2rem, 5.5vw, 3.6rem)',
-              color: 'var(--on-background)', lineHeight: 1.1, marginBottom: '18px', letterSpacing: '-0.03em',
+              color: '#fff', lineHeight: 1.1, marginBottom: '18px', letterSpacing: '-0.03em',
             }}
           >
             {service.headlinePlain}{' '}
             <span className="mark-lime">{service.headlineHighlight}</span>
           </h1>
-          <p style={{ color: 'var(--on-surface-variant)', fontSize: '1.05rem', marginBottom: '24px' }}>{service.subheading}</p>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', justifyContent: 'center', marginBottom: '28px' }}>
+          <p style={{ color: 'rgba(255,255,255,0.9)', fontSize: '1.08rem', fontWeight: 500, lineHeight: 1.6, marginBottom: '24px' }}>{service.subheading}</p>
+          <div className="service-hero-tags">
             {service.tags.map((tag) => (
-              <span key={tag} className="tag-pill tag-pill-purple" style={{ fontSize: '0.78rem', backdropFilter: 'blur(8px)' }}>{tag}</span>
+              <span key={tag} className="tag-pill" style={{ fontSize: '0.78rem', color: 'var(--lime)', background: 'rgba(28,10,68,0.4)', border: '1px solid rgba(196,238,135,0.3)', backdropFilter: 'blur(8px)', textShadow: 'none' }}>{tag}</span>
             ))}
           </div>
           {service.description.map((p, i) => (
-            <p key={i} style={{ color: i === 0 ? 'var(--primary)' : 'var(--on-surface-variant)', fontWeight: i === 0 ? 700 : 400, fontSize: '0.95rem', lineHeight: 1.7, marginBottom: '8px' }}>
+            <p key={i} style={{ color: i === 0 ? '#fff' : 'rgba(255,255,255,0.82)', fontWeight: i === 0 ? 700 : 400, fontSize: '0.95rem', lineHeight: 1.7, marginBottom: '8px' }}>
               {p}
             </p>
           ))}
@@ -542,6 +527,48 @@ export default function ServiceDetail() {
       </section>
 
       <style>{`
+        .service-hero {
+          position: relative;
+          isolation: isolate;
+          min-height: 100svh;
+          margin-top: -88px;
+          padding: 132px 24px 80px;
+          overflow: hidden;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background-color: #562fa0;
+          background-position: center;
+          background-size: cover;
+          background-repeat: no-repeat;
+          text-align: center;
+        }
+        .service-hero::after {
+          content: '';
+          position: absolute;
+          inset: 0;
+          z-index: 0;
+          /* Gelap di tengah (area teks) supaya kontras ≥4.5:1, memudar ke samping agar kolase tetap terang */
+          background: radial-gradient(ellipse 48% 62% at 50% 52%, rgba(28,10,68,0.5) 0%, rgba(28,10,68,0.34) 55%, rgba(28,10,68,0) 100%);
+          pointer-events: none;
+        }
+        .service-hero-copy {
+          position: relative;
+          z-index: 2;
+          width: 100%;
+          max-width: 760px;
+          margin: 0 auto;
+          text-shadow: 0 2px 20px rgba(20,6,60,0.35);
+        }
+        .service-hero-eyebrow { margin: 0 auto 20px; }
+        .service-hero-copy .mark-lime { text-shadow: none; }
+        .service-hero-tags {
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: center;
+          gap: 8px;
+          margin-bottom: 28px;
+        }
         .service-scope-section {
           padding: 112px 24px;
           background:
@@ -756,6 +783,7 @@ export default function ServiceDetail() {
           line-height: 1.62;
         }
         @media (max-width: 900px) {
+          .service-hero { padding: 128px 20px 72px; }
           .service-scope-layout { grid-template-columns: 1fr; }
           .service-scope-visual { min-height: 430px; }
           .service-workflow-heading { grid-template-columns: 1fr; gap: 18px; }
