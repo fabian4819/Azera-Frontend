@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { Upload, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { Upload, CheckCircle2, AlertTriangle, Link2 } from 'lucide-react';
 import api from '../../lib/api';
 
 const f = "var(--font-display)";
@@ -20,8 +20,9 @@ const rp = (n?: number) => (n === undefined || n === null ? '-' : `Rp${n.toLocal
 const td: React.CSSProperties = { padding: '8px 10px', whiteSpace: 'nowrap' };
 
 export default function Import() {
-  const [file, setFile] = useState<File | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const [link, setLink] = useState('');
+  const [source, setSource] = useState('');
   const [rows, setRows] = useState<ImportRow[]>([]);
   const [loading, setLoading] = useState(false);
   const [ignoredHeaders, setIgnoredHeaders] = useState<string[]>([]);
@@ -30,20 +31,27 @@ export default function Import() {
   const [error, setError] = useState('');
 
   // Langsung preview begitu file dipilih — tidak ada tombol Preview terpisah
-  const preview = async (picked: File) => {
-    setFile(picked);
+  const preview = async (picked: File | string) => {
+    setSource(typeof picked === 'string' ? 'Google Sheets' : picked.name);
     setRows([]);
     setLoading(true);
     setError('');
     setResult(null);
     try {
-      const formData = new FormData();
-      formData.append('file', picked);
-      const res = await api.post('/admin/import/preview', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+      let res;
+      if (typeof picked === 'string') {
+        res = await api.post('/admin/import/preview', { url: picked });
+      } else {
+        const formData = new FormData();
+        formData.append('file', picked);
+        res = await api.post('/admin/import/preview', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+      }
       setRows(res.data.rows);
       setIgnoredHeaders(res.data.ignoredHeaders || []);
       setSheetCount(res.data.sheetCount || 1);
-    } catch {
+    } catch (err) {
+      const message = (err as { response?: { data?: { message?: string } } }).response?.data?.message;
+      if (message && message !== 'Gagal membaca file') { setError(message); return; }
       setError('Gagal membaca file. Pastikan format sesuai (Nama Campaign, Brand, Nama Creator, Platform, Link Konten, Niche Akun, Views, Reach, Likes, Comments, Shares, Saved, Tanggal Posting, Fee Creator, Fee PIC, Fee MG).');
     } finally {
       setLoading(false);
@@ -57,7 +65,8 @@ export default function Import() {
       setResult(res.data);
       setRows([]);
       setIgnoredHeaders([]);
-      setFile(null);
+      setSource('');
+      setLink('');
     } catch {
       setError('Gagal import data.');
     } finally {
@@ -74,7 +83,7 @@ export default function Import() {
           Upload spreadsheet (.xlsx atau .csv) dengan kolom: <strong>Nama Campaign, Brand, Nama Creator, Platform, Link Konten,
           Niche Akun, Views, Reach, Likes, Comments, Shares, Saved, Tanggal Posting, Fee Creator, Fee PIC, Fee MG</strong>. Satu file = satu campaign = satu brand (sheet pertama saja yang dibaca). Satu baris = satu platform per creator.
           Fee = fee per creator untuk campaign tsb (cukup diisi di salah satu baris kalau creator punya lebih dari satu platform). Tanggal pakai format dd/mm/yyyy.
-          Import ulang file yang sama akan meng-update angka, bukan menggandakan data.
+          Bisa juga pakai link Google Sheets yang aksesnya "Anyone with the link" — tab yang dibaca sesuai link (gid). Import ulang file/link yang sama akan meng-update angka, bukan menggandakan data.
         </p>
         <input
           ref={inputRef} type="file" accept=".xlsx,.csv" hidden
@@ -88,8 +97,23 @@ export default function Import() {
           <button onClick={() => inputRef.current?.click()} disabled={loading} className="btn-primary" style={{ padding: '9px 18px', fontSize: '0.82rem', opacity: loading ? 0.6 : 1 }}>
             <Upload size={14} /> {loading ? 'Memproses...' : 'Pilih File'}
           </button>
-          {file && <span style={{ fontFamily: f, fontSize: '0.82rem', color: '#464652' }}>{file.name}</span>}
+          {source && <span style={{ fontFamily: f, fontSize: '0.82rem', color: '#464652' }}>{source}</span>}
         </div>
+        <form
+          onSubmit={(e) => { e.preventDefault(); if (link.trim()) preview(link.trim()); }}
+          style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginTop: '14px' }}
+        >
+          <span style={{ fontFamily: f, fontSize: '0.82rem', color: '#464652' }}>atau</span>
+          <input
+            type="url" value={link} onChange={(e) => setLink(e.target.value)}
+            placeholder="Paste link Google Sheets (akses: Anyone with the link)"
+            aria-label="Link Google Sheets"
+            style={{ flex: '1 1 320px', padding: '9px 14px', borderRadius: '999px', border: '1px solid #e1e0ff', fontFamily: f, fontSize: '0.82rem' }}
+          />
+          <button type="submit" disabled={loading || !link.trim()} className="btn-primary" style={{ padding: '9px 18px', fontSize: '0.82rem', opacity: loading || !link.trim() ? 0.6 : 1 }}>
+            <Link2 size={14} /> Ambil dari Link
+          </button>
+        </form>
         {error && <p style={{ color: '#ba1a1a', fontSize: '0.82rem', marginTop: '12px', fontFamily: f }}>{error}</p>}
       </div>
 
