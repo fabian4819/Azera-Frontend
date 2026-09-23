@@ -2,16 +2,12 @@ import { useEffect, useRef, useState } from 'react';
 import { useParams, Navigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence, useInView } from 'framer-motion';
 import {
-  Target, Users, Rocket, TrendingUp, ShieldCheck, Layers, ClipboardCheck, BarChart3,
-  ChevronLeft, ChevronRight, Check, Eye,
+  Users, TrendingUp, ChevronLeft, ChevronRight, Check, Eye, Plus,
 } from 'lucide-react';
 import { getServiceBySlug } from '../data/services';
 import { ease } from '../lib/motion';
 import api from '../lib/api';
 import SocialEmbed from '../components/SocialEmbed';
-
-const scopeIcons = [ShieldCheck, Layers, Target, TrendingUp, ClipboardCheck, BarChart3];
-const workflowIcons = [Target, Users, Rocket, TrendingUp];
 
 const serviceHeroImages: Record<string, string> = {
   'nano-micro-kol-campaign': '/service-heroes/nano-micro-kol-campaign.webp',
@@ -244,45 +240,62 @@ function RelatedSuccess({ category }: { category: string }) {
 }
 
 function FAQAccordion({ items }: { items: { question: string; answer: string }[] }) {
-  const [open, setOpen] = useState<number | null>(0);
+  const [open, setOpen] = useState<number | null>(null);
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: '-80px' });
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+    <div ref={ref} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
       {items.map((item, i) => {
         const isOpen = open === i;
         return (
-          <div key={i} style={{ background: 'rgba(255,255,255,0.09)', borderRadius: '16px', overflow: 'hidden' }}>
+          <motion.div
+            key={item.question}
+            initial={{ opacity: 0, y: 16 }}
+            animate={isInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.5, ease, delay: i * 0.07 }}
+            style={{
+              background: isOpen ? 'rgba(255,255,255,0.14)' : 'rgba(255,255,255,0.09)',
+              borderRadius: '22px',
+              overflow: 'hidden',
+              transition: 'background 0.25s ease',
+            }}
+          >
             <button
               onClick={() => setOpen(isOpen ? null : i)}
               style={{
                 width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                padding: '18px 22px', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left',
+                gap: '20px', padding: '22px 26px', background: 'none', border: 'none',
+                cursor: 'pointer', textAlign: 'center',
               }}
             >
-              <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '0.95rem', color: '#fff' }}>{item.question}</span>
-              <span
+              <span style={{ flex: 1, fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.05rem', color: '#fff', lineHeight: 1.4 }}>{item.question}</span>
+              <motion.span
+                animate={{ rotate: isOpen ? 45 : 0 }}
+                transition={{ duration: 0.25, ease }}
                 style={{
-                  flexShrink: 0, width: '28px', height: '28px', borderRadius: '50%', background: '#fff',
+                  flexShrink: 0, width: '34px', height: '34px', borderRadius: '50%', background: '#fff',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  transform: isOpen ? 'rotate(45deg)' : 'none', transition: 'transform 0.2s',
+                  color: 'var(--secondary)',
                 }}
               >
-                <span style={{ color: 'var(--primary)', fontSize: '1.1rem', lineHeight: 1 }}>+</span>
-              </span>
+                <Plus size={17} />
+              </motion.span>
             </button>
-            <AnimatePresence>
+            <AnimatePresence initial={false}>
               {isOpen && (
                 <motion.div
                   initial={{ height: 0, opacity: 0 }}
                   animate={{ height: 'auto', opacity: 1 }}
                   exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.25, ease }}
+                  transition={{ duration: 0.3, ease }}
                   style={{ overflow: 'hidden' }}
                 >
-                  <p style={{ padding: '0 22px 18px', color: 'rgba(255,255,255,0.7)', fontSize: '0.88rem', lineHeight: 1.7 }}>{item.answer}</p>
+                  <p style={{ color: 'rgba(255,255,255,0.72)', fontSize: '0.9rem', lineHeight: 1.75, textAlign: 'center', padding: '0 26px 26px' }}>{item.answer}</p>
                 </motion.div>
               )}
             </AnimatePresence>
-          </div>
+          </motion.div>
         );
       })}
     </div>
@@ -294,6 +307,8 @@ export default function ServiceDetail() {
   const service = getServiceBySlug(slug || '');
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: '-80px' });
+  const workflowRef = useRef(null);
+  const isWorkflowInView = useInView(workflowRef, { once: true, margin: '-100px' });
 
   const WA_LINK = 'https://wa.me/6281919525186?text=' + encodeURIComponent(`Halo AzeraKOL!\nSaya ingin tanya-tanya soal layanan ${service?.navLabel || ''}, boleh dibantu?`);
 
@@ -352,56 +367,97 @@ export default function ServiceDetail() {
       </section>
 
       {/* Scope & Advantages */}
-      <section ref={ref} style={{ padding: '90px 24px', maxWidth: '1160px', margin: '0 auto' }}>
-        <motion.h2
-          initial={{ opacity: 0, y: 20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.5, ease }}
-          style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 'clamp(1.8rem, 4vw, 2.6rem)', textAlign: 'center', color: 'var(--on-background)', marginBottom: '40px', letterSpacing: '-0.02em' }}
-        >
-          {service.scopeTitle}
-        </motion.h2>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px' }} className="service-scope-grid">
-          {service.scope.map((item, i) => {
-            const Icon = scopeIcons[i % scopeIcons.length];
-            return (
-              <motion.div
-                key={item.title}
-                initial={{ opacity: 0, y: 20 }}
-                animate={isInView ? { opacity: 1, y: 0 } : {}}
-                transition={{ duration: 0.5, ease, delay: i * 0.06 }}
-                style={{ background: 'var(--primary)', borderRadius: '20px', padding: '28px' }}
-              >
-                <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: 'rgba(196,238,135,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px' }}>
-                  <Icon size={20} color="var(--lime)" />
+      <section ref={ref} className="service-scope-section">
+        <div style={{ maxWidth: '1160px', margin: '0 auto' }}>
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            animate={isInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.6, ease }}
+            style={{ maxWidth: '720px', marginBottom: '48px' }}
+          >
+            <span className="service-section-eyebrow">What You Get</span>
+            <h2 className="service-section-title">Semua yang campaign kamu butuhkan, <span className="mark-lime">dalam satu tim.</span></h2>
+            <p className="service-section-lead">Dari pemilihan creator sampai laporan akhir, setiap detail dikelola agar campaign berjalan rapi dan terukur.</p>
+          </motion.div>
+
+          <div className="service-scope-layout">
+            <motion.div
+              initial={{ opacity: 0, x: -28, rotate: -1.5 }}
+              animate={isInView ? { opacity: 1, x: 0, rotate: 0 } : {}}
+              transition={{ duration: 0.7, ease }}
+              className="service-scope-visual"
+            >
+              <img src="/service-sections/scope-coverage.webp" alt="Ilustrasi cakupan pengelolaan campaign AzeraKOL" />
+              <div className="service-visual-caption">
+                <span>{String(service.scope.length).padStart(2, '0')}</span>
+                <div>
+                  <strong>{service.scopeTitle}</strong>
+                  <small>Terintegrasi end-to-end</small>
                 </div>
-                <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.02rem', color: '#fff', marginBottom: '8px' }}>{item.title}</h3>
-                <p style={{ color: 'rgba(255,255,255,0.65)', fontSize: '0.85rem', lineHeight: 1.6 }}>{item.desc}</p>
-              </motion.div>
-            );
-          })}
+              </div>
+            </motion.div>
+
+            <div className="service-scope-grid">
+              {service.scope.map((item, i) => (
+                  <motion.article
+                    key={item.title}
+                    initial={{ opacity: 0, y: 24 }}
+                    animate={isInView ? { opacity: 1, y: 0 } : {}}
+                    transition={{ duration: 0.55, ease, delay: 0.08 + i * 0.06 }}
+                    className="service-scope-card"
+                  >
+                    <span className="service-scope-index">0{i + 1}</span>
+                    <h3>{item.title}</h3>
+                    <p>{item.desc}</p>
+                  </motion.article>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 
       {/* Workflow */}
-      <section style={{ padding: '20px 24px 90px', maxWidth: '1160px', margin: '0 auto' }}>
-        <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 'clamp(1.8rem, 4vw, 2.6rem)', textAlign: 'center', color: 'var(--on-background)', marginBottom: '48px', letterSpacing: '-0.02em' }}>
-          Alur Kerja Campaign
-        </h2>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '24px' }} className="service-workflow-grid">
-          {service.workflow.map((step, i) => {
-            const Icon = workflowIcons[i % workflowIcons.length];
-            return (
-              <div key={step.title} style={{ textAlign: 'center' }}>
-                <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'var(--secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
-                  <Icon size={26} color="#fff" />
-                </div>
-                <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1rem', color: 'var(--on-background)', marginBottom: '8px' }}>{step.title}</h3>
-                <p style={{ color: 'var(--on-surface-variant)', fontSize: '0.85rem', lineHeight: 1.6 }}>{step.desc}</p>
-              </div>
-            );
-          })}
-        </div>
+      <section ref={workflowRef} className="service-workflow-section">
+        <motion.div
+          initial={{ opacity: 0, y: 32 }}
+          animate={isWorkflowInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.65, ease }}
+          className="service-workflow-shell"
+        >
+          <div className="service-workflow-heading">
+            <div>
+              <span className="service-section-eyebrow service-section-eyebrow-light">How We Work</span>
+              <h2>Dari brief jadi campaign<br /><span>yang benar-benar jalan.</span></h2>
+            </div>
+            <p>Empat tahap yang jelas, satu tim yang mendampingi dari strategi sampai optimasi performa.</p>
+          </div>
+
+          <motion.img
+            src="/service-sections/campaign-workflow.webp"
+            alt="Ilustrasi alur kerja campaign dari perencanaan hingga optimasi"
+            initial={{ opacity: 0, scale: 0.94 }}
+            animate={isWorkflowInView ? { opacity: 1, scale: 1 } : {}}
+            transition={{ duration: 0.75, ease, delay: 0.12 }}
+            className="service-workflow-illustration"
+          />
+
+          <div className="service-workflow-grid">
+            {service.workflow.map((step, i) => (
+                <motion.article
+                  key={step.title}
+                  initial={{ opacity: 0, y: 24 }}
+                  animate={isWorkflowInView ? { opacity: 1, y: 0 } : {}}
+                  transition={{ duration: 0.5, ease, delay: 0.2 + i * 0.08 }}
+                  className="service-workflow-card"
+                >
+                  <span className="service-workflow-number">0{i + 1}</span>
+                  <span className="service-workflow-label">Step {i + 1}</span>
+                  <h3>{step.title}</h3>
+                  <p>{step.desc}</p>
+                </motion.article>
+            ))}
+          </div>
+        </motion.div>
       </section>
 
       {/* Pricing / Estimasi Paket */}
@@ -456,11 +512,16 @@ export default function ServiceDetail() {
       </section>
 
       {/* FAQ */}
-      <section style={{ padding: '90px 24px', background: 'linear-gradient(160deg, #2c1065 0%, #1c0a44 100%)' }}>
+      <section style={{ padding: '100px 24px', background: 'var(--hero-bg)' }}>
         <div style={{ maxWidth: '760px', margin: '0 auto' }}>
-          <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 'clamp(1.8rem, 4vw, 2.6rem)', textAlign: 'center', color: '#fff', marginBottom: '40px', letterSpacing: '-0.02em' }}>
-            Pertanyaan Umum
-          </h2>
+          <div style={{ textAlign: 'center', marginBottom: '56px' }}>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.6)', display: 'inline-block', marginBottom: '18px' }}>
+              FAQs
+            </span>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 'clamp(2rem, 4.8vw, 3.2rem)', color: '#fff', lineHeight: 1.1, letterSpacing: '-0.03em' }}>
+              Pertanyaan umum seputar layanan.
+            </h2>
+          </div>
           <FAQAccordion items={service.faq} />
         </div>
       </section>
@@ -481,13 +542,236 @@ export default function ServiceDetail() {
       </section>
 
       <style>{`
+        .service-scope-section {
+          padding: 112px 24px;
+          background:
+            radial-gradient(circle at 8% 18%, rgba(196,238,135,0.22), transparent 24%),
+            linear-gradient(180deg, var(--surface) 0%, #f0ecff 100%);
+        }
+        .service-section-eyebrow {
+          display: inline-block;
+          margin-bottom: 16px;
+          color: var(--secondary);
+          font-family: var(--font-mono);
+          font-size: 0.72rem;
+          font-weight: 700;
+          letter-spacing: 0.14em;
+          text-transform: uppercase;
+        }
+        .service-section-title {
+          max-width: 700px;
+          margin-bottom: 18px;
+          color: var(--on-background);
+          font-family: var(--font-display);
+          font-size: clamp(2rem, 4.5vw, 3.15rem);
+          font-weight: 700;
+          letter-spacing: -0.035em;
+          line-height: 1.06;
+        }
+        .service-section-lead {
+          max-width: 610px;
+          color: var(--on-surface-variant);
+          font-size: 1rem;
+          line-height: 1.72;
+        }
+        .service-scope-layout {
+          display: grid;
+          grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.45fr);
+          gap: 22px;
+          align-items: stretch;
+        }
+        .service-scope-visual {
+          position: relative;
+          min-height: 550px;
+          overflow: hidden;
+          border-radius: 32px;
+          background:
+            radial-gradient(circle at 1px 1px, rgba(255,255,255,0.14) 1px, transparent 0) 0 0 / 18px 18px,
+            linear-gradient(145deg, #241064 0%, #15157d 55%, #6728e4 145%);
+          box-shadow: 0 28px 70px -34px rgba(46,49,146,0.7);
+        }
+        .service-scope-visual > img {
+          width: 116%;
+          max-width: none;
+          height: 84%;
+          margin-left: -8%;
+          object-fit: contain;
+          display: block;
+        }
+        .service-visual-caption {
+          position: absolute;
+          right: 22px;
+          bottom: 22px;
+          left: 22px;
+          display: flex;
+          align-items: center;
+          gap: 14px;
+          padding: 15px 17px;
+          border: 1px solid rgba(255,255,255,0.16);
+          border-radius: 18px;
+          background: rgba(255,255,255,0.1);
+          backdrop-filter: blur(12px);
+        }
+        .service-visual-caption > span {
+          color: var(--lime);
+          font-family: var(--font-display);
+          font-size: 1.7rem;
+          font-weight: 700;
+        }
+        .service-visual-caption strong,
+        .service-visual-caption small { display: block; }
+        .service-visual-caption strong {
+          margin-bottom: 3px;
+          color: #fff;
+          font-family: var(--font-display);
+          font-size: 0.9rem;
+        }
+        .service-visual-caption small { color: rgba(255,255,255,0.6); font-size: 0.75rem; }
+        .service-scope-grid {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 14px;
+        }
+        .service-scope-card {
+          min-height: 170px;
+          padding: 22px;
+          border: 1.5px solid rgba(103,40,228,0.12);
+          border-radius: 22px;
+          background: rgba(255,255,255,0.86);
+          box-shadow: 0 12px 35px -28px rgba(21,21,125,0.5);
+          transition: transform 0.3s var(--ease-spring), background 0.3s ease, box-shadow 0.3s ease;
+        }
+        .service-scope-card:hover {
+          transform: translateY(-5px) rotate(-0.4deg);
+          background: #fff;
+          box-shadow: var(--shadow-pitch);
+        }
+        .service-scope-index {
+          display: block;
+          margin-bottom: 24px;
+          color: var(--secondary);
+          font-family: var(--font-display);
+          font-size: 1.85rem;
+          font-weight: 700;
+          letter-spacing: -0.05em;
+          line-height: 1;
+        }
+        .service-scope-card h3 {
+          margin-bottom: 8px;
+          color: var(--on-background);
+          font-family: var(--font-display);
+          font-size: 1rem;
+          font-weight: 700;
+        }
+        .service-scope-card p {
+          color: var(--on-surface-variant);
+          font-size: 0.82rem;
+          line-height: 1.62;
+        }
+        .service-workflow-section {
+          padding: 112px 24px;
+          background: var(--hero-bg);
+        }
+        .service-workflow-shell {
+          max-width: 1160px;
+          margin: 0 auto;
+        }
+        .service-workflow-heading {
+          display: grid;
+          grid-template-columns: 1.3fr 0.7fr;
+          gap: 48px;
+          align-items: end;
+        }
+        .service-section-eyebrow-light { color: var(--lime); }
+        .service-workflow-heading h2 {
+          color: #fff;
+          font-family: var(--font-display);
+          font-size: clamp(2rem, 4.2vw, 3rem);
+          font-weight: 700;
+          letter-spacing: -0.035em;
+          line-height: 1.07;
+        }
+        .service-workflow-heading h2 span { color: #c9b6ff; }
+        .service-workflow-heading > p {
+          color: rgba(255,255,255,0.66);
+          font-size: 0.94rem;
+          line-height: 1.7;
+        }
+        .service-workflow-illustration {
+          width: 100%;
+          height: auto;
+          margin: 34px auto 20px;
+          display: block;
+          filter: drop-shadow(0 20px 26px rgba(7,5,40,0.2));
+        }
+        .service-workflow-grid {
+          position: relative;
+          display: grid;
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+          gap: 12px;
+        }
+        .service-workflow-card {
+          min-height: 210px;
+          padding: 21px;
+          border: 1px solid rgba(255,255,255,0.12);
+          border-radius: 20px;
+          background: rgba(255,255,255,0.08);
+          backdrop-filter: blur(10px);
+          transition: transform 0.3s var(--ease-spring), background 0.3s ease;
+        }
+        .service-workflow-card:hover {
+          transform: translateY(-5px);
+          background: rgba(255,255,255,0.14);
+        }
+        .service-workflow-number {
+          display: block;
+          margin-bottom: 8px;
+          color: var(--lime);
+          font-family: var(--font-display);
+          font-size: 2.35rem;
+          font-weight: 700;
+          letter-spacing: -0.06em;
+          line-height: 1;
+        }
+        .service-workflow-label {
+          display: block;
+          margin-bottom: 24px;
+          color: rgba(255,255,255,0.46);
+          font-family: var(--font-mono);
+          font-size: 0.65rem;
+          font-weight: 700;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+        }
+        .service-workflow-card h3 {
+          margin-bottom: 9px;
+          color: #fff;
+          font-family: var(--font-display);
+          font-size: 1.08rem;
+          font-weight: 700;
+        }
+        .service-workflow-card p {
+          color: rgba(255,255,255,0.62);
+          font-size: 0.8rem;
+          line-height: 1.62;
+        }
         @media (max-width: 900px) {
-          .service-scope-grid { grid-template-columns: repeat(2, 1fr) !important; }
-          .service-workflow-grid { grid-template-columns: repeat(2, 1fr) !important; row-gap: 32px !important; }
+          .service-scope-layout { grid-template-columns: 1fr; }
+          .service-scope-visual { min-height: 430px; }
+          .service-workflow-heading { grid-template-columns: 1fr; gap: 18px; }
+          .service-workflow-heading > p { max-width: 560px; }
+          .service-workflow-grid { grid-template-columns: repeat(2, 1fr); }
           .service-pricing-grid { grid-template-columns: 1fr !important; }
         }
         @media (max-width: 560px) {
-          .service-scope-grid { grid-template-columns: 1fr !important; }
+          .service-scope-section { padding: 80px 18px; }
+          .service-scope-grid { grid-template-columns: 1fr; }
+          .service-scope-visual { min-height: 370px; }
+          .service-scope-visual > img { height: 80%; width: 128%; margin-left: -14%; }
+          .service-workflow-section { padding: 80px 18px; }
+          .service-workflow-illustration { width: 135%; max-width: none; margin-left: -17.5%; }
+          .service-workflow-grid { grid-template-columns: 1fr; }
+          .service-workflow-card { min-height: 0; }
         }
       `}</style>
     </div>
