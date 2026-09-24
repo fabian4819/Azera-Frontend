@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { Fragment, useState } from 'react';
 import { Link, useLocation, Outlet } from 'react-router-dom';
-import { LayoutDashboard, Building2, Users, UserCheck, ImageIcon, Megaphone, PanelsTopLeft, Upload, MessageCircle, Inbox, MessageSquareText, Bot, Plug, LogOut, ChevronsLeft, ChevronsRight } from 'lucide-react';
+import { LayoutDashboard, Building2, Users, UserCheck, ImageIcon, Megaphone, PanelsTopLeft, Upload, MessageCircle, Inbox, MessageSquareText, Bot, Plug, LogOut, ChevronsLeft, ChevronsRight, FolderOpen, FileText, Receipt, FileSignature, ChevronDown } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 
 const navItems = [
@@ -19,6 +19,14 @@ const navItems = [
   { label: 'Portfolio', to: '/admin/portfolio', icon: ImageIcon },
 ];
 
+/** Grup "Document" (bisa dibuka/tutup) — dirender tepat setelah item DOCS_AFTER */
+const DOCS_AFTER = '/admin/import';
+const docItems = [
+  { label: 'Quotation', to: '/admin/documents/quotation', icon: FileText },
+  { label: 'Invoice', to: '/admin/documents/invoice', icon: Receipt },
+  { label: 'SPK', to: '/admin/documents/spk', icon: FileSignature },
+];
+
 const pageTitles: Record<string, string> = {
   '/admin/dashboard': 'Dashboard',
   '/admin/campaigns': 'Campaigns',
@@ -33,14 +41,34 @@ const pageTitles: Record<string, string> = {
   '/admin/extension': 'Ekstensi KOL Lister',
   '/admin/pic': 'PIC / Handle-by',
   '/admin/portfolio': 'Portfolio Manager',
+  '/admin/documents/quotation': 'Document — Quotation',
+  '/admin/documents/invoice': 'Document — Invoice',
+  '/admin/documents/spk': 'Document — SPK',
 };
 
 const COLLAPSE_KEY = 'azera_admin_sidebar_collapsed';
+const DOCS_OPEN_KEY = 'azera_admin_docs_open';
+
+function readFlag(key: string): boolean | null {
+  try {
+    const v = localStorage.getItem(key);
+    return v === null ? null : v === '1';
+  } catch {
+    return null;
+  }
+}
 
 export default function AdminLayout() {
   const location = useLocation();
   const { admin, logout } = useAuth();
   const [collapsed, setCollapsed] = useState(() => localStorage.getItem(COLLAPSE_KEY) === '1');
+  const [docsOpen, setDocsOpen] = useState(() => readFlag(DOCS_OPEN_KEY) ?? location.pathname.startsWith('/admin/documents'));
+  const toggleDocs = () => {
+    setDocsOpen((prev) => {
+      try { localStorage.setItem(DOCS_OPEN_KEY, prev ? '0' : '1'); } catch { /* storage diblokir — cukup state */ }
+      return !prev;
+    });
+  };
 
   const toggleCollapsed = () => {
     setCollapsed((prev) => {
@@ -55,9 +83,33 @@ export default function AdminLayout() {
     Object.entries(pageTitles).find(([key]) => location.pathname.startsWith(key))?.[1] ||
     'Admin Panel';
 
-  const activeTo = navItems
+  const activeTo = [...navItems, ...docItems]
     .filter((item) => location.pathname === item.to || location.pathname.startsWith(item.to + '/'))
     .sort((a, b) => b.to.length - a.to.length)[0]?.to;
+
+  const renderLink = ({ label, to, icon: Icon }: { label: string; to: string; icon: typeof LayoutDashboard }, nested = false) => {
+    const active = to === activeTo;
+    return (
+      <Link
+        key={to}
+        to={to}
+        title={collapsed ? label : undefined}
+        style={{
+          height: nested ? '40px' : '46px', borderRadius: '13px', flexShrink: 0,
+          display: 'flex', alignItems: 'center', gap: '12px',
+          justifyContent: collapsed ? 'center' : 'flex-start',
+          padding: collapsed ? 0 : nested ? '0 14px 0 30px' : '0 14px',
+          background: active ? 'var(--lime)' : 'transparent',
+          color: active ? 'var(--on-lime)' : 'rgba(255,255,255,0.65)',
+          fontFamily: 'var(--font-display)', fontWeight: active ? 700 : 500, fontSize: nested ? '0.84rem' : '0.88rem',
+          transition: 'background 0.2s, color 0.2s',
+        }}
+      >
+        <Icon size={nested ? 17 : 19} style={{ flexShrink: 0 }} />
+        {!collapsed && <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{label}</span>}
+      </Link>
+    );
+  };
 
   return (
     <div
@@ -109,29 +161,30 @@ export default function AdminLayout() {
         </Link>
 
         <nav style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '6px', padding: collapsed ? '0 15px' : '0 14px', overflowY: 'auto', overflowX: 'hidden' }}>
-          {navItems.map(({ label, to, icon: Icon }) => {
-            const active = to === activeTo;
-            return (
-              <Link
-                key={to}
-                to={to}
-                title={collapsed ? label : undefined}
-                style={{
-                  height: '46px', borderRadius: '13px', flexShrink: 0,
-                  display: 'flex', alignItems: 'center', gap: '12px',
-                  justifyContent: collapsed ? 'center' : 'flex-start',
-                  padding: collapsed ? 0 : '0 14px',
-                  background: active ? 'var(--lime)' : 'transparent',
-                  color: active ? 'var(--on-lime)' : 'rgba(255,255,255,0.65)',
-                  fontFamily: 'var(--font-display)', fontWeight: active ? 700 : 500, fontSize: '0.88rem',
-                  transition: 'background 0.2s, color 0.2s',
-                }}
-              >
-                <Icon size={19} style={{ flexShrink: 0 }} />
-                {!collapsed && <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{label}</span>}
-              </Link>
-            );
-          })}
+          {navItems.map((item) => (
+            <Fragment key={item.to}>
+              {renderLink(item)}
+              {item.to === DOCS_AFTER && (collapsed ? docItems.map((d) => renderLink(d)) : (
+                <>
+                  <button
+                    onClick={toggleDocs}
+                    aria-expanded={docsOpen}
+                    style={{
+                      height: '46px', borderRadius: '13px', flexShrink: 0, border: 'none', cursor: 'pointer',
+                      display: 'flex', alignItems: 'center', gap: '12px', padding: '0 14px',
+                      background: 'transparent', color: 'rgba(255,255,255,0.65)',
+                      fontFamily: 'var(--font-display)', fontWeight: 500, fontSize: '0.88rem',
+                    }}
+                  >
+                    <FolderOpen size={19} style={{ flexShrink: 0 }} />
+                    <span style={{ flex: 1, textAlign: 'left' }}>Document</span>
+                    <ChevronDown size={16} style={{ transform: docsOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+                  </button>
+                  {docsOpen && docItems.map((d) => renderLink(d, true))}
+                </>
+              ))}
+            </Fragment>
+          ))}
         </nav>
 
         <div style={{ padding: collapsed ? '0 15px' : '0 14px', display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '8px' }}>

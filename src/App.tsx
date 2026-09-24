@@ -36,6 +36,7 @@ const AdminCampaignDashboard = lazy(() => import('./pages/admin/CampaignDashboar
 const CampaignNew = lazy(() => import('./pages/admin/CampaignNew'));
 const CampaignDetail = lazy(() => import('./pages/admin/CampaignDetail'));
 const Import = lazy(() => import('./pages/admin/Import'));
+const Documents = lazy(() => import('./pages/admin/Documents'));
 const WhatsApp = lazy(() => import('./pages/admin/WhatsApp'));
 const WhatsAppInbox = lazy(() => import('./pages/admin/WhatsAppInbox'));
 const WaTemplates = lazy(() => import('./pages/admin/WaTemplates'));
@@ -132,6 +133,7 @@ export default function App() {
             <Route path="campaigns/new" element={<CampaignNew />} />
             <Route path="campaigns/:id" element={<CampaignDetail />} />
             <Route path="import" element={<Import />} />
+            <Route path="documents/:type" element={<Documents />} />
             <Route path="whatsapp" element={<WhatsApp />} />
             <Route path="whatsapp/inbox" element={<WhatsAppInbox />} />
             <Route path="wa-templates" element={<WaTemplates />} />
