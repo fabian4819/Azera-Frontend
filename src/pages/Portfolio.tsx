@@ -3,14 +3,14 @@ import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
 import api from '../lib/api';
-import SocialEmbed from '../components/SocialEmbed';
+import VideoTile from '../components/VideoTile';
 import { ease } from '../lib/motion';
-import { PORTFOLIO_CATEGORIES, isVideo, resultBoxes, sectionLabel, type PortfolioItem, type TopCreator } from '../lib/portfolio';
+import { PORTFOLIO_CATEGORIES, isVideo, resultBoxes, sectionLabel, videoTile, type PortfolioItem, type TopCreator } from '../lib/portfolio';
 
 const categories = ['All Campaigns', ...PORTFOLIO_CATEGORIES];
 
 // Carousel contoh konten: embed postingan Top Creator (yang punya link) + foto/video upload
-type Slide = { kind: 'creator'; creator: TopCreator; rank: number } | { kind: 'media'; url: string };
+type Slide = { kind: 'creator'; creator: TopCreator } | { kind: 'media'; url: string };
 
 export default function Portfolio() {
   const [items, setItems] = useState<PortfolioItem[]>([]);
@@ -36,7 +36,7 @@ export default function Portfolio() {
   const selected = filtered.find((i) => i._id === selectedId) || filtered[0];
 
   const slides: Slide[] = selected ? [
-    ...(selected.topCreators || []).slice(0, 3).flatMap((c, i) => (c.postLink ? [{ kind: 'creator' as const, creator: c, rank: i + 1 }] : [])),
+    ...(selected.topCreators || []).slice(0, 3).flatMap((c) => (c.postLink ? [{ kind: 'creator' as const, creator: c }] : [])),
     ...(selected.contents || []).slice(0, 3).map((url) => ({ kind: 'media' as const, url })),
   ] : [];
   const hasCreators = slides.length > 0;
@@ -179,29 +179,10 @@ export default function Portfolio() {
                           <div key={i} style={{ flex: '0 0 100%', minWidth: 0, scrollSnapAlign: 'center' }}>
                             {slide.kind === 'media' ? (
                               isVideo(slide.url)
-                                ? <video src={slide.url} controls playsInline style={{ width: '100%', maxHeight: '560px', borderRadius: '14px', background: '#000' }} />
-                                : <img src={slide.url} alt={`Contoh konten ${selected.brand}`} style={{ width: '100%', maxHeight: '560px', objectFit: 'cover', borderRadius: '14px' }} />
+                                ? <video src={slide.url} controls playsInline style={{ ...videoTile, objectFit: 'cover', background: '#000' }} />
+                                : <img src={slide.url} alt={`Contoh konten ${selected.brand}`} style={{ ...videoTile, objectFit: 'cover', cursor: 'default' }} />
                             ) : (
-                              <>
-                                <SocialEmbed platform={slide.creator.platform} url={slide.creator.postLink!} />
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginTop: '8px', fontSize: '0.76rem', color: 'rgba(255,255,255,0.7)' }}>
-                                  <span
-                                    style={{
-                                      flexShrink: 0, width: '20px', height: '20px', borderRadius: '50%',
-                                      background: 'var(--lime)', color: 'var(--on-lime)', display: 'flex',
-                                      alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-display)',
-                                      fontWeight: 800, fontSize: '0.66rem',
-                                    }}
-                                  >
-                                    {slide.rank}
-                                  </span>
-                                  <span style={{ fontWeight: 700, color: '#fff' }}>{slide.creator.name}</span>
-                                  {slide.creator.views && <span>{slide.creator.views} views</span>}
-                                  {slide.creator.likes && <span>{slide.creator.likes} likes</span>}
-                                  {slide.creator.comments && <span>{slide.creator.comments} komentar</span>}
-                                  {slide.creator.shares && <span>{slide.creator.shares} share</span>}
-                                </div>
-                              </>
+                              <VideoTile creator={slide.creator} />
                             )}
                           </div>
                         ))}
@@ -259,6 +240,7 @@ export default function Portfolio() {
               {/* Kanan: info campaign */}
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
+                  {selected.logo && <img src={selected.logo} alt={selected.brand} style={{ height: '32px', maxWidth: '120px', objectFit: 'contain', background: '#fff', borderRadius: '8px', padding: '4px 8px' }} />}
                   <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '1.05rem', color: 'var(--lime)' }}>{selected.brand}</span>
                   <span className="tag-pill tag-pill-white">{selected.category}</span>
                 </div>
@@ -296,9 +278,10 @@ export default function Portfolio() {
 
                 <Link
                   to={`/portfolio/${selected._id}`}
-                  style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', marginTop: '20px', color: '#fff', fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '0.88rem', textDecoration: 'none' }}
+                  className="btn-lime portfolio-detail-cta"
+                  style={{ marginTop: '24px', padding: '12px 24px', fontSize: '0.9rem' }}
                 >
-                  Lihat Detail Campaign <ArrowRight size={15} />
+                  Lihat Detail Campaign <ArrowRight size={16} className="portfolio-detail-cta-arrow" />
                 </Link>
               </div>
             </motion.div>
@@ -310,6 +293,8 @@ export default function Portfolio() {
         @media (max-width: 900px) {
           .portfolio-detail-grid { grid-template-columns: 1fr !important; }
         }
+        .portfolio-detail-cta-arrow { transition: transform 0.25s ease; }
+        .portfolio-detail-cta:hover .portfolio-detail-cta-arrow { transform: translateX(4px); }
         .portfolio-creator-scroll { scrollbar-width: none; -ms-overflow-style: none; }
         .portfolio-creator-scroll::-webkit-scrollbar { display: none; }
       `}</style>

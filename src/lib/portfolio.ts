@@ -130,3 +130,9 @@ export function scopeText(item: PortfolioItem) {
 export const isVideo = (url: string) => /\.(mp4|mov|webm|m4v)(\?|$)/i.test(url) || url.includes('/video/upload/');
 
 export const sectionLabel: CSSProperties = { fontFamily: 'var(--font-mono)', fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--lime)', marginBottom: '8px' };
+
+/** Kotak video 9:16 (VideoTile & tile foto/video upload). */
+export const videoTile: CSSProperties = {
+  position: 'relative', width: '100%', aspectRatio: '9/16', borderRadius: '10px', overflow: 'hidden', border: 'none', padding: 0,
+  background: 'rgba(255,255,255,0.14)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+};
