@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { ArrowLeft, ExternalLink } from 'lucide-react';
+import { ArrowLeft, Play, X } from 'lucide-react';
 import api from '../lib/api';
 import {
-  formatCompact, isVideo, platformLabel, resultBoxes, scopeText, sectionLabel, type PortfolioItem, type PlatformResult,
+  formatCompact, isVideo, platformLabel, resultBoxes, scopeText, sectionLabel, type PortfolioItem, type PlatformResult, type TopCreator,
 } from '../lib/portfolio';
 
 const num = (v: number | null | undefined, compact = false) =>
@@ -15,16 +15,83 @@ const head: React.CSSProperties = { ...cell, fontWeight: 700, color: '#fff' };
 type ExtraKey = 'reach' | 'impressions' | 'engagement' | 'er';
 const EXTRA_LABELS: Record<ExtraKey, string> = { reach: 'Reach', impressions: 'Impressions', engagement: 'Engagement', er: 'ER' };
 
+type Clip = { kind: 'embed'; creator: TopCreator } | { kind: 'media'; url: string };
+
+const IG_WIDTH = 326; // lebar minimum embed Instagram
+const IG_HEADER = 54; // tinggi header username di embed IG
+const IG_MEDIA_H = (IG_WIDTH * 5) / 4; // reel ditampilkan IG dalam kotak 4:5 dengan bar hitam kiri-kanan
+
+/** Preview kecil postingan asli. TikTok: player resmi /player/v1 (ukuran bebas, hanya video).
+ * Instagram: tidak punya player kecil & thumbnail butuh token API, jadi embed-nya dirender
+ * di lebar minimum lalu diperkecil dengan CSS scale. */
+function EmbedTile({ creator }: { creator: TopCreator }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [tileW, setTileW] = useState(0);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() => setTileW(el.clientWidth));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  const url = creator.postLink!;
+  if (creator.platform === 'tiktok') {
+    const id = url.match(/\/video\/(\d+)/)?.[1];
+    if (id) {
+      const params = 'controls=1&progress_bar=0&volume_control=0&fullscreen_button=1&timestamp=0&music_info=0&description=0&rel=0&native_context_menu=0&closed_caption=0';
+      return (
+        <div style={tile}>
+          <iframe src={`https://www.tiktok.com/player/v1/${id}?${params}`} title={`Video ${creator.name}`} allow="fullscreen; encrypted-media" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', border: 0 }} />
+        </div>
+      );
+    }
+  }
+  const code = url.match(/instagram\.com\/(?:[^/]+\/)?(?:p|reel|reels|tv)\/([^/?#]+)/)?.[1];
+  if (!code) return null;
+  // perbesar sampai kotak media 4:5 setinggi tile 9:16, lalu geser ke tengah:
+  // header, bar hitam, dan footer "View more on Instagram" terpotong, sisa videonya saja
+  const scale = (tileW * 16) / 9 / IG_MEDIA_H;
+  const offsetX = (IG_WIDTH * scale - tileW) / 2;
+  return (
+    <div ref={ref} style={tile}>
+      <iframe
+        src={`https://www.instagram.com/reel/${code}/embed/`}
+        title={`Video ${creator.name}`}
+        scrolling="no"
+        style={{
+          position: 'absolute', top: 0, left: 0, border: 0, width: `${IG_WIDTH}px`, height: `${IG_HEADER + IG_MEDIA_H + 200}px`,
+          transform: `translateX(${-offsetX}px) scale(${scale}) translateY(-${IG_HEADER}px)`, transformOrigin: 'top left',
+          visibility: tileW ? 'visible' : 'hidden',
+        }}
+      />
+    </div>
+  );
+}
+
+const tile: React.CSSProperties = {
+  position: 'relative', width: '100%', aspectRatio: '9/16', borderRadius: '10px', overflow: 'hidden', border: 'none', padding: 0,
+  background: 'rgba(255,255,255,0.14)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+};
+
 export default function PortfolioDetail() {
   const { id } = useParams();
   const [item, setItem] = useState<PortfolioItem | null>(null);
   const [notFound, setNotFound] = useState(false);
+  const [playing, setPlaying] = useState<Clip | null>(null);
 
   useEffect(() => {
     api.get(`/portfolio/${id}`)
       .then((res) => setItem(res.data))
       .catch(() => setNotFound(true));
   }, [id]);
+
+  useEffect(() => {
+    if (!playing) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setPlaying(null); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [playing]);
 
   if (notFound || !item) {
     return (
@@ -41,8 +108,10 @@ export default function PortfolioDetail() {
   const extraCols = (Object.keys(EXTRA_LABELS) as ExtraKey[]).filter((k) => rows.some((r) => r[k] !== undefined && r[k] !== null && r[k] !== ''));
   const extraValue = (r: PlatformResult, k: ExtraKey) => (k === 'er' ? r.er || '—' : num(r[k], true));
   const scope = scopeText(item);
-  const creators = (item.topCreators || []).slice(0, 3);
-  const media = (item.contents || []).slice(0, 3);
+  const clips: Clip[] = [
+    ...(item.topCreators || []).slice(0, 3).filter((c) => c.postLink).map((creator) => ({ kind: 'embed' as const, creator })),
+    ...(item.contents || []).slice(0, 3).map((url) => ({ kind: 'media' as const, url })),
+  ];
 
   return (
     <div style={{ background: 'var(--surface)', minHeight: '100vh', padding: '96px 24px 90px' }}>
@@ -114,31 +183,21 @@ export default function PortfolioDetail() {
             </div>
           )}
 
-          {(media.length > 0 || creators.length > 0) && (
+          {clips.length > 0 && (
             <div style={{ minWidth: 0 }}>
               <p style={{ ...sectionLabel, marginBottom: '12px' }}>Contoh Konten</p>
-              {media.length > 0 && (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', marginBottom: '14px' }}>
-                  {media.map((url) => (
-                    isVideo(url)
-                      ? <video key={url} src={url} controls playsInline style={{ width: '100%', aspectRatio: '9/16', objectFit: 'cover', borderRadius: '10px', background: '#000' }} />
-                      : <a key={url} href={url} target="_blank" rel="noopener noreferrer"><img src={url} alt={`Contoh konten ${item.brand}`} style={{ width: '100%', aspectRatio: '9/16', objectFit: 'cover', borderRadius: '10px' }} /></a>
-                  ))}
-                </div>
-              )}
-              {creators.map((c, i) => (
-                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', fontSize: '0.8rem', color: 'rgba(255,255,255,0.7)', marginBottom: '8px' }}>
-                  <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'var(--lime)', color: 'var(--on-lime)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '0.66rem' }}>{i + 1}</span>
-                  <span style={{ fontWeight: 700, color: '#fff' }}>{c.name}</span>
-                  {c.views && <span>{c.views} views</span>}
-                  {c.likes && <span>{c.likes} likes</span>}
-                  {c.postLink && (
-                    <a href={c.postLink} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', color: 'var(--lime)', textDecoration: 'none' }}>
-                      Lihat postingan <ExternalLink size={11} />
-                    </a>
-                  )}
-                </div>
-              ))}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
+                {clips.map((clip, i) => (
+                  clip.kind === 'embed' ? <EmbedTile key={i} creator={clip.creator} /> : (
+                    <button key={i} onClick={() => setPlaying(clip)} style={tile} aria-label={`Buka contoh konten ${i + 1}`}>
+                      {isVideo(clip.url)
+                        ? <video src={clip.url} muted playsInline preload="metadata" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+                        : <img src={clip.url} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />}
+                      {isVideo(clip.url) && <Play size={30} fill="#fff" color="#fff" style={{ position: 'relative' }} />}
+                    </button>
+                  )
+                ))}
+              </div>
             </div>
           )}
         </div>
@@ -156,6 +215,24 @@ export default function PortfolioDetail() {
           </p>
         )}
       </div>
+
+      {playing && (
+        <div
+          onClick={() => setPlaying(null)}
+          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px', overflowY: 'auto' }}
+        >
+          <div onClick={(e) => e.stopPropagation()} style={{ position: 'relative', maxHeight: '90vh', overflowY: 'auto' }}>
+            <button onClick={() => setPlaying(null)} aria-label="Tutup" style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 1, width: '32px', height: '32px', borderRadius: '50%', border: 'none', background: 'rgba(0,0,0,0.6)', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <X size={16} />
+            </button>
+            {playing.kind === 'embed' ? null : isVideo(playing.url) ? (
+              <video src={playing.url} controls autoPlay playsInline style={{ maxWidth: '90vw', maxHeight: '85vh', borderRadius: '14px', background: '#000' }} />
+            ) : (
+              <img src={playing.url} alt={`Contoh konten ${item.brand}`} style={{ maxWidth: '90vw', maxHeight: '85vh', borderRadius: '14px' }} />
+            )}
+          </div>
+        </div>
+      )}
 
       <style>{`
         @media (max-width: 900px) {
