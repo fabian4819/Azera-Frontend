@@ -215,7 +215,7 @@ export const services: ServiceContent[] = [
   {
     slug: 'event-creator-activation',
     navLabel: 'Event Creator Activation',
-    portfolioCategory: 'Event Activation',
+    portfolioCategory: 'Event Creator Activation',
     eyebrow: 'Core Service',
     headlinePlain: 'Event Creator',
     headlineHighlight: 'Activation',

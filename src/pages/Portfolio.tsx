@@ -1,54 +1,16 @@
 import { useEffect, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Users, Eye, TrendingUp, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
 import api from '../lib/api';
 import SocialEmbed from '../components/SocialEmbed';
 import { ease } from '../lib/motion';
+import { PORTFOLIO_CATEGORIES, isVideo, resultBoxes, sectionLabel, type PortfolioItem, type TopCreator } from '../lib/portfolio';
 
-interface TopCreator {
-  name: string;
-  platform: 'instagram' | 'tiktok';
-  postLink: string;
-  views?: string;
-  likes?: string;
-  comments?: string;
-  shares?: string;
-}
-interface PortfolioMetrics {
-  totalImpression?: string;
-  accountsReached?: string;
-  totalEngagement?: string;
-  totalFollowers?: string;
-  avgEngagementRate?: string;
-  costPerView?: string;
-}
-interface PortfolioItem {
-  _id: string;
-  brand: string;
-  hashtag: string;
-  category: string;
-  kolCount: number;
-  reach: string;
-  engagement: number;
-  featured?: boolean;
-  logo?: string;
-  logoBg?: string;
-  title?: string;
-  objective?: string;
-  metrics?: PortfolioMetrics;
-  topCreators?: TopCreator[];
-}
+const categories = ['All Campaigns', ...PORTFOLIO_CATEGORIES];
 
-const categories = ['All Campaigns', 'KOL Campaign', 'KOC Campaign', 'Affiliate Campaign', 'Event Activation'];
-
-const metricEntries: { key: keyof PortfolioMetrics; label: string }[] = [
-  { key: 'totalImpression', label: 'Total Impression' },
-  { key: 'accountsReached', label: 'Accounts Reached' },
-  { key: 'totalEngagement', label: 'Total Engagement' },
-  { key: 'totalFollowers', label: 'Total Followers' },
-  { key: 'avgEngagementRate', label: 'Average ER Post' },
-  { key: 'costPerView', label: 'Cost Per View' },
-];
+// Carousel contoh konten: embed postingan Top Creator (yang punya link) + foto/video upload
+type Slide = { kind: 'creator'; creator: TopCreator; rank: number } | { kind: 'media'; url: string };
 
 export default function Portfolio() {
   const [items, setItems] = useState<PortfolioItem[]>([]);
@@ -73,9 +35,13 @@ export default function Portfolio() {
   // fallback ke brand pertama yang terlihat kalau selectedId hilang dari filter kategori aktif
   const selected = filtered.find((i) => i._id === selectedId) || filtered[0];
 
-  const hasMetrics = selected?.metrics && Object.values(selected.metrics).some((v) => v);
-  const hasCreators = selected?.topCreators && selected.topCreators.length > 0;
-  const creatorCount = selected?.topCreators?.length ?? 0;
+  const slides: Slide[] = selected ? [
+    ...(selected.topCreators || []).slice(0, 3).flatMap((c, i) => (c.postLink ? [{ kind: 'creator' as const, creator: c, rank: i + 1 }] : [])),
+    ...(selected.contents || []).slice(0, 3).map((url) => ({ kind: 'media' as const, url })),
+  ] : [];
+  const hasCreators = slides.length > 0;
+  const creatorCount = slides.length;
+  const boxes = selected ? resultBoxes(selected).slice(0, 4) : [];
 
   // ganti brand -> reset carousel creator ke slide pertama (remount via key, bukan effect)
   if (selected?._id !== creatorScrollKey) {
@@ -209,26 +175,34 @@ export default function Portfolio() {
                         style={{ width: '340px', minWidth: 0, display: 'flex', overflowX: 'auto', scrollSnapType: 'x mandatory' }}
                         className="portfolio-creator-scroll"
                       >
-                        {selected.topCreators!.slice(0, 3).map((c, i) => (
+                        {slides.map((slide, i) => (
                           <div key={i} style={{ flex: '0 0 100%', minWidth: 0, scrollSnapAlign: 'center' }}>
-                            <SocialEmbed platform={c.platform} url={c.postLink} />
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginTop: '8px', fontSize: '0.76rem', color: 'rgba(255,255,255,0.7)' }}>
-                              <span
-                                style={{
-                                  flexShrink: 0, width: '20px', height: '20px', borderRadius: '50%',
-                                  background: 'var(--lime)', color: 'var(--on-lime)', display: 'flex',
-                                  alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-display)',
-                                  fontWeight: 800, fontSize: '0.66rem',
-                                }}
-                              >
-                                {i + 1}
-                              </span>
-                              <span style={{ fontWeight: 700, color: '#fff' }}>{c.name}</span>
-                              {c.views && <span>{c.views} views</span>}
-                              {c.likes && <span>{c.likes} likes</span>}
-                              {c.comments && <span>{c.comments} komentar</span>}
-                              {c.shares && <span>{c.shares} share</span>}
-                            </div>
+                            {slide.kind === 'media' ? (
+                              isVideo(slide.url)
+                                ? <video src={slide.url} controls playsInline style={{ width: '100%', maxHeight: '560px', borderRadius: '14px', background: '#000' }} />
+                                : <img src={slide.url} alt={`Contoh konten ${selected.brand}`} style={{ width: '100%', maxHeight: '560px', objectFit: 'cover', borderRadius: '14px' }} />
+                            ) : (
+                              <>
+                                <SocialEmbed platform={slide.creator.platform} url={slide.creator.postLink!} />
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginTop: '8px', fontSize: '0.76rem', color: 'rgba(255,255,255,0.7)' }}>
+                                  <span
+                                    style={{
+                                      flexShrink: 0, width: '20px', height: '20px', borderRadius: '50%',
+                                      background: 'var(--lime)', color: 'var(--on-lime)', display: 'flex',
+                                      alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-display)',
+                                      fontWeight: 800, fontSize: '0.66rem',
+                                    }}
+                                  >
+                                    {slide.rank}
+                                  </span>
+                                  <span style={{ fontWeight: 700, color: '#fff' }}>{slide.creator.name}</span>
+                                  {slide.creator.views && <span>{slide.creator.views} views</span>}
+                                  {slide.creator.likes && <span>{slide.creator.likes} likes</span>}
+                                  {slide.creator.comments && <span>{slide.creator.comments} komentar</span>}
+                                  {slide.creator.shares && <span>{slide.creator.shares} share</span>}
+                                </div>
+                              </>
+                            )}
                           </div>
                         ))}
                       </div>
@@ -249,7 +223,7 @@ export default function Portfolio() {
 
                     {creatorCount > 1 && (
                       <div style={{ display: 'flex', gap: '6px', justifyContent: 'center', marginTop: '14px' }}>
-                        {selected.topCreators!.slice(0, 3).map((_, i) => (
+                        {slides.map((_, i) => (
                           <button
                             key={i}
                             onClick={() => goToCreator(i)}
@@ -261,12 +235,15 @@ export default function Portfolio() {
                         ))}
                       </div>
                     )}
+                    <p style={{ textAlign: 'center', marginTop: '10px', fontSize: '0.72rem', color: 'rgba(255,255,255,0.55)' }}>
+                      Contoh postingan kreator · {creatorIndex + 1} dari {creatorCount}
+                    </p>
                   </div>
                 ) : (
                   <div
                     style={{
                       borderRadius: '20px', overflow: 'hidden', height: '100%', minHeight: '340px',
-                      background: selected.logo ? (selected.logoBg || 'rgba(255,255,255,0.08)') : 'rgba(255,255,255,0.08)',
+                      background: 'rgba(255,255,255,0.08)',
                       display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '32px',
                     }}
                   >
@@ -286,40 +263,43 @@ export default function Portfolio() {
                   <span className="tag-pill tag-pill-white">{selected.category}</span>
                 </div>
                 <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 'clamp(1.5rem, 3vw, 2rem)', color: '#fff', lineHeight: 1.2, marginBottom: '20px' }}>
-                  {selected.title || `${selected.brand} KOL Campaign`}
+                  {selected.title || `${selected.brand} ${selected.category}`}
                 </h2>
 
                 {selected.objective && (
-                  <div style={{ marginBottom: '22px' }}>
-                    <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--lime)', marginBottom: '8px' }}>Objective</p>
+                  <div style={{ marginBottom: '18px' }}>
+                    <p style={sectionLabel}>Objective</p>
                     <p style={{ color: 'rgba(255,255,255,0.78)', fontSize: '0.92rem', lineHeight: 1.7 }}>{selected.objective}</p>
                   </div>
                 )}
 
-                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--lime)', marginBottom: '12px' }}>
-                  {hasMetrics ? 'Performance Metrics Result' : 'Ringkasan Campaign'}
-                </p>
-
-                {hasMetrics ? (
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }} className="portfolio-metrics-grid">
-                    {metricEntries.map(({ key, label }) => {
-                      const value = selected.metrics?.[key];
-                      if (!value) return null;
-                      return (
-                        <div key={key} style={{ background: 'rgba(255,255,255,0.08)', borderRadius: '12px', padding: '12px 14px' }}>
-                          <p style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.6)', marginBottom: '4px' }}>{label}</p>
-                          <p style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '1.15rem', color: 'var(--lime)' }}>{value}</p>
-                        </div>
-                      );
-                    })}
-                  </div>
-                ) : (
-                  <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'rgba(255,255,255,0.75)', fontSize: '0.85rem' }}><Users size={14} /> {selected.kolCount} KOL</div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'rgba(255,255,255,0.75)', fontSize: '0.85rem' }}><Eye size={14} /> {selected.reach} Reach</div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--lime)', fontSize: '0.85rem', fontWeight: 700 }}><TrendingUp size={14} /> {selected.engagement}% ER</div>
+                {selected.deliverables && (
+                  <div style={{ marginBottom: '18px' }}>
+                    <p style={sectionLabel}>Creator Deliverables</p>
+                    <p style={{ color: 'rgba(255,255,255,0.78)', fontSize: '0.92rem', lineHeight: 1.7 }}>{selected.deliverables}</p>
                   </div>
                 )}
+
+                {boxes.length > 0 && (
+                  <>
+                    <p style={{ ...sectionLabel, marginBottom: '12px' }}>Campaign Results</p>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                      {boxes.map((b) => (
+                        <div key={b.label} style={{ background: 'rgba(255,255,255,0.08)', borderRadius: '12px', padding: '12px 14px' }}>
+                          <p style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.6)', marginBottom: '4px' }}>{b.label}</p>
+                          <p style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '1.25rem', color: 'var(--lime)' }}>{b.value}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
+
+                <Link
+                  to={`/portfolio/${selected._id}`}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', marginTop: '20px', color: '#fff', fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '0.88rem', textDecoration: 'none' }}
+                >
+                  Lihat Detail Campaign <ArrowRight size={15} />
+                </Link>
               </div>
             </motion.div>
           )}
@@ -329,9 +309,6 @@ export default function Portfolio() {
       <style>{`
         @media (max-width: 900px) {
           .portfolio-detail-grid { grid-template-columns: 1fr !important; }
-        }
-        @media (max-width: 480px) {
-          .portfolio-metrics-grid { grid-template-columns: 1fr 1fr !important; }
         }
         .portfolio-creator-scroll { scrollbar-width: none; -ms-overflow-style: none; }
         .portfolio-creator-scroll::-webkit-scrollbar { display: none; }
