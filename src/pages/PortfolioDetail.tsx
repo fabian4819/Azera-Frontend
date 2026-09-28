@@ -4,7 +4,7 @@ import { ArrowLeft, Play, X } from 'lucide-react';
 import api from '../lib/api';
 import SocialEmbed from '../components/SocialEmbed';
 import {
-  formatCompact, isVideo, platformLabel, resultBoxes, scopeText, sectionLabel, videoTile as tile, type PortfolioItem, type PlatformResult, type TopCreator,
+  formatCompact, isVideo, platformLabel, resultBoxes, scopeText, sectionLabel, nicheChip, videoTile as tile, type PortfolioItem, type PlatformResult, type TopCreator,
 } from '../lib/portfolio';
 
 const num = (v: number | null | undefined, compact = false) =>
@@ -99,6 +99,14 @@ export default function PortfolioDetail() {
           <div style={{ marginBottom: '18px' }}>
             <p style={sectionLabel}>Objective</p>
             <p style={{ color: 'rgba(255,255,255,0.8)', lineHeight: 1.7 }}>{item.objective}</p>
+          </div>
+        )}
+        {!!item.niches?.length && (
+          <div style={{ marginBottom: '18px' }}>
+            <p style={sectionLabel}>Niche KOL</p>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+              {item.niches.map((n) => <span key={n} style={nicheChip}>{n}</span>)}
+            </div>
           </div>
         )}
         {item.deliverables && (

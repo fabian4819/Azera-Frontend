@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Plus, Edit2, Trash2, X, ChevronDown, ChevronUp } from 'lucide-react';
 import api from '../../lib/api';
 import {
-  PORTFOLIO_CATEGORIES, SCOPE_OPTIONS, PLATFORM_LABELS, creatorLabel, formatCompact, totalViews,
+  PORTFOLIO_CATEGORIES, SCOPE_OPTIONS, KOL_NICHES, PLATFORM_LABELS, creatorLabel, formatCompact, totalViews,
   type PortfolioItem, type ResultPlatform, type TopCreator,
 } from '../../lib/portfolio';
 
@@ -30,6 +30,7 @@ interface FormState {
   title: string;
   category: string;
   objective: string;
+  niches: string[];
   period: string;
   hashtag: string;
   kolCount: string;
@@ -54,7 +55,7 @@ const emptyPlatform = (): FormPlatform => ({
 
 const emptyForm: FormState = {
   status: 'draft',
-  brand: '', title: '', category: '', objective: '', period: '', hashtag: '', kolCount: '', deliverables: '',
+  brand: '', title: '', category: '', objective: '', niches: [], period: '', hashtag: '', kolCount: '', deliverables: '',
   scope: [], scopeOther: '', scopeOtherOn: false, partnerAgency: '', featured: false,
   platforms: [], cpv: '', cpvPublic: false, affiliate: { clicks: '', orders: '', gmv: '' }, topCreators: [],
 };
@@ -165,6 +166,7 @@ export default function PortfolioManager() {
       title: item.title || '',
       category: item.category,
       objective: item.objective || '',
+      niches: item.niches || [],
       period: item.period || '',
       hashtag: item.hashtag || '',
       kolCount: str(item.kolCount),
@@ -210,6 +212,10 @@ export default function PortfolioManager() {
   };
   const removePlatform = (i: number) => setForm((f) => ({ ...f, platforms: f.platforms.filter((_, idx) => idx !== i) }));
 
+  const toggleNiche = (opt: string) => {
+    setForm((f) => ({ ...f, niches: f.niches.includes(opt) ? f.niches.filter((x) => x !== opt) : [...f.niches, opt] }));
+  };
+
   const toggleScope = (opt: string) => {
     setForm((f) => ({ ...f, scope: f.scope.includes(opt) ? f.scope.filter((x) => x !== opt) : [...f.scope, opt] }));
   };
@@ -228,9 +234,10 @@ export default function PortfolioManager() {
     setFormError('');
     try {
       const fd = new FormData();
-      const { platforms, topCreators, scope, affiliate, scopeOtherOn, scopeOther, ...flat } = form;
+      const { platforms, topCreators, scope, niches, affiliate, scopeOtherOn, scopeOther, ...flat } = form;
       Object.entries({ ...flat, status, scopeOther: scopeOtherOn ? scopeOther : '' }).forEach(([k, v]) => fd.append(k, String(v)));
       fd.append('scope', JSON.stringify(scope));
+      fd.append('niches', JSON.stringify(niches));
       fd.append('affiliate', JSON.stringify(affiliate));
       fd.append('platforms', JSON.stringify(platforms.map((r) => ({
         ...r,
@@ -393,6 +400,18 @@ export default function PortfolioManager() {
                 placeholder="Meningkatkan brand awareness melalui konten kreator."
                 style={{ ...modalInputStyle, resize: 'vertical', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
               />
+            </div>
+
+            <div style={{ marginBottom: '14px' }}>
+              <label style={labelStyle}>Niche KOL</label>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                {KOL_NICHES.map((opt) => (
+                  <label key={opt} style={checkChip(form.niches.includes(opt))}>
+                    <input type="checkbox" checked={form.niches.includes(opt)} onChange={() => toggleNiche(opt)} style={{ accentColor: '#6728e4' }} />
+                    {opt}
+                  </label>
+                ))}
+              </div>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '14px', marginBottom: '14px' }}>

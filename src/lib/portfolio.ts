@@ -2,6 +2,8 @@
 import type { CSSProperties } from 'react';
 
 export const PORTFOLIO_CATEGORIES = ['KOL Campaign', 'KOC Campaign', 'Affiliate Campaign', 'Event Creator Activation'];
+// sama dengan pilihan niche di CampaignNew (admin)
+export const KOL_NICHES = ['Beauty', 'Fashion', 'Food & Beverage', 'Travel', 'Tech', 'Fitness', 'Parenting', 'Gaming', 'Finance', 'Education', 'Lifestyle', 'Entertainment'];
 export const SCOPE_OPTIONS = ['sourcing', 'briefing', 'content review', 'monitoring posting', 'pengumpulan insight', 'reporting'];
 
 export type ResultPlatform = 'instagram' | 'tiktok' | 'threads' | 'x' | 'youtube' | 'other';
@@ -39,6 +41,7 @@ export interface PortfolioItem {
   title?: string;
   category: string;
   objective?: string;
+  niches?: string[];
   period?: string;
   hashtag?: string;
   kolCount?: number;
@@ -136,3 +139,5 @@ export const videoTile: CSSProperties = {
   position: 'relative', width: '100%', aspectRatio: '9/16', borderRadius: '10px', overflow: 'hidden', border: 'none', padding: 0,
   background: 'rgba(255,255,255,0.14)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
 };
+
+export const nicheChip: CSSProperties = { padding: '4px 12px', borderRadius: '999px', background: 'rgba(255,255,255,0.12)', color: '#fff', fontSize: '0.8rem', fontWeight: 600 };
