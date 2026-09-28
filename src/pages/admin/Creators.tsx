@@ -22,6 +22,7 @@ interface CreatorItem {
   npwp?: string; portfolioLink?: string;
   performanceScore: { overall: number };
   cancelCount: number; complianceStatus: string; source: string; status: string; createdAt: string;
+  campaigns?: string[];
   extensionMetrics?: Record<string, ExtensionMetric>;
 }
 
@@ -71,7 +72,10 @@ function multiTokenFilter(row: { getValue: (id: string) => unknown }, columnId: 
   return tokens.some((t) => filterValue.includes(t == null || t === '' ? '(Kosong)' : String(t)));
 }
 
-export default function Creators() {
+const SOURCE_LABELS: Record<string, string> = { form: 'Form', extension: 'Ekstensi', campaign: 'Link Campaign', import: 'Import Sheet' };
+
+/** general = daftar lewat form KOL Register; campaign = masuk lewat link apply campaign / import sheet */
+export default function Creators({ scope = 'general' }: { scope?: 'general' | 'campaign' }) {
   const [creators, setCreators] = useState<CreatorItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [globalFilter, setGlobalFilter] = useState('');
@@ -83,7 +87,7 @@ export default function Creators() {
   const fetchCreators = async () => {
     setLoading(true);
     try {
-      const res = await api.get('/admin/creators');
+      const res = await api.get('/admin/creators', { params: { scope } });
       setCreators(res.data);
     } catch {
       setCreators([]);
@@ -162,6 +166,7 @@ export default function Creators() {
         cell: ({ getValue }) => formatDate(getValue<string>()),
       },
       textCol('name', 'Nama', (c) => c.name, ({ getValue }) => <span style={{ fontWeight: 600, color: '#191c20' }}>{getValue<string>()}</span>),
+      ...(scope === 'campaign' ? [arrayCol('campaigns', 'Campaign', (c) => c.campaigns || [])] : []),
       textCol('phone', 'WhatsApp', (c) => c.phone),
       textCol('email', 'Email', (c) => c.email || ''),
       numCol('age', 'Usia', (c) => c.age ?? null),
@@ -188,7 +193,7 @@ export default function Creators() {
         const comp = complianceLabels[row.original.complianceStatus] || complianceLabels.ok;
         return <span style={{ background: comp.bg, color: comp.color, borderRadius: '999px', padding: '3px 10px', fontSize: '0.7rem', fontWeight: 700 }}>{comp.label}</span>;
       }),
-      textCol('source', 'Sumber', (c) => (c.source === 'import' ? 'Import' : 'Form')),
+      textCol('source', 'Sumber', (c) => SOURCE_LABELS[c.source] || c.source),
       textCol('status', 'Status', (c) => STATUS_LABELS[c.status] || c.status, ({ row }) => <StatusBadge status={row.original.status} />),
       {
         id: 'action', header: 'Aksi', enableSorting: false, enableColumnFilter: false,
@@ -202,7 +207,7 @@ export default function Creators() {
         ),
       },
     ];
-  }, [navigate]);
+  }, [navigate, scope]);
 
   const table = useReactTable({
     data: creators,
@@ -332,7 +337,6 @@ function ColumnHeaderCell({ column, table, children }: { column: Column<CreatorI
     return Array.from(set).sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
     // otherColumnFilters dipakai murni sebagai trigger recompute (facet berubah kalau kolom LAIN
     // difilter) — bukan dibaca di body, makanya lint kira "tidak perlu".
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [column, otherColumnFilters]);
 
   const selected = filterValue ?? uniqueValues; // undefined filter = semua tercentang

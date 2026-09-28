@@ -143,7 +143,8 @@ export default function App() {
             <Route path="campaigns/:id/broadcast" element={<Broadcast />} />
             <Route path="brands" element={<Brands />} />
             <Route path="brands/:id" element={<BrandDetail />} />
-            <Route path="creators" element={<Creators />} />
+            <Route path="creators" element={<Creators key="general" />} />
+            <Route path="campaign-creators" element={<Creators key="campaign" scope="campaign" />} />
             <Route path="creators/:id" element={<CreatorDetail />} />
             <Route path="extension" element={<ExtensionConnect />} />
             <Route path="pic" element={<PicUsers />} />

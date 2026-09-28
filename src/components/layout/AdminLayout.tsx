@@ -1,6 +1,6 @@
 import { Fragment, useState } from 'react';
 import { Link, useLocation, Outlet } from 'react-router-dom';
-import { LayoutDashboard, Building2, Users, UserCheck, ImageIcon, Megaphone, PanelsTopLeft, Upload, MessageCircle, Inbox, MessageSquareText, Bot, Plug, LogOut, ChevronsLeft, ChevronsRight, FolderOpen, FileText, Receipt, FileSignature, ChevronDown } from 'lucide-react';
+import { LayoutDashboard, Building2, Users, Contact, UserCheck, ImageIcon, Megaphone, PanelsTopLeft, Upload, MessageCircle, Inbox, MessageSquareText, Bot, Plug, LogOut, ChevronsLeft, ChevronsRight, FolderOpen, FileText, Receipt, FileSignature, ChevronDown } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 
 const navItems = [
@@ -14,6 +14,7 @@ const navItems = [
   { label: 'Template Bot Lead', to: '/admin/lead-bot-templates', icon: Bot },
   { label: 'Brands', to: '/admin/brands', icon: Building2 },
   { label: 'Creators', to: '/admin/creators', icon: Users },
+  { label: 'Creator Campaign', to: '/admin/campaign-creators', icon: Contact },
   { label: 'Ekstensi KOL Lister', to: '/admin/extension', icon: Plug },
   { label: 'PIC', to: '/admin/pic', icon: UserCheck },
   { label: 'Portfolio', to: '/admin/portfolio', icon: ImageIcon },
@@ -38,6 +39,7 @@ const pageTitles: Record<string, string> = {
   '/admin/lead-bot-templates': 'Template Bot WhatsApp (Lead Masuk)',
   '/admin/brands': 'Brand Submissions',
   '/admin/creators': 'Creator Registrations',
+  '/admin/campaign-creators': 'Creator Campaign',
   '/admin/extension': 'Ekstensi KOL Lister',
   '/admin/pic': 'PIC / Handle-by',
   '/admin/portfolio': 'Portfolio Manager',
