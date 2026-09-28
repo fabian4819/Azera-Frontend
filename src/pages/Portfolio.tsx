@@ -9,6 +9,8 @@ import { PORTFOLIO_CATEGORIES, isVideo, resultBoxes, sectionLabel, videoTile, ty
 
 const categories = ['All Campaigns', ...PORTFOLIO_CATEGORIES];
 
+const bigLabel: React.CSSProperties = { ...sectionLabel, fontSize: '0.74rem', marginBottom: '8px' };
+
 // Carousel contoh konten: embed postingan Top Creator (yang punya link) + foto/video upload
 type Slide = { kind: 'creator'; creator: TopCreator } | { kind: 'media'; url: string };
 
@@ -237,39 +239,39 @@ export default function Portfolio() {
                 )}
               </div>
 
-              {/* Kanan: info campaign */}
-              <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
-                  {selected.logo && <img src={selected.logo} alt={selected.brand} style={{ height: '32px', maxWidth: '120px', objectFit: 'contain', background: '#fff', borderRadius: '8px', padding: '4px 8px' }} />}
-                  <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '1.05rem', color: 'var(--lime)' }}>{selected.brand}</span>
+              {/* Kanan: info campaign — teks diperbesar & rata tengah vertikal supaya setinggi carousel video */}
+              <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', marginBottom: '20px' }}>
+                  {selected.logo && <img src={selected.logo} alt={selected.brand} style={{ height: '36px', maxWidth: '135px', objectFit: 'contain', background: '#fff', borderRadius: '8px', padding: '4px 8px' }} />}
+                  <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '1.15rem', color: 'var(--lime)' }}>{selected.brand}</span>
                   <span className="tag-pill tag-pill-white">{selected.category}</span>
                 </div>
-                <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 'clamp(1.5rem, 3vw, 2rem)', color: '#fff', lineHeight: 1.2, marginBottom: '20px' }}>
+                <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 'clamp(1.6rem, 3vw, 2.25rem)', color: '#fff', lineHeight: 1.2, marginBottom: '24px' }}>
                   {selected.title || `${selected.brand} ${selected.category}`}
                 </h2>
 
                 {selected.objective && (
-                  <div style={{ marginBottom: '18px' }}>
-                    <p style={sectionLabel}>Objective</p>
-                    <p style={{ color: 'rgba(255,255,255,0.78)', fontSize: '0.92rem', lineHeight: 1.7 }}>{selected.objective}</p>
+                  <div style={{ marginBottom: '22px' }}>
+                    <p style={bigLabel}>Objective</p>
+                    <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: '1rem', lineHeight: 1.7 }}>{selected.objective}</p>
                   </div>
                 )}
 
                 {selected.deliverables && (
-                  <div style={{ marginBottom: '18px' }}>
-                    <p style={sectionLabel}>Creator Deliverables</p>
-                    <p style={{ color: 'rgba(255,255,255,0.78)', fontSize: '0.92rem', lineHeight: 1.7 }}>{selected.deliverables}</p>
+                  <div style={{ marginBottom: '22px' }}>
+                    <p style={bigLabel}>Creator Deliverables</p>
+                    <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: '1rem', lineHeight: 1.7 }}>{selected.deliverables}</p>
                   </div>
                 )}
 
                 {boxes.length > 0 && (
                   <>
-                    <p style={{ ...sectionLabel, marginBottom: '12px' }}>Campaign Results</p>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                    <p style={{ ...bigLabel, marginBottom: '14px' }}>Campaign Results</p>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                       {boxes.map((b) => (
-                        <div key={b.label} style={{ background: 'rgba(255,255,255,0.08)', borderRadius: '12px', padding: '12px 14px' }}>
-                          <p style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.6)', marginBottom: '4px' }}>{b.label}</p>
-                          <p style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '1.25rem', color: 'var(--lime)' }}>{b.value}</p>
+                        <div key={b.label} style={{ background: 'rgba(255,255,255,0.08)', borderRadius: '12px', padding: '16px 18px' }}>
+                          <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.62)', marginBottom: '4px' }}>{b.label}</p>
+                          <p style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '1.6rem', lineHeight: 1.15, color: 'var(--lime)' }}>{b.value}</p>
                         </div>
                       ))}
                     </div>
@@ -279,7 +281,7 @@ export default function Portfolio() {
                 <Link
                   to={`/portfolio/${selected._id}`}
                   className="btn-lime portfolio-detail-cta"
-                  style={{ marginTop: '24px', padding: '12px 24px', fontSize: '0.9rem' }}
+                  style={{ marginTop: '28px', padding: '13px 26px', fontSize: '0.95rem', alignSelf: 'flex-start' }}
                 >
                   Lihat Detail Campaign <ArrowRight size={16} className="portfolio-detail-cta-arrow" />
                 </Link>
