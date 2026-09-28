@@ -4,9 +4,6 @@ import { Menu, X, ChevronDown } from 'lucide-react';
 import { services as serviceList } from '../../data/services';
 import { contactOptions } from '../../lib/contact';
 
-/** Menu Portfolio disembunyikan sementara — halaman /portfolio tetap bisa diakses langsung */
-const SHOW_PORTFOLIO = false
-
 const navLinks = [{ label: 'Home', to: '/' }];
 
 const services = serviceList.map((s) => ({ label: s.navLabel, to: `/service/${s.slug}` }));
@@ -169,7 +166,6 @@ export default function Navbar() {
               )}
             </div>
 
-            {SHOW_PORTFOLIO && (
             <Link
               to="/portfolio"
               onClick={() => setMenuOpen(false)}
@@ -187,7 +183,6 @@ export default function Navbar() {
             >
               Portfolio
             </Link>
-            )}
 
             <Link
               to="/kamus"
@@ -371,7 +366,6 @@ export default function Navbar() {
               </div>
             )}
 
-            {SHOW_PORTFOLIO && (
             <Link
               to="/portfolio"
               onClick={() => setMenuOpen(false)}
@@ -388,7 +382,6 @@ export default function Navbar() {
             >
               Portfolio
             </Link>
-            )}
 
             <Link
               to="/kamus"
