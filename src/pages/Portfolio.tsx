@@ -5,7 +5,7 @@ import { ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
 import api from '../lib/api';
 import SocialEmbed from '../components/SocialEmbed';
 import { ease } from '../lib/motion';
-import { PORTFOLIO_CATEGORIES, isVideo, resultBoxes, sectionLabel, nicheChip, videoTile, type PortfolioItem, type TopCreator } from '../lib/portfolio';
+import { PORTFOLIO_CATEGORIES, isVideo, resultBoxes, sectionLabel, brandKey, campaignLabel, nicheChip, videoTile, type PortfolioItem, type TopCreator } from '../lib/portfolio';
 
 const categories = ['All Campaigns', ...PORTFOLIO_CATEGORIES];
 
@@ -34,6 +34,14 @@ export default function Portfolio() {
   const filtered = category === 'All Campaigns' ? items : items.filter((i) => i.category === category);
   // fallback ke brand pertama yang terlihat kalau selectedId hilang dari filter kategori aktif
   const selected = filtered.find((i) => i._id === selectedId) || filtered[0];
+
+  // satu bubble per brand; brand dengan >1 campaign memunculkan sub-bubble per campaign
+  const brandGroups = [...filtered.reduce((m, i) => {
+    const k = brandKey(i.brand);
+    m.set(k, [...(m.get(k) || []), i]);
+    return m;
+  }, new Map<string, PortfolioItem[]>()).values()];
+  const activeGroup = selected ? brandGroups.find((g) => g.some((i) => i._id === selected._id)) : undefined;
 
   const slides: Slide[] = selected ? [
     ...(selected.topCreators || []).slice(0, 3).flatMap((c) => (c.postLink ? [{ kind: 'creator' as const, creator: c }] : [])),
@@ -109,28 +117,68 @@ export default function Portfolio() {
           </div>
         </div>
 
-        {/* Grid chip brand (dari data Portfolio asli) */}
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', justifyContent: 'center', marginBottom: '40px' }}>
-          {filtered.map((item) => {
-            const active = selected?._id === item._id;
+        {/* Bubble brand (satu per brand) */}
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', justifyContent: 'center', marginBottom: activeGroup && activeGroup.length > 1 ? '14px' : '40px' }}>
+          {brandGroups.map((group) => {
+            const first = group[0];
+            const active = group === activeGroup;
             return (
               <button
-                key={item._id}
-                onClick={() => setSelectedId(item._id)}
+                key={first._id}
+                onClick={() => setSelectedId(first._id)}
                 style={{
                   padding: '11px 22px', borderRadius: '999px',
                   border: active ? '1.5px solid var(--secondary)' : '1.5px solid var(--outline-variant)',
                   background: active ? 'var(--secondary)' : '#fff',
                   color: active ? '#fff' : 'var(--on-background)',
                   fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '0.88rem', cursor: 'pointer',
-                  transition: 'all 0.2s',
+                  transition: 'all 0.2s', display: 'inline-flex', alignItems: 'center', gap: '8px',
                 }}
               >
-                {item.brand}
+                {first.brand.trim()}
+                {group.length > 1 && (
+                  <span style={{ fontSize: '0.72rem', fontWeight: 700, padding: '1px 7px', borderRadius: '999px', background: active ? 'rgba(255,255,255,0.22)' : 'var(--surface-container)' }}>
+                    {group.length}
+                  </span>
+                )}
               </button>
             );
           })}
         </div>
+
+        {/* Sub-bubble campaign: hanya untuk brand yang punya lebih dari satu campaign */}
+        <AnimatePresence>
+          {activeGroup && activeGroup.length > 1 && (
+            <motion.div
+              key={activeGroup[0]._id}
+              initial={{ opacity: 0, y: -6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2, ease }}
+              style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', justifyContent: 'center', marginBottom: '40px' }}
+            >
+              {activeGroup.map((item) => {
+                const active = item._id === selected?._id;
+                return (
+                  <button
+                    key={item._id}
+                    onClick={() => setSelectedId(item._id)}
+                    style={{
+                      padding: '8px 18px', borderRadius: '999px',
+                      border: active ? '1.5px solid var(--primary)' : '1.5px dashed var(--outline-variant)',
+                      background: active ? 'var(--primary)' : 'transparent',
+                      color: active ? '#fff' : 'var(--on-surface-variant)',
+                      fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '0.8rem', cursor: 'pointer',
+                      transition: 'all 0.2s',
+                    }}
+                  >
+                    {campaignLabel(item)}
+                  </button>
+                );
+              })}
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {filtered.length === 0 && (
           <div style={{ textAlign: 'center', padding: '60px 24px', color: 'var(--outline)' }}>

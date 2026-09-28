@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Plus, Edit2, Trash2, X, ChevronDown, ChevronUp } from 'lucide-react';
 import api from '../../lib/api';
 import {
-  PORTFOLIO_CATEGORIES, SCOPE_OPTIONS, KOL_NICHES, PLATFORM_LABELS, creatorLabel, formatCompact, totalViews,
+  PORTFOLIO_CATEGORIES, SCOPE_OPTIONS, KOL_NICHES, brandKey, PLATFORM_LABELS, creatorLabel, formatCompact, totalViews,
   type PortfolioItem, type ResultPlatform, type TopCreator,
 } from '../../lib/portfolio';
 
@@ -28,6 +28,7 @@ interface FormState {
   status: 'draft' | 'published';
   brand: string;
   title: string;
+  bubbleLabel: string;
   category: string;
   objective: string;
   niches: string[];
@@ -55,7 +56,7 @@ const emptyPlatform = (): FormPlatform => ({
 
 const emptyForm: FormState = {
   status: 'draft',
-  brand: '', title: '', category: '', objective: '', niches: [], period: '', hashtag: '', kolCount: '', deliverables: '',
+  brand: '', title: '', bubbleLabel: '', category: '', objective: '', niches: [], period: '', hashtag: '', kolCount: '', deliverables: '',
   scope: [], scopeOther: '', scopeOtherOn: false, partnerAgency: '', featured: false,
   platforms: [], cpv: '', cpvPublic: false, affiliate: { clicks: '', orders: '', gmv: '' }, topCreators: [],
 };
@@ -164,6 +165,7 @@ export default function PortfolioManager() {
       status: item.status ?? 'published', // data lama tanpa status sudah tayang
       brand: item.brand,
       title: item.title || '',
+      bubbleLabel: item.bubbleLabel || '',
       category: item.category,
       objective: item.objective || '',
       niches: item.niches || [],
@@ -375,7 +377,11 @@ export default function PortfolioManager() {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }}>
               <div>
                 <label style={labelStyle}>Nama Brand *</label>
-                <input value={form.brand} onChange={(e) => setForm({ ...form, brand: e.target.value })} placeholder="Smartfren" style={modalInputStyle} />
+                <input value={form.brand} onChange={(e) => setForm({ ...form, brand: e.target.value })} placeholder="Smartfren" list="portfolio-brands" style={modalInputStyle} />
+                {/* pilih dari brand yang sudah ada supaya ejaan sama → campaign tergabung di satu bubble brand */}
+                <datalist id="portfolio-brands">
+                  {[...new Map(items.map((i) => [brandKey(i.brand), i.brand.trim()])).values()].map((b) => <option key={b} value={b} />)}
+                </datalist>
               </div>
               <div>
                 <label style={labelStyle}>Kategori *</label>
@@ -389,6 +395,18 @@ export default function PortfolioManager() {
             <div style={{ marginBottom: '14px' }}>
               <label style={labelStyle}>Judul Campaign *</label>
               <input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Smartfren Up Campaign" style={modalInputStyle} />
+            </div>
+
+            <div style={{ marginBottom: '14px' }}>
+              <label style={labelStyle}>Label Bubble Campaign</label>
+              <input value={form.bubbleLabel} onChange={(e) => setForm({ ...form, bubbleLabel: e.target.value })} placeholder="Promo Ramadhan" style={modalInputStyle} />
+              <p style={{ ...hintStyle, marginTop: '4px', marginBottom: 0 }}>
+                Nama pendek campaign. Kalau brand ini punya lebih dari satu campaign, klik bubble brand di halaman Portfolio memunculkan bubble per campaign dengan label ini (kosong = pakai Judul Campaign).
+                {form.brand.trim() && (() => {
+                  const n = items.filter((i) => i._id !== editId && brandKey(i.brand) === brandKey(form.brand)).length;
+                  return n > 0 ? <> Brand ini sudah punya <b>{n}</b> campaign lain.</> : null;
+                })()}
+              </p>
             </div>
 
             <div style={{ marginBottom: '14px' }}>

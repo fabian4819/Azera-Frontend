@@ -39,6 +39,7 @@ export interface PortfolioItem {
   status?: 'draft' | 'published';
   brand: string;
   title?: string;
+  bubbleLabel?: string;
   category: string;
   objective?: string;
   niches?: string[];
@@ -125,6 +126,12 @@ export function resultBoxes(item: PortfolioItem): ResultBox[] {
     : [viewsBox, cpvBox, ...affBoxes];
   return [creators, posts, ...results, ...legacy].filter((b): b is ResultBox => b !== null);
 }
+
+/** Kunci pengelompokan brand: "Modern Elektronik" & "modern elektronik " = brand yang sama. */
+export const brandKey = (brand: string) => brand.trim().replace(/\s+/g, ' ').toLowerCase();
+
+/** Label sub-bubble campaign saat satu brand punya lebih dari satu campaign. */
+export const campaignLabel = (item: PortfolioItem) => item.bubbleLabel?.trim() || item.title?.trim() || item.brand;
 
 export function scopeText(item: PortfolioItem) {
   return [...(item.scope || []), ...(item.scopeOther?.trim() ? [item.scopeOther.trim()] : [])].join(' · ');
