@@ -32,6 +32,8 @@ interface FormState {
   category: string;
   objective: string;
   niches: string[];
+  nicheOther: string;
+  nicheOtherOn: boolean;
   period: string;
   hashtag: string;
   kolCount: string;
@@ -56,7 +58,7 @@ const emptyPlatform = (): FormPlatform => ({
 
 const emptyForm: FormState = {
   status: 'draft',
-  brand: '', title: '', bubbleLabel: '', category: '', objective: '', niches: [], period: '', hashtag: '', kolCount: '', deliverables: '',
+  brand: '', title: '', bubbleLabel: '', category: '', objective: '', niches: [], nicheOther: '', nicheOtherOn: false, period: '', hashtag: '', kolCount: '', deliverables: '',
   scope: [], scopeOther: '', scopeOtherOn: false, partnerAgency: '', featured: false,
   platforms: [], cpv: '', cpvPublic: false, affiliate: { clicks: '', orders: '', gmv: '' }, topCreators: [],
 };
@@ -168,7 +170,9 @@ export default function PortfolioManager() {
       bubbleLabel: item.bubbleLabel || '',
       category: item.category,
       objective: item.objective || '',
-      niches: item.niches || [],
+      niches: (item.niches || []).filter((n) => KOL_NICHES.includes(n)),
+      nicheOther: (item.niches || []).filter((n) => !KOL_NICHES.includes(n)).join(', '),
+      nicheOtherOn: (item.niches || []).some((n) => !KOL_NICHES.includes(n)),
       period: item.period || '',
       hashtag: item.hashtag || '',
       kolCount: str(item.kolCount),
@@ -236,10 +240,12 @@ export default function PortfolioManager() {
     setFormError('');
     try {
       const fd = new FormData();
-      const { platforms, topCreators, scope, niches, affiliate, scopeOtherOn, scopeOther, ...flat } = form;
+      const { platforms, topCreators, scope, niches, nicheOther, nicheOtherOn, affiliate, scopeOtherOn, scopeOther, ...flat } = form;
       Object.entries({ ...flat, status, scopeOther: scopeOtherOn ? scopeOther : '' }).forEach(([k, v]) => fd.append(k, String(v)));
       fd.append('scope', JSON.stringify(scope));
-      fd.append('niches', JSON.stringify(niches));
+      // niche "Lainnya" (dipisah koma) disimpan sebagai niche biasa, jadi tampil publik sama seperti niche baku
+      const customNiches = nicheOtherOn ? nicheOther.split(',').map((n) => n.trim()).filter(Boolean) : [];
+      fd.append('niches', JSON.stringify([...new Set([...niches, ...customNiches])]));
       fd.append('affiliate', JSON.stringify(affiliate));
       fd.append('platforms', JSON.stringify(platforms.map((r) => ({
         ...r,
@@ -429,7 +435,14 @@ export default function PortfolioManager() {
                     {opt}
                   </label>
                 ))}
+                <label style={checkChip(form.nicheOtherOn)}>
+                  <input type="checkbox" checked={form.nicheOtherOn} onChange={(e) => setForm({ ...form, nicheOtherOn: e.target.checked })} style={{ accentColor: '#6728e4' }} />
+                  Lainnya
+                </label>
               </div>
+              {form.nicheOtherOn && (
+                <input value={form.nicheOther} onChange={(e) => setForm({ ...form, nicheOther: e.target.value })} placeholder="Isi sendiri, pisahkan dengan koma (mis. Otomotif, Home Living)" style={{ ...modalInputStyle, marginTop: '8px' }} />
+              )}
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '14px', marginBottom: '14px' }}>
