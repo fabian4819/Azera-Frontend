@@ -151,9 +151,6 @@ export default function PortfolioDetail() {
                   </tbody>
                 </table>
               </div>
-              <p style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.55)', marginTop: '10px' }}>
-                Akumulasi views postingan, bukan jumlah penonton unik.
-              </p>
             </div>
           )}
 
