@@ -116,11 +116,11 @@ export default function PortfolioDetail() {
           </div>
         )}
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '8px', marginBottom: '32px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: '12px', marginBottom: '32px' }}>
           {resultBoxes(item).map((b) => (
-            <div key={b.label} style={{ background: 'rgba(255,255,255,0.08)', borderRadius: '10px', padding: '8px 12px' }}>
-              <p style={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.6)', marginBottom: '2px' }}>{b.label}</p>
-              <p style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '1.1rem', lineHeight: 1.25, color: 'var(--lime)' }}>{b.value}</p>
+            <div key={b.label} style={{ background: 'rgba(255,255,255,0.08)', borderRadius: '12px', padding: '14px 16px' }}>
+              <p style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.6)', marginBottom: '4px' }}>{b.label}</p>
+              <p style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '1.35rem', color: 'var(--lime)' }}>{b.value}</p>
             </div>
           ))}
         </div>

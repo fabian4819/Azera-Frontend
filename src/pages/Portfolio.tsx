@@ -195,7 +195,7 @@ export default function Portfolio() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -16 }}
               transition={{ duration: 0.3, ease }}
-              style={{ background: 'var(--portfolio-bg)', borderRadius: '28px', padding: '36px', display: 'grid', gridTemplateColumns: '1fr 1.1fr', gap: '36px' }}
+              style={{ background: 'var(--portfolio-bg)', borderRadius: '24px', padding: '28px', display: 'grid', gridTemplateColumns: '1fr 1.1fr', gap: '28px', maxWidth: '980px', margin: '0 auto' }} // selebar navbar (Navbar.tsx maxWidth 980px)
               className="portfolio-detail-grid"
             >
               {/* Kiri: showcase top 3 creator (video ter-embed) atau fallback logo */}
@@ -322,11 +322,11 @@ export default function Portfolio() {
                 {boxes.length > 0 && (
                   <>
                     <p style={{ ...sectionLabel, marginBottom: '12px' }}>Campaign Results</p>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 200px))', gap: '8px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                       {boxes.map((b) => (
-                        <div key={b.label} style={{ background: 'rgba(255,255,255,0.08)', borderRadius: '10px', padding: '8px 12px' }}>
-                          <p style={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.6)', marginBottom: '2px' }}>{b.label}</p>
-                          <p style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '1.1rem', lineHeight: 1.25, color: 'var(--lime)' }}>{b.value}</p>
+                        <div key={b.label} style={{ background: 'rgba(255,255,255,0.08)', borderRadius: '12px', padding: '12px 14px' }}>
+                          <p style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.6)', marginBottom: '4px' }}>{b.label}</p>
+                          <p style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '1.25rem', color: 'var(--lime)' }}>{b.value}</p>
                         </div>
                       ))}
                     </div>
