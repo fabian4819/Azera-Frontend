@@ -27,6 +27,10 @@ function loadScriptOnce(src: string, id: string, onLoad: () => void) {
  * ini tidak punya penyimpanan video sendiri, jadi "video creator" berarti
  * postingan aslinya di-embed langsung dari platform. Lihat docs/plan section AD-49.
  */
+// ≈ tinggi embed IG (header + media 4:5 + footer) di lebar 340px, supaya kartu IG & TikTok
+// sejajar. Embed TikTok aslinya ±740px — sisa bawah (caption & nama musik) ikut terpotong.
+const TIKTOK_H = 640;
+
 function tiktokVideoId(url: string) {
   return url.match(/\/video\/(\d+)/)?.[1];
 }
@@ -56,7 +60,7 @@ export default function SocialEmbed({ platform, url }: { platform: 'instagram' |
           title="TikTok video"
           loading="lazy"
           allow="encrypted-media; fullscreen"
-          style={{ width: '100%', minWidth: '325px', height: '740px', border: 0, display: 'block' }}
+          style={{ width: '100%', minWidth: '325px', height: `${TIKTOK_H}px`, border: 0, display: 'block' }}
         />
       )}
       <a
