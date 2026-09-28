@@ -322,11 +322,11 @@ export default function Portfolio() {
                 {boxes.length > 0 && (
                   <>
                     <p style={{ ...sectionLabel, marginBottom: '12px' }}>Campaign Results</p>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 200px))', gap: '8px' }}>
                       {boxes.map((b) => (
-                        <div key={b.label} style={{ background: 'rgba(255,255,255,0.08)', borderRadius: '12px', padding: '12px 14px' }}>
-                          <p style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.6)', marginBottom: '4px' }}>{b.label}</p>
-                          <p style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '1.25rem', color: 'var(--lime)' }}>{b.value}</p>
+                        <div key={b.label} style={{ background: 'rgba(255,255,255,0.08)', borderRadius: '10px', padding: '8px 12px' }}>
+                          <p style={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.6)', marginBottom: '2px' }}>{b.label}</p>
+                          <p style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '1.1rem', lineHeight: 1.25, color: 'var(--lime)' }}>{b.value}</p>
                         </div>
                       ))}
                     </div>
