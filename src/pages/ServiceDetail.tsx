@@ -378,7 +378,7 @@ export default function ServiceDetail() {
           display: flex;
           align-items: center;
           justify-content: center;
-          background-color: #562fa0;
+          background-color: #7250d2;
           text-align: center;
         }
         .service-hero-bg {
