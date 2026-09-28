@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
 import api from '../lib/api';
-import VideoTile from '../components/VideoTile';
+import SocialEmbed from '../components/SocialEmbed';
 import { ease } from '../lib/motion';
 import { PORTFOLIO_CATEGORIES, isVideo, resultBoxes, sectionLabel, videoTile, type PortfolioItem, type TopCreator } from '../lib/portfolio';
 
@@ -184,7 +184,7 @@ export default function Portfolio() {
                                 ? <video src={slide.url} controls playsInline style={{ ...videoTile, objectFit: 'cover', background: '#000' }} />
                                 : <img src={slide.url} alt={`Contoh konten ${selected.brand}`} style={{ ...videoTile, objectFit: 'cover', cursor: 'default' }} />
                             ) : (
-                              <VideoTile creator={slide.creator} />
+                              <SocialEmbed platform={slide.creator.platform} url={slide.creator.postLink!} />
                             )}
                           </div>
                         ))}
@@ -239,8 +239,8 @@ export default function Portfolio() {
                 )}
               </div>
 
-              {/* Kanan: info campaign — teks diperbesar & rata tengah vertikal supaya setinggi carousel video */}
-              <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+              {/* Kanan: info campaign — rata atas, sejajar dengan atas video */}
+              <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-start' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', marginBottom: '20px' }}>
                   {selected.logo && <img src={selected.logo} alt={selected.brand} style={{ height: '36px', maxWidth: '135px', objectFit: 'contain', background: '#fff', borderRadius: '8px', padding: '4px 8px' }} />}
                   <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '1.15rem', color: 'var(--lime)' }}>{selected.brand}</span>

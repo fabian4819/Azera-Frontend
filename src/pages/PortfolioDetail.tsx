@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { ArrowLeft, Play, X } from 'lucide-react';
 import api from '../lib/api';
-import VideoTile from '../components/VideoTile';
+import SocialEmbed from '../components/SocialEmbed';
 import {
   formatCompact, isVideo, platformLabel, resultBoxes, scopeText, sectionLabel, videoTile as tile, type PortfolioItem, type PlatformResult, type TopCreator,
 } from '../lib/portfolio';
@@ -17,6 +17,26 @@ type ExtraKey = 'reach' | 'impressions' | 'engagement' | 'er';
 const EXTRA_LABELS: Record<ExtraKey, string> = { reach: 'Reach', impressions: 'Impressions', engagement: 'Engagement', er: 'ER' };
 
 type Clip = { kind: 'embed'; creator: TopCreator } | { kind: 'media'; url: string };
+
+const EMBED_W = 340; // embed IG/TikTok tidak bisa dirender lebih sempit dari ±326px
+
+/** Render embed di lebar aslinya lalu perkecil (CSS zoom, layout ikut mengecil) agar muat di kolom sempit. */
+function ZoomFit({ children }: { children: ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [zoom, setZoom] = useState(0.5);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() => setZoom(Math.min(1, el.clientWidth / EMBED_W)));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+  return (
+    <div ref={ref} style={{ minWidth: 0 }}>
+      <div style={{ width: `${EMBED_W}px`, zoom }}>{children}</div>
+    </div>
+  );
+}
 
 export default function PortfolioDetail() {
   const { id } = useParams();
@@ -146,9 +166,11 @@ export default function PortfolioDetail() {
           {clips.length > 0 && (
             <div style={{ minWidth: 0 }}>
               <p style={{ ...sectionLabel, marginBottom: '12px' }}>Contoh Konten</p>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', alignItems: 'start' }}>
                 {clips.map((clip, i) => (
-                  clip.kind === 'embed' ? <VideoTile key={i} creator={clip.creator} /> : (
+                  clip.kind === 'embed' ? (
+                    <ZoomFit key={i}><SocialEmbed platform={clip.creator.platform} url={clip.creator.postLink!} /></ZoomFit>
+                  ) : (
                     <button key={i} onClick={() => setPlaying(clip)} style={tile} aria-label={`Buka contoh konten ${i + 1}`}>
                       {isVideo(clip.url)
                         ? <video src={clip.url} muted playsInline preload="metadata" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
