@@ -195,7 +195,7 @@ export default function Portfolio() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -16 }}
               transition={{ duration: 0.3, ease }}
-              style={{ background: 'var(--hero-bg)', borderRadius: '28px', padding: '36px', display: 'grid', gridTemplateColumns: '1fr 1.1fr', gap: '36px' }}
+              style={{ background: 'var(--portfolio-bg)', borderRadius: '28px', padding: '36px', display: 'grid', gridTemplateColumns: '1fr 1.1fr', gap: '36px' }}
               className="portfolio-detail-grid"
             >
               {/* Kiri: showcase top 3 creator (video ter-embed) atau fallback logo */}

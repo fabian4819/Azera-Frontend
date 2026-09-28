@@ -47,10 +47,10 @@
 
   /* Latar ungu hero — dipakai juga oleh Payoff, Solutions, For Brand, FAQ */
   /* Disamakan dengan palet gambar hero service (sampling: #a47dfc atas → #5332b1 bawah) */
-  /* Percobaan ungu tua. Versi sebelumnya:
-     radial-gradient(70% 55% at 50% -8%, #a47dfc, rgba(164,125,252,0) 62%),
-     linear-gradient(180deg, #8b66eb 0%, #7250d2 50%, #5332b1 100%) */
-  --hero-bg: radial-gradient(70% 55% at 50% -8%, #5b2fc4, rgba(91,47,196,0) 62%),
+  --hero-bg: radial-gradient(70% 55% at 50% -8%, #a47dfc, rgba(164,125,252,0) 62%),
+    linear-gradient(180deg, #8b66eb 0%, #7250d2 50%, #5332b1 100%);
+  /* Varian ungu tua — khusus kotak showcase di halaman Portfolio */
+  --portfolio-bg: radial-gradient(70% 55% at 50% -8%, #5b2fc4, rgba(91,47,196,0) 62%),
     linear-gradient(180deg, #34168a 0%, #25106a 50%, #170a47 100%);
 
   --surface: #f8f9ff;
