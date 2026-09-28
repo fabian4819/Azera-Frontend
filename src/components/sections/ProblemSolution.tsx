@@ -1,6 +1,5 @@
 import { useRef, useState } from 'react';
 import { motion, AnimatePresence, useInView } from 'framer-motion';
-import { Quote } from 'lucide-react';
 import { ease } from '../../lib/motion';
 
 const solutions = [
@@ -24,57 +23,7 @@ const solutions = [
   },
 ];
 
-// Kutipan asli & terdokumentasi dari tokoh digital marketing/social media —
-// bukan testimoni fiktif, jadi atribusinya harus akurat (nama + peran nyata).
-const quotes = [
-  { text: 'Content is king, but marketing is queen, and runs the household.', name: 'Gary Vaynerchuk', role: 'CEO, VaynerMedia' },
-  { text: 'Marketing is no longer about the stuff you make, but about the stories you tell.', name: 'Seth Godin', role: 'Author & Marketing Speaker' },
-  { text: 'Social media is about sociology and psychology more than technology.', name: 'Brian Solis', role: 'Digital Analyst & Author' },
-  { text: 'Content is fire, social media is gasoline.', name: 'Jay Baer', role: 'Marketing Consultant & Author' },
-];
-
-const QUOTE_DURATION = 5;
-
-function QuoteCarousel() {
-  const [index, setIndex] = useState(0);
-  const q = quotes[index];
-
-  return (
-    <div style={{ position: 'relative', marginTop: '32px' }}>
-      <div style={{ position: 'absolute', top: '-8px', left: '18px', right: '18px', height: '16px', borderRadius: '10px', background: 'linear-gradient(90deg, var(--lime), var(--secondary))' }} />
-      <div style={{ position: 'relative', background: '#c9b6ff', borderRadius: '18px', padding: '26px', overflow: 'hidden' }}>
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={index}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.35, ease }}
-          >
-            <Quote size={22} color="#2c1065" style={{ opacity: 0.55, marginBottom: '12px' }} />
-            <p style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.05rem', color: '#1c0a44', lineHeight: 1.5, marginBottom: '18px' }}>
-              “{q.text}”
-            </p>
-            <p style={{ color: 'rgba(28,10,68,0.75)', fontSize: '0.85rem' }}>
-              <span style={{ fontWeight: 700 }}>{q.name}</span>, {q.role}
-            </p>
-          </motion.div>
-        </AnimatePresence>
-
-        <div style={{ marginTop: '20px', height: '3px', borderRadius: '999px', background: 'rgba(28,10,68,0.15)', overflow: 'hidden' }}>
-          <motion.div
-            key={index}
-            initial={{ width: '0%' }}
-            animate={{ width: '100%' }}
-            transition={{ duration: QUOTE_DURATION, ease: 'linear' }}
-            onAnimationComplete={() => setIndex((i) => (i + 1) % quotes.length)}
-            style={{ height: '100%', background: '#1c0a44' }}
-          />
-        </div>
-      </div>
-    </div>
-  );
-}
+const SOLUTION_DURATION = 5;
 
 export default function ProblemSolution() {
   const [active, setActive] = useState(0);
@@ -139,26 +88,37 @@ export default function ProblemSolution() {
             </motion.div>
           </AnimatePresence>
 
-          <div>
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={active}
-                initial={{ opacity: 0, y: 14 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -14 }}
-                transition={{ duration: 0.35, ease }}
-              >
-                <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 'clamp(1.6rem, 3vw, 2.1rem)', color: '#fff', letterSpacing: '-0.02em', marginBottom: '16px' }}>
-                  {current.title}
-                </h3>
-                <p style={{ color: 'rgba(255,255,255,0.75)', fontSize: '1rem', lineHeight: 1.7 }}>
-                  {current.desc}
-                </p>
-              </motion.div>
-            </AnimatePresence>
+          <div style={{ position: 'relative' }}>
+            <div style={{ position: 'absolute', top: '-8px', left: '18px', right: '18px', height: '16px', borderRadius: '10px', background: 'linear-gradient(90deg, var(--lime), var(--secondary))' }} />
+            <div style={{ position: 'relative', background: '#c9b6ff', borderRadius: '18px', padding: '32px', overflow: 'hidden' }}>
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={active}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.35, ease }}
+                >
+                  <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 'clamp(1.6rem, 3vw, 2.1rem)', color: '#1c0a44', letterSpacing: '-0.02em', marginBottom: '14px' }}>
+                    {current.title}
+                  </h3>
+                  <p style={{ color: 'rgba(28,10,68,0.75)', fontSize: '1rem', lineHeight: 1.7 }}>
+                    {current.desc}
+                  </p>
+                </motion.div>
+              </AnimatePresence>
 
-            {/* Kutipan berputar otomatis, independen dari tab solusi di atas */}
-            <QuoteCarousel />
+              <div style={{ marginTop: '20px', height: '3px', borderRadius: '999px', background: 'rgba(28,10,68,0.15)', overflow: 'hidden' }}>
+                <motion.div
+                  key={active}
+                  initial={{ width: '0%' }}
+                  animate={isInView ? { width: '100%' } : {}}
+                  transition={{ duration: SOLUTION_DURATION, ease: 'linear' }}
+                  onAnimationComplete={() => isInView && setActive((i) => (i + 1) % solutions.length)}
+                  style={{ height: '100%', background: '#1c0a44' }}
+                />
+              </div>
+            </div>
           </div>
         </div>
       </div>

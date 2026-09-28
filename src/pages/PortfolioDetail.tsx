@@ -79,7 +79,7 @@ export default function PortfolioDetail() {
 
   return (
     <div style={{ background: 'var(--surface)', minHeight: '100vh', padding: '96px 24px 90px' }}>
-      <div style={{ maxWidth: '1160px', margin: '0 auto', background: 'var(--primary)', borderRadius: '28px', padding: '36px', color: '#fff' }}>
+      <div style={{ maxWidth: '1160px', margin: '0 auto', background: 'var(--hero-bg)', borderRadius: '28px', padding: '36px', color: '#fff' }}>
         <Link to="/portfolio" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', color: 'var(--lime)', fontSize: '0.85rem', textDecoration: 'none', marginBottom: '20px' }}>
           <ArrowLeft size={15} /> Kembali ke Portofolio
         </Link>

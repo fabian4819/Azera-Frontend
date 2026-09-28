@@ -179,12 +179,12 @@ export default function Hero() {
         style={{
           position: 'relative',
           zIndex: 1,
-          maxWidth: '1080px',
+          maxWidth: '880px',
           margin: '56px auto 0',
           padding: '0 24px',
           display: 'grid',
           gridTemplateColumns: 'repeat(3, 1fr)',
-          gridTemplateAreas: `"a b b" "a c d"`,
+          gridTemplateAreas: `"a b b" "a c c"`,
           gap: '18px',
         }}
       >
@@ -218,11 +218,11 @@ export default function Hero() {
         {/* Kartu aksen lime */}
         <div style={{ gridArea: 'b', padding: '28px', borderRadius: 'var(--radius-lg)', background: 'var(--lime)', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
           <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(21,21,125,0.7)', marginBottom: '10px' }}>
-            Kepuasan Klien
+            Brand Partner
           </span>
-          <p style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '2.8rem', color: 'var(--on-lime)', lineHeight: 1 }}>100%</p>
+          <p style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '2.8rem', color: 'var(--on-lime)', lineHeight: 1 }}>100+</p>
           <p style={{ color: 'rgba(21,21,125,0.72)', fontSize: '0.85rem', marginTop: '8px', maxWidth: '320px' }}>
-            Tingkat kepuasan klien dari setiap campaign yang kami jalankan.
+            Brand yang telah mempercayakan campaign mereka kepada kami.
           </p>
         </div>
 
@@ -239,11 +239,6 @@ export default function Hero() {
             Satu campaign, semua platform utama.
           </p>
         </div>
-
-        <div style={{ ...glassCard, gridArea: 'd', padding: '24px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-          <p style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '2rem', color: 'var(--lime)', lineHeight: 1, marginBottom: '6px' }}>100+</p>
-          <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.78rem', fontWeight: 600, letterSpacing: '0.04em' }}>Brand Partner</p>
-        </div>
       </motion.div>
 
       <style>{`
@@ -251,7 +246,7 @@ export default function Hero() {
           .hero-ghosts { display: none; }
           .hero-bento {
             grid-template-columns: 1fr !important;
-            grid-template-areas: "a" "b" "c" "d" !important;
+            grid-template-areas: "a" "b" "c" !important;
           }
         }
       `}</style>
