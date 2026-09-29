@@ -52,14 +52,17 @@ function setPath(o: unknown, keys: string[], value: unknown): unknown {
 }
 /**
  * Baris opsional di bawah Subtotal Net invoice (default PPH 21; bisa diganti/dihapus/ditambah, minus = potongan).
- * Dokumen lama pakai field `pph21` — dijadikan list di sini supaya bisa diedit per baris. Sama dgn invoiceCharges() di server.
+ * Field lama `discount` / `pph21` dijadikan baris di list ini supaya bisa diedit. Sama dgn invoiceCharges() di server.
  */
-const invoiceCharges = (data: Data): Data[] =>
-  Array.isArray(data.charges) ? (data.charges as Data[]) : [{ label: 'PPH 21', amount: data.pph21 ?? '' }];
+const invoiceCharges = (data: Data): Data[] => {
+  const rows = Array.isArray(data.charges) ? (data.charges as Data[]) : [{ label: 'PPH 21', amount: data.pph21 ?? '' }];
+  const discount = Number(data.discount) || 0;
+  return discount > 0 ? [{ label: 'Discount', amount: -discount }, ...rows] : rows;
+};
 const withCharges = (data: Data): Data => {
-  if (Array.isArray(data.charges)) return data;
   const next: Data = { ...data, charges: invoiceCharges(data) };
   delete next.pph21;
+  delete next.discount;
   return next;
 };
 const LISTS: Record<string, string> = { item: 'items', charge: 'charges' };
@@ -83,7 +86,7 @@ function computeCalcs(data: Data): Record<string, number> {
   });
   out.subtotal = subtotal;
   const charges = invoiceCharges(data).reduce((s, c) => s + (Number(c.amount) || 0), 0);
-  out.total = subtotal - Math.min(Number(data.discount) || 0, subtotal) + charges;
+  out.total = subtotal + charges;
   const l2 = (data.lampiran2 ?? {}) as Data;
   out.spkTotal = (Number(l2.serviceFee) || 0) + (Number(l2.additionalFee) || 0);
   return out;
