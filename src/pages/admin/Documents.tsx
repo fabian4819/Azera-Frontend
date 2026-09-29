@@ -32,7 +32,7 @@ const CONFIGS: Record<string, DocConfig> = {
   },
   invoice: {
     apiType: 'invoice', title: 'Invoice',
-    defaults: () => ({ issueDate: today(), dueDate: today(7), items: [{}] }),
+    defaults: () => ({ issueDate: today(), dueDate: today(7), items: [{}], charges: [{ label: 'PPH 21' }] }),
   },
   spk: {
     apiType: 'spk_brand', title: 'SPK',
@@ -50,6 +50,20 @@ function setPath(o: unknown, keys: string[], value: unknown): unknown {
   base[head] = rest.length ? setPath(base[head], rest, value) : value;
   return base;
 }
+/**
+ * Baris opsional di bawah Subtotal Net invoice (default PPH 21; bisa diganti/dihapus/ditambah, minus = potongan).
+ * Dokumen lama pakai field `pph21` — dijadikan list di sini supaya bisa diedit per baris. Sama dgn invoiceCharges() di server.
+ */
+const invoiceCharges = (data: Data): Data[] =>
+  Array.isArray(data.charges) ? (data.charges as Data[]) : [{ label: 'PPH 21', amount: data.pph21 ?? '' }];
+const withCharges = (data: Data): Data => {
+  if (Array.isArray(data.charges)) return data;
+  const next: Data = { ...data, charges: invoiceCharges(data) };
+  delete next.pph21;
+  return next;
+};
+const LISTS: Record<string, string> = { item: 'items', charge: 'charges' };
+
 const rupiah = (v: number) => {
   const x = Math.round(v * 100) / 100;
   const dp = Number.isInteger(x) ? 0 : 2;
@@ -68,7 +82,8 @@ function computeCalcs(data: Data): Record<string, number> {
     subtotal += amount;
   });
   out.subtotal = subtotal;
-  out.total = subtotal - Math.min(Number(data.discount) || 0, subtotal) + (Number(data.pph21) || 0);
+  const charges = invoiceCharges(data).reduce((s, c) => s + (Number(c.amount) || 0), 0);
+  out.total = subtotal - Math.min(Number(data.discount) || 0, subtotal) + charges;
   const l2 = (data.lampiran2 ?? {}) as Data;
   out.spkTotal = (Number(l2.serviceFee) || 0) + (Number(l2.additionalFee) || 0);
   return out;
@@ -104,7 +119,7 @@ const ZOOM_MIN = 0.5, ZOOM_MAX = 2, ZOOM_STEP = 0.1;
 function DocEditor({ config, initialId, initialData, onBack, onSaved }: {
   config: DocConfig; initialId: string | null; initialData: Data; onBack: () => void; onSaved: () => void;
 }) {
-  const dataRef = useRef<Data>(initialData);
+  const dataRef = useRef<Data>(config.apiType === 'invoice' ? withCharges(initialData) : initialData);
   const idRef = useRef<string | null>(initialId);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const scrollRef = useRef(0);
@@ -165,10 +180,14 @@ function DocEditor({ config, initialId, initialData, onBack, onSaved }: {
     doc.addEventListener('click', (e) => {
       const button = (e.target as HTMLElement).closest<HTMLElement>('[data-action]');
       if (!button) return;
-      const items = Array.isArray(dataRef.current.items) ? [...(dataRef.current.items as Data[])] : [];
-      if (button.dataset.action === 'add-item') items.push({});
-      if (button.dataset.action === 'del-item') items.splice(Number(button.dataset.i), 1);
-      dataRef.current = { ...dataRef.current, items };
+      // data-action "add-item" / "del-charge" dst → list di LISTS
+      const [verb, kind] = button.dataset.action!.split('-');
+      const key = LISTS[kind];
+      if (!key) return;
+      const list = Array.isArray(dataRef.current[key]) ? [...(dataRef.current[key] as Data[])] : [];
+      if (verb === 'add') list.push({});
+      if (verb === 'del') list.splice(Number(button.dataset.i), 1);
+      dataRef.current = { ...dataRef.current, [key]: list };
       dirtyRef.current = true;
       render();
     });
