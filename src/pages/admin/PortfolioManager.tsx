@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Plus, Edit2, Trash2, X, ChevronDown, ChevronUp } from 'lucide-react';
+import { Plus, Edit2, Trash2, X, ChevronDown, ChevronUp, GripVertical } from 'lucide-react';
 import api from '../../lib/api';
 import {
   PORTFOLIO_CATEGORIES, SCOPE_OPTIONS, KOL_NICHES, brandKey, PLATFORM_LABELS, creatorLabel, formatCompact, totalViews,
@@ -120,6 +120,10 @@ const checkChip = (on: boolean): React.CSSProperties => ({
 export default function PortfolioManager() {
   const [items, setItems] = useState<PortfolioItem[]>([]);
   const [loading, setLoading] = useState(true);
+  // Drag & drop urutan Top Creator — kartu cuma draggable saat grip ditekan, biar input tetap bisa diseleksi
+  const [dragArmed, setDragArmed] = useState<number | null>(null);
+  const [dragFrom, setDragFrom] = useState<number | null>(null);
+  const [dragOver, setDragOver] = useState<number | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState<FormState>(emptyForm);
@@ -208,6 +212,16 @@ export default function PortfolioManager() {
   const updateCreator = (i: number, patch: Partial<FormCreator>) => {
     setForm((f) => ({ ...f, topCreators: f.topCreators.map((c, idx) => (idx === i ? { ...c, ...patch } : c)) }));
   };
+  const moveCreator = (from: number, to: number) => {
+    if (from === to) return;
+    setForm((f) => {
+      const list = [...f.topCreators];
+      const [moved] = list.splice(from, 1);
+      list.splice(to, 0, moved);
+      return { ...f, topCreators: list };
+    });
+  };
+  const endDrag = () => { setDragArmed(null); setDragFrom(null); setDragOver(null); };
   const removeCreator = (i: number) => {
     setForm((f) => ({ ...f, topCreators: f.topCreators.filter((_, idx) => idx !== i) }));
   };
@@ -609,8 +623,27 @@ export default function PortfolioManager() {
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                   {form.topCreators.map((c, i) => (
-                    <div key={i} style={{ border: '1.5px solid #e1e0ff', borderRadius: '12px', padding: '12px' }}>
-                      <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
+                    <div
+                      key={i}
+                      draggable={dragArmed === i}
+                      onDragStart={(e) => { e.dataTransfer.effectAllowed = 'move'; setDragFrom(i); }}
+                      onDragOver={(e) => { if (dragFrom === null) return; e.preventDefault(); setDragOver(i); }}
+                      onDrop={(e) => { e.preventDefault(); if (dragFrom !== null) moveCreator(dragFrom, i); endDrag(); }}
+                      onDragEnd={endDrag}
+                      style={{
+                        border: `1.5px ${dragOver === i && dragFrom !== i ? 'dashed #6728e4' : 'solid #e1e0ff'}`, borderRadius: '12px', padding: '12px',
+                        opacity: dragFrom === i ? 0.4 : 1, background: dragOver === i && dragFrom !== i ? '#f8f6ff' : 'white',
+                      }}
+                    >
+                      <div style={{ display: 'flex', gap: '8px', marginBottom: '8px', alignItems: 'center' }}>
+                        <span
+                          title="Geser untuk atur urutan"
+                          onMouseDown={() => setDragArmed(i)}
+                          onMouseUp={() => setDragArmed(null)}
+                          style={{ display: 'flex', alignItems: 'center', gap: '2px', cursor: 'grab', color: '#777683', flexShrink: 0, fontSize: '0.75rem', fontWeight: 700, fontFamily: 'var(--font-display)' }}
+                        >
+                          <GripVertical size={16} />#{i + 1}
+                        </span>
                         <input value={c.name} onChange={(e) => updateCreator(i, { name: e.target.value })} placeholder={`Nama Creator ${i + 1}`} style={{ ...modalInputStyle, flex: 1, padding: '8px 10px', fontSize: '0.8rem' }} />
                         <select value={c.platform} onChange={(e) => updateCreator(i, { platform: e.target.value as CreatorPlatform })} style={{ ...modalInputStyle, width: '110px', padding: '8px 10px', fontSize: '0.8rem' }}>
                           <option value="instagram">Instagram</option>
@@ -632,7 +665,7 @@ export default function PortfolioManager() {
                 </div>
               )}
               <p style={{ fontSize: '0.72rem', color: '#8a8a99', marginTop: '8px' }}>
-                Urutan menentukan ranking (creator pertama = Top 1). Data diisi manual — belum dihitung otomatis dari data campaign.
+                Urutan menentukan ranking (creator pertama = Top 1) — geser ikon ⋮⋮ untuk mengubah urutan. Data diisi manual — belum dihitung otomatis dari data campaign.
               </p>
             </div>
 
