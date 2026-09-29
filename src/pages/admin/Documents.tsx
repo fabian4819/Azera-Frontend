@@ -64,7 +64,7 @@ function computeCalcs(data: Data): Record<string, number> {
     subtotal += amount;
   });
   out.subtotal = subtotal;
-  out.total = subtotal - Math.min(Number(data.discount) || 0, subtotal);
+  out.total = subtotal - Math.min(Number(data.discount) || 0, subtotal) + (Number(data.pph21) || 0);
   const l2 = (data.lampiran2 ?? {}) as Data;
   out.spkTotal = (Number(l2.serviceFee) || 0) + (Number(l2.additionalFee) || 0);
   return out;
