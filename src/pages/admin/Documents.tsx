@@ -50,7 +50,7 @@ function setPath(o: unknown, keys: string[], value: unknown): unknown {
   base[head] = rest.length ? setPath(base[head], rest, value) : value;
   return base;
 }
-const rupiah = (v: number) => `Rp${Math.round(v).toLocaleString('id-ID')}`;
+const rupiah = (v: number) => `Rp${v.toLocaleString('id-ID', { maximumFractionDigits: 2 })}`;
 
 /** Angka turunan yang ditampilkan template (data-calc) — rumus sama dengan server (docTemplates.ts) */
 function computeCalcs(data: Data): Record<string, number> {
