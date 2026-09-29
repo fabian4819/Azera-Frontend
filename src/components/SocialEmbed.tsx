@@ -57,10 +57,10 @@ export default function SocialEmbed({ platform: savedPlatform, url }: { platform
           />
         </div>
       ) : (
-        // iframe embed/v2 langsung, BUKAN embed.js: embed.js harus disisipkan ulang tiap render
-        // (tidak ada API reprocess) dan request berulangnya memicu "overload-protect triggered" dari TikTok.
+        // Player resmi player/v1, BUKAN embed.js / embed/v2: keduanya kena rate-limit TikTok
+        // ("overload-protect triggered", HTTP 503) — embed/v2 terkonfirmasi 503 sementara player/v1 tetap 200.
         <iframe
-          src={`https://www.tiktok.com/embed/v2/${tiktokVideoId(url)}`}
+          src={`https://www.tiktok.com/player/v1/${tiktokVideoId(url)}?rel=0`}
           title="TikTok video"
           loading="lazy"
           allow="encrypted-media; fullscreen"
