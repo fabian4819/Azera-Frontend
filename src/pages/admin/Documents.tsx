@@ -269,7 +269,9 @@ function DocEditor({ config, initialId, initialData, onBack, onSaved }: {
   );
 }
 
-interface ListRow { _id: string; number: string; client: string; updatedAt: string }
+interface ListRow { _id: string; number: string; client: string; mastersheetUrl?: string; updatedAt: string }
+/** Link Mastersheet dari bot WA (/invoice) — hanya link Google Sheets yang dijadikan tautan */
+const isSheetUrl = (u?: string) => !!u && /^https:\/\/docs\.google\.com\/spreadsheets\//.test(u);
 
 const fetchRows = (apiType: string): Promise<ListRow[]> =>
   api.get('/admin/documents', { params: { type: apiType } }).then((res) => res.data);
@@ -358,7 +360,7 @@ export default function Documents() {
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem', fontFamily: f }}>
               <thead>
                 <tr style={{ background: '#f8f9ff', textAlign: 'left' }}>
-                  {['Nomor', 'Klien', 'Terakhir Diubah', ''].map((h) => <th key={h} style={{ padding: '9px 10px', fontWeight: 700 }}>{h}</th>)}
+                  {['Nomor', 'Klien', ...(config.apiType === 'invoice' ? ['Mastersheet'] : []), 'Terakhir Diubah', ''].map((h) => <th key={h} style={{ padding: '9px 10px', fontWeight: 700 }}>{h}</th>)}
                 </tr>
               </thead>
               <tbody>
@@ -366,6 +368,13 @@ export default function Documents() {
                   <tr key={r._id} style={{ borderBottom: '1px solid #f0f0f0' }}>
                     <td style={{ padding: '9px 10px', fontWeight: 600, whiteSpace: 'nowrap' }}>{r.number || '-'}</td>
                     <td style={{ padding: '9px 10px' }}>{r.client || '-'}</td>
+                    {config.apiType === 'invoice' && (
+                      <td style={{ padding: '9px 10px', whiteSpace: 'nowrap' }}>
+                        {isSheetUrl(r.mastersheetUrl)
+                          ? <a href={r.mastersheetUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#4b2fc4', fontWeight: 600 }}>Buka Sheet ↗</a>
+                          : '-'}
+                      </td>
+                    )}
                     <td style={{ padding: '9px 10px', whiteSpace: 'nowrap' }}>{new Date(r.updatedAt).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' })}</td>
                     <td style={{ padding: '9px 10px', whiteSpace: 'nowrap', textAlign: 'right' }}>
                       {confirmDelete === r._id ? (
