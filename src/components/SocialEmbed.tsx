@@ -33,7 +33,10 @@ function tiktokVideoId(url: string) {
   return url.match(/\/video\/(\d+)/)?.[1];
 }
 
-export default function SocialEmbed({ platform, url }: { platform: 'instagram' | 'tiktok'; url: string }) {
+export default function SocialEmbed({ platform: savedPlatform, url }: { platform: 'instagram' | 'tiktok'; url: string }) {
+  // Link adalah sumber kebenaran — pilihan platform di admin bisa salah (default-nya Instagram),
+  // dan link TikTok yang dirender sebagai embed IG cuma jadi kotak putih kosong.
+  const platform = /tiktok\.com/i.test(url) ? 'tiktok' : /instagram\.com/i.test(url) ? 'instagram' : savedPlatform;
   useEffect(() => {
     if (platform !== 'instagram') return;
     loadScriptOnce('https://www.instagram.com/embed.js', 'ig-embed-script', () => {

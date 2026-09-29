@@ -620,7 +620,7 @@ export default function PortfolioManager() {
                           <Trash2 size={14} />
                         </button>
                       </div>
-                      <input value={c.postLink} onChange={(e) => updateCreator(i, { postLink: e.target.value })} placeholder="Link postingan asli (opsional) — instagram.com/p/... atau tiktok.com/@.../video/..." style={{ ...modalInputStyle, padding: '8px 10px', fontSize: '0.8rem', marginBottom: '8px' }} />
+                      <input value={c.postLink} onChange={(e) => { const v = e.target.value; updateCreator(i, { postLink: v, ...(/tiktok\.com/i.test(v) ? { platform: 'tiktok' } : /instagram\.com/i.test(v) ? { platform: 'instagram' } : {}) }); }} placeholder="Link postingan asli (opsional) — instagram.com/p/... atau tiktok.com/@.../video/..." style={{ ...modalInputStyle, padding: '8px 10px', fontSize: '0.8rem', marginBottom: '8px' }} />
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px' }}>
                         <input value={c.views} onChange={(e) => updateCreator(i, { views: e.target.value })} placeholder="Views" style={{ ...modalInputStyle, padding: '8px 10px', fontSize: '0.78rem' }} />
                         <input value={c.likes} onChange={(e) => updateCreator(i, { likes: e.target.value })} placeholder="Likes" style={{ ...modalInputStyle, padding: '8px 10px', fontSize: '0.78rem' }} />
