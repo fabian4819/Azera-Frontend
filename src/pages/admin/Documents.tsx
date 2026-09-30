@@ -32,7 +32,7 @@ const CONFIGS: Record<string, DocConfig> = {
   },
   invoice: {
     apiType: 'invoice', title: 'Invoice',
-    defaults: () => ({ issueDate: today(), dueDate: today(7), items: [{}], charges: [{ label: 'PPH 21' }] }),
+    defaults: () => ({ issueDate: today(), dueDate: today(7), items: [{}], charges: [] }),
   },
   spk: {
     apiType: 'spk_brand', title: 'SPK',
@@ -51,11 +51,11 @@ function setPath(o: unknown, keys: string[], value: unknown): unknown {
   return base;
 }
 /**
- * Baris opsional di bawah Subtotal Net invoice (default PPH 21; bisa diganti/dihapus/ditambah, minus = potongan).
+ * Baris opsional di bawah Subtotal Net invoice (kosong = tidak ada baris; bisa ditambah/diganti/dihapus, minus = potongan).
  * Field lama `discount` / `pph21` dijadikan baris di list ini supaya bisa diedit. Sama dgn invoiceCharges() di server.
  */
 const invoiceCharges = (data: Data): Data[] => {
-  const rows = Array.isArray(data.charges) ? (data.charges as Data[]) : [{ label: 'PPH 21', amount: data.pph21 ?? '' }];
+  const rows = Array.isArray(data.charges) ? (data.charges as Data[]) : Number(data.pph21) ? [{ label: 'PPH 21', amount: data.pph21 }] : [];
   const discount = Number(data.discount) || 0;
   return discount > 0 ? [{ label: 'Discount', amount: -discount }, ...rows] : rows;
 };
