@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Save } from 'lucide-react';
 import api from '../../lib/api';
+import Switch from '../../components/ui/Switch';
 
 const f = "var(--font-display)";
 const cardStyle: React.CSSProperties = {
@@ -9,7 +10,7 @@ const cardStyle: React.CSSProperties = {
 };
 
 interface WaTemplate {
-  _id: string; trigger: string; audience: 'creator' | 'client'; body: string;
+  _id: string; trigger: string; audience: 'creator' | 'client'; body: string; enabled?: boolean;
 }
 
 const TRIGGER_LABELS: Record<string, string> = {
@@ -35,6 +36,7 @@ export default function WaTemplates() {
   const [templates, setTemplates] = useState<WaTemplate[]>([]);
   const [drafts, setDrafts] = useState<Record<string, string>>({});
   const [savingTrigger, setSavingTrigger] = useState<string | null>(null);
+  const [togglingTrigger, setTogglingTrigger] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState('');
 
@@ -68,6 +70,18 @@ export default function WaTemplates() {
     }
   };
 
+  const toggle = async (trigger: string, enabled: boolean) => {
+    setTogglingTrigger(trigger);
+    try {
+      await api.patch(`/admin/wa-templates/${trigger}`, { enabled });
+      setTemplates((prev) => prev.map((t) => (t.trigger === trigger ? { ...t, enabled } : t)));
+      setMessage(`${TRIGGER_LABELS[trigger] || trigger} ${enabled ? 'diaktifkan' : 'dimatikan'}.`);
+      setTimeout(() => setMessage(''), 2000);
+    } finally {
+      setTogglingTrigger(null);
+    }
+  };
+
   if (loading) return <div style={{ textAlign: 'center', padding: '80px', color: '#777683' }}>Memuat...</div>;
 
   const creatorTemplates = templates.filter((t) => t.audience === 'creator');
@@ -77,10 +91,18 @@ export default function WaTemplates() {
     <div style={{ marginBottom: '28px' }}>
       <h2 style={{ fontFamily: f, fontWeight: 800, fontSize: '1.05rem', color: '#191c20', marginBottom: '14px' }}>{title}</h2>
       {group.map((t) => (
-        <div key={t.trigger} style={cardStyle}>
-          <p style={{ fontFamily: f, fontWeight: 700, fontSize: '0.88rem', color: '#191c20', marginBottom: '10px' }}>
-            {TRIGGER_LABELS[t.trigger] || t.trigger}
-          </p>
+        <div key={t.trigger} style={{ ...cardStyle, opacity: t.enabled === false ? 0.65 : 1 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', marginBottom: '10px' }}>
+            <p style={{ fontFamily: f, fontWeight: 700, fontSize: '0.88rem', color: '#191c20' }}>
+              {TRIGGER_LABELS[t.trigger] || t.trigger}
+            </p>
+            <Switch
+              checked={t.enabled !== false}
+              onChange={(v) => void toggle(t.trigger, v)}
+              disabled={togglingTrigger === t.trigger}
+              label={t.enabled !== false ? 'Aktif' : 'Mati'}
+            />
+          </div>
           <textarea
             value={drafts[t.trigger] ?? ''}
             onChange={(e) => setDrafts((prev) => ({ ...prev, [t.trigger]: e.target.value }))}
@@ -103,7 +125,7 @@ export default function WaTemplates() {
   return (
     <div>
       <p style={{ fontFamily: f, fontSize: '0.85rem', color: '#777683', marginBottom: '20px' }}>
-        Placeholder tersedia: {'{{nama}}'}, {'{{campaign}}'}, {'{{password}}'}, {'{{grup_link}}'}, {'{{brief}}'}, {'{{invoice_number}}'}, {'{{bill_to}}'}, {'{{total}}'}, {'{{payment_link}}'}, {'{{pdf_url}}'}, dll, sesuaikan per trigger.
+        Placeholder tersedia: {'{{nama}}'}, {'{{campaign}}'}, {'{{password}}'}, {'{{grup_link}}'}, {'{{brief}}'}, {'{{invoice_number}}'}, {'{{bill_to}}'}, {'{{total}}'}, {'{{payment_link}}'}, {'{{pdf_url}}'}, dll, sesuaikan per trigger. Automation yang dimatikan tidak dikirim, tapi tetap tercatat di Log Pesan dengan status "Dimatikan".
       </p>
       {message && (
         <div style={{ background: '#d1fae5', color: '#065F46', borderRadius: '10px', padding: '10px 16px', marginBottom: '16px', fontSize: '0.82rem', fontFamily: f }}>

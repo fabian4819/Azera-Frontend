@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Save, Lock } from 'lucide-react';
 import api from '../../lib/api';
+import Switch from '../../components/ui/Switch';
 
 const f = "var(--font-display)";
 const cardStyle: React.CSSProperties = {
@@ -29,12 +30,15 @@ export default function LeadBotTemplates() {
   const [savingTrigger, setSavingTrigger] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState('');
+  const [autoReply, setAutoReply] = useState<Record<string, boolean>>({});
+  const [togglingBot, setTogglingBot] = useState<string | null>(null);
 
   const load = async () => {
     try {
       const res = await api.get('/admin/lead-bot-templates');
       setTemplates(res.data.templates);
       setLocked(res.data.lockedReference);
+      setAutoReply(res.data.autoReply || {});
       const d: Record<string, string> = {};
       for (const t of res.data.templates as LeadBotTemplateItem[]) d[t.trigger] = t.body;
       setDrafts(d);
@@ -61,6 +65,16 @@ export default function LeadBotTemplates() {
     }
   };
 
+  const toggleBot = async (bot: string, enabled: boolean) => {
+    setTogglingBot(bot);
+    try {
+      const res = await api.patch(`/admin/lead-bot-templates/auto-reply/${bot}`, { enabled });
+      setAutoReply(res.data);
+    } finally {
+      setTogglingBot(null);
+    }
+  };
+
   if (loading) return <div style={{ textAlign: 'center', padding: '80px', color: '#777683' }}>Memuat...</div>;
 
   return (
@@ -68,6 +82,21 @@ export default function LeadBotTemplates() {
       <p style={{ fontFamily: f, fontSize: '0.85rem', color: '#777683', marginBottom: '20px' }}>
         Pesan yang dibalas otomatis bot di CHAT PERTAMA nomor yang belum pernah chat (2 pilihan: daftar info / langsung ke Admin) — beda dari Template Pesan di menu sebelah, yang itu untuk notifikasi ke creator/client yang sudah terdaftar.
       </p>
+      <div style={{ ...cardStyle, display: 'flex', flexWrap: 'wrap', gap: '12px 32px', alignItems: 'center' }}>
+        <p style={{ fontFamily: f, fontWeight: 700, fontSize: '0.88rem', color: '#191c20', flex: '1 1 100%' }}>Balasan otomatis</p>
+        {([['partnership', 'Bot Partnership / Brand'], ['creator', 'Bot Creator / KOL']] as const).map(([bot, name]) => (
+          <Switch
+            key={bot}
+            label={`${name}: ${autoReply[bot] !== false ? 'Aktif' : 'Mati'}`}
+            checked={autoReply[bot] !== false}
+            disabled={togglingBot === bot}
+            onChange={(v) => void toggleBot(bot, v)}
+          />
+        ))}
+        <p style={{ fontFamily: f, fontSize: '0.78rem', color: '#777683', flex: '1 1 100%' }}>
+          Kalau dimatikan, bot tidak membalas chat masuk sama sekali. Pesan masuk tetap tercatat di Inbox.
+        </p>
+      </div>
       {message && (
         <div style={{ background: '#d1fae5', color: '#065F46', borderRadius: '10px', padding: '10px 16px', marginBottom: '16px', fontSize: '0.82rem', fontFamily: f }}>
           {message}

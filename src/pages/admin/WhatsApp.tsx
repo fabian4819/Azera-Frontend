@@ -12,7 +12,7 @@ type WaStatus = 'disconnected' | 'connecting' | 'qr' | 'connected';
 
 interface WaMessageLog {
   _id: string; trigger: string; to: string; payload: string;
-  status: 'queued' | 'sent' | 'failed'; error?: string; createdAt: string;
+  status: 'queued' | 'sent' | 'failed' | 'skipped'; error?: string; createdAt: string;
 }
 
 // Dua bot WhatsApp terpisah — nomor & pairing sendiri-sendiri.
@@ -220,6 +220,7 @@ function BotPanel({ botId, label, hint }: { botId: string; label: string; hint: 
                     {l.status === 'sent' && <span style={{ color: '#065F46' }}>Terkirim</span>}
                     {l.status === 'queued' && <span style={{ color: '#92400E' }}>Antri</span>}
                     {l.status === 'failed' && <span style={{ color: '#ba1a1a' }} title={l.error}>Gagal</span>}
+                    {l.status === 'skipped' && <span style={{ color: '#8a8a99' }} title={l.error}>Dimatikan</span>}
                   </td>
                 </tr>
               ))}
