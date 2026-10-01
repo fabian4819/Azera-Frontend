@@ -88,6 +88,36 @@ const td: React.CSSProperties = {
   padding: '10px 12px', fontSize: '0.82rem', color: '#191c20', borderBottom: '1px solid #eceef3', verticalAlign: 'top',
 };
 
+/** Kerangka Broadcast Campaign (format WA Azera) — admin lengkapi bagian "...". */
+const broadcastTemplate = (name: string, applyUrl: string) => `*${name.toUpperCase()} | AZERA*
+
+*Info event:*
+...
+
+*Fee talent:*
+* ...
+_fee pic ..., mg ..._
+
+*Kriteria*
+- Usia ...
+- ...
+
+*OPSI Lokasi & Tanggal*
+> bisa pilih di form
+1️⃣ *Option 1*
+📅 ...
+📍 ...
+⏰ ...
+
+*SOW:*
+- ...
+
+*Daftar:*
+${applyUrl}
+
+PIC: AZERA
+Handle by + WA:`;
+
 export default function CampaignDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -150,12 +180,12 @@ export default function CampaignDetail() {
     setGenerating(true);
     setBriefError('');
     try {
-      const res = await api.post(`/admin/campaigns/${id}/generate-brief`);
+      const res = await api.post(`/admin/campaigns/${id}/generate-brief`, { applyUrl: `${window.location.origin}/apply/${campaign?.applySlug}` });
       setCampaign(res.data);
       setBriefDraft(res.data.briefContent || '');
     } catch (err: unknown) {
       const message = (err as { response?: { data?: { error?: string } } })?.response?.data?.error;
-      setBriefError(message || 'Gagal generate brief. Coba lagi.');
+      setBriefError(message || 'Gagal generate broadcast. Coba lagi.');
     } finally {
       setGenerating(false);
     }
@@ -167,7 +197,7 @@ export default function CampaignDetail() {
       const res = await api.patch(`/admin/campaigns/${id}`, { briefContent: briefDraft });
       setCampaign(res.data);
     } catch {
-      alert('Gagal menyimpan brief.');
+      alert('Gagal menyimpan broadcast.');
     } finally {
       setSaving(false);
     }
@@ -297,11 +327,11 @@ export default function CampaignDetail() {
     setActionError('');
     try {
       const res = await api.post(`/admin/campaigns/${id}/send-brief`);
-      setActionMessage(`Brief terkirim ke ${res.data.sent} creator.`);
+      setActionMessage(`Broadcast terkirim ke ${res.data.sent} creator.`);
       setTimeout(() => setActionMessage(''), 3000);
     } catch (err: unknown) {
       const data = (err as { response?: { data?: { error?: string; message?: string } } })?.response?.data;
-      setActionError(data?.error || data?.message || 'Gagal mengirim brief.');
+      setActionError(data?.error || data?.message || 'Gagal mengirim broadcast.');
     } finally {
       setSendingBrief(false);
     }
@@ -403,11 +433,16 @@ export default function CampaignDetail() {
 
           <div style={cardStyle}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-              <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: '1rem', color: '#191c20' }}>Brief Campaign</p>
+              <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: '1rem', color: '#191c20' }}>Broadcast Campaign</p>
+              <div style={{ display: 'flex', gap: '8px' }}>
+              <button onClick={() => setBriefDraft(broadcastTemplate(campaign.name, `${window.location.origin}/apply/${campaign.applySlug}`))} style={{ padding: '8px 16px', borderRadius: '10px', border: '1.5px solid #6728e4', background: 'white', color: '#6728e4', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer', fontFamily: "var(--font-display)" }}>
+                Pakai Template
+              </button>
               <button onClick={generateBrief} disabled={generating} className="btn-primary" style={{ padding: '8px 16px', fontSize: '0.8rem', opacity: generating ? 0.7 : 1 }}>
                 <Sparkles size={14} />
                 {generating ? 'Generating...' : 'Generate dengan AI'}
               </button>
+              </div>
             </div>
             {briefError && (
               <p style={{ color: '#ba1a1a', fontSize: '0.82rem', marginBottom: '12px', background: '#ffdad6', padding: '10px 14px', borderRadius: '10px' }}>
@@ -417,16 +452,16 @@ export default function CampaignDetail() {
             <textarea
               value={briefDraft}
               onChange={(e) => setBriefDraft(e.target.value)}
-              rows={8}
-              placeholder="Brief belum dibuat. Klik Generate dengan AI, atau tulis manual di sini."
+              rows={14}
+              placeholder="Broadcast belum dibuat. Klik Pakai Template, Generate dengan AI, atau tulis manual di sini."
               style={{ width: '100%', padding: '14px', borderRadius: '12px', border: '1.5px solid #c7c8cf', fontSize: '0.875rem', color: '#191c20', fontFamily: "var(--font-display)", resize: 'vertical', outline: 'none', marginBottom: '12px' }}
             />
             <div style={{ display: 'flex', gap: '10px' }}>
               <button onClick={saveBrief} disabled={saving} style={{ padding: '9px 18px', borderRadius: '10px', border: '1.5px solid #6728e4', background: 'white', color: '#6728e4', fontWeight: 700, fontSize: '0.82rem', cursor: 'pointer', fontFamily: "var(--font-display)" }}>
-                {saving ? 'Menyimpan...' : 'Simpan Brief'}
+                {saving ? 'Menyimpan...' : 'Simpan Broadcast'}
               </button>
               <button onClick={sendBrief} disabled={sendingBrief || !campaign.briefContent} className="btn-primary" style={{ padding: '9px 18px', fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: '6px', opacity: sendingBrief || !campaign.briefContent ? 0.6 : 1 }}>
-                <Send size={14} /> {sendingBrief ? 'Mengirim...' : 'Kirim Brief ke Creator'}
+                <Send size={14} /> {sendingBrief ? 'Mengirim...' : 'Kirim Broadcast ke Creator'}
               </button>
             </div>
           </div>

@@ -15,7 +15,7 @@ interface WaTemplate {
 const TRIGGER_LABELS: Record<string, string> = {
   creator_accepted: 'Creator Diterima',
   creator_rejected: 'Creator Ditolak',
-  brief_campaign: 'Brief Campaign',
+  brief_campaign: 'Broadcast Campaign',
   reminder_draft: 'Reminder Draft',
   reminder_upload: 'Reminder Upload',
   reminder_revision: 'Reminder Revisi',
