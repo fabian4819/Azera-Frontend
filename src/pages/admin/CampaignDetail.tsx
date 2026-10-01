@@ -1,10 +1,11 @@
 import { Fragment, useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, Sparkles, Copy, Check, ThumbsUp, ThumbsDown, Send, MessageCircle, Megaphone, Plus, Trash2, ChevronDown, ChevronUp, LayoutDashboard, ExternalLink } from 'lucide-react';
+import { ArrowLeft, Sparkles, Copy, Check, ThumbsUp, ThumbsDown, Send, MessageCircle, Megaphone, ChevronDown, ChevronUp, LayoutDashboard, ExternalLink } from 'lucide-react';
 import api from '../../lib/api';
 import CampaignAnalyticsFinance from './CampaignAnalyticsFinance';
 import WorkflowTracker from './WorkflowTracker';
 import AssetLibrary from './AssetLibrary';
+import CustomFormBuilder, { type CustomField } from './CustomFormBuilder';
 
 const REMINDER_OPTIONS = [
   { trigger: 'reminder_draft', label: 'Reminder Draft' },
@@ -30,8 +31,6 @@ interface Application {
   picUserId?: { _id: string; name: string; email: string } | null;
   latestSubmission?: Submission | null;
 }
-type CustomFieldType = 'text' | 'textarea' | 'number' | 'select' | 'checkbox';
-interface CustomField { id: string; label: string; type: CustomFieldType; required: boolean; options?: string[] }
 interface Campaign {
   _id: string; name: string; objective: string; briefContent?: string; deliverables: string[];
   budget: number; criteria: { niches: string[]; minFollowers?: number; provinces: string[]; platforms: string[] };
@@ -40,11 +39,6 @@ interface Campaign {
   masterSheetUrl?: string | null; reportSheetUrl?: string | null; recapPaymentSheetUrl?: string | null;
 }
 interface PicUser { _id: string; name: string; email: string; phone: string }
-
-const CUSTOM_FIELD_TYPE_LABELS: Record<CustomFieldType, string> = {
-  text: 'Jawaban Singkat', textarea: 'Paragraf', number: 'Angka',
-  select: 'Pilihan Ganda', checkbox: 'Kotak Centang (multi)',
-};
 
 const cardStyle: React.CSSProperties = {
   background: 'white', borderRadius: '16px', padding: '28px', border: '1px solid #e1e0ff',
@@ -138,8 +132,6 @@ export default function CampaignDetail() {
   const [assigningPicId, setAssigningPicId] = useState<string | null>(null);
   const [actionMessage, setActionMessage] = useState('');
   const [actionError, setActionError] = useState('');
-  const [customFieldsDraft, setCustomFieldsDraft] = useState<CustomField[]>([]);
-  const [savingFields, setSavingFields] = useState(false);
   const [activeTab, setActiveTab] = useState<TabKey>('overview');
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [picUsers, setPicUsers] = useState<PicUser[]>([]);
@@ -157,7 +149,6 @@ export default function CampaignDetail() {
       setCampaign(cRes.data);
       setBriefDraft(cRes.data.briefContent || '');
       setWaGroupLinkDraft(cRes.data.waGroupLink || '');
-      setCustomFieldsDraft(cRes.data.customFields || []);
       setApplications(aRes.data);
       setPicUsers(pRes.data);
     } catch {
@@ -274,38 +265,6 @@ export default function CampaignDetail() {
     } catch (err: unknown) {
       const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
       setActionError(message || 'Gagal menyimpan link grup.');
-    }
-  };
-
-  const addCustomField = () => {
-    setCustomFieldsDraft((prev) => [
-      ...prev,
-      { id: crypto.randomUUID(), label: '', type: 'text', required: false, options: [] },
-    ]);
-  };
-
-  const updateCustomField = (id: string, patch: Partial<CustomField>) => {
-    setCustomFieldsDraft((prev) => prev.map((f) => (f.id === id ? { ...f, ...patch } : f)));
-  };
-
-  const removeCustomField = (id: string) => {
-    setCustomFieldsDraft((prev) => prev.filter((f) => f.id !== id));
-  };
-
-  const saveCustomFields = async () => {
-    setSavingFields(true);
-    setActionError('');
-    try {
-      const cleaned = customFieldsDraft.filter((f) => f.label.trim());
-      const res = await api.patch(`/admin/campaigns/${id}`, { customFields: cleaned });
-      setCampaign(res.data);
-      setCustomFieldsDraft(res.data.customFields || []);
-      setActionMessage('Form kustom disimpan.');
-      setTimeout(() => setActionMessage(''), 2500);
-    } catch {
-      setActionError('Gagal menyimpan form kustom.');
-    } finally {
-      setSavingFields(false);
     }
   };
 
@@ -658,64 +617,11 @@ export default function CampaignDetail() {
       )}
 
       {activeTab === 'form-kustom' && (
-        <div style={cardStyle}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-            <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: '1rem', color: '#191c20' }}>Form Kustom Pendaftaran</p>
-            <button onClick={addCustomField} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '7px 14px', background: '#e1e0ff', color: '#6728e4', borderRadius: '8px', border: 'none', cursor: 'pointer', fontSize: '0.78rem', fontWeight: 700, fontFamily: "var(--font-display)" }}>
-              <Plus size={14} /> Tambah Pertanyaan
-            </button>
-          </div>
-          <p style={{ fontSize: '0.78rem', color: '#777683', marginBottom: '16px' }}>
-            Pertanyaan tambahan di luar field standar (nama, WA, sosmed, dll), muncul di bawah form Apply publik campaign ini, ala Google Forms.
-          </p>
-          {customFieldsDraft.length === 0 ? (
-            <p style={{ color: '#777683', fontSize: '0.85rem', textAlign: 'center', padding: '16px' }}>Belum ada pertanyaan tambahan.</p>
-          ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '16px' }}>
-              {customFieldsDraft.map((f, i) => (
-                <div key={f.id} style={{ border: '1.5px solid #e1e0ff', borderRadius: '12px', padding: '14px' }}>
-                  <div style={{ display: 'flex', gap: '8px', marginBottom: '10px' }}>
-                    <input
-                      value={f.label}
-                      onChange={(e) => updateCustomField(f.id, { label: e.target.value })}
-                      placeholder={`Pertanyaan ${i + 1}`}
-                      style={{ flex: 1, padding: '8px 12px', borderRadius: '8px', border: '1.5px solid #c7c8cf', fontSize: '0.85rem', fontFamily: "var(--font-display)" }}
-                    />
-                    <button onClick={() => removeCustomField(f.id)} style={{ padding: '8px', background: '#ffdad6', border: 'none', borderRadius: '8px', color: '#ba1a1a', cursor: 'pointer', display: 'flex' }}>
-                      <Trash2 size={14} />
-                    </button>
-                  </div>
-                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
-                    <select
-                      value={f.type}
-                      onChange={(e) => updateCustomField(f.id, { type: e.target.value as CustomFieldType })}
-                      style={{ padding: '7px 10px', borderRadius: '8px', border: '1.5px solid #c7c8cf', fontSize: '0.78rem', fontFamily: "var(--font-display)", color: '#464652' }}
-                    >
-                      {(Object.keys(CUSTOM_FIELD_TYPE_LABELS) as CustomFieldType[]).map((t) => (
-                        <option key={t} value={t}>{CUSTOM_FIELD_TYPE_LABELS[t]}</option>
-                      ))}
-                    </select>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.78rem', color: '#464652', fontFamily: "var(--font-display)", cursor: 'pointer' }}>
-                      <input type="checkbox" checked={f.required} onChange={(e) => updateCustomField(f.id, { required: e.target.checked })} style={{ accentColor: '#6728e4' }} />
-                      Wajib diisi
-                    </label>
-                  </div>
-                  {(f.type === 'select' || f.type === 'checkbox') && (
-                    <input
-                      value={(f.options || []).join(', ')}
-                      onChange={(e) => updateCustomField(f.id, { options: e.target.value.split(',').map((o) => o.trim()).filter(Boolean) })}
-                      placeholder="Pilihan, dipisah koma (mis. Ya, Tidak, Kadang)"
-                      style={{ width: '100%', marginTop: '10px', padding: '8px 12px', borderRadius: '8px', border: '1.5px solid #c7c8cf', fontSize: '0.8rem', fontFamily: "var(--font-display)", boxSizing: 'border-box' }}
-                    />
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-          <button onClick={saveCustomFields} disabled={savingFields} className="btn-primary" style={{ width: '100%', justifyContent: 'center', fontSize: '0.85rem' }}>
-            {savingFields ? 'Menyimpan...' : 'Simpan Form Kustom'}
-          </button>
-        </div>
+        <CustomFormBuilder
+          campaignId={campaign._id}
+          initial={campaign.customFields || []}
+          onSaved={(customFields) => setCampaign((c) => (c ? { ...c, customFields } : c))}
+        />
       )}
 
       {activeTab === 'distribusi' && (
