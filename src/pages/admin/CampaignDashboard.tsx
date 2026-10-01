@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ExternalLink, RefreshCw } from 'lucide-react';
+import { RefreshCw } from 'lucide-react';
+import { SHEET_TABS } from './sheetTabs';
 import api from '../../lib/api';
 
 const f = 'var(--font-display)';
@@ -12,16 +13,13 @@ interface CampaignDashboardItem {
   workflowStage: string;
   budget: number;
   brandId?: { namaBrand?: string } | string;
-  masterSheetUrl?: string | null;
-  reportSheetUrl?: string | null;
-  recapPaymentSheetUrl?: string | null;
 }
 
 const sheetButtonStyle: React.CSSProperties = {
-  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
-  padding: '9px 12px', borderRadius: '10px', border: '1.5px solid #e1e0ff',
-  background: 'white', color: '#6728e4', textDecoration: 'none',
-  fontFamily: f, fontSize: '0.76rem', fontWeight: 700,
+  display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '5px',
+  padding: '10px 6px', borderRadius: '10px', border: '1.5px solid #e1e0ff',
+  background: '#faf9ff', color: '#6728e4', textDecoration: 'none',
+  fontFamily: f, fontSize: '0.74rem', fontWeight: 700, textAlign: 'center',
 };
 
 export default function CampaignDashboard() {
@@ -53,7 +51,7 @@ export default function CampaignDashboard() {
         <div>
           <h2 style={{ fontFamily: f, fontWeight: 800, fontSize: '1.35rem', color: '#191c20' }}>Semua Campaign</h2>
           <p style={{ marginTop: '4px', color: '#777683', fontSize: '0.82rem' }}>
-            Dashboard operasional admin dengan akses langsung ke master, report, dan recap payment.
+            Pilih campaign, lalu buka Master Sheet, Report, atau Recap Payment langsung di sini.
           </p>
         </div>
         <button
@@ -76,11 +74,6 @@ export default function CampaignDashboard() {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(330px, 1fr))', gap: '14px' }}>
           {campaigns.map((campaign) => {
             const brandName = typeof campaign.brandId === 'object' ? campaign.brandId?.namaBrand : undefined;
-            const sheets = [
-              { label: 'Master Sheet', url: campaign.masterSheetUrl },
-              { label: 'Report Sheet', url: campaign.reportSheetUrl },
-              { label: 'Recap Payment', url: campaign.recapPaymentSheetUrl },
-            ];
             return (
               <article key={campaign._id} style={{ background: 'white', borderRadius: '16px', padding: '20px', border: '1px solid #e1e0ff', boxShadow: '0 2px 12px rgba(107,46,232,0.05)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px' }}>
@@ -97,15 +90,11 @@ export default function CampaignDashboard() {
                   </span>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '7px', marginTop: '18px' }}>
-                  {sheets.map((sheet) => sheet.url ? (
-                    <a key={sheet.label} href={sheet.url} target="_blank" rel="noopener noreferrer" style={sheetButtonStyle}>
-                      <ExternalLink size={13} /> {sheet.label}
-                    </a>
-                  ) : (
-                    <span key={sheet.label} style={{ ...sheetButtonStyle, color: '#8a8a99', background: '#f8f9ff' }}>
-                      {sheet.label} belum tersedia
-                    </span>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', marginTop: '18px' }}>
+                  {SHEET_TABS.map(({ kind, label, icon: Icon }) => (
+                    <Link key={kind} to={`/admin/campaigns/${campaign._id}/sheet?tab=${kind}`} style={sheetButtonStyle}>
+                      <Icon size={17} /> {label}
+                    </Link>
                   ))}
                 </div>
               </article>
