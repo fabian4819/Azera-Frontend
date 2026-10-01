@@ -636,6 +636,108 @@ const rawTerms: Array<Omit<GlossaryTerm, 'slug'>> = [
       { heading: 'Cara Memicunya Lewat Campaign KOL', body: 'Selain kualitas produk itu sendiri, momen yang mengejutkan, program referral dengan insentif, atau konten yang benar-benar layak dibagikan semuanya bisa mempercepat word-of-mouth menyebar.' },
     ],
   },
+  {
+    term: 'Yellow Cart',
+    category: 'commerce',
+    summary: 'Ikon keranjang kuning di video atau live TikTok yang menautkan langsung ke produk di TikTok Shop, sehingga penonton bisa checkout tanpa keluar dari konten.',
+    sections: [
+      { heading: 'Cara Kerjanya', body: 'Creator yang sudah terdaftar sebagai affiliate TikTok Shop menautkan produk ke video atau sesi live. Ikon keranjang kuning lalu muncul di pojok konten, dan penonton tinggal mengetuknya untuk melihat serta membeli produk.' },
+      { heading: 'Kenapa Penting di Campaign', body: 'Yellow cart memperpendek jarak dari menonton ke membeli, sehingga konten KOL bisa langsung diukur kontribusinya ke penjualan (GMV) — bukan cuma views dan engagement.' },
+      { heading: 'Hal yang Perlu Dicek Tim Ops', body: 'Pastikan akun KOL sudah eligible affiliate, produk yang ditautkan sesuai SKU di brief, komisi sudah diatur di TikTok Shop, dan keranjang benar-benar muncul saat konten tayang.' },
+    ],
+  },
+  {
+    term: 'SOW (Scope of Works)',
+    category: 'ops',
+    summary: 'Dokumen yang merinci lingkup pekerjaan sebuah campaign: deliverable, jumlah konten, platform, timeline, hingga tanggung jawab tiap pihak.',
+    sections: [
+      { heading: 'Isi yang Umum Dicantumkan', body: 'Jumlah dan jenis konten per KOL (misalnya 1 TikTok video + 3 IG story), platform, jadwal draft dan posting, jumlah revisi, usage rights, periode take down, serta format laporan akhir.' },
+      { heading: 'Kenapa Wajib Ada', body: 'SOW jadi acuan bersama antara brand, agency, dan KOL. Kalau ada permintaan di luar SOW (konten tambahan, revisi berlebih), tim bisa menegosiasikan biaya tambahan dengan dasar yang jelas.' },
+      { heading: 'Hubungannya dengan Dokumen Lain', body: 'SOW biasanya disusun sebelum quotation dan kontrak final — angka di quotation dan klausul di kontrak mengikuti lingkup yang sudah disepakati di SOW.' },
+    ],
+  },
+  {
+    term: 'Requirement User',
+    category: 'ops',
+    summary: 'Kriteria KOL yang diminta client untuk sebuah campaign — misalnya minimal follower, engagement rate, niche, lokasi, hingga profil audiens.',
+    sections: [
+      { heading: 'Contoh Kriteria', body: "Misalnya: 'KOL perempuan, domisili Jabodetabek, niche beauty, 10K–50K follower TikTok, ER minimal 3%, audiens mayoritas usia 18–24'." },
+      { heading: 'Kegunaannya bagi Tim Ops', body: 'Requirement jadi filter utama saat mencari dan menyusun shortlist KOL, sehingga kandidat yang diajukan ke client sudah sesuai harapan dan proses approval lebih cepat.' },
+      { heading: 'Tips', body: "Konfirmasi ulang requirement yang ambigu di awal (misalnya 'KOL yang aesthetic') dan minta contoh akun referensi dari client agar tidak bolak-balik revisi shortlist." },
+    ],
+  },
+  {
+    term: 'Shortlist',
+    category: 'ops',
+    summary: 'Daftar kandidat KOL hasil kurasi yang diajukan ke client untuk dipilih sebelum campaign berjalan.',
+    sections: [
+      { heading: 'Isi Shortlist', body: 'Biasanya berisi nama dan link akun, jumlah follower, engagement rate, rata-rata views, rate card, serta alasan singkat kenapa KOL tersebut cocok dengan requirement client.' },
+      { heading: 'Alurnya', body: 'Tim ops menyusun shortlist berdasarkan requirement, client memilih atau mengganti kandidat, lalu KOL yang di-approve masuk ke tahap negosiasi dan kontrak.' },
+    ],
+  },
+  {
+    term: 'Quotation',
+    category: 'ops',
+    summary: 'Penawaran harga resmi dari agency ke client yang merinci biaya KOL, produksi, dan fee agency untuk sebuah campaign.',
+    sections: [
+      { heading: 'Isi yang Umum Dicantumkan', body: 'Daftar item pekerjaan sesuai SOW, harga per item, subtotal, pajak (PPN/PPh), masa berlaku penawaran, dan syarat pembayaran.' },
+      { heading: 'Setelah Quotation Disetujui', body: 'Client biasanya menerbitkan PO (Purchase Order). Nomor quotation juga sering dicantumkan sebagai referensi di invoice agar penagihan mudah dicocokkan.' },
+    ],
+  },
+  {
+    term: 'PO (Purchase Order)',
+    category: 'ops',
+    summary: 'Dokumen resmi dari client yang menyatakan persetujuan pembelian jasa sesuai quotation, sekaligus dasar penagihan invoice.',
+    sections: [
+      { heading: 'Kenapa Penting', body: 'Banyak perusahaan tidak bisa memproses pembayaran tanpa nomor PO. Invoice yang tidak mencantumkan PO yang benar sering tertahan di bagian finance client.' },
+      { heading: 'Yang Perlu Dicek', body: 'Pastikan nilai, item, dan nama entitas di PO sama dengan quotation. Kalau ada perbedaan, minta revisi PO sebelum campaign jalan agar penagihan tidak bermasalah.' },
+    ],
+  },
+  {
+    term: 'Draft Approval',
+    category: 'ops',
+    summary: 'Tahap di mana KOL mengirim draft konten (script, foto, atau video) untuk dicek dan disetujui brand sebelum diposting.',
+    sections: [
+      { heading: 'Yang Dicek Saat Review', body: "Kesesuaian dengan brief (key message, do & don't), penyebutan produk yang benar, kualitas visual, caption, hashtag, mention, serta label disclosure." },
+      { heading: 'Batas Revisi', body: 'Jumlah revisi biasanya sudah diatur di SOW (misalnya maksimal 2x). Feedback sebaiknya dikumpulkan dalam satu kali kirim agar tidak memperlambat timeline posting.' },
+    ],
+  },
+  {
+    term: 'Go Live',
+    category: 'ops',
+    summary: 'Saat konten KOL resmi tayang di akun sesuai jadwal posting yang sudah disepakati.',
+    sections: [
+      { heading: 'Checklist Saat Go Live', body: 'Pastikan konten yang diposting sama dengan versi yang di-approve, caption dan tag sudah benar, link atau yellow cart aktif, lalu simpan link postingan untuk keperluan report.' },
+      { heading: 'Kenapa Jadwalnya Penting', body: 'Go live sering diselaraskan dengan momen campaign (launching produk, payday, flash sale), sehingga keterlambatan posting bisa langsung berdampak ke hasil campaign.' },
+    ],
+  },
+  {
+    term: 'Insight Report',
+    category: 'metrics',
+    summary: 'Laporan performa konten KOL setelah tayang — biasanya berupa screenshot insight dari akun KOL ditambah rekap metrik campaign.',
+    sections: [
+      { heading: 'Isi yang Umum Diminta', body: 'Views, reach, impression, likes, comments, shares, saves, watch time, profil audiens, serta klik link atau penjualan dari yellow cart jika ada.' },
+      { heading: 'Kapan Diambil', body: 'Umumnya diminta 1x24 jam dan/atau 7 hari setelah posting. Waktu pengambilan insight sebaiknya disepakati di SOW agar data antar KOL bisa dibandingkan secara adil.' },
+    ],
+  },
+  {
+    term: 'Ads Code',
+    category: 'commerce',
+    summary: 'Kode otorisasi dari KOL (misalnya TikTok Spark Ads code) yang memungkinkan brand mengiklankan postingan KOL tersebut.',
+    sections: [
+      { heading: 'Cara Kerjanya', body: 'KOL membuat kode otorisasi dari postingannya dengan durasi tertentu (misalnya 30 atau 60 hari), lalu brand memasukkan kode itu di Ads Manager untuk menjalankan postingan sebagai iklan.' },
+      { heading: 'Yang Perlu Disepakati', body: 'Durasi kode, biaya tambahan (kalau ada), dan apakah ini termasuk usage rights di SOW. Pastikan kode dikirim sebelum kedaluwarsa sesuai jadwal ads brand.' },
+    ],
+  },
+  {
+    term: 'Take Down',
+    category: 'ops',
+    summary: 'Periode minimal sebuah konten campaign wajib tetap tayang sebelum KOL boleh menghapus atau mengarsipkannya.',
+    sections: [
+      { heading: 'Contoh Ketentuan', body: "Misalnya: 'Konten tidak boleh dihapus atau diarsipkan minimal 3 bulan setelah tanggal posting'. Ketentuan ini biasanya ditulis di SOW dan kontrak." },
+      { heading: 'Kenapa Diatur', body: 'Brand ingin konten tetap bisa ditemukan audiens dan terus mengumpulkan views setelah campaign selesai. Konten yang dihapus terlalu cepat bisa dianggap melanggar kesepakatan.' },
+    ],
+  },
 ];
 
 export const glossaryTerms: GlossaryTerm[] = rawTerms
