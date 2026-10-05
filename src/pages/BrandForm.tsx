@@ -181,7 +181,7 @@ export default function BrandForm() {
             </div>
           </div>
 
-          <form onSubmit={handleSubmit(onSubmit)} style={{ background: 'white', borderRadius: '24px', padding: '40px', boxShadow: '0 4px 24px rgba(0,0,0,0.06)' }}>
+          <form onSubmit={handleSubmit(onSubmit)} style={{ minWidth: 0, background: 'white', borderRadius: '24px', padding: '40px', boxShadow: '0 4px 24px rgba(0,0,0,0.06)' }}>
             <p style={sectionTitleStyle}>Informasi Brand</p>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }} className="form-2col">
               <div>
@@ -322,11 +322,12 @@ export default function BrandForm() {
 
       <style>{`
         @media (max-width: 900px) {
-          .brandform-grid { grid-template-columns: 1fr !important; }
-          .brandform-panel { position: static !important; display: none; }
+          .brandform-grid { grid-template-columns: minmax(0, 1fr) !important; }
+          .brandform-panel { position: static !important; order: 1; }
         }
         @media (max-width: 640px) {
           .form-2col { grid-template-columns: 1fr !important; }
+          .brandform-grid form { padding: 28px 20px !important; }
         }
       `}</style>
     </div>

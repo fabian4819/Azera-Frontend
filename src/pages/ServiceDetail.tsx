@@ -417,6 +417,7 @@ export default function ServiceDetail() {
         }
         .service-scope-section {
           padding: 112px 24px;
+          overflow-x: clip;
           background:
             radial-gradient(circle at 8% 18%, rgba(196,238,135,0.22), transparent 24%),
             linear-gradient(180deg, var(--surface) 0%, #f0ecff 100%);
@@ -542,6 +543,7 @@ export default function ServiceDetail() {
         }
         .service-workflow-section {
           padding: 112px 24px;
+          overflow-x: clip;
           background: var(--hero-bg);
         }
         .service-workflow-shell {
@@ -636,6 +638,15 @@ export default function ServiceDetail() {
           .service-pricing-grid { grid-template-columns: 1fr !important; }
         }
         @media (max-width: 560px) {
+          /* Kolase hero ada di sisi kiri-kanan gambar; crop tengah ala desktop bikin kosong,
+             jadi di mobile gambar ditampilkan utuh selebar layar di bawah teks. */
+          .service-hero { padding-bottom: calc(56vw + 24px); align-items: flex-start; }
+          .service-hero-bg {
+            background-size: 100% auto;
+            background-position: center bottom 40px;
+            -webkit-mask-image: linear-gradient(to top, #000 calc(40px + 42vw), transparent calc(40px + 60vw));
+            mask-image: linear-gradient(to top, #000 calc(40px + 42vw), transparent calc(40px + 60vw));
+          }
           .service-scope-section { padding: 80px 18px; }
           .service-scope-grid { grid-template-columns: 1fr; }
           .service-scope-visual { min-height: 370px; }

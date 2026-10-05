@@ -220,7 +220,7 @@ export default function Portfolio() {
                         key={selected._id}
                         ref={creatorScrollRef}
                         onScroll={handleCreatorScroll}
-                        style={{ width: '340px', minWidth: 0, display: 'flex', overflowX: 'auto', scrollSnapType: 'x mandatory' }}
+                        style={{ flex: '0 1 340px', minWidth: 0, display: 'flex', overflowX: 'auto', scrollSnapType: 'x mandatory' }}
                         className="portfolio-creator-scroll"
                       >
                         {slides.map((slide, i) => (
@@ -348,7 +348,7 @@ export default function Portfolio() {
 
       <style>{`
         @media (max-width: 900px) {
-          .portfolio-detail-grid { grid-template-columns: 1fr !important; }
+          .portfolio-detail-grid { grid-template-columns: minmax(0, 1fr) !important; padding: 20px 16px !important; }
         }
         .portfolio-detail-cta-arrow { transition: transform 0.25s ease; }
         .portfolio-detail-cta:hover .portfolio-detail-cta-arrow { transform: translateX(4px); }

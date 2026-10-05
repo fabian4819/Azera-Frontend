@@ -125,10 +125,11 @@ export default function PortalLogin() {
           <div className="blob-lg" style={{ width: '260px', height: '260px', background: '#c4ee87', opacity: 0.12, bottom: '-100px', right: '-60px' }} />
 
           <div style={{ position: 'relative', zIndex: 1 }}>
-            <p style={{ color: 'rgba(255,255,255,0.65)', fontFamily: f, fontWeight: 600, fontSize: '0.85rem', letterSpacing: '0.04em', textTransform: 'uppercase', marginBottom: '28px' }}>
+            <p className="login-left-welcome" style={{ color: 'rgba(255,255,255,0.65)', fontFamily: f, fontWeight: 600, fontSize: '0.85rem', letterSpacing: '0.04em', textTransform: 'uppercase', marginBottom: '28px' }}>
               Welcome to
             </p>
             <div
+              className="login-left-logo"
               style={{
                 width: '96px', height: '96px', borderRadius: '50%', background: 'white',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px',
@@ -150,10 +151,6 @@ export default function PortalLogin() {
           className="login-right"
           style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '60px 64px', position: 'relative' }}
         >
-          <div className="mobile-logo" style={{ display: 'none', alignItems: 'center', gap: '10px', marginBottom: '36px' }}>
-            <img src="/logo-transparent.png" alt="AzeraKOL" style={{ height: '32px', objectFit: 'contain' }} />
-            <span style={{ fontFamily: f, fontWeight: 900, fontSize: '1.1rem', color: 'var(--primary)', letterSpacing: '-0.02em' }}>AZERAKOL</span>
-          </div>
 
           <div style={{ width: '100%', maxWidth: '380px' }}>
             <div style={{ display: 'flex', background: '#f0eeff', borderRadius: '999px', padding: '4px', marginBottom: '28px' }}>
@@ -299,10 +296,12 @@ export default function PortalLogin() {
 
       <style>{`
         @media (max-width: 768px) {
-          .login-left { display: none !important; }
-          .login-card { min-height: unset !important; }
-          .login-right { padding: 40px 32px !important; }
-          .mobile-logo { display: flex !important; }
+          .login-card { min-height: unset !important; flex-direction: column; border-radius: 28px !important; }
+          .login-left { flex: none !important; padding: 36px 28px 40px !important; border-radius: 0 0 48px 48px !important; }
+          .login-left-logo { width: 72px !important; height: 72px !important; margin-bottom: 14px !important; }
+          .login-left-logo img { width: 42px !important; height: 42px !important; }
+          .login-left-welcome { margin-bottom: 18px !important; }
+          .login-right { padding: 36px 24px !important; }
         }
       `}</style>
     </div>

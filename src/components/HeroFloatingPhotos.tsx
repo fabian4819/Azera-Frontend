@@ -2,9 +2,10 @@ import { useEffect, useRef } from 'react';
 import { motion, useMotionValue, useSpring, useTransform, type MotionValue } from 'framer-motion';
 import { ease } from '../lib/motion';
 
-// Sama seperti hero halaman utama (Hero.tsx) — dipakai ulang di hero halaman service
-// supaya treatment visualnya konsisten. Listener mouse nempel ke parent section
-// sendiri (bukan lewat prop), jadi tinggal taruh komponen ini sebagai child pertama.
+// Foto konten tersebar di background hero (ghosting ala pitch). Listener mouse nempel
+// ke parent section sendiri (bukan lewat prop), jadi tinggal taruh komponen ini sebagai
+// child pertama. Di mobile foto diperkecil (bukan disembunyikan) supaya tetap sama
+// dengan desktop; animasi melayang tetap jalan, parallax mouse otomatis diam.
 const bgPhotos = [
   { src: '/hero/social-phone.jpg', pos: { top: '8%', left: '4%' }, rot: -8, w: 184, h: 230 },
   { src: '/hero/team-meeting.jpg', pos: { top: '5%', left: '38%' }, rot: 4, w: 206, h: 150 },
@@ -23,6 +24,7 @@ function ParallaxCard({ src, w, h, springX, springY, depth }: { src: string; w: 
   const y = useTransform(springY, (v) => v * depth);
   return (
     <motion.div
+      className="hero-ghost-card"
       style={{
         x, y,
         width: `${w}px`, height: `${h}px`,
@@ -90,7 +92,7 @@ export default function HeroFloatingPhotos() {
         );
       })}
       <style>{`
-        @media (max-width: 768px) { .hero-ghosts { display: none; } }
+        @media (max-width: 768px) { .hero-ghost-card { zoom: 0.5; opacity: 0.75; } }
       `}</style>
     </div>
   );
