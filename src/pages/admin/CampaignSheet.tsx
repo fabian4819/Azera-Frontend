@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, Check, Columns3, Copy, ExternalLink, RefreshCw, X } from 'lucide-react';
+import { ArrowLeft, Check, Copy, ExternalLink, RefreshCw, X } from 'lucide-react';
 import api from '../../lib/api';
 import SheetGrid, { type Cell, type CellKind } from '../../components/SheetGrid';
-import ColumnManager, { type Access, type ProgressColumn } from './ColumnManager';
+import { AccessIcon, AddColumnMenu, ColumnMenu, type Access, type ProgressColumn } from './ColumnManager';
 import { SHEET_TABS, type SheetKind } from './sheetTabs';
 
 const f = 'var(--font-display)';
@@ -39,7 +39,6 @@ export default function CampaignSheet() {
   const [cache, setCache] = useState<Partial<Record<SheetKind, SheetView>>>({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [managing, setManaging] = useState(false);
   const [deciding, setDeciding] = useState<string | null>(null);
   const [actionError, setActionError] = useState('');
   const [copied, setCopied] = useState<string | null>(null);
@@ -94,6 +93,42 @@ export default function CampaignSheet() {
     files.forEach((file) => fd.append('files', file));
     await api.post(`/admin/campaigns/${id}/sheet/cell/upload`, fd, { headers: { 'Content-Type': 'multipart/form-data' } });
     await reloadCurrent();
+  };
+
+  // Kelola kolom langsung dari header tabel — tiap perubahan langsung disimpan ke campaign
+  const progressCols = view?.progressColumns ?? [];
+  const saveColumns = async (progressColumns: ProgressColumn[], columnAccess?: Record<string, Access>) => {
+    setActionError('');
+    try {
+      await api.patch(`/admin/campaigns/${id}`, { progressColumns, ...(columnAccess ? { columnAccess } : {}) });
+      await reloadCurrent();
+    } catch {
+      setActionError('Gagal menyimpan pengaturan kolom. Coba lagi.');
+    }
+  };
+
+  const columnMenu = (col: number, close: () => void) => {
+    const meta = view?.columns?.[col];
+    if (!meta) return null;
+    const pIdx = progressCols.findIndex((c) => c.id === meta.progressId);
+    const progress = pIdx === -1 ? undefined : progressCols[pIdx];
+    const withCol = (fn: (list: ProgressColumn[]) => void) => { const list = [...progressCols]; fn(list); return list; };
+    return (
+      <ColumnMenu
+        progress={progress}
+        access={meta.access}
+        canMoveLeft={pIdx > 0}
+        canMoveRight={pIdx !== -1 && pIdx < progressCols.length - 1}
+        onAccess={(a) => {
+          const access = Object.fromEntries((view?.columns ?? []).filter((c) => !c.progressId).map((c) => [c.key, c.access === 'view' ? 'view' : 'hidden'])) as Record<string, Access>;
+          void saveColumns(progressCols, { ...access, [meta.key]: a });
+        }}
+        onChange={(next) => void saveColumns(withCol((l) => { l[pIdx] = next; }))}
+        onMove={(dir) => { close(); void saveColumns(withCol((l) => { [l[pIdx], l[pIdx + dir]] = [l[pIdx + dir], l[pIdx]]; })); }}
+        onInsertRight={() => { close(); void saveColumns(withCol((l) => { l.splice(pIdx + 1, 0, { id: crypto.randomUUID(), label: 'Kolom baru', type: 'text', creatorAccess: 'edit' }); })); }}
+        onDelete={() => { close(); void saveColumns(progressCols.filter((c) => c.id !== meta.progressId)); }}
+      />
+    );
   };
 
   const decide = async (row: number, status: 'accepted' | 'rejected') => {
@@ -167,12 +202,6 @@ export default function CampaignSheet() {
           {campaign && <p style={{ marginTop: '4px', color: '#777683', fontSize: '0.82rem' }}>{campaign.brandName || 'Tanpa brand'}</p>}
         </div>
         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-          {isMaster && view && (
-            <button type="button" onClick={() => setManaging(true)}
-              style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '0 14px', height: '38px', borderRadius: '10px', border: '1.5px solid #c9b6f7', background: 'white', color: '#6728e4', fontFamily: f, fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer' }}>
-              <Columns3 size={15} /> Kelola Kolom
-            </button>
-          )}
           <button type="button" onClick={refresh} disabled={loading} aria-label="Muat ulang data" title="Muat ulang data"
             style={{ width: '38px', height: '38px', borderRadius: '10px', border: '1.5px solid #c7c8cf', background: 'white', color: '#6728e4', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: loading ? 0.5 : 1 }}>
             <RefreshCw size={16} />
@@ -232,19 +261,13 @@ export default function CampaignSheet() {
           onUpload={uploadCell}
           actionHeader="Status"
           rowAction={kind === 'applicants' ? applicantAction : undefined}
+          columnMenu={isMaster ? columnMenu : undefined}
+          headerIcon={isMaster ? (col) => (view.columns?.[col] ? <AccessIcon access={view.columns[col].access} /> : null) : undefined}
+          addColumnMenu={isMaster ? (close) => <AddColumnMenu onAdd={(cols) => { close(); void saveColumns([...progressCols, ...cols]); }} /> : undefined}
           footer=" · Data langsung dari database — sama dengan yang disinkron ke Google Sheets."
         />
       )}
 
-      {managing && view?.columns && (
-        <ColumnManager
-          campaignId={id!}
-          initialProgress={view.progressColumns ?? []}
-          systemColumns={view.columns.flatMap((c, i) => (c.progressId ? [] : [{ key: c.key, label: view.headers[i], access: c.access }]))}
-          onClose={() => setManaging(false)}
-          onSaved={() => { setManaging(false); void reloadCurrent(); }}
-        />
-      )}
     </div>
   );
 }

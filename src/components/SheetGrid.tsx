@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState, type ReactNode } from 'react';
-import { ArrowDownAZ, ArrowDownZA, ListFilter, Pencil, Search, Upload, X } from 'lucide-react';
+import { ArrowDownAZ, ArrowDownZA, ListFilter, Pencil, Plus, Search, Upload, X } from 'lucide-react';
 
 export type Cell = string | number;
 export type CellKind = 'text' | 'number' | 'date' | 'link' | 'file';
@@ -37,24 +37,28 @@ interface FilterMenuProps {
   onSort: (dir: 1 | -1) => void;
   onApply: (hidden: Set<string>) => void;
   onClose: () => void;
+  /** Pengaturan kolom (admin) — tampil di atas opsi urut/filter */
+  extra?: ReactNode;
 }
 
 /** Dropdown filter kolom ala Google Sheets: urutkan A→Z / Z→A + filter berdasarkan nilai. */
-function FilterMenu({ header, rect, values, hidden, sortDir, onSort, onApply, onClose }: FilterMenuProps) {
+function FilterMenu({ header, rect, values, hidden, sortDir, onSort, onApply, onClose, extra }: FilterMenuProps) {
   const [draft, setDraft] = useState(() => new Set(hidden));
   const [search, setSearch] = useState('');
   const shown = values.filter((v) => v.key.toLowerCase().includes(search.trim().toLowerCase()));
   const toggle = (k: string) => setDraft((d) => { const n = new Set(d); if (n.has(k)) n.delete(k); else n.add(k); return n; });
   const setShown = (hide: boolean) => setDraft((d) => { const n = new Set(d); shown.forEach((v) => (hide ? n.add(v.key) : n.delete(v.key))); return n; });
 
-  const W = 260;
+  const W = extra ? 300 : 260;
+  const top = Math.max(8, Math.min(rect.bottom + 4, window.innerHeight - 420));
   const item: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: '8px', width: '100%', padding: '7px 12px', background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.8rem', color: '#202124', textAlign: 'left' };
   const link: React.CSSProperties = { background: 'none', border: 'none', color: '#1a73e8', cursor: 'pointer', fontSize: '0.75rem', padding: 0 };
   return (
     <>
       <div onClick={onClose} style={{ position: 'fixed', inset: 0, zIndex: 50 }} />
       <div role="dialog" aria-label={`Filter kolom ${header}`} onKeyDown={(e) => { if (e.key === 'Escape') onClose(); }}
-        style={{ position: 'fixed', top: Math.min(rect.bottom + 4, window.innerHeight - 420), left: Math.max(8, Math.min(rect.left, window.innerWidth - W - 8)), width: W, zIndex: 51, background: 'white', borderRadius: '8px', boxShadow: '0 4px 16px rgba(0,0,0,.18)', fontFamily: 'Arial, Helvetica, sans-serif', padding: '6px 0' }}>
+        style={{ position: 'fixed', top, left: Math.max(8, Math.min(rect.left, window.innerWidth - W - 8)), width: W, maxHeight: `calc(100vh - ${top + 8}px)`, overflowY: 'auto', zIndex: 51, background: 'white', borderRadius: '8px', boxShadow: '0 4px 16px rgba(0,0,0,.18)', fontFamily: 'Arial, Helvetica, sans-serif', padding: '6px 0' }}>
+        {extra && <>{extra}<div style={{ borderTop: `1px solid ${GRID}`, margin: '6px 0' }} /></>}
         <button type="button" style={{ ...item, fontWeight: sortDir === 1 ? 700 : 400 }} onClick={() => onSort(1)}><ArrowDownAZ size={15} /> Urutkan A → Z</button>
         <button type="button" style={{ ...item, fontWeight: sortDir === -1 ? 700 : 400 }} onClick={() => onSort(-1)}><ArrowDownZA size={15} /> Urutkan Z → A</button>
         <div style={{ borderTop: `1px solid ${GRID}`, margin: '6px 0' }} />
@@ -108,6 +112,12 @@ interface SheetGridProps {
   rowAction?: (row: number) => ReactNode;
   footer?: ReactNode;
   maxHeight?: string;
+  /** Admin: pengaturan kolom di dropdown header (nama, sumber data, akses creator, hapus) */
+  columnMenu?: (col: number, close: () => void) => ReactNode;
+  /** Ikon kecil di header, mis. penanda akses creator */
+  headerIcon?: (col: number) => ReactNode;
+  /** Admin: isi popover tombol "+" di ujung kanan header (tambah kolom) */
+  addColumnMenu?: (close: () => void) => ReactNode;
 }
 
 function errorMessage(err: unknown): string {
@@ -117,7 +127,9 @@ function errorMessage(err: unknown): string {
 /** Tabel ala Google Sheets: cari, filter & urutkan per kolom, plus edit sel progress langsung di tabel. */
 export default function SheetGrid({
   headers, rows: allRows, totals, hint, emptyText, canEdit, kindOf, onEdit, onUpload, highlightRow, actionHeader, rowAction, footer, maxHeight,
+  columnMenu, headerIcon, addColumnMenu,
 }: SheetGridProps) {
+  const [addMenu, setAddMenu] = useState<DOMRect | null>(null);
   const [query, setQuery] = useState('');
   const [selected, setSelected] = useState<number | null>(null);
   // Filter & sort per kolom; `hidden` = nilai yang disembunyikan per index kolom
@@ -272,7 +284,7 @@ export default function SheetGrid({
     );
   };
 
-  const colCount = headers.length + (rowAction ? 1 : 0);
+  const colCount = headers.length + (rowAction ? 1 : 0) + (addColumnMenu ? 1 : 0);
 
   return (
     <div>
@@ -304,6 +316,7 @@ export default function SheetGrid({
                   {colLetter(ci)}
                 </th>
               ))}
+              {addColumnMenu && <th style={{ ...cellBase, background: HEAD_BG }} />}
               {rowAction && <th style={{ ...cellBase, background: HEAD_BG }} />}
             </tr>
             <tr>
@@ -315,7 +328,8 @@ export default function SheetGrid({
                   <th key={ci} title={h} style={{ ...cellBase, background: '#f3f0ff', fontWeight: 700, textAlign: 'left', ...(ci === 0 ? { ...firstColStyle, zIndex: 3 } : {}) }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                       <span style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>{h}</span>
-                      <button type="button" aria-label={`Filter & urutkan ${h}`} title="Filter & urutkan"
+                      {headerIcon?.(ci)}
+                      <button type="button" aria-label={`${columnMenu ? 'Atur, filter & urutkan' : 'Filter & urutkan'} ${h}`} title={columnMenu ? 'Atur kolom, filter & urutkan' : 'Filter & urutkan'}
                         onClick={(e) => { e.stopPropagation(); setMenu({ col: ci, rect: e.currentTarget.getBoundingClientRect() }); }}
                         style={{ flexShrink: 0, width: '22px', height: '22px', borderRadius: '4px', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', background: on ? '#6728e4' : 'transparent', color: on ? 'white' : '#5f6368' }}>
                         {hidden[ci]?.size ? <ListFilter size={13} /> : <SortIcon size={13} />}
@@ -324,6 +338,15 @@ export default function SheetGrid({
                   </th>
                 );
               })}
+              {addColumnMenu && (
+                <th style={{ ...cellBase, background: '#f3f0ff', padding: '3px 8px' }}>
+                  <button type="button" aria-label="Tambah kolom" title="Tambah kolom"
+                    onClick={(e) => setAddMenu(e.currentTarget.getBoundingClientRect())}
+                    style={{ width: '24px', height: '24px', borderRadius: '6px', border: '1px dashed #c9b6f7', background: 'white', color: '#6728e4', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Plus size={14} />
+                  </button>
+                </th>
+              )}
               {rowAction && <th style={{ ...cellBase, background: '#f3f0ff', fontWeight: 700, textAlign: 'left', position: 'sticky', right: 0, zIndex: 3 }}>{actionHeader ?? 'Aksi'}</th>}
             </tr>
           </thead>
@@ -353,6 +376,7 @@ export default function SheetGrid({
                       </td>
                     );
                   })}
+                  {addColumnMenu && <td style={{ ...cellBase, background: bg }} />}
                   {rowAction && (
                     <td onClick={(e) => e.stopPropagation()} style={{ ...cellBase, background: bg, position: 'sticky', right: 0, overflow: 'visible' }}>{rowAction(i)}</td>
                   )}
@@ -390,7 +414,18 @@ export default function SheetGrid({
           hidden={hidden[menu.col] ?? new Set()} sortDir={sort?.col === menu.col ? sort.dir : null}
           onSort={(dir) => { setSort({ col: menu.col, dir }); setMenu(null); }}
           onApply={(h) => { setHidden((prev) => ({ ...prev, [menu.col]: h })); setSelected(null); setMenu(null); }}
-          onClose={() => setMenu(null)} />
+          onClose={() => setMenu(null)}
+          extra={columnMenu?.(menu.col, () => setMenu(null))} />
+      )}
+
+      {addMenu && addColumnMenu && (
+        <>
+          <div onClick={() => setAddMenu(null)} style={{ position: 'fixed', inset: 0, zIndex: 50 }} />
+          <div role="dialog" aria-label="Tambah kolom" onKeyDown={(e) => { if (e.key === 'Escape') setAddMenu(null); }}
+            style={{ position: 'fixed', top: Math.min(addMenu.bottom + 4, window.innerHeight - 320), left: Math.max(8, Math.min(addMenu.right - 260, window.innerWidth - 268)), width: 260, zIndex: 51, background: 'white', borderRadius: '8px', boxShadow: '0 4px 16px rgba(0,0,0,.18)', padding: '6px 0' }}>
+            {addColumnMenu(() => setAddMenu(null))}
+          </div>
+        </>
       )}
     </div>
   );
