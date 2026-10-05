@@ -135,17 +135,21 @@ export default function CampaignDetail() {
   const [activeTab, setActiveTab] = useState<TabKey>('overview');
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [picUsers, setPicUsers] = useState<PicUser[]>([]);
+  // Semua akun PIC terdaftar — jadi daftar centang pilihan PIC di Form Kustom
+  const [allPics, setAllPics] = useState<PicUser[]>([]);
   const [picEmailDraft, setPicEmailDraft] = useState('');
   const [addingPic, setAddingPic] = useState(false);
   const [picError, setPicError] = useState('');
 
   const load = async () => {
     try {
-      const [cRes, aRes, pRes] = await Promise.all([
+      const [cRes, aRes, pRes, allRes] = await Promise.all([
         api.get(`/admin/campaigns/${id}`),
         api.get(`/admin/applications/campaign/${id}`),
         api.get(`/admin/campaigns/${id}/pic`),
+        api.get('/admin/pic').catch(() => ({ data: [] })),
       ]);
+      setAllPics(allRes.data);
       setCampaign(cRes.data);
       setBriefDraft(cRes.data.briefContent || '');
       setWaGroupLinkDraft(cRes.data.waGroupLink || '');
@@ -252,6 +256,17 @@ export default function CampaignDetail() {
       setPicUsers((prev) => prev.filter((p) => p._id !== picUserId));
     } catch {
       setPicError('Gagal melepas PIC');
+    }
+  };
+
+  // Centang/lepas PIC dari Form Kustom — langsung tersimpan (assign PicUser ke campaign ini)
+  const togglePic = async (pic: PicUser, on: boolean) => {
+    if (on) {
+      const res = await api.post(`/admin/campaigns/${id}/pic`, { email: pic.email });
+      setPicUsers((prev) => (prev.some((p) => p._id === pic._id) ? prev : [...prev, res.data]));
+    } else {
+      await api.delete(`/admin/campaigns/${id}/pic/${pic._id}`);
+      setPicUsers((prev) => prev.filter((p) => p._id !== pic._id));
     }
   };
 
@@ -621,8 +636,9 @@ export default function CampaignDetail() {
           campaignId={campaign._id}
           initial={campaign.customFields || []}
           initialApplyFields={campaign.applyFields}
-          picNames={picUsers.map((p) => p.name)}
-          onManagePic={() => setActiveTab('distribusi')}
+          pics={allPics}
+          assignedPicIds={picUsers.map((p) => p._id)}
+          onTogglePic={togglePic}
           onSaved={(customFields, applyFields) => setCampaign((c) => (c ? { ...c, customFields, applyFields } : c))}
         />
       )}

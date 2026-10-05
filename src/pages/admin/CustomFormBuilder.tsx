@@ -25,9 +25,10 @@ interface Props {
   campaignId: string;
   initial: CustomField[];
   initialApplyFields?: ApplyFields;
-  /** Nama PIC yang sudah di-assign ke campaign — jadi opsi dropdown PIC di form */
-  picNames: string[];
-  onManagePic: () => void;
+  /** Semua akun PIC terdaftar + yang dicentang untuk campaign ini (jadi opsi dropdown PIC di form) */
+  pics: { _id: string; name: string; email: string }[];
+  assignedPicIds: string[];
+  onTogglePic: (pic: { _id: string; name: string; email: string; phone: string }, on: boolean) => Promise<void>;
   onSaved: (fields: CustomField[], applyFields: ApplyFields) => void;
 }
 
@@ -47,7 +48,7 @@ const answerLine = (w: string, text: string) => (
 );
 
 /** Builder pertanyaan tambahan form Apply, pengalaman ala Google Forms (AD-47). */
-export default function CustomFormBuilder({ campaignId, initial, initialApplyFields, picNames, onManagePic, onSaved }: Props) {
+export default function CustomFormBuilder({ campaignId, initial, initialApplyFields, pics, assignedPicIds, onTogglePic, onSaved }: Props) {
   const [fields, setFields] = useState<CustomField[]>(initial);
   const [applyFields, setApplyFields] = useState<ApplyFields>(initialApplyFields ?? DEFAULT_APPLY_FIELDS);
   const [saved, setSaved] = useState(JSON.stringify([initial, initialApplyFields ?? DEFAULT_APPLY_FIELDS]));
@@ -58,6 +59,20 @@ export default function CustomFormBuilder({ campaignId, initial, initialApplyFie
   const [dragId, setDragId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [status, setStatus] = useState<{ ok: boolean; text: string } | null>(null);
+  const [picBusy, setPicBusy] = useState<string | null>(null);
+  const [picError, setPicError] = useState('');
+
+  const togglePic = async (pic: Props['pics'][number], on: boolean) => {
+    setPicBusy(pic._id);
+    setPicError('');
+    try {
+      await onTogglePic(pic as Parameters<Props['onTogglePic']>[0], on);
+    } catch {
+      setPicError(`Gagal ${on ? 'menambahkan' : 'melepas'} ${pic.name}. Coba lagi.`);
+    } finally {
+      setPicBusy(null);
+    }
+  };
   const dirty = JSON.stringify([fields, applyFields]) !== saved;
   const setApply = (patch: Partial<ApplyFields>) => setApplyFields((a) => ({ ...a, ...patch }));
 
@@ -173,17 +188,29 @@ export default function CustomFormBuilder({ campaignId, initial, initialApplyFie
       {applyFields.pic && (
         <div style={defaultCard}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px' }}>
-            <p style={{ fontFamily: font, fontSize: '0.95rem', color: '#191c20' }}>PIC{picNames.length > 0 && <span style={{ color: '#d93025' }}> *</span>}</p>
+            <p style={{ fontFamily: font, fontSize: '0.95rem', color: '#191c20' }}>PIC{assignedPicIds.length > 0 && <span style={{ color: '#d93025' }}> *</span>}</p>
             <button onClick={() => setApply({ pic: false })} title="Hapus field PIC dari form" style={iconBtn}><Trash2 size={18} /></button>
           </div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '10px' }}>
-            {picNames.length === 0
-              ? <span style={{ fontSize: '0.8rem', color: '#9a99a6', fontFamily: font }}>Belum ada PIC di campaign ini — field PIC tidak tampil di form sampai ada PIC.</span>
-              : picNames.map((n) => <span key={n} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem', color: '#464652', fontFamily: font, background: '#f6f5ff', borderRadius: '999px', padding: '4px 12px' }}><Circle size={12} color="#b0afba" /> {n}</span>)}
-          </div>
-          <button onClick={onManagePic} style={{ marginTop: '10px', background: 'none', border: 'none', padding: 0, color: '#6728e4', fontSize: '0.8rem', fontWeight: 700, fontFamily: font, cursor: 'pointer' }}>
-            Atur pilihan PIC →
-          </button>
+          <p style={{ fontSize: '0.78rem', color: '#777683', fontFamily: font, margin: '4px 0 8px' }}>
+            Centang PIC yang jadi pilihan di form campaign ini (tersimpan otomatis). Tanpa PIC tercentang, field ini tidak tampil di form.
+          </p>
+          {pics.length === 0 ? (
+            <p style={{ fontSize: '0.8rem', color: '#9a99a6', fontFamily: font }}>Belum ada akun PIC terdaftar. PIC daftar sendiri lewat halaman /login, lalu muncul di sini.</p>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              {pics.map((p) => {
+                const on = assignedPicIds.includes(p._id);
+                return (
+                  <label key={p._id} style={{ display: 'flex', alignItems: 'center', gap: '10px', minHeight: '38px', cursor: picBusy ? 'wait' : 'pointer', opacity: picBusy === p._id ? 0.5 : 1 }}>
+                    <input type="checkbox" checked={on} disabled={Boolean(picBusy)} onChange={(e) => void togglePic(p, e.target.checked)} style={{ width: '18px', height: '18px', accentColor: '#6728e4' }} />
+                    <span style={{ fontSize: '0.88rem', color: '#191c20', fontFamily: font }}>{p.name}</span>
+                    <span style={{ fontSize: '0.76rem', color: '#9a99a6', fontFamily: font, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.email}</span>
+                  </label>
+                );
+              })}
+            </div>
+          )}
+          {picError && <p role="alert" style={{ color: '#ba1a1a', fontSize: '0.78rem', fontFamily: font, marginTop: '6px' }}>{picError}</p>}
         </div>
       )}
 
