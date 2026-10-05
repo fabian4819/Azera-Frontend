@@ -1,41 +1,21 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { CheckCircle2, Camera, Music2, AtSign, Hash } from 'lucide-react';
+import { CheckCircle2 } from 'lucide-react';
 import api from '../lib/api';
-import DatePicker from '../components/ui/DatePicker';
-
-const niches = ['Beauty', 'Fashion', 'Food & Beverage', 'Travel', 'Tech', 'Fitness', 'Parenting', 'Gaming', 'Finance', 'Education', 'Lifestyle', 'Entertainment', 'Yang lain'];
-const contentStyles = ['Review', 'Tutorial', 'Challenge / Trend', 'Daily Vlog', 'Storytelling', 'Talking Head', 'GRWM', 'Before & After', 'Comedy', 'Unboxing', 'Cinematic', 'ASMR', 'Voice Over', 'Live Streaming', 'Podcast / Interview', 'Foto Estetik', 'UGC Style', 'Yang lain'];
-const activities = [
-  { value: 'kol', label: 'KOL (Key Opinion Leader)', desc: 'Audiensmu mengikuti rekomendasi/opinimu dan itu memengaruhi keputusan mereka.' },
-  { value: 'koc', label: 'KOC (Key Opinion Consumer)', desc: 'Membagikan pengalaman pakai produk secara autentik sebagai konsumen.' },
-  { value: 'ugc', label: 'UGC Creator', desc: 'Membuat konten untuk brand tanpa harus dipublikasikan di akun pribadi.' },
-  { value: 'affiliator', label: 'Affiliator', desc: 'Mempromosikan produk lewat link affiliate, dapat komisi dari penjualan.' },
-  { value: 'live_streamer', label: 'Live Streamer', desc: 'Siaran langsung untuk interaksi dengan audiens atau bantu penjualan.' },
-];
-const socialPlatforms = [
-  { value: 'instagram', label: 'Instagram', icon: Camera, color: '#ff81aa' },
-  { value: 'tiktok', label: 'TikTok', icon: Music2, color: '#10B981' },
-  { value: 'threads', label: 'Threads', icon: AtSign, color: '#464652' },
-  { value: 'x', label: 'X', icon: Hash, color: '#191c20' },
-];
 
 type CustomFieldType = 'text' | 'textarea' | 'number' | 'select' | 'checkbox';
 interface CustomField { id: string; label: string; type: CustomFieldType; required: boolean; options?: string[] }
 interface PicOption { _id: string; name: string }
+interface ApplyFields { pic: boolean; handleBy: boolean; handleByRequired: boolean }
 
 interface CampaignInfo {
   name: string;
   brand: { namaBrand: string };
   briefContent?: string;
-  deliverables: string[];
-  criteria: { niches: string[]; platforms: string[] };
   customFields?: CustomField[];
+  applyFields?: ApplyFields;
   picOptions?: PicOption[];
 }
-
-const WILAYAH_API = 'https://www.emsifa.com/api-wilayah-indonesia/api';
-interface WilayahOption { id: string; name: string }
 
 const inputStyle: React.CSSProperties = {
   width: '100%', padding: '11px 14px', borderRadius: '12px', border: '1.5px solid #c7c8cf',
@@ -48,12 +28,6 @@ const labelStyle: React.CSSProperties = {
   marginBottom: '5px', fontFamily: "var(--font-display)",
 };
 
-const SectionTitle = ({ title }: { title: string }) => (
-  <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: '1rem', color: '#6728e4', marginBottom: '20px', paddingBottom: '12px', borderBottom: '1px solid #e1e0ff', marginTop: '8px' }}>
-    {title}
-  </p>
-);
-
 const Pill = ({ label, selected, onClick }: { label: string; selected: boolean; onClick: () => void }) => (
   <button type="button" onClick={onClick} style={{
     padding: '8px 16px', borderRadius: '999px', border: 'none',
@@ -65,12 +39,8 @@ const Pill = ({ label, selected, onClick }: { label: string; selected: boolean; 
   </button>
 );
 
-interface SocialState { username: string; profileUrl: string; followers: string }
-
-// AD-50: apply flow sekarang wizard 2 langkah — 'gate' cek nomor WA dulu (creator existing lompat
-// langsung ke 'campaign', tidak perlu isi ulang profil), 'profile' cuma muncul buat creator baru.
-type Step = 'gate' | 'profile' | 'campaign';
-
+/** Form pendaftaran campaign: field default (nama/WA/email + PIC/Handle by kalau aktif) + pertanyaan
+ * custom dari admin. Creator tidak perlu isi Form Creator (/kol/register) dulu. */
 export default function CampaignApply() {
   const { slug } = useParams();
   const [campaign, setCampaign] = useState<CampaignInfo | null>(null);
@@ -79,35 +49,12 @@ export default function CampaignApply() {
   const [submitError, setSubmitError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const [step, setStep] = useState<Step>('gate');
-  const [checkingPhone, setCheckingPhone] = useState(false);
-  const [existingCreator, setExistingCreator] = useState(false);
-
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
-  const [birthDate, setBirthDate] = useState('');
-  const [gender, setGender] = useState('');
-  const [provinces, setProvinces] = useState<WilayahOption[]>([]);
-  const [cities, setCities] = useState<WilayahOption[]>([]);
-  const [province, setProvince] = useState('');
-  const [city, setCity] = useState('');
-  const [address, setAddress] = useState('');
-  const [postalCode, setPostalCode] = useState('');
-  const [school, setSchool] = useState('');
-  const [customValues, setCustomValues] = useState<Record<string, string | string[]>>({});
-  const [socials, setSocials] = useState<Record<string, SocialState>>({});
-  const [selectedActivities, setSelectedActivities] = useState<string[]>([]);
-  const [selectedNiches, setSelectedNiches] = useState<string[]>([]);
-  const [nicheOther, setNicheOther] = useState('');
-  const [selectedStyles, setSelectedStyles] = useState<string[]>([]);
-  const [styleOther, setStyleOther] = useState('');
-  const [bankName, setBankName] = useState('');
-  const [accountNumber, setAccountNumber] = useState('');
-  const [accountName, setAccountName] = useState('');
-  const [npwp, setNpwp] = useState('');
-  const [mediaKitUrl, setMediaKitUrl] = useState('');
   const [picUserId, setPicUserId] = useState('');
+  const [handleBy, setHandleBy] = useState('');
+  const [customValues, setCustomValues] = useState<Record<string, string | string[]>>({});
 
   useEffect(() => {
     api.get(`/campaigns/${slug}`)
@@ -115,28 +62,8 @@ export default function CampaignApply() {
       .catch(() => setNotFound(true));
   }, [slug]);
 
-  useEffect(() => {
-    fetch(`${WILAYAH_API}/provinces.json`)
-      .then((res) => res.json())
-      .then((data: WilayahOption[]) => setProvinces(data))
-      .catch(() => setProvinces([]));
-  }, []);
-
-  const onProvinceChange = (provinceId: string) => {
-    setProvince(provinceId);
-    setCity('');
-    setCities([]);
-    if (!provinceId) return;
-    fetch(`${WILAYAH_API}/regencies/${provinceId}.json`)
-      .then((res) => res.json())
-      .then((data: WilayahOption[]) => setCities(data))
-      .catch(() => setCities([]));
-  };
-
-  const toggle = (list: string[], setList: (v: string[]) => void, val: string) => {
-    if (list.includes(val)) setList(list.filter((v) => v !== val));
-    else setList([...list, val]);
-  };
+  const fields: ApplyFields = campaign?.applyFields ?? { pic: true, handleBy: true, handleByRequired: false };
+  const showPic = fields.pic && (campaign?.picOptions?.length ?? 0) > 0;
 
   const setCustomValue = (fieldId: string, value: string | string[]) => {
     setCustomValues((prev) => ({ ...prev, [fieldId]: value }));
@@ -147,45 +74,21 @@ export default function CampaignApply() {
     setCustomValue(fieldId, current.includes(option) ? current.filter((v) => v !== option) : [...current, option]);
   };
 
-  const setSocialField = (platform: string, field: keyof SocialState, value: string) => {
-    setSocials((prev) => ({ ...prev, [platform]: { ...prev[platform], [field]: value } }));
-  };
-
-  const onGateContinue = async () => {
-    setSubmitError('');
-    if (!name || !phone) {
-      setSubmitError('Nama dan nomor WA wajib diisi.');
-      return;
-    }
-    setCheckingPhone(true);
-    try {
-      const res = await api.get('/creators/exists', { params: { phone } });
-      if (res.data.exists) {
-        setExistingCreator(true);
-        setStep('campaign');
-      } else {
-        setExistingCreator(false);
-        setStep('profile');
-      }
-    } catch {
-      setSubmitError('Gagal mengecek nomor WA. Coba lagi.');
-    } finally {
-      setCheckingPhone(false);
-    }
-  };
-
-  const onProfileContinue = () => {
-    setSubmitError('');
-    if (!gender) {
-      setSubmitError('Jenis kelamin wajib diisi.');
-      return;
-    }
-    setStep('campaign');
-  };
-
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitError('');
+    if (!name.trim() || !phone.trim() || !email.trim()) {
+      setSubmitError('Nama, nomor WA, dan email wajib diisi.');
+      return;
+    }
+    if (showPic && !picUserId) {
+      setSubmitError('PIC wajib dipilih.');
+      return;
+    }
+    if (fields.handleBy && fields.handleByRequired && !handleBy.trim()) {
+      setSubmitError('Handle by wajib diisi.');
+      return;
+    }
     const missingCustom = (campaign?.customFields || []).filter((f) => {
       if (!f.required) return false;
       const v = customValues[f.id];
@@ -195,34 +98,13 @@ export default function CampaignApply() {
       setSubmitError(`Wajib diisi: ${missingCustom.map((f) => f.label).join(', ')}`);
       return;
     }
-    if ((campaign?.picOptions?.length ?? 0) > 0 && !picUserId) {
-      setSubmitError('PIC/Partner wajib dipilih.');
-      return;
-    }
     setLoading(true);
     try {
-      const socialsPayload = Object.entries(socials)
-        .filter(([, v]) => v?.username)
-        .map(([platform, v]) => ({ platform, username: v.username, profileUrl: v.profileUrl || '', followers: Number(v.followers) || 0 }));
-
-      const provinceName = provinces.find((p) => p.id === province)?.name || '';
-      const cityName = cities.find((c) => c.id === city)?.name || '';
-
       await api.post(`/campaigns/${slug}/apply`, {
-        name, phone, email: email || undefined, birthDate: birthDate || undefined, gender,
-        domicile: { province: provinceName, city: cityName },
-        address: address || undefined, postalCode: postalCode || undefined, school: school || undefined,
-        socials: socialsPayload,
-        activities: selectedActivities,
-        niches: selectedNiches.filter((n) => n !== 'Yang lain'),
-        nicheOther: selectedNiches.includes('Yang lain') ? nicheOther : undefined,
-        contentStyles: selectedStyles.filter((s) => s !== 'Yang lain'),
-        contentStyleOther: selectedStyles.includes('Yang lain') ? styleOther : undefined,
-        bankAccount: bankName ? { bankName, accountNumber, accountName } : undefined,
-        npwp: npwp || undefined,
-        mediaKitUrl: mediaKitUrl || undefined,
+        name, phone, email,
+        picUserId: showPic ? picUserId : undefined,
+        handleBy: fields.handleBy ? handleBy : undefined,
         customAnswers: customValues,
-        picUserId: picUserId || undefined,
       });
       setSubmitted(true);
     } catch (err: unknown) {
@@ -252,7 +134,7 @@ export default function CampaignApply() {
             Pendaftaran Terkirim!
           </h2>
           <p style={{ color: '#464652', lineHeight: 1.7, fontFamily: "var(--font-display)" }}>
-            Tim AzeraKOL akan review pendaftaranmu. Kalau lolos, kamu akan dihubungi via WhatsApp beserta akses Talent Portal.
+            Tim AzeraKOL akan review pendaftaranmu. Kalau lolos, link dashboard campaign akan dikirim ke WhatsApp dan email kamu.
           </p>
         </div>
       </div>
@@ -281,207 +163,73 @@ export default function CampaignApply() {
           </div>
         )}
 
-        <div style={{ background: 'white', borderRadius: '24px', padding: '40px', boxShadow: '0 4px 24px rgba(0,0,0,0.06)' }}>
-          {(step === 'gate' || step === 'profile') && (
-            <>
-              <SectionTitle title="1. Data Diri" />
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }} className="form-2col">
-                <div>
-                  <label style={labelStyle}>Nama Lengkap *</label>
-                  <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Nama lengkap" disabled={step === 'profile'} style={inputStyle} />
-                </div>
-                <div>
-                  <label style={labelStyle}>Nomor WhatsApp *</label>
-                  <input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="08xxxxxxxxxx" disabled={step === 'profile'} style={inputStyle} />
-                </div>
-              </div>
+        <form onSubmit={onSubmit} style={{ background: 'white', borderRadius: '24px', padding: 'clamp(24px, 5vw, 40px)', boxShadow: '0 4px 24px rgba(0,0,0,0.06)' }}>
+          <div style={{ marginBottom: '18px' }}>
+            <label style={labelStyle}>Nama Lengkap *</label>
+            <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Nama lengkap" autoComplete="name" style={inputStyle} />
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '18px' }} className="form-2col">
+            <div>
+              <label style={labelStyle}>Nomor WhatsApp *</label>
+              <input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="08xxxxxxxxxx" inputMode="tel" autoComplete="tel" style={inputStyle} />
+            </div>
+            <div>
+              <label style={labelStyle}>Email *</label>
+              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@email.com" autoComplete="email" style={inputStyle} />
+            </div>
+          </div>
 
-              {step === 'gate' && (
-                <button type="button" disabled={checkingPhone} onClick={onGateContinue} className="btn-primary" style={{ width: '100%', justifyContent: 'center', fontSize: '0.95rem', padding: '14px', opacity: checkingPhone ? 0.7 : 1, marginBottom: '8px' }}>
-                  {checkingPhone ? 'Mengecek...' : 'Lanjut'}
-                </button>
+          {showPic && (
+            <div style={{ marginBottom: '18px' }}>
+              <label style={labelStyle}>PIC *</label>
+              <select value={picUserId} onChange={(e) => setPicUserId(e.target.value)} style={inputStyle}>
+                <option value="">Pilih PIC kamu</option>
+                {campaign.picOptions!.map((p) => <option key={p._id} value={p._id}>{p.name}</option>)}
+              </select>
+            </div>
+          )}
+
+          {fields.handleBy && (
+            <div style={{ marginBottom: '18px' }}>
+              <label style={labelStyle}>Handle by{fields.handleByRequired && ' *'}</label>
+              <input value={handleBy} onChange={(e) => setHandleBy(e.target.value)} placeholder="Nama yang meng-handle kamu" style={inputStyle} />
+            </div>
+          )}
+
+          {(campaign.customFields || []).map((f) => (
+            <div key={f.id} style={{ marginBottom: '18px' }}>
+              <label style={labelStyle}>{f.label}{f.required && ' *'}</label>
+              {f.type === 'text' && (
+                <input value={(customValues[f.id] as string) || ''} onChange={(e) => setCustomValue(f.id, e.target.value)} style={inputStyle} />
               )}
-
-              {step === 'profile' && (
-                <>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }} className="form-2col">
-                    <div>
-                      <label style={labelStyle}>Email</label>
-                      <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@email.com" style={inputStyle} />
-                    </div>
-                    <div>
-                      <label style={labelStyle}>Tanggal Lahir</label>
-                      <DatePicker value={birthDate} onChange={setBirthDate} max={new Date()} style={inputStyle} />
-                    </div>
-                  </div>
-                  <div style={{ marginBottom: '14px' }}>
-                    <label style={labelStyle}>Jenis Kelamin *</label>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                      <Pill label="Laki-laki" selected={gender === 'male'} onClick={() => setGender('male')} />
-                      <Pill label="Perempuan (Hijab)" selected={gender === 'female_hijab'} onClick={() => setGender('female_hijab')} />
-                      <Pill label="Perempuan (Non-Hijab)" selected={gender === 'female_non_hijab'} onClick={() => setGender('female_non_hijab')} />
-                    </div>
-                  </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }} className="form-2col">
-                    <div>
-                      <label style={labelStyle}>Provinsi</label>
-                      <select value={province} onChange={(e) => onProvinceChange(e.target.value)} style={inputStyle}>
-                        <option value="">Pilih provinsi</option>
-                        {provinces.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
-                      </select>
-                    </div>
-                    <div>
-                      <label style={labelStyle}>Kota/Kabupaten</label>
-                      <select value={city} onChange={(e) => setCity(e.target.value)} disabled={!province} style={inputStyle}>
-                        <option value="">{province ? 'Pilih kota/kabupaten' : 'Pilih provinsi dulu'}</option>
-                        {cities.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-                      </select>
-                    </div>
-                  </div>
-                  <div style={{ marginBottom: '14px' }}>
-                    <label style={labelStyle}>Alamat Lengkap</label>
-                    <p style={{ fontSize: '0.78rem', color: '#777683', marginBottom: '6px' }}>Lengkap sampai ancer-ancernya, buat kirim produk kalau lolos.</p>
-                    <input value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Jl. ..." style={inputStyle} />
-                  </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '28px' }} className="form-2col">
-                    <div><label style={labelStyle}>Kode Pos</label><input value={postalCode} onChange={(e) => setPostalCode(e.target.value)} placeholder="50xxx" style={inputStyle} /></div>
-                    <div><label style={labelStyle}>Asal Univ/Sekolah</label><input value={school} onChange={(e) => setSchool(e.target.value)} placeholder="Universitas Diponegoro" style={inputStyle} /></div>
-                  </div>
-
-                  <SectionTitle title="2. Media Sosial" />
-                  <p style={{ color: '#777683', fontSize: '0.85rem', marginBottom: '20px', fontFamily: "var(--font-display)" }}>Isi minimal 1 platform.</p>
-                  {socialPlatforms.map(({ value, label, icon: Icon, color }) => (
-                    <div key={value} style={{ background: '#f8f9ff', border: `1px solid ${color}22`, borderRadius: '16px', padding: '20px', marginBottom: '16px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
-                        <Icon size={18} color={color} />
-                        <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, color, fontSize: '0.9rem' }}>{label}</p>
-                      </div>
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }} className="form-2col">
-                        <div><label style={labelStyle}>Username</label><input value={socials[value]?.username || ''} onChange={(e) => setSocialField(value, 'username', e.target.value)} placeholder="@username" style={inputStyle} /></div>
-                        <div><label style={labelStyle}>Followers</label><input value={socials[value]?.followers || ''} onChange={(e) => setSocialField(value, 'followers', e.target.value)} type="number" placeholder="10000" style={inputStyle} /></div>
-                        <div style={{ gridColumn: '1 / -1' }}><label style={labelStyle}>Link Profil</label><input value={socials[value]?.profileUrl || ''} onChange={(e) => setSocialField(value, 'profileUrl', e.target.value)} placeholder="https://..." style={inputStyle} /></div>
-                      </div>
-                    </div>
+              {f.type === 'number' && (
+                <input type="number" value={(customValues[f.id] as string) || ''} onChange={(e) => setCustomValue(f.id, e.target.value)} style={inputStyle} />
+              )}
+              {f.type === 'textarea' && (
+                <textarea value={(customValues[f.id] as string) || ''} onChange={(e) => setCustomValue(f.id, e.target.value)} rows={3} style={{ ...inputStyle, resize: 'vertical' }} />
+              )}
+              {f.type === 'select' && (
+                <select value={(customValues[f.id] as string) || ''} onChange={(e) => setCustomValue(f.id, e.target.value)} style={inputStyle}>
+                  <option value="">Pilih salah satu</option>
+                  {(f.options || []).map((o) => <option key={o} value={o}>{o}</option>)}
+                </select>
+              )}
+              {f.type === 'checkbox' && (
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                  {(f.options || []).map((o) => (
+                    <Pill key={o} label={o} selected={((customValues[f.id] as string[]) || []).includes(o)} onClick={() => toggleCustomCheckbox(f.id, o)} />
                   ))}
-
-                  <SectionTitle title="3. Aktivitas Sebagai Creator" />
-                  <p style={{ color: '#777683', fontSize: '0.85rem', marginBottom: '16px', fontFamily: "var(--font-display)" }}>Bisa pilih lebih dari 1.</p>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '28px' }}>
-                    {activities.map((a) => {
-                      const selected = selectedActivities.includes(a.value);
-                      return (
-                        <button key={a.value} type="button" onClick={() => toggle(selectedActivities, setSelectedActivities, a.value)}
-                          style={{ textAlign: 'left', padding: '14px 16px', borderRadius: '12px', border: selected ? '1.5px solid #6728e4' : '1.5px solid #e1e0ff', background: selected ? '#f0eeff' : 'white', cursor: 'pointer' }}>
-                          <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: '0.85rem', color: selected ? '#6728e4' : '#191c20', marginBottom: '2px' }}>{a.label}</p>
-                          <p style={{ fontSize: '0.78rem', color: '#777683', fontFamily: "var(--font-display)" }}>{a.desc}</p>
-                        </button>
-                      );
-                    })}
-                  </div>
-
-                  <SectionTitle title="4. Niche Konten" />
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: selectedNiches.includes('Yang lain') ? '12px' : '28px' }}>
-                    {niches.map((n) => <Pill key={n} label={n} selected={selectedNiches.includes(n)} onClick={() => toggle(selectedNiches, setSelectedNiches, n)} />)}
-                  </div>
-                  {selectedNiches.includes('Yang lain') && (
-                    <input value={nicheOther} onChange={(e) => setNicheOther(e.target.value)} placeholder="Sebutkan niche lain..." style={{ ...inputStyle, marginBottom: '28px' }} />
-                  )}
-
-                  <SectionTitle title="5. Gaya Konten" />
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: selectedStyles.includes('Yang lain') ? '12px' : '28px' }}>
-                    {contentStyles.map((s) => <Pill key={s} label={s} selected={selectedStyles.includes(s)} onClick={() => toggle(selectedStyles, setSelectedStyles, s)} />)}
-                  </div>
-                  {selectedStyles.includes('Yang lain') && (
-                    <input value={styleOther} onChange={(e) => setStyleOther(e.target.value)} placeholder="Sebutkan gaya konten lain..." style={{ ...inputStyle, marginBottom: '28px' }} />
-                  )}
-
-                  <SectionTitle title="6. Info Tambahan (opsional)" />
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }} className="form-2col">
-                    <div><label style={labelStyle}>Nama Bank</label><input value={bankName} onChange={(e) => setBankName(e.target.value)} placeholder="BCA" style={inputStyle} /></div>
-                    <div><label style={labelStyle}>Nomor Rekening</label><input value={accountNumber} onChange={(e) => setAccountNumber(e.target.value)} placeholder="1234567890" style={inputStyle} /></div>
-                  </div>
-                  <div style={{ marginBottom: '14px' }}>
-                    <label style={labelStyle}>Nama Pemilik Rekening</label>
-                    <input value={accountName} onChange={(e) => setAccountName(e.target.value)} placeholder="Sesuai buku tabungan" style={inputStyle} />
-                  </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '36px' }} className="form-2col">
-                    <div><label style={labelStyle}>NPWP</label><input value={npwp} onChange={(e) => setNpwp(e.target.value)} placeholder="Opsional" style={inputStyle} /></div>
-                    <div><label style={labelStyle}>Link Media Kit</label><input value={mediaKitUrl} onChange={(e) => setMediaKitUrl(e.target.value)} placeholder="https://..." style={inputStyle} /></div>
-                  </div>
-
-                  {submitError && <p style={{ color: '#ba1a1a', fontSize: '0.85rem', marginBottom: '16px', fontFamily: "var(--font-display)" }}>{submitError}</p>}
-
-                  <button type="button" onClick={onProfileContinue} className="btn-primary" style={{ width: '100%', justifyContent: 'center', fontSize: '1rem', padding: '16px' }}>
-                    Lanjut ke Pertanyaan Campaign
-                  </button>
-                </>
-              )}
-
-              {step === 'gate' && submitError && <p style={{ color: '#ba1a1a', fontSize: '0.85rem', fontFamily: "var(--font-display)" }}>{submitError}</p>}
-            </>
-          )}
-
-          {step === 'campaign' && (
-            <form onSubmit={onSubmit}>
-              <SectionTitle title="Pertanyaan Campaign" />
-              {existingCreator && (
-                <p style={{ color: '#777683', fontSize: '0.82rem', marginBottom: '20px', fontFamily: "var(--font-display)" }}>
-                  Halo kembali, {name}! Nomor WA kamu sudah terdaftar, tinggal jawab pertanyaan campaign ini.
-                </p>
-              )}
-
-              {(campaign.picOptions?.length ?? 0) > 0 && (
-                <div style={{ marginBottom: '20px' }}>
-                  <label style={labelStyle}>PIC/Partner *</label>
-                  <select value={picUserId} onChange={(e) => setPicUserId(e.target.value)} style={inputStyle}>
-                    <option value="">Pilih PIC/Partner kamu</option>
-                    {campaign.picOptions!.map((p) => <option key={p._id} value={p._id}>{p.name}</option>)}
-                  </select>
                 </div>
               )}
+            </div>
+          ))}
 
-              {(campaign.customFields?.length ?? 0) > 0 && campaign.customFields!.map((f) => (
-                <div key={f.id} style={{ marginBottom: '20px' }}>
-                  <label style={labelStyle}>{f.label}{f.required && ' *'}</label>
-                  {f.type === 'text' && (
-                    <input value={(customValues[f.id] as string) || ''} onChange={(e) => setCustomValue(f.id, e.target.value)} style={inputStyle} />
-                  )}
-                  {f.type === 'number' && (
-                    <input type="number" value={(customValues[f.id] as string) || ''} onChange={(e) => setCustomValue(f.id, e.target.value)} style={inputStyle} />
-                  )}
-                  {f.type === 'textarea' && (
-                    <textarea value={(customValues[f.id] as string) || ''} onChange={(e) => setCustomValue(f.id, e.target.value)} rows={3} style={{ ...inputStyle, resize: 'vertical' }} />
-                  )}
-                  {f.type === 'select' && (
-                    <select value={(customValues[f.id] as string) || ''} onChange={(e) => setCustomValue(f.id, e.target.value)} style={inputStyle}>
-                      <option value="">Pilih salah satu</option>
-                      {(f.options || []).map((o) => <option key={o} value={o}>{o}</option>)}
-                    </select>
-                  )}
-                  {f.type === 'checkbox' && (
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                      {(f.options || []).map((o) => (
-                        <Pill key={o} label={o} selected={((customValues[f.id] as string[]) || []).includes(o)} onClick={() => toggleCustomCheckbox(f.id, o)} />
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ))}
+          {submitError && <p role="alert" style={{ color: '#ba1a1a', fontSize: '0.85rem', marginBottom: '16px', fontFamily: "var(--font-display)" }}>{submitError}</p>}
 
-              {submitError && <p style={{ color: '#ba1a1a', fontSize: '0.85rem', marginBottom: '16px', fontFamily: "var(--font-display)" }}>{submitError}</p>}
-
-              {!existingCreator && (
-                <button type="button" onClick={() => setStep('profile')} style={{ background: 'none', border: 'none', color: '#6728e4', fontFamily: "var(--font-display)", fontSize: '0.82rem', fontWeight: 600, cursor: 'pointer', marginBottom: '16px', padding: 0 }}>
-                  ← Kembali ke Data Diri
-                </button>
-              )}
-
-              <button type="submit" disabled={loading} className="btn-primary" style={{ width: '100%', justifyContent: 'center', fontSize: '1rem', padding: '16px', opacity: loading ? 0.7 : 1 }}>
-                {loading ? 'Mendaftar...' : 'Daftar Sekarang'}
-              </button>
-            </form>
-          )}
-        </div>
+          <button type="submit" disabled={loading} className="btn-primary" style={{ width: '100%', justifyContent: 'center', fontSize: '1rem', padding: '16px', marginTop: '8px', opacity: loading ? 0.7 : 1 }}>
+            {loading ? 'Mendaftar...' : 'Daftar Sekarang'}
+          </button>
+        </form>
       </div>
     </div>
   );

@@ -1,9 +1,12 @@
 import { useState } from 'react';
-import { Plus, Trash2, Copy, ArrowUp, ArrowDown, X, Circle, Square, GripHorizontal } from 'lucide-react';
+import { Plus, Trash2, Copy, ArrowUp, ArrowDown, X, Circle, Square, GripHorizontal, Lock, Undo2 } from 'lucide-react';
 import api from '../../lib/api';
 
 export type CustomFieldType = 'text' | 'textarea' | 'number' | 'select' | 'checkbox';
 export interface CustomField { id: string; label: string; type: CustomFieldType; required: boolean; options?: string[] }
+/** Field default form Apply: Nama/WA/Email selalu ada; PIC & Handle by bisa dihapus admin. */
+export interface ApplyFields { pic: boolean; handleBy: boolean; handleByRequired: boolean }
+const DEFAULT_APPLY_FIELDS: ApplyFields = { pic: true, handleBy: true, handleByRequired: false };
 
 const TYPE_LABELS: Record<CustomFieldType, string> = {
   text: 'Jawaban Singkat', textarea: 'Paragraf', number: 'Angka',
@@ -21,13 +24,33 @@ const iconBtn: React.CSSProperties = {
 interface Props {
   campaignId: string;
   initial: CustomField[];
-  onSaved: (fields: CustomField[]) => void;
+  initialApplyFields?: ApplyFields;
+  /** Nama PIC yang sudah di-assign ke campaign — jadi opsi dropdown PIC di form */
+  picNames: string[];
+  onManagePic: () => void;
+  onSaved: (fields: CustomField[], applyFields: ApplyFields) => void;
 }
 
+const Toggle = ({ checked, onChange, label }: { checked: boolean; onChange: (v: boolean) => void; label: string }) => (
+  <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.85rem', color: '#191c20', fontFamily: font, cursor: 'pointer' }}>
+    {label}
+    <input type="checkbox" role="switch" checked={checked} onChange={(e) => onChange(e.target.checked)} style={{ position: 'absolute', opacity: 0, width: 0, height: 0 }} />
+    <span style={{ width: '36px', height: '20px', borderRadius: '10px', background: checked ? '#c9b6f7' : '#c7c8cf', position: 'relative', transition: 'background .15s' }}>
+      <span style={{ position: 'absolute', top: '2px', left: checked ? '18px' : '2px', width: '16px', height: '16px', borderRadius: '50%', background: checked ? '#6728e4' : 'white', boxShadow: '0 1px 3px rgba(0,0,0,.3)', transition: 'left .15s' }} />
+    </span>
+  </label>
+);
+
+const defaultCard: React.CSSProperties = { background: 'white', borderRadius: '12px', border: '1px solid #e1e0ff', marginBottom: '12px', padding: '16px 24px' };
+const answerLine = (w: string, text: string) => (
+  <p style={{ fontSize: '0.85rem', color: '#9a99a6', borderBottom: '1px dotted #c7c8cf', paddingBottom: '6px', width: w, marginTop: '10px', fontFamily: font }}>{text}</p>
+);
+
 /** Builder pertanyaan tambahan form Apply, pengalaman ala Google Forms (AD-47). */
-export default function CustomFormBuilder({ campaignId, initial, onSaved }: Props) {
+export default function CustomFormBuilder({ campaignId, initial, initialApplyFields, picNames, onManagePic, onSaved }: Props) {
   const [fields, setFields] = useState<CustomField[]>(initial);
-  const [saved, setSaved] = useState(JSON.stringify(initial));
+  const [applyFields, setApplyFields] = useState<ApplyFields>(initialApplyFields ?? DEFAULT_APPLY_FIELDS);
+  const [saved, setSaved] = useState(JSON.stringify([initial, initialApplyFields ?? DEFAULT_APPLY_FIELDS]));
   const [activeId, setActiveId] = useState<string | null>(null);
   const [focusOpt, setFocusOpt] = useState<string | null>(null);
   // Drag cuma aktif kalau mulai dari handle, supaya select teks di input tetap normal
@@ -35,7 +58,8 @@ export default function CustomFormBuilder({ campaignId, initial, onSaved }: Prop
   const [dragId, setDragId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [status, setStatus] = useState<{ ok: boolean; text: string } | null>(null);
-  const dirty = JSON.stringify(fields) !== saved;
+  const dirty = JSON.stringify([fields, applyFields]) !== saved;
+  const setApply = (patch: Partial<ApplyFields>) => setApplyFields((a) => ({ ...a, ...patch }));
 
   const update = (id: string, patch: Partial<CustomField>) =>
     setFields((prev) => prev.map((f) => (f.id === id ? { ...f, ...patch } : f)));
@@ -108,11 +132,13 @@ export default function CustomFormBuilder({ campaignId, initial, onSaved }: Prop
           label: f.label.trim(),
           options: isChoice(f.type) ? (f.options || []).map((o) => o.trim()).filter(Boolean) : [],
         }));
-      const res = await api.patch(`/admin/campaigns/${campaignId}`, { customFields: cleaned });
+      const res = await api.patch(`/admin/campaigns/${campaignId}`, { customFields: cleaned, applyFields });
       const next: CustomField[] = res.data.customFields || [];
+      const nextApply: ApplyFields = res.data.applyFields ?? applyFields;
       setFields(next);
-      setSaved(JSON.stringify(next));
-      onSaved(next);
+      setApplyFields(nextApply);
+      setSaved(JSON.stringify([next, nextApply]));
+      onSaved(next, nextApply);
       setStatus({ ok: true, text: 'Form kustom disimpan.' });
       setTimeout(() => setStatus(null), 2500);
     } catch {
@@ -127,9 +153,67 @@ export default function CustomFormBuilder({ campaignId, initial, onSaved }: Prop
       <div style={{ background: 'white', borderRadius: '12px', border: '1px solid #e1e0ff', borderTop: '10px solid #6728e4', padding: '22px 24px', marginBottom: '12px' }}>
         <p style={{ fontFamily: font, fontWeight: 700, fontSize: '1.4rem', color: '#191c20', marginBottom: '6px' }}>Form Kustom Pendaftaran</p>
         <p style={{ fontSize: '0.82rem', color: '#777683' }}>
-          Pertanyaan tambahan di luar field standar (nama, WA, sosmed, dll). Muncul di bawah form Apply publik campaign ini.
+          Field default di bawah otomatis ada di form Apply. Nama, WhatsApp, dan Email wajib; PIC dan Handle by boleh dihapus.
+          Tambahkan pertanyaan lain sesuai kebutuhan campaign.
         </p>
       </div>
+
+      {['Nama Lengkap', 'WhatsApp', 'Email'].map((label) => (
+        <div key={label} style={{ ...defaultCard, display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '12px' }}>
+          <div style={{ flex: 1 }}>
+            <p style={{ fontFamily: font, fontSize: '0.95rem', color: '#191c20' }}>{label}<span style={{ color: '#d93025' }}> *</span></p>
+            {answerLine('50%', 'Teks jawaban singkat')}
+          </div>
+          <span title="Field default, tidak bisa dihapus" style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.74rem', color: '#777683', fontFamily: font, whiteSpace: 'nowrap' }}>
+            <Lock size={13} /> Wajib
+          </span>
+        </div>
+      ))}
+
+      {applyFields.pic && (
+        <div style={defaultCard}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px' }}>
+            <p style={{ fontFamily: font, fontSize: '0.95rem', color: '#191c20' }}>PIC{picNames.length > 0 && <span style={{ color: '#d93025' }}> *</span>}</p>
+            <button onClick={() => setApply({ pic: false })} title="Hapus field PIC dari form" style={iconBtn}><Trash2 size={18} /></button>
+          </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '10px' }}>
+            {picNames.length === 0
+              ? <span style={{ fontSize: '0.8rem', color: '#9a99a6', fontFamily: font }}>Belum ada PIC di campaign ini — field PIC tidak tampil di form sampai ada PIC.</span>
+              : picNames.map((n) => <span key={n} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem', color: '#464652', fontFamily: font, background: '#f6f5ff', borderRadius: '999px', padding: '4px 12px' }}><Circle size={12} color="#b0afba" /> {n}</span>)}
+          </div>
+          <button onClick={onManagePic} style={{ marginTop: '10px', background: 'none', border: 'none', padding: 0, color: '#6728e4', fontSize: '0.8rem', fontWeight: 700, fontFamily: font, cursor: 'pointer' }}>
+            Atur pilihan PIC →
+          </button>
+        </div>
+      )}
+
+      {applyFields.handleBy && (
+        <div style={defaultCard}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px' }}>
+            <p style={{ fontFamily: font, fontSize: '0.95rem', color: '#191c20' }}>Handle by{applyFields.handleByRequired && <span style={{ color: '#d93025' }}> *</span>}</p>
+            <button onClick={() => setApply({ handleBy: false })} title="Hapus field Handle by dari form" style={iconBtn}><Trash2 size={18} /></button>
+          </div>
+          {answerLine('50%', 'Teks jawaban singkat (isian bebas)')}
+          <div style={{ display: 'flex', justifyContent: 'flex-end', borderTop: '1px solid #e1e0ff', paddingTop: '8px', marginTop: '12px' }}>
+            <Toggle label="Wajib diisi" checked={applyFields.handleByRequired} onChange={(v) => setApply({ handleByRequired: v })} />
+          </div>
+        </div>
+      )}
+
+      {(!applyFields.pic || !applyFields.handleBy) && (
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '12px' }}>
+          {!applyFields.pic && (
+            <button onClick={() => setApply({ pic: true })} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '7px 14px', borderRadius: '999px', border: '1px solid #c9b6f7', background: 'white', color: '#6728e4', fontSize: '0.78rem', fontWeight: 700, fontFamily: font, cursor: 'pointer' }}>
+              <Undo2 size={14} /> Kembalikan field PIC
+            </button>
+          )}
+          {!applyFields.handleBy && (
+            <button onClick={() => setApply({ handleBy: true })} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '7px 14px', borderRadius: '999px', border: '1px solid #c9b6f7', background: 'white', color: '#6728e4', fontSize: '0.78rem', fontWeight: 700, fontFamily: font, cursor: 'pointer' }}>
+              <Undo2 size={14} /> Kembalikan field Handle by
+            </button>
+          )}
+        </div>
+      )}
 
       {fields.map((f, i) => {
         const active = f.id === activeId;
@@ -228,13 +312,7 @@ export default function CustomFormBuilder({ campaignId, initial, onSaved }: Prop
                 <button onClick={(e) => { e.stopPropagation(); duplicate(f); }} title="Duplikat" style={iconBtn}><Copy size={18} /></button>
                 <button onClick={(e) => { e.stopPropagation(); remove(f.id); }} title="Hapus" style={iconBtn}><Trash2 size={18} /></button>
                 <span style={{ width: '1px', height: '28px', background: '#e1e0ff', margin: '0 10px' }} />
-                <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.85rem', color: '#191c20', fontFamily: font, cursor: 'pointer' }}>
-                  Wajib diisi
-                  <input type="checkbox" role="switch" checked={f.required} onChange={(e) => update(f.id, { required: e.target.checked })} style={{ position: 'absolute', opacity: 0, width: 0, height: 0 }} />
-                  <span style={{ width: '36px', height: '20px', borderRadius: '10px', background: f.required ? '#c9b6f7' : '#c7c8cf', position: 'relative', transition: 'background .15s' }}>
-                    <span style={{ position: 'absolute', top: '2px', left: f.required ? '18px' : '2px', width: '16px', height: '16px', borderRadius: '50%', background: f.required ? '#6728e4' : 'white', boxShadow: '0 1px 3px rgba(0,0,0,.3)', transition: 'left .15s' }} />
-                  </span>
-                </label>
+                <Toggle label="Wajib diisi" checked={f.required} onChange={(v) => update(f.id, { required: v })} />
               </div>
             )}
           </div>

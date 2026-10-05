@@ -1,106 +1,34 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
-import { ArrowDownAZ, ArrowDownZA, ArrowLeft, ExternalLink, ListFilter, RefreshCw, Search, X } from 'lucide-react';
+import { ArrowLeft, Check, Columns3, Copy, ExternalLink, RefreshCw, X } from 'lucide-react';
 import api from '../../lib/api';
+import SheetGrid, { type Cell, type CellKind } from '../../components/SheetGrid';
+import ColumnManager, { type Access, type ProgressColumn } from './ColumnManager';
 import { SHEET_TABS, type SheetKind } from './sheetTabs';
 
 const f = 'var(--font-display)';
+const GRID = '#e2e3e3';
 
-type Cell = string | number;
+interface ColumnMeta { key: string; progressId?: string; kind?: CellKind; access: Access }
 interface SheetView {
   campaign: { _id: string; name: string; brandName: string | null };
   headers: string[];
   rows: Cell[][];
   totals?: Cell[];
+  columns?: ColumnMeta[];
+  rowIds?: string[];
+  rowStatus?: string[];
+  progressColumns?: ProgressColumn[];
   sheetUrl: string | null;
 }
 
-// Warna grid sama dengan Google Sheets supaya terasa familiar
-const GRID = '#e2e3e3';
-const HEAD_BG = '#f8f9fa';
-const ROW_NO_W = 46;
+const STATUS_STYLE: Record<string, { bg: string; color: string; label: string }> = {
+  pending: { bg: '#fff4d6', color: '#8a5a00', label: 'Pending' },
+  accepted: { bg: '#d7f5e3', color: '#146c2e', label: 'Approved' },
+  rejected: { bg: '#ffdad6', color: '#93000a', label: 'Rejected' },
+};
 
-/** A, B, …, Z, AA, AB … — label kolom ala spreadsheet */
-const colLetter = (i: number): string => (i < 26 ? String.fromCharCode(65 + i) : colLetter(Math.floor(i / 26) - 1) + colLetter(i % 26));
-
-function renderCell(v: Cell) {
-  if (typeof v === 'number') return v.toLocaleString('id-ID');
-  if (/^https?:\/\//.test(v)) {
-    return <a href={v} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} style={{ color: '#1a73e8' }}>{v}</a>;
-  }
-  return v;
-}
-
-const isEmpty = (v?: Cell) => v === undefined || v === '';
-/** Angka dibanding numerik, teks natural (A2 < A10); sel kosong selalu di bawah seperti Sheets. */
-function compareCells(x: Cell | undefined, y: Cell | undefined, dir: 1 | -1): number {
-  if (isEmpty(x) || isEmpty(y)) return Number(isEmpty(x)) - Number(isEmpty(y));
-  if (typeof x === 'number' && typeof y === 'number') return dir * (x - y);
-  return dir * String(x).localeCompare(String(y), 'id', { numeric: true, sensitivity: 'base' });
-}
-
-interface FilterMenuProps {
-  header: string;
-  rect: DOMRect;
-  values: { key: string; count: number }[];
-  hidden: Set<string>;
-  sortDir: 1 | -1 | null;
-  onSort: (dir: 1 | -1) => void;
-  onApply: (hidden: Set<string>) => void;
-  onClose: () => void;
-}
-
-/** Dropdown filter kolom ala Google Sheets: urutkan A→Z / Z→A + filter berdasarkan nilai. */
-function FilterMenu({ header, rect, values, hidden, sortDir, onSort, onApply, onClose }: FilterMenuProps) {
-  const [draft, setDraft] = useState(() => new Set(hidden));
-  const [search, setSearch] = useState('');
-  const shown = values.filter((v) => v.key.toLowerCase().includes(search.trim().toLowerCase()));
-  const toggle = (k: string) => setDraft((d) => { const n = new Set(d); if (n.has(k)) n.delete(k); else n.add(k); return n; });
-  const setShown = (hide: boolean) => setDraft((d) => { const n = new Set(d); shown.forEach((v) => (hide ? n.add(v.key) : n.delete(v.key))); return n; });
-
-  const W = 260;
-  const item: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: '8px', width: '100%', padding: '7px 12px', background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.8rem', color: '#202124', textAlign: 'left' };
-  const link: React.CSSProperties = { background: 'none', border: 'none', color: '#1a73e8', cursor: 'pointer', fontSize: '0.75rem', padding: 0 };
-  return (
-    <>
-      <div onClick={onClose} style={{ position: 'fixed', inset: 0, zIndex: 50 }} />
-      <div role="dialog" aria-label={`Filter kolom ${header}`} onKeyDown={(e) => { if (e.key === 'Escape') onClose(); }}
-        style={{ position: 'fixed', top: Math.min(rect.bottom + 4, window.innerHeight - 420), left: Math.max(8, Math.min(rect.left, window.innerWidth - W - 8)), width: W, zIndex: 51, background: 'white', borderRadius: '8px', boxShadow: '0 4px 16px rgba(0,0,0,.18)', fontFamily: 'Arial, Helvetica, sans-serif', padding: '6px 0' }}>
-        <button type="button" style={{ ...item, fontWeight: sortDir === 1 ? 700 : 400 }} onClick={() => onSort(1)}><ArrowDownAZ size={15} /> Urutkan A → Z</button>
-        <button type="button" style={{ ...item, fontWeight: sortDir === -1 ? 700 : 400 }} onClick={() => onSort(-1)}><ArrowDownZA size={15} /> Urutkan Z → A</button>
-        <div style={{ borderTop: `1px solid ${GRID}`, margin: '6px 0' }} />
-        <div style={{ padding: '0 12px' }}>
-          <p style={{ fontSize: '0.75rem', fontWeight: 700, color: '#5f6368', marginBottom: '6px' }}>Filter menurut nilai</p>
-          <div style={{ display: 'flex', gap: '10px', marginBottom: '6px' }}>
-            <button type="button" style={link} onClick={() => setShown(false)}>Pilih semua</button>
-            <button type="button" style={link} onClick={() => setShown(true)}>Hapus</button>
-            <span style={{ marginLeft: 'auto', fontSize: '0.72rem', color: '#9a99a6' }}>{values.length - draft.size}/{values.length}</span>
-          </div>
-          <label style={{ display: 'flex', alignItems: 'center', gap: '6px', border: `1px solid ${GRID}`, borderRadius: '6px', padding: '0 8px', height: '30px' }}>
-            <Search size={13} color="#777683" />
-            <input autoFocus value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Cari nilai…" aria-label="Cari nilai"
-              style={{ border: 'none', outline: 'none', fontSize: '0.78rem', flex: 1, minWidth: 0 }} />
-          </label>
-          <div style={{ maxHeight: '200px', overflowY: 'auto', margin: '6px 0' }}>
-            {shown.length === 0 ? <p style={{ fontSize: '0.75rem', color: '#9a99a6', padding: '8px 0' }}>Tidak ada nilai.</p> : shown.map((v) => (
-              <label key={v.key} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '4px 0', fontSize: '0.78rem', color: '#202124', cursor: 'pointer' }}>
-                <input type="checkbox" checked={!draft.has(v.key)} onChange={() => toggle(v.key)} />
-                <span style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontStyle: v.key ? 'normal' : 'italic' }}>{v.key || '(Kosong)'}</span>
-                <span style={{ color: '#9a99a6', fontSize: '0.7rem' }}>{v.count}</span>
-              </label>
-            ))}
-          </div>
-        </div>
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', padding: '8px 12px 4px', borderTop: `1px solid ${GRID}` }}>
-          <button type="button" onClick={onClose} style={{ padding: '6px 14px', borderRadius: '6px', border: `1px solid ${GRID}`, background: 'white', cursor: 'pointer', fontSize: '0.78rem' }}>Batal</button>
-          <button type="button" onClick={() => onApply(draft)} style={{ padding: '6px 14px', borderRadius: '6px', border: 'none', background: '#6728e4', color: 'white', cursor: 'pointer', fontSize: '0.78rem', fontWeight: 700 }}>OK</button>
-        </div>
-      </div>
-    </>
-  );
-}
-
-/** Tampilan Master / Report / Recap Payment satu campaign ala Google Sheets, di dalam admin. */
+/** Tampilan Master / Report / Recap Payment / Pendaftar satu campaign ala Google Sheets, di dalam admin. */
 export default function CampaignSheet() {
   const { id } = useParams<{ id: string }>();
   const [params, setParams] = useSearchParams();
@@ -111,12 +39,10 @@ export default function CampaignSheet() {
   const [cache, setCache] = useState<Partial<Record<SheetKind, SheetView>>>({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [query, setQuery] = useState('');
-  const [selected, setSelected] = useState<number | null>(null);
-  // Filter & sort per kolom; `hidden` = nilai yang disembunyikan per index kolom
-  const [sort, setSort] = useState<{ col: number; dir: 1 | -1 } | null>(null);
-  const [hidden, setHidden] = useState<Record<number, Set<string>>>({});
-  const [menu, setMenu] = useState<{ col: number; rect: DOMRect } | null>(null);
+  const [managing, setManaging] = useState(false);
+  const [deciding, setDeciding] = useState<string | null>(null);
+  const [actionError, setActionError] = useState('');
+  const [copied, setCopied] = useState<string | null>(null);
   const view = cache[kind];
 
   const load = useCallback(async (k: SheetKind) => {
@@ -140,68 +66,92 @@ export default function CampaignSheet() {
 
   const switchTab = (k: SheetKind) => {
     setParams({ tab: k }, { replace: true });
-    setQuery('');
-    setSelected(null);
     setError('');
-    clearFilters();
-  };
-
-  const clearFilters = () => {
-    setSort(null);
-    setHidden({});
-    setMenu(null);
+    setActionError('');
   };
 
   const refresh = () => {
     setCache({});
-    setSelected(null);
     setError('');
   };
 
-  // Nomor baris asli (baris 1 = header, sama dgn sheet) tetap dipakai walau difilter
-  const activeFilters = Object.entries(hidden).filter(([, s]) => s.size > 0).map(([ci, s]) => [Number(ci), s] as const);
-  const filtered = Boolean(query.trim()) || activeFilters.length > 0;
-  const rows = useMemo(() => {
-    let out = (view?.rows ?? []).map((r, i) => ({ r, no: i + 2 }));
-    const q = query.trim().toLowerCase();
-    if (q) out = out.filter(({ r }) => r.some((c) => String(c).toLowerCase().includes(q)));
-    const active = Object.entries(hidden).filter(([, s]) => s.size > 0);
-    if (active.length) out = out.filter(({ r }) => active.every(([ci, s]) => !s.has(String(r[Number(ci)] ?? ''))));
-    if (sort) out = [...out].sort((a, b) => compareCells(a.r[sort.col], b.r[sort.col], sort.dir));
-    return out;
-  }, [view, query, hidden, sort]);
+  // Data tab lain ikut basi setelah edit/approve — buang cache-nya, muat ulang tab yang sedang dibuka.
+  const reloadCurrent = async () => {
+    setCache((c) => ({ [kind]: c[kind] }));
+    await load(kind);
+  };
 
-  // Nilai unik + jumlahnya untuk kolom yang dropdown-nya sedang dibuka
-  const menuValues = useMemo(() => {
-    if (!menu || !view) return [];
-    const counts = new Map<string, { v: Cell; count: number }>();
-    view.rows.forEach((r) => {
-      const v = r[menu.col] ?? '';
-      const k = String(v);
-      const e = counts.get(k);
-      if (e) e.count++; else counts.set(k, { v, count: 1 });
+  const editCell = async (row: number, col: number, value: string) => {
+    const meta = view?.columns?.[col];
+    await api.patch(`/admin/campaigns/${id}/sheet/cell`, { applicationId: view?.rowIds?.[row], columnId: meta?.progressId, value });
+    await reloadCurrent();
+  };
+
+  const uploadCell = async (row: number, col: number, files: File[]) => {
+    const fd = new FormData();
+    fd.append('applicationId', view?.rowIds?.[row] ?? '');
+    fd.append('columnId', view?.columns?.[col]?.progressId ?? '');
+    files.forEach((file) => fd.append('files', file));
+    await api.post(`/admin/campaigns/${id}/sheet/cell/upload`, fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+    await reloadCurrent();
+  };
+
+  const decide = async (row: number, status: 'accepted' | 'rejected') => {
+    const appId = view?.rowIds?.[row];
+    if (!appId) return;
+    setDeciding(appId);
+    setActionError('');
+    try {
+      await api.patch(`/admin/applications/${appId}`, { status });
+      await reloadCurrent();
+    } catch {
+      setActionError('Gagal mengubah status pendaftar. Coba lagi.');
+    } finally {
+      setDeciding(null);
+    }
+  };
+
+  const copyPortal = async (row: number) => {
+    const link = view?.rows[row]?.[view.headers.indexOf('Link Portal')];
+    if (!link) return;
+    try {
+      await navigator.clipboard.writeText(String(link));
+      setCopied(view?.rowIds?.[row] ?? null);
+      setTimeout(() => setCopied(null), 1800);
+    } catch {
+      setActionError('Gagal menyalin link. Salin manual dari kolom Link Portal.');
+    }
+  };
+
+  const applicantAction = (row: number) => {
+    const status = view?.rowStatus?.[row] ?? 'pending';
+    const appId = view?.rowIds?.[row];
+    const busy = deciding === appId;
+    const s = STATUS_STYLE[status] ?? STATUS_STYLE.pending;
+    const btn = (bg: string, color: string): React.CSSProperties => ({
+      display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '4px 10px', borderRadius: '6px', border: 'none',
+      background: bg, color, fontSize: '0.72rem', fontWeight: 700, cursor: busy ? 'wait' : 'pointer', opacity: busy ? 0.6 : 1,
     });
-    return [...counts.entries()].sort((a, b) => compareCells(a[1].v, b[1].v, 1)).map(([key, { count }]) => ({ key, count }));
-  }, [menu, view]);
-
-  const numericCols = useMemo(() => {
-    const set = new Set<number>();
-    view?.headers.forEach((_, ci) => { if (view.rows.some((r) => typeof r[ci] === 'number')) set.add(ci); });
-    return set;
-  }, [view]);
+    return (
+      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+        <span style={{ background: s.bg, color: s.color, borderRadius: '999px', padding: '2px 9px', fontSize: '0.7rem', fontWeight: 700 }}>{s.label}</span>
+        {status !== 'accepted' && (
+          <button type="button" disabled={busy} onClick={() => decide(row, 'accepted')} style={btn('#146c2e', 'white')}><Check size={12} /> Approve</button>
+        )}
+        {status !== 'rejected' && (
+          <button type="button" disabled={busy} onClick={() => decide(row, 'rejected')} style={btn('#ffdad6', '#93000a')}><X size={12} /> Reject</button>
+        )}
+        {status === 'accepted' && (
+          <button type="button" onClick={() => copyPortal(row)} title="Salin magic link portal creator ini" style={btn('#f0eeff', '#6728e4')}>
+            <Copy size={12} /> {copied === appId ? 'Tersalin' : 'Link'}
+          </button>
+        )}
+      </span>
+    );
+  };
 
   const campaign = view?.campaign ?? Object.values(cache)[0]?.campaign;
-
-  const cellBase: React.CSSProperties = {
-    borderRight: `1px solid ${GRID}`, borderBottom: `1px solid ${GRID}`, padding: '6px 10px',
-    whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '280px', fontSize: '0.8rem', color: '#202124',
-  };
-  const rowNoStyle: React.CSSProperties = {
-    ...cellBase, position: 'sticky', left: 0, zIndex: 1, width: ROW_NO_W, minWidth: ROW_NO_W, textAlign: 'center',
-    background: HEAD_BG, color: '#5f6368', fontSize: '0.72rem',
-  };
-  // Kolom pertama (nama creator) ikut nempel di kiri saat scroll horizontal
-  const firstColStyle: React.CSSProperties = { position: 'sticky', left: ROW_NO_W, zIndex: 1 };
+  const isMaster = kind === 'master';
 
   return (
     <div>
@@ -216,7 +166,13 @@ export default function CampaignSheet() {
           </h2>
           {campaign && <p style={{ marginTop: '4px', color: '#777683', fontSize: '0.82rem' }}>{campaign.brandName || 'Tanpa brand'}</p>}
         </div>
-        <div style={{ display: 'flex', gap: '8px' }}>
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+          {isMaster && view && (
+            <button type="button" onClick={() => setManaging(true)}
+              style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '0 14px', height: '38px', borderRadius: '10px', border: '1.5px solid #c9b6f7', background: 'white', color: '#6728e4', fontFamily: f, fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer' }}>
+              <Columns3 size={15} /> Kelola Kolom
+            </button>
+          )}
           <button type="button" onClick={refresh} disabled={loading} aria-label="Muat ulang data" title="Muat ulang data"
             style={{ width: '38px', height: '38px', borderRadius: '10px', border: '1.5px solid #c7c8cf', background: 'white', color: '#6728e4', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: loading ? 0.5 : 1 }}>
             <RefreshCw size={16} />
@@ -251,111 +207,43 @@ export default function CampaignSheet() {
         })}
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap', marginBottom: '10px' }}>
-        <p style={{ color: '#777683', fontSize: '0.8rem' }}>{tab.hint}</p>
-        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '0 12px', height: '36px', border: '1.5px solid #e1e0ff', borderRadius: '10px', background: 'white', minWidth: '240px' }}>
-          <Search size={14} color="#777683" />
-          <input value={query} onChange={(e) => { setQuery(e.target.value); setSelected(null); }} placeholder="Cari di sheet ini…" aria-label="Cari di sheet"
-            style={{ border: 'none', outline: 'none', fontSize: '0.8rem', fontFamily: f, flex: 1, background: 'transparent' }} />
-        </label>
-      </div>
+      {actionError && (
+        <div role="alert" style={{ display: 'flex', justifyContent: 'space-between', gap: '10px', padding: '10px 14px', marginBottom: '10px', borderRadius: '10px', background: '#ffdad6', color: '#93000a', fontSize: '0.8rem' }}>
+          {actionError}
+          <button type="button" onClick={() => setActionError('')} aria-label="Tutup pesan" style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#93000a', display: 'flex' }}><X size={14} /></button>
+        </div>
+      )}
 
       {error ? (
         <div style={{ textAlign: 'center', padding: '48px', color: '#ba1a1a', background: 'white', borderRadius: '12px', border: '1px solid #ffdad6' }}>{error}</div>
       ) : !view ? (
         <div style={{ textAlign: 'center', padding: '70px', color: '#777683', background: 'white', borderRadius: '12px', border: `1px solid ${GRID}` }}>Memuat sheet…</div>
       ) : (
-        <div style={{ background: 'white', border: `1px solid ${GRID}`, borderRadius: '10px', overflow: 'auto', maxHeight: 'calc(100vh - 300px)', minHeight: '240px' }}>
-          <table style={{ borderCollapse: 'separate', borderSpacing: 0, minWidth: '100%', fontFamily: 'Arial, Helvetica, sans-serif' }}>
-            <thead style={{ position: 'sticky', top: 0, zIndex: 2 }}>
-              <tr>
-                <th style={{ ...rowNoStyle, zIndex: 3 }} />
-                {view.headers.map((_, ci) => (
-                  <th key={ci} style={{ ...cellBase, background: HEAD_BG, color: '#5f6368', fontWeight: 400, fontSize: '0.72rem', textAlign: 'center', padding: '3px 10px', ...(ci === 0 ? { ...firstColStyle, zIndex: 3 } : {}) }}>
-                    {colLetter(ci)}
-                  </th>
-                ))}
-              </tr>
-              <tr>
-                <th style={{ ...rowNoStyle, zIndex: 3 }}>1</th>
-                {view.headers.map((h, ci) => (
-                  <th key={ci} title={h} style={{ ...cellBase, background: '#f3f0ff', fontWeight: 700, textAlign: 'left', ...(ci === 0 ? { ...firstColStyle, zIndex: 3 } : {}) }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <span style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>{h}</span>
-                      {(() => {
-                        const on = Boolean(hidden[ci]?.size) || sort?.col === ci;
-                        const SortIcon = sort?.col === ci ? (sort.dir === 1 ? ArrowDownAZ : ArrowDownZA) : ListFilter;
-                        return (
-                          <button type="button" aria-label={`Filter & urutkan ${h}`} title="Filter & urutkan"
-                            onClick={(e) => { e.stopPropagation(); setMenu({ col: ci, rect: e.currentTarget.getBoundingClientRect() }); }}
-                            style={{ flexShrink: 0, width: '22px', height: '22px', borderRadius: '4px', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', background: on ? '#6728e4' : 'transparent', color: on ? 'white' : '#5f6368' }}>
-                            {hidden[ci]?.size ? <ListFilter size={13} /> : <SortIcon size={13} />}
-                          </button>
-                        );
-                      })()}
-                    </div>
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {rows.length === 0 ? (
-                <tr>
-                  <td style={rowNoStyle}>2</td>
-                  <td colSpan={view.headers.length} style={{ ...cellBase, maxWidth: 'none', color: '#777683', padding: '28px 16px' }}>
-                    {filtered ? 'Tidak ada baris yang cocok dengan pencarian/filter.' : tab.empty}
-                  </td>
-                </tr>
-              ) : rows.map(({ r, no }) => {
-                const isSel = selected === no;
-                return (
-                  <tr key={no} onClick={() => setSelected(isSel ? null : no)}>
-                    <td style={{ ...rowNoStyle, background: isSel ? '#d3e3fd' : HEAD_BG, color: isSel ? '#0b57d0' : '#5f6368' }}>{no}</td>
-                    {view.headers.map((_, ci) => {
-                      const v = r[ci] ?? '';
-                      return (
-                        <td key={ci} title={String(v)} style={{ ...cellBase, background: isSel ? '#e8f0fe' : 'white', textAlign: numericCols.has(ci) ? 'right' : 'left', ...(ci === 0 ? firstColStyle : {}) }}>
-                          {renderCell(v)}
-                        </td>
-                      );
-                    })}
-                  </tr>
-                );
-              })}
-            </tbody>
-            {view.totals && rows.length > 0 && !filtered && (
-              <tfoot style={{ position: 'sticky', bottom: 0, zIndex: 2 }}>
-                <tr>
-                  <td style={{ ...rowNoStyle, borderTop: '2px solid #c7c8cf' }} />
-                  {view.totals.map((v, ci) => (
-                    <td key={ci} style={{ ...cellBase, borderTop: '2px solid #c7c8cf', background: '#f3f0ff', fontWeight: 700, textAlign: numericCols.has(ci) ? 'right' : 'left', ...(ci === 0 ? firstColStyle : {}) }}>
-                      {renderCell(v)}
-                    </td>
-                  ))}
-                </tr>
-              </tfoot>
-            )}
-          </table>
-        </div>
+        <SheetGrid
+          key={kind}
+          headers={view.headers}
+          rows={view.rows}
+          totals={view.totals}
+          hint={tab.hint}
+          emptyText={tab.empty}
+          canEdit={isMaster ? (_row, col) => Boolean(view.columns?.[col]?.progressId) : undefined}
+          kindOf={(col) => view.columns?.[col]?.kind}
+          onEdit={editCell}
+          onUpload={uploadCell}
+          actionHeader="Status"
+          rowAction={kind === 'applicants' ? applicantAction : undefined}
+          footer=" · Data langsung dari database — sama dengan yang disinkron ke Google Sheets."
+        />
       )}
 
-      {view && (
-        <p style={{ marginTop: '8px', color: '#9a99a6', fontSize: '0.72rem' }}>
-          {filtered ? `${rows.length} dari ${view.rows.length} baris` : `${view.rows.length} baris`} · Data langsung dari database — sama dengan yang disinkron ke Google Sheets.
-          {(activeFilters.length > 0 || sort) && (
-            <button type="button" onClick={clearFilters} style={{ marginLeft: '8px', display: 'inline-flex', alignItems: 'center', gap: '3px', background: 'none', border: 'none', color: '#6728e4', cursor: 'pointer', fontSize: '0.72rem', fontWeight: 700, padding: 0 }}>
-              <X size={12} /> Hapus filter & urutan
-            </button>
-          )}
-        </p>
-      )}
-
-      {menu && view && (
-        <FilterMenu key={menu.col} header={view.headers[menu.col]} rect={menu.rect} values={menuValues}
-          hidden={hidden[menu.col] ?? new Set()} sortDir={sort?.col === menu.col ? sort.dir : null}
-          onSort={(dir) => { setSort({ col: menu.col, dir }); setMenu(null); }}
-          onApply={(h) => { setHidden((prev) => ({ ...prev, [menu.col]: h })); setSelected(null); setMenu(null); }}
-          onClose={() => setMenu(null)} />
+      {managing && view?.columns && (
+        <ColumnManager
+          campaignId={id!}
+          initialProgress={view.progressColumns ?? []}
+          systemColumns={view.columns.flatMap((c, i) => (c.progressId ? [] : [{ key: c.key, label: view.headers[i], access: c.access }]))}
+          onClose={() => setManaging(false)}
+          onSaved={() => { setManaging(false); void reloadCurrent(); }}
+        />
       )}
     </div>
   );

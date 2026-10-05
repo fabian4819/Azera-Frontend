@@ -90,7 +90,7 @@ export default function CampaignDashboard() {
                   </span>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', marginTop: '18px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', marginTop: '18px' }}>
                   {SHEET_TABS.map(({ kind, label, icon: Icon }) => (
                     <Link key={kind} to={`/admin/campaigns/${campaign._id}/sheet?tab=${kind}`} style={sheetButtonStyle}>
                       <Icon size={17} /> {label}

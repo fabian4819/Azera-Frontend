@@ -5,7 +5,7 @@ import api from '../../lib/api';
 import CampaignAnalyticsFinance from './CampaignAnalyticsFinance';
 import WorkflowTracker from './WorkflowTracker';
 import AssetLibrary from './AssetLibrary';
-import CustomFormBuilder, { type CustomField } from './CustomFormBuilder';
+import CustomFormBuilder, { type CustomField, type ApplyFields } from './CustomFormBuilder';
 
 const REMINDER_OPTIONS = [
   { trigger: 'reminder_draft', label: 'Reminder Draft' },
@@ -35,7 +35,7 @@ interface Campaign {
   _id: string; name: string; objective: string; briefContent?: string; deliverables: string[];
   budget: number; criteria: { niches: string[]; minFollowers?: number; provinces: string[]; platforms: string[] };
   status: string; workflowStage: string; applyOpen: boolean; applySlug: string; waGroupLink?: string;
-  customFields: CustomField[]; accessCode: string;
+  customFields: CustomField[]; applyFields?: ApplyFields; accessCode: string;
   masterSheetUrl?: string | null; reportSheetUrl?: string | null; recapPaymentSheetUrl?: string | null;
 }
 interface PicUser { _id: string; name: string; email: string; phone: string }
@@ -620,7 +620,10 @@ export default function CampaignDetail() {
         <CustomFormBuilder
           campaignId={campaign._id}
           initial={campaign.customFields || []}
-          onSaved={(customFields) => setCampaign((c) => (c ? { ...c, customFields } : c))}
+          initialApplyFields={campaign.applyFields}
+          picNames={picUsers.map((p) => p.name)}
+          onManagePic={() => setActiveTab('distribusi')}
+          onSaved={(customFields, applyFields) => setCampaign((c) => (c ? { ...c, customFields, applyFields } : c))}
         />
       )}
 

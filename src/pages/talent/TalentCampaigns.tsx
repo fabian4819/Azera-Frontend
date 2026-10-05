@@ -6,6 +6,7 @@ import talentApi from '../../lib/talentApi';
 interface CampaignItem {
   applicationId: string;
   campaign: { _id: string; name: string; workflowStage: string; budget: number };
+  portalToken: string;
 }
 
 const f = "var(--font-display)";
@@ -34,7 +35,7 @@ export default function TalentCampaigns() {
           {items.map((item) => (
             <button
               key={item.applicationId}
-              onClick={() => navigate(`/talent/campaigns/${item.campaign._id}`)}
+              onClick={() => navigate(`/portal/${item.portalToken}`)}
               style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'white', borderRadius: '16px', padding: '18px 20px', border: '1px solid #e1e0ff', cursor: 'pointer', textAlign: 'left', width: '100%' }}
             >
               <div>

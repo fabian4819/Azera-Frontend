@@ -52,7 +52,7 @@ const ExtensionConnect = lazy(() => import('./pages/admin/ExtensionConnect'));
 // Talent Portal — creator-facing, juga bukan target SEO
 const TalentLayout = lazy(() => import('./components/layout/TalentLayout'));
 const TalentCampaigns = lazy(() => import('./pages/talent/TalentCampaigns'));
-const TalentCampaignDetail = lazy(() => import('./pages/talent/TalentCampaignDetail'));
+const CreatorPortal = lazy(() => import('./pages/CreatorPortal'));
 
 // PIC/Handle-by Portal — campaign contact-facing, akun bisa link banyak campaign
 const PicLayout = lazy(() => import('./components/layout/PicLayout'));
@@ -123,6 +123,7 @@ export default function App() {
 
           {/* AD-48: dashboard PIC/Handle-by, akses via accessCode (query ?code=), tanpa login/Navbar/Footer */}
           <Route path="/campaign-dashboard/:id" element={<CampaignDashboard />} />
+          <Route path="/portal/:token" element={<CreatorPortal />} />
 
           {/* Admin login — no layout */}
           <Route path="/admin/login" element={<AdminLogin />} />
@@ -161,7 +162,6 @@ export default function App() {
           <Route path="/talent" element={<ProtectedTalentRoute />}>
             <Route index element={<Navigate to="/talent/campaigns" replace />} />
             <Route path="campaigns" element={<TalentCampaigns />} />
-            <Route path="campaigns/:id" element={<TalentCampaignDetail />} />
           </Route>
 
           {/* PIC/Handle-by Portal protected routes */}
