@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, ExternalLink, RefreshCw, Search } from 'lucide-react';
+import { ArrowDownAZ, ArrowDownZA, ArrowLeft, ExternalLink, ListFilter, RefreshCw, Search, X } from 'lucide-react';
 import api from '../../lib/api';
 import { SHEET_TABS, type SheetKind } from './sheetTabs';
 
@@ -31,6 +31,75 @@ function renderCell(v: Cell) {
   return v;
 }
 
+const isEmpty = (v?: Cell) => v === undefined || v === '';
+/** Angka dibanding numerik, teks natural (A2 < A10); sel kosong selalu di bawah seperti Sheets. */
+function compareCells(x: Cell | undefined, y: Cell | undefined, dir: 1 | -1): number {
+  if (isEmpty(x) || isEmpty(y)) return Number(isEmpty(x)) - Number(isEmpty(y));
+  if (typeof x === 'number' && typeof y === 'number') return dir * (x - y);
+  return dir * String(x).localeCompare(String(y), 'id', { numeric: true, sensitivity: 'base' });
+}
+
+interface FilterMenuProps {
+  header: string;
+  rect: DOMRect;
+  values: { key: string; count: number }[];
+  hidden: Set<string>;
+  sortDir: 1 | -1 | null;
+  onSort: (dir: 1 | -1) => void;
+  onApply: (hidden: Set<string>) => void;
+  onClose: () => void;
+}
+
+/** Dropdown filter kolom ala Google Sheets: urutkan A→Z / Z→A + filter berdasarkan nilai. */
+function FilterMenu({ header, rect, values, hidden, sortDir, onSort, onApply, onClose }: FilterMenuProps) {
+  const [draft, setDraft] = useState(() => new Set(hidden));
+  const [search, setSearch] = useState('');
+  const shown = values.filter((v) => v.key.toLowerCase().includes(search.trim().toLowerCase()));
+  const toggle = (k: string) => setDraft((d) => { const n = new Set(d); if (n.has(k)) n.delete(k); else n.add(k); return n; });
+  const setShown = (hide: boolean) => setDraft((d) => { const n = new Set(d); shown.forEach((v) => (hide ? n.add(v.key) : n.delete(v.key))); return n; });
+
+  const W = 260;
+  const item: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: '8px', width: '100%', padding: '7px 12px', background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.8rem', color: '#202124', textAlign: 'left' };
+  const link: React.CSSProperties = { background: 'none', border: 'none', color: '#1a73e8', cursor: 'pointer', fontSize: '0.75rem', padding: 0 };
+  return (
+    <>
+      <div onClick={onClose} style={{ position: 'fixed', inset: 0, zIndex: 50 }} />
+      <div role="dialog" aria-label={`Filter kolom ${header}`} onKeyDown={(e) => { if (e.key === 'Escape') onClose(); }}
+        style={{ position: 'fixed', top: Math.min(rect.bottom + 4, window.innerHeight - 420), left: Math.max(8, Math.min(rect.left, window.innerWidth - W - 8)), width: W, zIndex: 51, background: 'white', borderRadius: '8px', boxShadow: '0 4px 16px rgba(0,0,0,.18)', fontFamily: 'Arial, Helvetica, sans-serif', padding: '6px 0' }}>
+        <button type="button" style={{ ...item, fontWeight: sortDir === 1 ? 700 : 400 }} onClick={() => onSort(1)}><ArrowDownAZ size={15} /> Urutkan A → Z</button>
+        <button type="button" style={{ ...item, fontWeight: sortDir === -1 ? 700 : 400 }} onClick={() => onSort(-1)}><ArrowDownZA size={15} /> Urutkan Z → A</button>
+        <div style={{ borderTop: `1px solid ${GRID}`, margin: '6px 0' }} />
+        <div style={{ padding: '0 12px' }}>
+          <p style={{ fontSize: '0.75rem', fontWeight: 700, color: '#5f6368', marginBottom: '6px' }}>Filter menurut nilai</p>
+          <div style={{ display: 'flex', gap: '10px', marginBottom: '6px' }}>
+            <button type="button" style={link} onClick={() => setShown(false)}>Pilih semua</button>
+            <button type="button" style={link} onClick={() => setShown(true)}>Hapus</button>
+            <span style={{ marginLeft: 'auto', fontSize: '0.72rem', color: '#9a99a6' }}>{values.length - draft.size}/{values.length}</span>
+          </div>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '6px', border: `1px solid ${GRID}`, borderRadius: '6px', padding: '0 8px', height: '30px' }}>
+            <Search size={13} color="#777683" />
+            <input autoFocus value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Cari nilai…" aria-label="Cari nilai"
+              style={{ border: 'none', outline: 'none', fontSize: '0.78rem', flex: 1, minWidth: 0 }} />
+          </label>
+          <div style={{ maxHeight: '200px', overflowY: 'auto', margin: '6px 0' }}>
+            {shown.length === 0 ? <p style={{ fontSize: '0.75rem', color: '#9a99a6', padding: '8px 0' }}>Tidak ada nilai.</p> : shown.map((v) => (
+              <label key={v.key} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '4px 0', fontSize: '0.78rem', color: '#202124', cursor: 'pointer' }}>
+                <input type="checkbox" checked={!draft.has(v.key)} onChange={() => toggle(v.key)} />
+                <span style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontStyle: v.key ? 'normal' : 'italic' }}>{v.key || '(Kosong)'}</span>
+                <span style={{ color: '#9a99a6', fontSize: '0.7rem' }}>{v.count}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', padding: '8px 12px 4px', borderTop: `1px solid ${GRID}` }}>
+          <button type="button" onClick={onClose} style={{ padding: '6px 14px', borderRadius: '6px', border: `1px solid ${GRID}`, background: 'white', cursor: 'pointer', fontSize: '0.78rem' }}>Batal</button>
+          <button type="button" onClick={() => onApply(draft)} style={{ padding: '6px 14px', borderRadius: '6px', border: 'none', background: '#6728e4', color: 'white', cursor: 'pointer', fontSize: '0.78rem', fontWeight: 700 }}>OK</button>
+        </div>
+      </div>
+    </>
+  );
+}
+
 /** Tampilan Master / Report / Recap Payment satu campaign ala Google Sheets, di dalam admin. */
 export default function CampaignSheet() {
   const { id } = useParams<{ id: string }>();
@@ -44,6 +113,10 @@ export default function CampaignSheet() {
   const [error, setError] = useState('');
   const [query, setQuery] = useState('');
   const [selected, setSelected] = useState<number | null>(null);
+  // Filter & sort per kolom; `hidden` = nilai yang disembunyikan per index kolom
+  const [sort, setSort] = useState<{ col: number; dir: 1 | -1 } | null>(null);
+  const [hidden, setHidden] = useState<Record<number, Set<string>>>({});
+  const [menu, setMenu] = useState<{ col: number; rect: DOMRect } | null>(null);
   const view = cache[kind];
 
   const load = useCallback(async (k: SheetKind) => {
@@ -70,6 +143,13 @@ export default function CampaignSheet() {
     setQuery('');
     setSelected(null);
     setError('');
+    clearFilters();
+  };
+
+  const clearFilters = () => {
+    setSort(null);
+    setHidden({});
+    setMenu(null);
   };
 
   const refresh = () => {
@@ -79,11 +159,30 @@ export default function CampaignSheet() {
   };
 
   // Nomor baris asli (baris 1 = header, sama dgn sheet) tetap dipakai walau difilter
+  const activeFilters = Object.entries(hidden).filter(([, s]) => s.size > 0).map(([ci, s]) => [Number(ci), s] as const);
+  const filtered = Boolean(query.trim()) || activeFilters.length > 0;
   const rows = useMemo(() => {
-    const all = (view?.rows ?? []).map((r, i) => ({ r, no: i + 2 }));
+    let out = (view?.rows ?? []).map((r, i) => ({ r, no: i + 2 }));
     const q = query.trim().toLowerCase();
-    return q ? all.filter(({ r }) => r.some((c) => String(c).toLowerCase().includes(q))) : all;
-  }, [view, query]);
+    if (q) out = out.filter(({ r }) => r.some((c) => String(c).toLowerCase().includes(q)));
+    const active = Object.entries(hidden).filter(([, s]) => s.size > 0);
+    if (active.length) out = out.filter(({ r }) => active.every(([ci, s]) => !s.has(String(r[Number(ci)] ?? ''))));
+    if (sort) out = [...out].sort((a, b) => compareCells(a.r[sort.col], b.r[sort.col], sort.dir));
+    return out;
+  }, [view, query, hidden, sort]);
+
+  // Nilai unik + jumlahnya untuk kolom yang dropdown-nya sedang dibuka
+  const menuValues = useMemo(() => {
+    if (!menu || !view) return [];
+    const counts = new Map<string, { v: Cell; count: number }>();
+    view.rows.forEach((r) => {
+      const v = r[menu.col] ?? '';
+      const k = String(v);
+      const e = counts.get(k);
+      if (e) e.count++; else counts.set(k, { v, count: 1 });
+    });
+    return [...counts.entries()].sort((a, b) => compareCells(a[1].v, b[1].v, 1)).map(([key, { count }]) => ({ key, count }));
+  }, [menu, view]);
 
   const numericCols = useMemo(() => {
     const set = new Set<number>();
@@ -181,7 +280,20 @@ export default function CampaignSheet() {
                 <th style={{ ...rowNoStyle, zIndex: 3 }}>1</th>
                 {view.headers.map((h, ci) => (
                   <th key={ci} title={h} style={{ ...cellBase, background: '#f3f0ff', fontWeight: 700, textAlign: 'left', ...(ci === 0 ? { ...firstColStyle, zIndex: 3 } : {}) }}>
-                    {h}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>{h}</span>
+                      {(() => {
+                        const on = Boolean(hidden[ci]?.size) || sort?.col === ci;
+                        const SortIcon = sort?.col === ci ? (sort.dir === 1 ? ArrowDownAZ : ArrowDownZA) : ListFilter;
+                        return (
+                          <button type="button" aria-label={`Filter & urutkan ${h}`} title="Filter & urutkan"
+                            onClick={(e) => { e.stopPropagation(); setMenu({ col: ci, rect: e.currentTarget.getBoundingClientRect() }); }}
+                            style={{ flexShrink: 0, width: '22px', height: '22px', borderRadius: '4px', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', background: on ? '#6728e4' : 'transparent', color: on ? 'white' : '#5f6368' }}>
+                            {hidden[ci]?.size ? <ListFilter size={13} /> : <SortIcon size={13} />}
+                          </button>
+                        );
+                      })()}
+                    </div>
                   </th>
                 ))}
               </tr>
@@ -191,7 +303,7 @@ export default function CampaignSheet() {
                 <tr>
                   <td style={rowNoStyle}>2</td>
                   <td colSpan={view.headers.length} style={{ ...cellBase, maxWidth: 'none', color: '#777683', padding: '28px 16px' }}>
-                    {query ? `Tidak ada baris yang cocok dengan "${query}".` : tab.empty}
+                    {filtered ? 'Tidak ada baris yang cocok dengan pencarian/filter.' : tab.empty}
                   </td>
                 </tr>
               ) : rows.map(({ r, no }) => {
@@ -211,7 +323,7 @@ export default function CampaignSheet() {
                 );
               })}
             </tbody>
-            {view.totals && rows.length > 0 && !query && (
+            {view.totals && rows.length > 0 && !filtered && (
               <tfoot style={{ position: 'sticky', bottom: 0, zIndex: 2 }}>
                 <tr>
                   <td style={{ ...rowNoStyle, borderTop: '2px solid #c7c8cf' }} />
@@ -229,8 +341,21 @@ export default function CampaignSheet() {
 
       {view && (
         <p style={{ marginTop: '8px', color: '#9a99a6', fontSize: '0.72rem' }}>
-          {query ? `${rows.length} dari ${view.rows.length} baris` : `${view.rows.length} baris`} · Data langsung dari database — sama dengan yang disinkron ke Google Sheets.
+          {filtered ? `${rows.length} dari ${view.rows.length} baris` : `${view.rows.length} baris`} · Data langsung dari database — sama dengan yang disinkron ke Google Sheets.
+          {(activeFilters.length > 0 || sort) && (
+            <button type="button" onClick={clearFilters} style={{ marginLeft: '8px', display: 'inline-flex', alignItems: 'center', gap: '3px', background: 'none', border: 'none', color: '#6728e4', cursor: 'pointer', fontSize: '0.72rem', fontWeight: 700, padding: 0 }}>
+              <X size={12} /> Hapus filter & urutan
+            </button>
+          )}
         </p>
+      )}
+
+      {menu && view && (
+        <FilterMenu key={menu.col} header={view.headers[menu.col]} rect={menu.rect} values={menuValues}
+          hidden={hidden[menu.col] ?? new Set()} sortDir={sort?.col === menu.col ? sort.dir : null}
+          onSort={(dir) => { setSort({ col: menu.col, dir }); setMenu(null); }}
+          onApply={(h) => { setHidden((prev) => ({ ...prev, [menu.col]: h })); setSelected(null); setMenu(null); }}
+          onClose={() => setMenu(null)} />
       )}
     </div>
   );
