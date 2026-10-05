@@ -106,9 +106,9 @@ export default function ServiceDetail() {
   };
   const resetHeroMouse = () => { mouseX.set(0); mouseY.set(0); };
 
-  const scopeParallax = useParallax(36);
-  const workflowParallax = useParallax(28);
-  const pricingParallax = useParallax(70);
+  const { ref: scopeParallaxRef, y: scopeParallaxY } = useParallax(36);
+  const { ref: workflowParallaxRef, y: workflowParallaxY } = useParallax(28);
+  const { ref: pricingParallaxRef, y: pricingParallaxY } = useParallax(70);
   const hoverLift = { y: -6, transition: { duration: 0.3, ease } };
 
   const WA_LINK = 'https://wa.me/6281919525186?text=' + encodeURIComponent(`Halo AzeraKOL!\nSaya ingin tanya-tanya soal layanan ${service?.navLabel || ''}, boleh dibantu?`);
@@ -190,8 +190,8 @@ export default function ServiceDetail() {
               className="service-scope-visual"
             >
               <motion.img
-                ref={scopeParallax.ref as RefObject<HTMLImageElement>}
-                style={reduceMotion ? undefined : { y: scopeParallax.y }}
+                ref={scopeParallaxRef as RefObject<HTMLImageElement>}
+                style={reduceMotion ? undefined : { y: scopeParallaxY }}
                 src="/service-sections/scope-coverage.webp"
                 alt="Ilustrasi cakupan pengelolaan campaign AzeraKOL"
               />
@@ -241,8 +241,8 @@ export default function ServiceDetail() {
           </div>
 
           <motion.img
-            ref={workflowParallax.ref as RefObject<HTMLImageElement>}
-            style={reduceMotion ? undefined : { y: workflowParallax.y }}
+            ref={workflowParallaxRef as RefObject<HTMLImageElement>}
+            style={reduceMotion ? undefined : { y: workflowParallaxY }}
             src="/service-sections/campaign-workflow.webp"
             alt="Ilustrasi alur kerja campaign dari perencanaan hingga optimasi"
             initial={{ opacity: 0, scale: 0.94 }}
@@ -275,10 +275,10 @@ export default function ServiceDetail() {
       <section ref={pricingRef} style={{ position: 'relative', overflow: 'hidden', padding: '90px 24px' }}>
         <div style={{ position: 'absolute', inset: 0, zIndex: 0 }} aria-hidden="true">
           <motion.img
-            ref={pricingParallax.ref as RefObject<HTMLImageElement>}
+            ref={pricingParallaxRef as RefObject<HTMLImageElement>}
             src="/cta/creator-bg.jpg"
             alt=""
-            style={{ width: '100%', height: '100%', objectFit: 'cover', scale: 1.2, ...(reduceMotion ? {} : { y: pricingParallax.y }) }}
+            style={{ width: '100%', height: '100%', objectFit: 'cover', scale: 1.2, ...(reduceMotion ? {} : { y: pricingParallaxY }) }}
           />
           <div
             style={{

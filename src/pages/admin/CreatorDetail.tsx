@@ -163,7 +163,10 @@ export default function CreatorDetail() {
     if (!platform) return;
     const keys = snapshots.filter((s) => s.platform === platform).map((s) => `${s.platform}:${normalizeUsername(s.username)}`);
     if (keys.length === 0) return;
-    setExpandedSocials((prev) => new Set([...prev, ...keys]));
+    const timeoutId = window.setTimeout(() => {
+      setExpandedSocials((prev) => new Set([...prev, ...keys]));
+    }, 0);
+    return () => window.clearTimeout(timeoutId);
   }, [snapshots, searchParams]);
 
   const decide = async (status: 'approved' | 'rejected') => {
