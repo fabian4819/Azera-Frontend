@@ -721,9 +721,9 @@ const rawTerms: Array<Omit<GlossaryTerm, 'slug'>> = [
     ],
   },
   {
-    term: 'Ads Code',
+    term: 'Code Boost',
     category: 'commerce',
-    summary: 'Kode otorisasi dari KOL (misalnya TikTok Spark Ads code) yang memungkinkan brand mengiklankan postingan KOL tersebut.',
+    summary: 'Kode otorisasi dari KOL (misalnya TikTok Spark Ads code) yang memungkinkan brand nge-boost postingan KOL tersebut sebagai iklan.',
     sections: [
       { heading: 'Cara Kerjanya', body: 'KOL membuat kode otorisasi dari postingannya dengan durasi tertentu (misalnya 30 atau 60 hari), lalu brand memasukkan kode itu di Ads Manager untuk menjalankan postingan sebagai iklan.' },
       { heading: 'Yang Perlu Disepakati', body: 'Durasi kode, biaya tambahan (kalau ada), dan apakah ini termasuk usage rights di SOW. Pastikan kode dikirim sebelum kedaluwarsa sesuai jadwal ads brand.' },
