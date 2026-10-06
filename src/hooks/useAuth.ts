@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router-dom';
 export interface AdminUser {
   name: string;
   email: string;
+  /** owner | admin | ce | finance | developer */
+  role?: string;
 }
 
 export function useAuth() {

@@ -76,6 +76,13 @@ function PublicLayout() {
   );
 }
 
+/** Role developer = akses admin, tapi Inbox WhatsApp (chat pribadi) ditutup — API-nya juga menolak. */
+function NoDeveloper({ children }: { children: React.ReactElement }) {
+  let role: string | undefined;
+  try { role = JSON.parse(localStorage.getItem('azera_admin') || '{}').role; } catch { role = undefined; }
+  return role === 'developer' ? <Navigate to="/admin" replace /> : children;
+}
+
 function ProtectedRoute() {
   const token = localStorage.getItem('azera_token');
   if (!token) return <Navigate to="/admin/login" replace />;
@@ -140,7 +147,7 @@ export default function App() {
             <Route path="import" element={<Import />} />
             <Route path="documents/:type" element={<Documents />} />
             <Route path="whatsapp" element={<WhatsApp />} />
-            <Route path="whatsapp/inbox" element={<WhatsAppInbox />} />
+            <Route path="whatsapp/inbox" element={<NoDeveloper><WhatsAppInbox /></NoDeveloper>} />
             <Route path="wa-templates" element={<WaTemplates />} />
             <Route path="lead-bot-templates" element={<LeadBotTemplates />} />
             <Route path="campaigns/:id/broadcast" element={<Broadcast />} />

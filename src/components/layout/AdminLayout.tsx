@@ -163,7 +163,7 @@ export default function AdminLayout() {
         </Link>
 
         <nav style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '6px', padding: collapsed ? '0 15px' : '0 14px', overflowY: 'auto', overflowX: 'hidden' }}>
-          {navItems.map((item) => (
+          {navItems.filter((item) => !(admin?.role === 'developer' && item.to === '/admin/whatsapp/inbox')).map((item) => (
             <Fragment key={item.to}>
               {renderLink(item)}
               {item.to === DOCS_AFTER && (collapsed ? docItems.map((d) => renderLink(d)) : (
