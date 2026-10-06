@@ -80,7 +80,10 @@ export function ColumnMenu({ progress, access, canMoveLeft, canMoveRight, onAcce
       <div style={{ padding: '4px 12px 6px' }}>
         <span style={lbl}>Akses creator (portal)</span>
         <AccessPicker value={access === 'view' ? 'view' : 'hidden'} options={['hidden', 'view']} onChange={onAccess} />
-        <p style={{ fontSize: '0.7rem', color: '#9a99a6', marginTop: '6px' }}>Kolom data sistem — tidak bisa diedit creator.</p>
+        <p style={{ fontSize: '0.7rem', color: '#777683', marginTop: '6px', lineHeight: 1.5 }}>
+          Kolom data sistem (diisi otomatis/admin), jadi creator hanya bisa melihat. Butuh kolom yang bisa diisi creator?
+          Tambah lewat tombol <strong>+</strong> di ujung kanan header — akses Edit tersedia di sana.
+        </p>
       </div>
     );
   }
