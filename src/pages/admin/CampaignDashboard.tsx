@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { RefreshCw } from 'lucide-react';
 import { SHEET_TABS } from './sheetTabs';
 import api from '../../lib/api';
@@ -23,6 +23,7 @@ const sheetButtonStyle: React.CSSProperties = {
 };
 
 export default function CampaignDashboard() {
+  const navigate = useNavigate();
   const [campaigns, setCampaigns] = useState<CampaignDashboardItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -75,10 +76,11 @@ export default function CampaignDashboard() {
           {campaigns.map((campaign) => {
             const brandName = typeof campaign.brandId === 'object' ? campaign.brandId?.namaBrand : undefined;
             return (
-              <article key={campaign._id} style={{ background: 'white', borderRadius: '16px', padding: '20px', border: '1px solid #e1e0ff', boxShadow: '0 2px 12px rgba(107,46,232,0.05)' }}>
+              // Klik di mana saja pada card = buka detail campaign (judul tetap <Link> untuk keyboard/tab baru)
+              <article key={campaign._id} onClick={() => navigate(`/admin/campaigns/${campaign._id}`)} style={{ background: 'white', borderRadius: '16px', padding: '20px', border: '1px solid #e1e0ff', boxShadow: '0 2px 12px rgba(107,46,232,0.05)', cursor: 'pointer' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px' }}>
                   <div style={{ minWidth: 0 }}>
-                    <Link to={`/admin/campaigns/${campaign._id}`} style={{ fontFamily: f, fontWeight: 750, fontSize: '0.98rem', color: '#191c20', textDecoration: 'none' }}>
+                    <Link to={`/admin/campaigns/${campaign._id}`} onClick={(e) => e.stopPropagation()} style={{ fontFamily: f, fontWeight: 750, fontSize: '0.98rem', color: '#191c20', textDecoration: 'none' }}>
                       {campaign.name}
                     </Link>
                     <p style={{ fontFamily: f, fontSize: '0.78rem', color: '#777683', marginTop: '4px' }}>
@@ -92,7 +94,7 @@ export default function CampaignDashboard() {
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', marginTop: '18px' }}>
                   {SHEET_TABS.map(({ kind, label, icon: Icon }) => (
-                    <Link key={kind} to={`/admin/campaigns/${campaign._id}/sheet?tab=${kind}`} style={sheetButtonStyle}>
+                    <Link key={kind} to={`/admin/campaigns/${campaign._id}/sheet?tab=${kind}`} onClick={(e) => e.stopPropagation()} style={sheetButtonStyle}>
                       <Icon size={17} /> {label}
                     </Link>
                   ))}
