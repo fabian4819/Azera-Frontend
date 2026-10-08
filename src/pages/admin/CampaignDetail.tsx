@@ -74,6 +74,7 @@ const TABS = [
   { key: 'overview', label: 'Overview' },
   { key: 'form-kustom', label: 'Form Pendaftaran' },
   { key: 'distribusi', label: 'Distribusi' },
+  { key: 'report', label: 'Report' },
   { key: 'finance', label: 'Finance' },
 ] as const;
 type TabKey = (typeof TABS)[number]['key'];
@@ -321,7 +322,15 @@ export default function CampaignDetail() {
         </div>
       )}
 
-      {activeTab === 'finance' && <CampaignAnalyticsFinance campaignId={campaign._id} />}
+      {(activeTab === 'report' || activeTab === 'finance') && (
+        <CampaignAnalyticsFinance
+          key={activeTab}
+          campaignId={campaign._id}
+          view={activeTab}
+          stage={campaign.workflowStage}
+          onStageChanged={(workflowStage) => setCampaign((c) => (c ? { ...c, workflowStage } : c))}
+        />
+      )}
 
 
       <style>{`
