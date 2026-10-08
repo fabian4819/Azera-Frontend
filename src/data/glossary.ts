@@ -24,7 +24,7 @@ function slugify(term: string) {
 }
 
 // Beberapa foto Unsplash per kategori (bukan per istilah, biar tidak nabrak rate limit 50 req/jam versi
-// demo) — cukup untuk kasih tiap istilah dalam satu kategori foto yang berbeda, lihat getTermPhoto().
+// demo), cukup untuk kasih tiap istilah dalam satu kategori foto yang berbeda, lihat getTermPhoto().
 const categoryPhotos: Record<GlossaryCategory, CategoryPhoto[]> = {
   tiers: [
     { url: 'https://images.unsplash.com/photo-1683721003111-070bcc053d8b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1200', photographer: 'Mariia Berezovsky', photographerUrl: 'https://unsplash.com/@mariiaberezovsky' },
@@ -114,13 +114,13 @@ const rawTerms: Array<Omit<GlossaryTerm, 'slug'>> = [
       { heading: 'Beda dengan Kolaborasi Biasa', body: 'Ambassador biasanya wajib memakai produk brand secara rutin, muncul di berbagai campaign, dan kadang dilibatkan dalam acara resmi brand. Durasi kontraknya bisa berbulan-bulan hingga tahunan.' },
       { heading: 'Kenapa Brand Memilih Skema Ini', body: 'Hubungan jangka panjang membuat asosiasi antara ambassador dan brand terasa lebih kuat dan konsisten di mata audiens, dibanding kolaborasi satu kali yang mudah dilupakan.' },
       { heading: 'Tanggung Jawab Tambahan', body: 'Selain posting rutin, ambassador biasanya diminta hadir di acara brand, memberi masukan produk, atau jadi wajah utama campaign besar sepanjang masa kontrak.' },
-      { heading: 'Kelebihan & Risikonya', body: 'Kelebihannya, hubungan yang konsisten membangun asosiasi kuat antara ambassador dan brand. Risikonya, reputasi brand jadi sangat terikat pada personal branding ambassador tersebut — kalau kontroversi menimpa ambassador, brand ikut terdampak.' },
+      { heading: 'Kelebihan & Risikonya', body: 'Kelebihannya, hubungan yang konsisten membangun asosiasi kuat antara ambassador dan brand. Risikonya, reputasi brand jadi sangat terikat pada personal branding ambassador tersebut, kalau kontroversi menimpa ambassador, brand ikut terdampak.' },
     ],
   },
   {
     term: 'Audience Demographics',
     category: 'metrics',
-    summary: 'Data profil audiens sebuah akun — usia, gender, lokasi, hingga minat — yang dipakai brand menilai kecocokan target pasar.',
+    summary: 'Data profil audiens sebuah akun, usia, gender, lokasi, hingga minat, yang dipakai brand menilai kecocokan target pasar.',
     sections: [
       { heading: 'Data yang Biasa Dilihat', body: 'Brand umumnya mengecek persentase gender, rentang usia terbanyak, sebaran kota/negara, serta minat audiens berdasarkan insight platform seperti Instagram Insights atau TikTok Analytics.' },
       { heading: 'Kenapa Penting Sebelum Kerja Sama', body: 'Follower banyak tidak berguna kalau demografinya tidak sesuai target pasar brand. Audience demographics jadi salah satu filter utama saat kurasi KOL.' },
@@ -162,9 +162,9 @@ const rawTerms: Array<Omit<GlossaryTerm, 'slug'>> = [
     category: 'strategy',
     summary: 'Kesesuaian antara citra, nilai, dan gaya konten seorang creator dengan identitas brand yang mengajak kerja sama.',
     sections: [
-      { heading: 'Yang Dinilai', body: 'Brand biasanya mengecek histori konten creator, niche yang digeluti, tone komunikasi, sampai reputasi personal — apakah semua itu selaras dengan positioning brand.' },
+      { heading: 'Yang Dinilai', body: 'Brand biasanya mengecek histori konten creator, niche yang digeluti, tone komunikasi, sampai reputasi personal, apakah semua itu selaras dengan positioning brand.' },
       { heading: 'Kenapa Sering Diabaikan tapi Krusial', body: 'Creator dengan follower besar tapi brand fit rendah justru bisa membuat campaign terasa dipaksakan dan kurang dipercaya audiens, walau angkanya di atas kertas terlihat bagus.' },
-      { heading: 'Contoh Ketidakcocokan', body: 'Misalnya brand skincare halal bekerja sama dengan creator yang kontennya sering menyinggung isu sensitif — meski followernya besar, ketidakcocokan nilai ini bisa membuat campaign terasa janggal di mata audiens.' },
+      { heading: 'Contoh Ketidakcocokan', body: 'Misalnya brand skincare halal bekerja sama dengan creator yang kontennya sering menyinggung isu sensitif, meski followernya besar, ketidakcocokan nilai ini bisa membuat campaign terasa janggal di mata audiens.' },
     ],
   },
   {
@@ -204,7 +204,7 @@ const rawTerms: Array<Omit<GlossaryTerm, 'slug'>> = [
     sections: [
       { heading: 'Komponen Umum', body: 'Berisi tujuan awal campaign, strategi yang dijalankan, kreator yang dilibatkan, dan hasil akhir dibanding target (reach, engagement, penjualan, dsb).' },
       { heading: 'Manfaatnya', body: 'Case study jadi bukti kredibilitas agency atau KOL ke calon klien baru, sekaligus bahan evaluasi internal untuk memperbaiki strategi campaign selanjutnya.' },
-      { heading: 'Format Umum yang Dipakai', body: 'Biasanya disusun dalam format sebelum-sesudah: kondisi awal brand, strategi yang dijalankan, lalu hasil akhir dengan data konkret — sering dilengkapi kutipan testimoni dari klien.' },
+      { heading: 'Format Umum yang Dipakai', body: 'Biasanya disusun dalam format sebelum-sesudah: kondisi awal brand, strategi yang dijalankan, lalu hasil akhir dengan data konkret, sering dilengkapi kutipan testimoni dari klien.' },
     ],
   },
   {
@@ -214,7 +214,7 @@ const rawTerms: Array<Omit<GlossaryTerm, 'slug'>> = [
     sections: [
       { heading: 'Yang Biasanya Dicantumkan', body: 'Tanggal dan jam posting, platform tujuan, jenis konten (feed, story, reels), serta creator yang bertanggung jawab pada slot tersebut.' },
       { heading: 'Kenapa Dibutuhkan', body: 'Campaign yang melibatkan banyak creator sekaligus butuh content calendar agar ritme publikasi tidak menumpuk di satu hari atau malah kosong berhari-hari.' },
-      { heading: 'Tools yang Biasa Dipakai', body: 'Bisa berupa spreadsheet sederhana, Notion, Trello, atau software khusus manajemen campaign — yang penting semua pihak (brand, agency, creator) bisa mengakses jadwal yang sama.' },
+      { heading: 'Tools yang Biasa Dipakai', body: 'Bisa berupa spreadsheet sederhana, Notion, Trello, atau software khusus manajemen campaign, yang penting semua pihak (brand, agency, creator) bisa mengakses jadwal yang sama.' },
     ],
   },
   {
@@ -222,9 +222,9 @@ const rawTerms: Array<Omit<GlossaryTerm, 'slug'>> = [
     category: 'ops',
     summary: 'Tema-tema besar yang menjadi fondasi arah konten sebuah akun atau campaign secara konsisten.',
     sections: [
-      { heading: 'Contoh Penerapan', body: 'Sebuah akun skincare misalnya bisa punya pillar seputar edukasi bahan aktif, review produk, dan rutinitas harian — semua konten dibuat berputar di sekitar tema-tema ini.' },
+      { heading: 'Contoh Penerapan', body: 'Sebuah akun skincare misalnya bisa punya pillar seputar edukasi bahan aktif, review produk, dan rutinitas harian, semua konten dibuat berputar di sekitar tema-tema ini.' },
       { heading: 'Manfaat bagi Campaign', body: 'Content pillar membuat konten creator tetap relevan dengan brand tanpa terasa monoton, karena ada variasi sudut pandang dalam satu payung tema yang sama.' },
-      { heading: 'Cara Menentukannya', body: 'Content pillar biasanya ditentukan dari kombinasi minat audiens, keahlian creator, dan tujuan brand — idealnya 3-5 pillar agar konten tetap fokus tapi tidak monoton.' },
+      { heading: 'Cara Menentukannya', body: 'Content pillar biasanya ditentukan dari kombinasi minat audiens, keahlian creator, dan tujuan brand, idealnya 3-5 pillar agar konten tetap fokus tapi tidak monoton.' },
     ],
   },
   {
@@ -253,7 +253,7 @@ const rawTerms: Array<Omit<GlossaryTerm, 'slug'>> = [
     category: 'ops',
     summary: 'Output konkret yang wajib diserahkan creator sesuai kontrak, misalnya jumlah post, story, atau video.',
     sections: [
-      { heading: 'Contoh Deliverable', body: 'Bisa berupa 1 video TikTok, 3 story Instagram dengan link swipe-up, atau 1 post feed plus caption sesuai key message — semuanya dirinci di kontrak atau briefing.' },
+      { heading: 'Contoh Deliverable', body: 'Bisa berupa 1 video TikTok, 3 story Instagram dengan link swipe-up, atau 1 post feed plus caption sesuai key message, semuanya dirinci di kontrak atau briefing.' },
       { heading: 'Kenapa Harus Spesifik', body: 'Deliverable yang tidak jelas jumlah dan formatnya sering jadi sumber sengketa antara brand dan creator soal apa yang sebenarnya sudah disepakati.' },
       { heading: 'Contoh Klausul di Kontrak', body: "Misalnya: '1x Reels durasi 30-60 detik, 3x Story dengan sticker link, wajib tayang minimal 24 jam, revisi maksimal 1 kali sebelum tayang'." },
     ],
@@ -264,7 +264,7 @@ const rawTerms: Array<Omit<GlossaryTerm, 'slug'>> = [
     summary: "Pengungkapan yang jelas bahwa sebuah konten adalah hasil kerja sama berbayar, biasanya lewat label \"Ad\" atau \"#ads\".",
     sections: [
       { heading: 'Bentuk Disclosure', body: 'Bisa lewat fitur paid partnership platform, watermark di video, atau hashtag seperti #ad, #sponsored, #kerjasamaberbayar di caption.' },
-      { heading: 'Kenapa Wajib', body: 'Selain jadi etika transparansi ke audiens, disclosure juga diatur regulasi periklanan di banyak negara — melanggar aturan ini bisa berisiko bagi brand maupun creator.' },
+      { heading: 'Kenapa Wajib', body: 'Selain jadi etika transparansi ke audiens, disclosure juga diatur regulasi periklanan di banyak negara, melanggar aturan ini bisa berisiko bagi brand maupun creator.' },
       { heading: 'Regulasi Terkait di Indonesia', body: 'Di Indonesia, praktik ini merujuk pada pedoman iklan yang mewajibkan transparansi konten berbayar, sejalan dengan aturan serupa di berbagai negara seperti FTC Guidelines di Amerika Serikat.' },
     ],
   },
@@ -314,7 +314,7 @@ const rawTerms: Array<Omit<GlossaryTerm, 'slug'>> = [
     summary: 'Bentuk kerja sama di mana creator menerima produk gratis sebagai imbalan atas konten yang dibuat, tanpa fee tambahan.',
     sections: [
       { heading: 'Kapan Biasanya Dipakai', body: 'Umum dilakukan ke nano atau micro influencer, atau saat brand baru ingin memperkenalkan produk tanpa budget campaign besar.' },
-      { heading: 'Batasannya', body: 'Karena tanpa fee, brand biasanya tidak bisa memaksa creator membuat konten — banyak creator hanya bersedia posting kalau memang benar-benar suka produknya.' },
+      { heading: 'Batasannya', body: 'Karena tanpa fee, brand biasanya tidak bisa memaksa creator membuat konten, banyak creator hanya bersedia posting kalau memang benar-benar suka produknya.' },
       { heading: 'Tips Menjalankan Gifting yang Efektif', body: 'Mengirim produk ke creator yang memang relevan dengan niche-nya (bukan asal kirim ke banyak orang), disertai catatan personal, meningkatkan peluang produk benar-benar dipakai dan dikonten-kan.' },
     ],
   },
@@ -325,7 +325,7 @@ const rawTerms: Array<Omit<GlossaryTerm, 'slug'>> = [
     sections: [
       { heading: 'Cara Dihitung', body: 'GMV dihitung dari total nilai barang yang terjual lewat link, keranjang kuning, atau live shopping creator dalam periode campaign tertentu, sebelum dikurangi biaya apa pun.' },
       { heading: 'Kenapa Jadi Metrik Populer di Live Commerce', body: 'GMV langsung menunjukkan dampak penjualan riil dari sebuah campaign, sehingga jadi metrik favorit brand yang fokus ke affiliate dan live shopping campaign.' },
-      { heading: 'Bukan Sama dengan Profit', body: 'GMV adalah nilai transaksi kotor sebelum dikurangi biaya produksi, komisi affiliate, diskon, dan biaya operasional lain — jadi angka GMV yang besar belum tentu berarti keuntungan brand besar juga.' },
+      { heading: 'Bukan Sama dengan Profit', body: 'GMV adalah nilai transaksi kotor sebelum dikurangi biaya produksi, komisi affiliate, diskon, dan biaya operasional lain, jadi angka GMV yang besar belum tentu berarti keuntungan brand besar juga.' },
     ],
   },
   {
@@ -343,7 +343,7 @@ const rawTerms: Array<Omit<GlossaryTerm, 'slug'>> = [
     category: 'metrics',
     summary: 'Jumlah total kemunculan sebuah konten di layar pengguna, termasuk jika dilihat berkali-kali oleh orang yang sama.',
     sections: [
-      { heading: 'Bedanya dengan Reach', body: 'Reach menghitung akun unik yang melihat, sementara impression menghitung total tayangan meski dilihat orang yang sama berkali-kali — impression selalu lebih besar atau sama dengan reach.' },
+      { heading: 'Bedanya dengan Reach', body: 'Reach menghitung akun unik yang melihat, sementara impression menghitung total tayangan meski dilihat orang yang sama berkali-kali, impression selalu lebih besar atau sama dengan reach.' },
       { heading: 'Kegunaannya', body: 'Impression membantu menilai seberapa sering sebuah konten berulang muncul di feed audiens, berguna untuk mengukur frekuensi eksposur campaign awareness.' },
       { heading: 'Contoh Penggunaannya', body: 'Brand yang membayar iklan berdasarkan CPM (cost per mille/seribu impression) sangat bergantung pada metrik ini untuk menghitung efisiensi biaya campaign mereka.' },
     ],
@@ -353,7 +353,7 @@ const rawTerms: Array<Omit<GlossaryTerm, 'slug'>> = [
     category: 'tiers',
     summary: 'Individu dengan audiens di media sosial yang mampu memengaruhi opini atau perilaku pengikutnya.',
     sections: [
-      { heading: 'Berbagai Tingkatannya', body: 'Influencer biasa dikelompokkan berdasarkan jumlah follower, dari nano, micro, macro, sampai mega — masing-masing punya karakteristik engagement dan biaya kerja sama yang berbeda.' },
+      { heading: 'Berbagai Tingkatannya', body: 'Influencer biasa dikelompokkan berdasarkan jumlah follower, dari nano, micro, macro, sampai mega, masing-masing punya karakteristik engagement dan biaya kerja sama yang berbeda.' },
       { heading: 'Peran dalam Campaign Brand', body: 'Influencer dipakai brand untuk memperkenalkan produk lewat kredibilitas personal mereka, yang sering kali lebih dipercaya audiens dibanding iklan konvensional.' },
       { heading: 'Platform Utama Influencer di Indonesia', body: 'Instagram, TikTok, dan YouTube jadi tiga platform utama tempat influencer di Indonesia membangun audiens, masing-masing dengan format dan gaya konten yang sedikit berbeda.' },
       { heading: 'Kelebihan & Tantangan Kerja Sama dengan Influencer', body: 'Kelebihannya, pesan brand terasa lebih personal dan dipercaya. Tantangannya, hasil campaign lebih sulit dikontrol penuh dibanding iklan konvensional karena tetap bergantung pada gaya dan kreativitas masing-masing influencer.' },
@@ -388,7 +388,7 @@ const rawTerms: Array<Omit<GlossaryTerm, 'slug'>> = [
     sections: [
       { heading: 'Contoh KPI Campaign KOL', body: 'Bisa berupa target reach, engagement rate minimum, jumlah klik link, atau target penjualan tergantung tujuan campaign (awareness, engagement, atau konversi).' },
       { heading: 'Kenapa Harus Ditentukan di Awal', body: 'Tanpa KPI yang jelas sejak awal, brand dan creator sulit menilai objektif apakah campaign benar-benar berhasil atau tidak setelah selesai.' },
-      { heading: 'Cara Menyusun KPI yang Baik', body: 'KPI yang baik biasanya mengikuti prinsip SMART — spesifik, terukur, realistis dicapai, relevan dengan tujuan bisnis, dan punya batas waktu yang jelas.' },
+      { heading: 'Cara Menyusun KPI yang Baik', body: 'KPI yang baik biasanya mengikuti prinsip SMART, spesifik, terukur, realistis dicapai, relevan dengan tujuan bisnis, dan punya batas waktu yang jelas.' },
     ],
   },
   {
@@ -467,7 +467,7 @@ const rawTerms: Array<Omit<GlossaryTerm, 'slug'>> = [
     category: 'commerce',
     summary: 'Bentuk kerja sama sederhana di mana creator dibayar untuk mempromosikan produk tanpa keterlibatan brand dalam proses kreatif.',
     sections: [
-      { heading: 'Bedanya dengan Sponsored Post', body: 'Paid promote biasanya lebih transaksional dan cepat — brand mengirim materi promosi jadi (caption, gambar) untuk langsung diposting creator tanpa proses kreatif tambahan.' },
+      { heading: 'Bedanya dengan Sponsored Post', body: 'Paid promote biasanya lebih transaksional dan cepat, brand mengirim materi promosi jadi (caption, gambar) untuk langsung diposting creator tanpa proses kreatif tambahan.' },
       { heading: 'Kapan Cocok Dipakai', body: 'Cocok untuk campaign jangka pendek dengan pesan yang sudah baku, misalnya promo flash sale atau pengumuman event, di mana kreativitas personal creator bukan prioritas utama.' },
       { heading: 'Kapan Sebaiknya Dihindari', body: 'Kalau tujuan campaign adalah membangun kepercayaan jangka panjang, paid promote yang terasa terlalu transaksional dan generik justru kurang efektif dibanding kolaborasi yang melibatkan kreativitas creator.' },
     ],
@@ -477,9 +477,9 @@ const rawTerms: Array<Omit<GlossaryTerm, 'slug'>> = [
     category: 'commerce',
     summary: 'Strategi campaign yang fokus pada hasil terukur seperti klik, konversi, atau penjualan, bukan sekadar awareness.',
     sections: [
-      { heading: 'Metrik yang Diprioritaskan', body: 'Selalu berpusat pada angka yang bisa langsung dihitung — cost per click, cost per acquisition, conversion rate, hingga ROI campaign.' },
+      { heading: 'Metrik yang Diprioritaskan', body: 'Selalu berpusat pada angka yang bisa langsung dihitung, cost per click, cost per acquisition, conversion rate, hingga ROI campaign.' },
       { heading: 'Kenapa Sering Dipasangkan dengan Affiliate Marketing', body: 'Karena sama-sama membayar berdasarkan hasil nyata, performance marketing dan affiliate marketing sering berjalan beriringan dalam campaign yang mengejar penjualan langsung.' },
-      { heading: 'Contoh Model Pembayarannya', body: 'Bisa berupa cost-per-click (CPC), cost-per-acquisition (CPA), atau commission-based seperti pada affiliate marketing — semuanya berbasis hasil terukur, bukan sekadar tayang.' },
+      { heading: 'Contoh Model Pembayarannya', body: 'Bisa berupa cost-per-click (CPC), cost-per-acquisition (CPA), atau commission-based seperti pada affiliate marketing, semuanya berbasis hasil terukur, bukan sekadar tayang.' },
       { heading: 'Kelebihan & Tantangannya', body: 'Kelebihannya, budget campaign lebih efisien karena bayar sesuai hasil. Tantangannya, strategi ini butuh tracking dan attribution yang akurat agar hasil bisa diukur dengan benar.' },
     ],
   },
@@ -501,7 +501,7 @@ const rawTerms: Array<Omit<GlossaryTerm, 'slug'>> = [
     sections: [
       { heading: 'Faktor Penentu Harga', body: 'Biasanya dipengaruhi jumlah follower, engagement rate, niche, tingkat eksklusivitas konten, serta durasi dan kompleksitas produksi yang diminta brand.' },
       { heading: 'Kegunaannya bagi Brand', body: 'Rate card mempercepat proses negosiasi karena brand punya gambaran awal budget yang dibutuhkan sebelum masuk ke diskusi detail kerja sama.' },
-      { heading: 'Contoh Kisaran Harga', body: 'Rate bervariasi luas tergantung tier dan niche — nano influencer bisa mulai dari ratusan ribu rupiah per post, sementara macro/mega influencer bisa mencapai puluhan hingga ratusan juta rupiah per campaign.' },
+      { heading: 'Contoh Kisaran Harga', body: 'Rate bervariasi luas tergantung tier dan niche, nano influencer bisa mulai dari ratusan ribu rupiah per post, sementara macro/mega influencer bisa mencapai puluhan hingga ratusan juta rupiah per campaign.' },
     ],
   },
   {
@@ -509,7 +509,7 @@ const rawTerms: Array<Omit<GlossaryTerm, 'slug'>> = [
     category: 'metrics',
     summary: 'Jumlah akun unik yang melihat sebuah konten, tanpa menghitung tampilan berulang dari orang yang sama.',
     sections: [
-      { heading: 'Kenapa Beda dari Impression', body: 'Satu akun yang melihat konten yang sama tiga kali tetap dihitung reach 1, tapi dihitung impression 3 — reach selalu menunjukkan jangkauan audiens yang sebenarnya.' },
+      { heading: 'Kenapa Beda dari Impression', body: 'Satu akun yang melihat konten yang sama tiga kali tetap dihitung reach 1, tapi dihitung impression 3, reach selalu menunjukkan jangkauan audiens yang sebenarnya.' },
       { heading: 'Kegunaan dalam Evaluasi Campaign', body: 'Reach jadi metrik utama untuk campaign awareness karena langsung menunjukkan berapa banyak orang berbeda yang benar-benar terpapar pesan campaign.' },
       { heading: 'Contoh Penggunaannya', body: "Brand yang fokus pada awareness campaign biasanya menetapkan target reach sebagai salah satu KPI utama, misalnya 'menjangkau 1 juta akun unik dalam 2 minggu'." },
     ],
@@ -531,7 +531,7 @@ const rawTerms: Array<Omit<GlossaryTerm, 'slug'>> = [
     sections: [
       { heading: 'Cara Melakukannya', body: 'Bisa dilakukan manual dengan membaca komentar satu per satu, atau otomatis lewat tools yang mengklasifikasikan kata dan emoji ke dalam kategori sentimen tertentu.' },
       { heading: 'Manfaat bagi Brand', body: 'Membantu brand memahami reaksi asli audiens terhadap campaign atau produk, termasuk mendeteksi lebih dini kalau ada respons negatif yang perlu segera ditangani.' },
-      { heading: 'Contoh Insight yang Bisa Didapat', body: 'Misalnya menemukan bahwa mayoritas komentar positif menyoroti harga yang terjangkau, sementara komentar negatif banyak menyinggung soal pengiriman — insight ini bisa langsung ditindaklanjuti brand.' },
+      { heading: 'Contoh Insight yang Bisa Didapat', body: 'Misalnya menemukan bahwa mayoritas komentar positif menyoroti harga yang terjangkau, sementara komentar negatif banyak menyinggung soal pengiriman, insight ini bisa langsung ditindaklanjuti brand.' },
     ],
   },
   {
@@ -591,7 +591,7 @@ const rawTerms: Array<Omit<GlossaryTerm, 'slug'>> = [
     summary: 'Kondisi ketika sebuah konten menyebar sangat cepat dan luas melampaui audiens asli si pembuat konten.',
     sections: [
       { heading: 'Faktor Pemicunya', body: 'Biasanya dipicu kombinasi antara relevansi topik, emosi kuat yang ditimbulkan (lucu, mengejutkan, related), dan dorongan algoritma platform yang mempercepat penyebarannya.' },
-      { heading: 'Risikonya bagi Campaign Brand', body: 'Viral tidak selalu berarti positif — konten yang viral karena kontroversi justru bisa berbalik merugikan brand, sehingga viralitas perlu diarahkan, bukan dibiarkan begitu saja.' },
+      { heading: 'Risikonya bagi Campaign Brand', body: 'Viral tidak selalu berarti positif, konten yang viral karena kontroversi justru bisa berbalik merugikan brand, sehingga viralitas perlu diarahkan, bukan dibiarkan begitu saja.' },
       { heading: 'Contoh Pola Konten yang Sering Viral', body: 'Konten yang menunjukkan transformasi dramatis, momen relatable/lucu, atau format challenge yang mudah ditiru orang lain punya peluang lebih besar untuk menyebar cepat.' },
     ],
   },
@@ -602,7 +602,7 @@ const rawTerms: Array<Omit<GlossaryTerm, 'slug'>> = [
     sections: [
       { heading: 'Kenapa Efektif untuk Product Placement', body: 'Produk yang muncul natural dalam rutinitas sehari-hari creator terasa lebih organik dibanding iklan langsung, karena konteksnya memang bagian dari cerita, bukan sisipan promosi.' },
       { heading: 'Tantangannya', body: 'Karena formatnya panjang dan personal, brand perlu memastikan momen penyebutan produk tidak terasa terlalu dipaksakan di tengah narasi vlog.' },
-      { heading: 'Contoh Format Umum', body: "Bisa berupa 'a day in my life', vlog perjalanan, atau vlog rutinitas pagi — semuanya memberi ruang natural untuk menyisipkan produk brand di tengah aktivitas sehari-hari." },
+      { heading: 'Contoh Format Umum', body: "Bisa berupa 'a day in my life', vlog perjalanan, atau vlog rutinitas pagi, semuanya memberi ruang natural untuk menyisipkan produk brand di tengah aktivitas sehari-hari." },
     ],
   },
   {
@@ -642,7 +642,7 @@ const rawTerms: Array<Omit<GlossaryTerm, 'slug'>> = [
     summary: 'Ikon keranjang kuning di video atau live TikTok yang menautkan langsung ke produk di TikTok Shop, sehingga penonton bisa checkout tanpa keluar dari konten.',
     sections: [
       { heading: 'Cara Kerjanya', body: 'Creator yang sudah terdaftar sebagai affiliate TikTok Shop menautkan produk ke video atau sesi live. Ikon keranjang kuning lalu muncul di pojok konten, dan penonton tinggal mengetuknya untuk melihat serta membeli produk.' },
-      { heading: 'Kenapa Penting di Campaign', body: 'Yellow cart memperpendek jarak dari menonton ke membeli, sehingga konten KOL bisa langsung diukur kontribusinya ke penjualan (GMV) — bukan cuma views dan engagement.' },
+      { heading: 'Kenapa Penting di Campaign', body: 'Yellow cart memperpendek jarak dari menonton ke membeli, sehingga konten KOL bisa langsung diukur kontribusinya ke penjualan (GMV), bukan cuma views dan engagement.' },
       { heading: 'Hal yang Perlu Dicek Tim Ops', body: 'Pastikan akun KOL sudah eligible affiliate, produk yang ditautkan sesuai SKU di brief, komisi sudah diatur di TikTok Shop, dan keranjang benar-benar muncul saat konten tayang.' },
     ],
   },
@@ -653,13 +653,13 @@ const rawTerms: Array<Omit<GlossaryTerm, 'slug'>> = [
     sections: [
       { heading: 'Isi yang Umum Dicantumkan', body: 'Jumlah dan jenis konten per KOL (misalnya 1 TikTok video + 3 IG story), platform, jadwal draft dan posting, jumlah revisi, usage rights, periode take down, serta format laporan akhir.' },
       { heading: 'Kenapa Wajib Ada', body: 'SOW jadi acuan bersama antara brand, agency, dan KOL. Kalau ada permintaan di luar SOW (konten tambahan, revisi berlebih), tim bisa menegosiasikan biaya tambahan dengan dasar yang jelas.' },
-      { heading: 'Hubungannya dengan Dokumen Lain', body: 'SOW biasanya disusun sebelum quotation dan kontrak final — angka di quotation dan klausul di kontrak mengikuti lingkup yang sudah disepakati di SOW.' },
+      { heading: 'Hubungannya dengan Dokumen Lain', body: 'SOW biasanya disusun sebelum quotation dan kontrak final, angka di quotation dan klausul di kontrak mengikuti lingkup yang sudah disepakati di SOW.' },
     ],
   },
   {
     term: 'Requirement User',
     category: 'ops',
-    summary: 'Kriteria KOL yang diminta client untuk sebuah campaign — misalnya minimal follower, engagement rate, niche, lokasi, hingga profil audiens.',
+    summary: 'Kriteria KOL yang diminta client untuk sebuah campaign, misalnya minimal follower, engagement rate, niche, lokasi, hingga profil audiens.',
     sections: [
       { heading: 'Contoh Kriteria', body: "Misalnya: 'KOL perempuan, domisili Jabodetabek, niche beauty, 10K–50K follower TikTok, ER minimal 3%, audiens mayoritas usia 18–24'." },
       { heading: 'Kegunaannya bagi Tim Ops', body: 'Requirement jadi filter utama saat mencari dan menyusun shortlist KOL, sehingga kandidat yang diajukan ke client sudah sesuai harapan dan proses approval lebih cepat.' },
@@ -714,7 +714,7 @@ const rawTerms: Array<Omit<GlossaryTerm, 'slug'>> = [
   {
     term: 'Insight Report',
     category: 'metrics',
-    summary: 'Laporan performa konten KOL setelah tayang — biasanya berupa screenshot insight dari akun KOL ditambah rekap metrik campaign.',
+    summary: 'Laporan performa konten KOL setelah tayang, biasanya berupa screenshot insight dari akun KOL ditambah rekap metrik campaign.',
     sections: [
       { heading: 'Isi yang Umum Diminta', body: 'Views, reach, impression, likes, comments, shares, saves, watch time, profil audiens, serta klik link atau penjualan dari yellow cart jika ada.' },
       { heading: 'Kapan Diambil', body: 'Umumnya diminta 1x24 jam dan/atau 7 hari setelah posting. Waktu pengambilan insight sebaiknya disepakati di SOW agar data antar KOL bisa dibandingkan secara adil.' },

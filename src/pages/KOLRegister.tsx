@@ -12,9 +12,9 @@ const activities = [
   { value: 'affiliator', label: 'Affiliator', desc: 'Mempromosikan produk lewat link affiliate, dapat komisi dari penjualan.' },
   { value: 'live_streamer', label: 'Live Streamer', desc: 'Siaran langsung untuk interaksi dengan audiens atau bantu penjualan.' },
 ];
-// TikTok & Threads WAJIB "@" di URL profil (tiktok.com/@handle, bukan tiktok.com/handle) —
+// TikTok & Threads WAJIB "@" di URL profil (tiktok.com/@handle, bukan tiktok.com/handle),
 // tanpanya link 404 / nyasar ke halaman search. Prefix ini dipakai dua kali: sebagai teks
-// bantu di depan input username, DAN untuk membangun profileUrl yang dikirim ke server —
+// bantu di depan input username, DAN untuk membangun profileUrl yang dikirim ke server,
 // jadi memperbaikinya di sini otomatis memperbaiki keduanya.
 const socialPlatforms = [
   { value: 'instagram', label: 'Instagram', icon: Camera, color: '#ff81aa', prefix: 'instagram.com/' },

@@ -146,27 +146,27 @@ export default function PicCampaignDetail() {
                 return (
                   <tr key={a._id}>
                     <td style={{ ...td, fontWeight: 600 }}>{a.creatorId?.name || 'Creator deleted'}</td>
-                    <td style={td}>{a.creatorId?.phone || '—'}</td>
-                    <td style={td}>{a.creatorId?.domicile?.province || '—'}</td>
-                    <td style={td}>{a.creatorId?.performanceScore?.overall ?? '—'}</td>
+                    <td style={td}>{a.creatorId?.phone || '-'}</td>
+                    <td style={td}>{a.creatorId?.domicile?.province || '-'}</td>
+                    <td style={td}>{a.creatorId?.performanceScore?.overall ?? '-'}</td>
                     <td style={td}><span style={{ background: cc.bg, color: cc.color, borderRadius: '999px', padding: '3px 10px', fontSize: '0.7rem', fontWeight: 700 }}>{cc.label}</span></td>
                     <td style={td}><span style={{ background: sc.bg, color: sc.color, borderRadius: '999px', padding: '3px 10px', fontSize: '0.7rem', fontWeight: 700, textTransform: 'capitalize' }}>{a.status}</span></td>
-                    <td style={{ ...td, textTransform: 'capitalize' }}>{latestSubmission ? `${latestSubmission.type} (${latestSubmission.platform})` : '—'}</td>
+                    <td style={{ ...td, textTransform: 'capitalize' }}>{latestSubmission ? `${latestSubmission.type} (${latestSubmission.platform})` : '-'}</td>
                     <td style={td}>
                       {latestSubmission && ssc ? (
                         <span style={{ background: ssc.bg, color: ssc.color, borderRadius: '999px', padding: '3px 10px', fontSize: '0.7rem', fontWeight: 700, textTransform: 'capitalize' }}>
                           {latestSubmission.status.replace('_', ' ')}
                         </span>
-                      ) : '—'}
+                      ) : '-'}
                     </td>
                     <td style={td}>{totalRevisions}</td>
-                    <td style={td}>{latestSubmission ? new Date(latestSubmission.createdAt).toLocaleDateString('id-ID') : '—'}</td>
+                    <td style={td}>{latestSubmission ? new Date(latestSubmission.createdAt).toLocaleDateString('id-ID') : '-'}</td>
                     <td style={td}>
                       {latestSubmission?.link ? (
                         <a href={latestSubmission.link} target="_blank" rel="noopener noreferrer" style={{ color: '#6728e4', display: 'flex', alignItems: 'center', gap: '4px' }}>
                           <ExternalLink size={13} /> Open
                         </a>
-                      ) : '—'}
+                      ) : '-'}
                     </td>
                   </tr>
                 );

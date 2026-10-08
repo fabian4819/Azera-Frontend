@@ -109,7 +109,7 @@ export default function CampaignDetail() {
   const [activeTab, setActiveTab] = useState<TabKey>('overview');
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [picUsers, setPicUsers] = useState<PicUser[]>([]);
-  // Semua akun PIC terdaftar — jadi daftar centang pilihan PIC di Form Kustom
+  // Semua akun PIC terdaftar, jadi daftar centang pilihan PIC di Form Kustom
   const [allPics, setAllPics] = useState<PicUser[]>([]);
   const [picEmailDraft, setPicEmailDraft] = useState('');
   const [addingPic, setAddingPic] = useState(false);
@@ -233,7 +233,7 @@ export default function CampaignDetail() {
     }
   };
 
-  // Centang/lepas PIC dari Form Kustom — langsung tersimpan (assign PicUser ke campaign ini)
+  // Centang/lepas PIC dari Form Kustom, langsung tersimpan (assign PicUser ke campaign ini)
   const togglePic = async (pic: PicUser, on: boolean) => {
     if (on) {
       const res = await api.post(`/admin/campaigns/${id}/pic`, { email: pic.email });
@@ -432,10 +432,10 @@ export default function CampaignDetail() {
             <div style={cardStyle}>
               <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: '1rem', color: '#191c20', marginBottom: '14px' }}>Kriteria</p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                <div><p style={labelSmall}>Niche</p><p style={{ fontSize: '0.85rem', color: '#191c20' }}>{campaign.criteria.niches.join(', ') || '—'}</p></div>
-                <div><p style={labelSmall}>Platform</p><p style={{ fontSize: '0.85rem', color: '#191c20' }}>{campaign.criteria.platforms.join(', ') || '—'}</p></div>
-                <div><p style={labelSmall}>Min. Followers</p><p style={{ fontSize: '0.85rem', color: '#191c20' }}>{campaign.criteria.minFollowers?.toLocaleString('id-ID') || '—'}</p></div>
-                <div><p style={labelSmall}>Provinsi</p><p style={{ fontSize: '0.85rem', color: '#191c20' }}>{campaign.criteria.provinces.join(', ') || '—'}</p></div>
+                <div><p style={labelSmall}>Niche</p><p style={{ fontSize: '0.85rem', color: '#191c20' }}>{campaign.criteria.niches.join(', ') || '-'}</p></div>
+                <div><p style={labelSmall}>Platform</p><p style={{ fontSize: '0.85rem', color: '#191c20' }}>{campaign.criteria.platforms.join(', ') || '-'}</p></div>
+                <div><p style={labelSmall}>Min. Followers</p><p style={{ fontSize: '0.85rem', color: '#191c20' }}>{campaign.criteria.minFollowers?.toLocaleString('id-ID') || '-'}</p></div>
+                <div><p style={labelSmall}>Provinsi</p><p style={{ fontSize: '0.85rem', color: '#191c20' }}>{campaign.criteria.provinces.join(', ') || '-'}</p></div>
               </div>
             </div>
           </div>
@@ -504,28 +504,28 @@ export default function CampaignDetail() {
                             )}
                           </td>
                           <td style={td}>{a.creatorId?.name || 'Creator dihapus'}</td>
-                          <td style={td}>{a.creatorId?.phone || '—'}</td>
-                          <td style={td}>{a.creatorId?.domicile?.province || '—'}</td>
-                          <td style={td}>{a.creatorId?.performanceScore?.overall ?? '—'}</td>
+                          <td style={td}>{a.creatorId?.phone || '-'}</td>
+                          <td style={td}>{a.creatorId?.domicile?.province || '-'}</td>
+                          <td style={td}>{a.creatorId?.performanceScore?.overall ?? '-'}</td>
                           <td style={td}>
                             <span style={{ background: cc.bg, color: cc.color, borderRadius: '999px', padding: '3px 10px', fontSize: '0.7rem', fontWeight: 700, whiteSpace: 'nowrap' }}>{cc.label}</span>
                           </td>
                           <td style={td}>
                             <span style={{ background: sc.bg, color: sc.color, borderRadius: '999px', padding: '3px 10px', fontSize: '0.7rem', fontWeight: 700, textTransform: 'capitalize' }}>{a.status}</span>
                           </td>
-                          <td style={{ ...td, textTransform: 'capitalize' }}>{a.latestSubmission?.type || '—'}</td>
-                          <td style={{ ...td, textTransform: 'capitalize' }}>{a.latestSubmission?.platform || '—'}</td>
+                          <td style={{ ...td, textTransform: 'capitalize' }}>{a.latestSubmission?.type || '-'}</td>
+                          <td style={{ ...td, textTransform: 'capitalize' }}>{a.latestSubmission?.platform || '-'}</td>
                           <td style={td}>
                             {a.latestSubmission?.link ? (
                               <a href={a.latestSubmission.link} target="_blank" rel="noopener noreferrer" style={{ color: '#6728e4', textDecoration: 'none' }}>Buka link</a>
-                            ) : '—'}
+                            ) : '-'}
                           </td>
-                          <td style={{ ...td, textTransform: 'capitalize' }}>{a.latestSubmission?.status || '—'}</td>
-                          <td style={td}>{a.latestSubmission?.parsedInsight?.views ?? '—'}</td>
-                          <td style={td}>{a.latestSubmission?.parsedInsight?.likes ?? '—'}</td>
-                          <td style={td}>{a.latestSubmission?.parsedInsight?.comments ?? '—'}</td>
-                          <td style={td}>{a.latestSubmission?.parsedInsight?.shares ?? '—'}</td>
-                          <td style={td}>{a.latestSubmission ? new Date(a.latestSubmission.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}</td>
+                          <td style={{ ...td, textTransform: 'capitalize' }}>{a.latestSubmission?.status || '-'}</td>
+                          <td style={td}>{a.latestSubmission?.parsedInsight?.views ?? '-'}</td>
+                          <td style={td}>{a.latestSubmission?.parsedInsight?.likes ?? '-'}</td>
+                          <td style={td}>{a.latestSubmission?.parsedInsight?.comments ?? '-'}</td>
+                          <td style={td}>{a.latestSubmission?.parsedInsight?.shares ?? '-'}</td>
+                          <td style={td}>{a.latestSubmission ? new Date(a.latestSubmission.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : '-'}</td>
                           <td style={td}>
                             <select
                               value={a.picUserId?._id || ''}
@@ -657,7 +657,7 @@ export default function CampaignDetail() {
             <div style={cardStyle}>
               <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: '1rem', color: '#191c20', marginBottom: '8px' }}>Google Sheet</p>
               <p style={{ fontSize: '0.78rem', color: '#777683', marginBottom: '14px', lineHeight: 1.5 }}>
-                Sheet operasional campaign ini — data pendaftar & submission (master) tersinkron otomatis dari platform, report & recap payment dikelola manual.
+                Sheet operasional campaign ini, data pendaftar & submission (master) tersinkron otomatis dari platform, report & recap payment dikelola manual.
               </p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {[

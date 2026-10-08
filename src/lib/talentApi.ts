@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-// Instance terpisah dari lib/api.ts — creator (talent) auth pakai token & redirect
+// Instance terpisah dari lib/api.ts, creator (talent) auth pakai token & redirect
 // yang berbeda dari staff admin, supaya dua sesi login bisa hidup berdampingan.
 const talentApi = axios.create({
   baseURL: '/api',

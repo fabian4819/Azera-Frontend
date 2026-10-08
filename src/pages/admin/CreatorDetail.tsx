@@ -21,13 +21,13 @@ const labelSmall: React.CSSProperties = {
 };
 
 // SocialSnapshot.username tersimpan lowercase+trim di server (kunci pencocokan resmi ke
-// Creator.socials.username) — tapi Creator.socials.username disimpan APA ADANYA (casing user
+// Creator.socials.username), tapi Creator.socials.username disimpan APA ADANYA (casing user
 // pas isi form), jadi cocokkan dua-duanya lewat normalizer yang sama.
 function normalizeUsername(u: string): string {
   return u.trim().toLowerCase();
 }
 
-// Username sering ketulis "@handle", "tiktok.com/@handle", atau ada spasi nyasar —
+// Username sering ketulis "@handle", "tiktok.com/@handle", atau ada spasi nyasar,
 // buang semuanya sampai tersisa handle polosnya.
 function normalizeHandle(input: string): string {
   let s = (input || '').trim();
@@ -42,17 +42,17 @@ function normalizeHandle(input: string): string {
 // Sebagian data lama (import historis / form manual) diisi "-", "0", "A", "tidakada"
 // dsb sebagai penanda "platform ini kosong" alih-alih benar-benar dikosongkan. Kalau
 // dipakai membangun link, hasilnya link yang kelihatan valid tapi menuju akun random
-// atau 404 — lebih baik dianggap belum diisi sama sekali.
+// atau 404, lebih baik dianggap belum diisi sama sekali.
 const PLACEHOLDER_HANDLES = new Set(['-', '0', 'a', 'na', 'n/a', 'tidakada', 'tidak ada', 'belum ada', 'none', 'null', 'xx']);
 // Handle sosmed cuma huruf/angka/titik/underscore/dash. Apa pun di luar itu (spasi,
-// kurung, dst — mis. data platform lain yang nyasar ke field ini) bukan handle asli.
+// kurung, dst, mis. data platform lain yang nyasar ke field ini) bukan handle asli.
 function isRealHandle(raw: string): boolean {
   const h = normalizeHandle(raw);
   if (h.length < 2 || PLACEHOLDER_HANDLES.has(h.toLowerCase())) return false;
   return /^[a-zA-Z0-9._-]+$/.test(h);
 }
 
-// Link profil SELALU dibangun dari username, bukan dari profileUrl yang diketik manual —
+// Link profil SELALU dibangun dari username, bukan dari profileUrl yang diketik manual,
 // TikTok/Threads wajib awalan "@", dan KOL sering lupa itu (link jadi 404 / ke search).
 // profileUrl cuma dipakai kalau username-nya kosong/placeholder.
 function platformProfileUrl(platform: string, username: string, profileUrl?: string): string {
@@ -116,7 +116,7 @@ function rateSummary(c: Pick<Creator, 'rateEstimateType' | 'rateEstimateAmount' 
       : c.rateEstimateType === 'unknown'
         ? 'Belum ada patokan'
         : '';
-  if (!base) return '—';
+  if (!base) return '-';
   return c.rateNegotiable ? `${base} · ${RATE_NEGO_LABELS[c.rateNegotiable]}` : base;
 }
 
@@ -156,7 +156,7 @@ export default function CreatorDetail() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
-  // Link dari Google Sheet (?expand=instagram) — otomatis buka section metrik ekstensi
+  // Link dari Google Sheet (?expand=instagram), otomatis buka section metrik ekstensi
   // platform itu begitu snapshot-nya kebaca, supaya staf langsung lihat datanya.
   useEffect(() => {
     const platform = searchParams.get('expand');
@@ -207,7 +207,7 @@ export default function CreatorDetail() {
   if (loading) return <div style={{ textAlign: 'center', padding: '80px', color: '#777683' }}>Memuat...</div>;
   if (!creator) return null;
 
-  // Snapshot ekstensi (KOL Lister) dikelompokkan per akun — dipakai buat expand/collapse
+  // Snapshot ekstensi (KOL Lister) dikelompokkan per akun, dipakai buat expand/collapse
   // di baris Media Sosial yang cocok, bukan card terpisah lagi.
   const snapshotsByAccount = new Map<string, Snapshot[]>();
   for (const s of snapshots) {
@@ -250,12 +250,12 @@ export default function CreatorDetail() {
               <StatusBadge status={creator.status} />
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
-              <div><p style={labelSmall}>Jenis Kelamin</p><p style={{ fontSize: '0.85rem', color: '#191c20' }}>{creator.gender ? GENDER_LABELS[creator.gender] : '—'}</p></div>
-              <div><p style={labelSmall}>Usia</p><p style={{ fontSize: '0.85rem', color: '#191c20' }}>{creator.age ?? '—'}</p></div>
-              <div><p style={labelSmall}>Domisili</p><p style={{ fontSize: '0.85rem', color: '#191c20' }}>{creator.domicile?.city || '—'}, {creator.domicile?.province || '—'}</p></div>
+              <div><p style={labelSmall}>Jenis Kelamin</p><p style={{ fontSize: '0.85rem', color: '#191c20' }}>{creator.gender ? GENDER_LABELS[creator.gender] : '-'}</p></div>
+              <div><p style={labelSmall}>Usia</p><p style={{ fontSize: '0.85rem', color: '#191c20' }}>{creator.age ?? '-'}</p></div>
+              <div><p style={labelSmall}>Domisili</p><p style={{ fontSize: '0.85rem', color: '#191c20' }}>{creator.domicile?.city || '-'}, {creator.domicile?.province || '-'}</p></div>
               <div><p style={labelSmall}>Niche</p><p style={{ fontSize: '0.85rem', color: '#191c20' }}>{creator.niches.join(', ')}{creator.nicheOther ? `, ${creator.nicheOther}` : ''}</p></div>
               <div><p style={labelSmall}>Gaya Konten</p><p style={{ fontSize: '0.85rem', color: '#191c20' }}>{creator.contentStyles.join(', ')}{creator.contentStyleOther ? `, ${creator.contentStyleOther}` : ''}</p></div>
-              <div><p style={labelSmall}>Aktivitas</p><p style={{ fontSize: '0.85rem', color: '#191c20' }}>{creator.activities.join(', ') || '—'}</p></div>
+              <div><p style={labelSmall}>Aktivitas</p><p style={{ fontSize: '0.85rem', color: '#191c20' }}>{creator.activities.join(', ') || '-'}</p></div>
               <div><p style={labelSmall}>Estimasi Rate (1&times; video)</p><p style={{ fontSize: '0.85rem', color: '#191c20' }}>{rateSummary(creator)}</p></div>
             </div>
           </div>
@@ -310,7 +310,7 @@ export default function CreatorDetail() {
                           <button
                             onClick={() => pullMetrics(s.platform, s.username, s.profileUrl)}
                             disabled={pulling === s.platform || !href}
-                            title={href ? 'Buka profil di tab baru — kirim metrik lewat panel ekstensi KOL Lister' : 'Username-nya belum valid (mis. "-"/"0") — perbaiki dulu sebelum bisa ditarik'}
+                            title={href ? 'Buka profil di tab baru, kirim metrik lewat panel ekstensi KOL Lister' : 'Username-nya belum valid (mis. "-"/"0"), perbaiki dulu sebelum bisa ditarik'}
                             style={{
                               display: 'flex', alignItems: 'center', gap: '5px', padding: '4px 10px',
                               background: 'white', color: href ? '#6728e4' : '#bbb', border: `1px solid ${href ? '#6728e4' : '#ddd'}`,
@@ -366,7 +366,7 @@ export default function CreatorDetail() {
                 </div>
                 <div style={{ padding: '14px', background: '#f8f9ff', borderRadius: '10px' }}>
                   <p style={labelSmall}>Communication (15%)</p>
-                  <p style={{ fontSize: '1.2rem', fontWeight: 800, color: '#6728e4' }}>{scoreBreakdown.communication.score ?? '—'}</p>
+                  <p style={{ fontSize: '1.2rem', fontWeight: 800, color: '#6728e4' }}>{scoreBreakdown.communication.score ?? '-'}</p>
                   <p style={{ fontSize: '0.75rem', color: '#777683' }}>{scoreBreakdown.communication.sampleCount} sample{scoreBreakdown.communication.avgResponseHours ? `, avg ${scoreBreakdown.communication.avgResponseHours}j respon` : ''}</p>
                 </div>
               </div>
@@ -379,7 +379,7 @@ export default function CreatorDetail() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {history.map((h) => (
                   <div key={h._id} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 14px', background: '#f8f9ff', borderRadius: '10px', fontSize: '0.8rem' }}>
-                    <span>{h.campaignId?.name || '—'} · {h.brandId?.namaBrand || '—'}</span>
+                    <span>{h.campaignId?.name || '-'} · {h.brandId?.namaBrand || '-'}</span>
                     <span style={{ color: h.violation ? '#ba1a1a' : '#065F46' }}>{h.violation || (h.uploadedOnTime ? 'On-time' : 'Telat')}</span>
                   </div>
                 ))}

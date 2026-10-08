@@ -48,7 +48,7 @@ export default function PicCampaigns() {
               <div>
                 <p style={{ fontFamily: f, fontWeight: 700, fontSize: '0.95rem', color: '#191c20' }}>{c.name}</p>
                 <p style={{ fontFamily: f, fontSize: '0.8rem', color: '#777683', marginTop: '2px' }}>
-                  {c.brandId?.namaBrand || '—'} · Rp{c.budget.toLocaleString('id-ID')}
+                  {c.brandId?.namaBrand || '-'} · Rp{c.budget.toLocaleString('id-ID')}
                 </p>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>

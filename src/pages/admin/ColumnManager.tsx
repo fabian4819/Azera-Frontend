@@ -38,7 +38,7 @@ const sel: React.CSSProperties = { width: '100%', padding: '5px 6px', borderRadi
 const lbl: React.CSSProperties = { fontSize: '0.7rem', fontWeight: 700, color: '#5f6368', marginBottom: '3px', display: 'block' };
 const item: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: '8px', width: '100%', padding: '7px 12px', background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.8rem', color: '#202124', textAlign: 'left' };
 
-/** Ikon akses creator di header kolom — supaya admin lihat sekilas kolom mana yang terlihat/bisa diedit creator. */
+/** Ikon akses creator di header kolom, supaya admin lihat sekilas kolom mana yang terlihat/bisa diedit creator. */
 export function AccessIcon({ access }: { access: Access }) {
   const Icon = ACCESS_ICON[access];
   const color = access === 'edit' ? '#6728e4' : access === 'view' ? '#5f6368' : '#b0afba';
@@ -59,7 +59,7 @@ function AccessPicker({ value, options, onChange }: { value: Access; options: Ac
 }
 
 interface ColumnMenuProps {
-  /** Kolom progress (bisa diubah/hapus) — kosong untuk kolom data sistem */
+  /** Kolom progress (bisa diubah/hapus), kosong untuk kolom data sistem */
   progress?: ProgressColumn;
   access: Access;
   canMoveLeft: boolean;
@@ -82,7 +82,7 @@ export function ColumnMenu({ progress, access, canMoveLeft, canMoveRight, onAcce
         <AccessPicker value={access === 'view' ? 'view' : 'hidden'} options={['hidden', 'view']} onChange={onAccess} />
         <p style={{ fontSize: '0.7rem', color: '#777683', marginTop: '6px', lineHeight: 1.5 }}>
           Kolom data sistem (diisi otomatis/admin), jadi creator hanya bisa melihat. Butuh kolom yang bisa diisi creator?
-          Tambah lewat tombol <strong>+</strong> di ujung kanan header — akses Edit tersedia di sana.
+          Tambah lewat tombol <strong>+</strong> di ujung kanan header, akses Edit tersedia di sana.
         </p>
       </div>
     );

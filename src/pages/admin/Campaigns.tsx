@@ -113,7 +113,7 @@ export default function Campaigns() {
                   return (
                     <tr key={c._id} style={{ borderBottom: '1px solid #e1e0ff', background: i % 2 === 0 ? 'white' : '#fcfcff' }}>
                       <td style={{ ...tdStyle, fontWeight: 600, color: '#191c20' }}>{c.name}</td>
-                      <td style={tdStyle}>{typeof c.brandId === 'object' ? c.brandId.namaBrand : '—'}</td>
+                      <td style={tdStyle}>{typeof c.brandId === 'object' ? c.brandId.namaBrand : '-'}</td>
                       <td style={tdStyle}>{formatBudget(c.budget)}</td>
                       <td style={tdStyle}>
                         <span style={{ background: '#e1e0ff', color: '#6728e4', borderRadius: '999px', padding: '3px 10px', fontSize: '0.72rem', fontWeight: 700 }}>

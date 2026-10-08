@@ -15,7 +15,7 @@ interface WaMessageLog {
   status: 'queued' | 'sent' | 'failed' | 'skipped'; error?: string; createdAt: string;
 }
 
-// Dua bot WhatsApp terpisah — nomor & pairing sendiri-sendiri.
+// Dua bot WhatsApp terpisah, nomor & pairing sendiri-sendiri.
 const BOTS = [
   { id: 'partnership', label: 'Bot Partnership / Brand', hint: 'Nomor untuk brand & klien. Menerima lead brand + notifikasi invoice/pembayaran/campaign.' },
   { id: 'creator', label: 'Bot Creator / KOL', hint: 'Nomor untuk KOL/creator. Balas link pendaftaran + notifikasi brief/reminder ke creator.' },

@@ -20,7 +20,7 @@ const navItems = [
   { label: 'Portfolio', to: '/admin/portfolio', icon: ImageIcon },
 ];
 
-/** Grup "Document" (bisa dibuka/tutup) — dirender tepat setelah item DOCS_AFTER */
+/** Grup "Document" (bisa dibuka/tutup), dirender tepat setelah item DOCS_AFTER */
 const DOCS_AFTER = '/admin/import';
 const docItems = [
   { label: 'Quotation', to: '/admin/documents/quotation', icon: FileText },
@@ -43,9 +43,9 @@ const pageTitles: Record<string, string> = {
   '/admin/extension': 'Ekstensi KOL Lister',
   '/admin/pic': 'PIC / Handle-by',
   '/admin/portfolio': 'Portfolio Manager',
-  '/admin/documents/quotation': 'Document — Quotation',
-  '/admin/documents/invoice': 'Document — Invoice',
-  '/admin/documents/spk': 'Document — SPK',
+  '/admin/documents/quotation': 'Document: Quotation',
+  '/admin/documents/invoice': 'Document: Invoice',
+  '/admin/documents/spk': 'Document: SPK',
 };
 
 const COLLAPSE_KEY = 'azera_admin_sidebar_collapsed';
@@ -67,7 +67,7 @@ export default function AdminLayout() {
   const [docsOpen, setDocsOpen] = useState(() => readFlag(DOCS_OPEN_KEY) ?? location.pathname.startsWith('/admin/documents'));
   const toggleDocs = () => {
     setDocsOpen((prev) => {
-      try { localStorage.setItem(DOCS_OPEN_KEY, prev ? '0' : '1'); } catch { /* storage diblokir — cukup state */ }
+      try { localStorage.setItem(DOCS_OPEN_KEY, prev ? '0' : '1'); } catch { /* storage diblokir, cukup state */ }
       return !prev;
     });
   };

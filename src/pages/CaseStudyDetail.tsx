@@ -44,7 +44,7 @@ export default function CaseStudyDetail() {
 
   return (
     <div style={{ background: '#f8f9ff', minHeight: '100vh' }}>
-      {/* Hero — screenshot-friendly: brand + headline + azerakol branding all in one crop */}
+      {/* Hero, screenshot-friendly: brand + headline + azerakol branding all in one crop */}
       <div style={{ background: 'linear-gradient(135deg, #1E0A5E, #2D1060)', padding: '100px 24px 80px', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', top: '24px', left: '50%', transform: 'translateX(-50%)', display: 'flex', alignItems: 'center', gap: '8px' }}>
           <img src="/logo-transparent.png" alt="AzeraKOL" style={{ height: '28px' }} />
@@ -62,7 +62,7 @@ export default function CaseStudyDetail() {
         </div>
       </div>
 
-      {/* Highlight stats — big bold numbers, screenshot-friendly block */}
+      {/* Highlight stats, big bold numbers, screenshot-friendly block */}
       <div style={{ maxWidth: '900px', margin: '-40px auto 0', padding: '0 24px', position: 'relative', zIndex: 1 }}>
         <div style={{ background: 'white', borderRadius: '24px', padding: '32px', boxShadow: '0 8px 32px rgba(0,0,0,0.08)', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '24px', textAlign: 'center' }}>
           <div>
@@ -86,7 +86,7 @@ export default function CaseStudyDetail() {
         </div>
       </div>
 
-      {/* Narrative sections — each self-contained enough to screenshot alone */}
+      {/* Narrative sections, each self-contained enough to screenshot alone */}
       <div style={{ maxWidth: '760px', margin: '0 auto', padding: '60px 24px 100px' }}>
         <div style={{ background: 'white', borderRadius: '20px', padding: '32px', marginBottom: '20px', boxShadow: '0 2px 16px rgba(0,0,0,0.05)' }}>
           <span style={{ display: 'inline-block', background: '#F0EEFF', color: '#6B2EE8', borderRadius: '999px', padding: '4px 14px', fontSize: '0.75rem', fontWeight: 700, fontFamily: f, marginBottom: '14px' }}>
@@ -108,7 +108,7 @@ export default function CaseStudyDetail() {
         </div>
       </div>
 
-      {/* Footer branding — visible in a bottom crop too */}
+      {/* Footer branding, visible in a bottom crop too */}
       <div style={{ background: '#08060F', padding: '32px 24px', textAlign: 'center' }}>
         <p style={{ fontFamily: f, fontWeight: 700, color: 'rgba(255,255,255,0.6)', fontSize: '0.85rem' }}>
           Scale Brands. Amplify Impact. @azerakol.id

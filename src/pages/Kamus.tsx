@@ -38,7 +38,7 @@ export default function Kamus() {
             Istilah KOL & Influencer Marketing
           </h1>
           <p style={{ color: 'var(--on-surface-variant)', fontSize: '1rem', lineHeight: 1.7, maxWidth: '520px', margin: '0 auto' }}>
-            Kumpulan istilah yang sering dipakai dalam dunia KOL, influencer marketing, dan campaign brand — biar kamu makin paham istilahnya.
+            Kumpulan istilah yang sering dipakai dalam dunia KOL, influencer marketing, dan campaign brand, biar kamu makin paham istilahnya.
           </p>
         </div>
       </div>

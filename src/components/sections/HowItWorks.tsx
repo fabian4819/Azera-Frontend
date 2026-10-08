@@ -11,7 +11,7 @@ const steps = [
   { number: '04', icon: TrendingUp, title: 'Scale', desc: 'Analisis performa campaign secara real-time dan optimalkan untuk hasil yang maksimal.' },
 ];
 
-// Digandakan 3x supaya carousel bisa di-loop tanpa henti — di kiri & kanan set
+// Digandakan 3x supaya carousel bisa di-loop tanpa henti, di kiri & kanan set
 // utama selalu ada "buffer" set yang identik, jadi begitu user hampir mentok
 // ke salah satu ujung, scrollLeft dilompat diam-diam ke posisi ekuivalen di
 // set sebelahnya (kontennya sama persis, jadi lompatannya tidak terlihat).
@@ -102,7 +102,7 @@ export default function HowItWorks() {
     draggingRef.current = false;
   };
   // Posisi badge dihitung relatif ke WRAPPER luar (yang tidak ikut scroll),
-  // bukan ke viewport yang scroll — supaya badge tetap nempel di mouse,
+  // bukan ke viewport yang scroll, supaya badge tetap nempel di mouse,
   // tidak ikut kegeser saat konten di-drag.
   const onMouseMoveWrapper = (e: ReactMouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();

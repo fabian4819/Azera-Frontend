@@ -193,7 +193,7 @@ export default function Brands() {
                     <td style={{ ...tdStyle, fontWeight: 600, color: '#191c20' }}>{b.namaBrand}</td>
                     <td style={tdStyle}>{b.namaPIC}</td>
                     <td style={tdStyle}>{b.whatsapp}</td>
-                    <td style={tdStyle}>{b.kategori || (b.jasa && JASA_LABELS[b.jasa]) || '—'}</td>
+                    <td style={tdStyle}>{b.kategori || (b.jasa && JASA_LABELS[b.jasa]) || '-'}</td>
                     <td style={tdStyle}>
                       {b.paket ? (
                         <span
@@ -210,7 +210,7 @@ export default function Brands() {
                         >
                           {b.paket}
                         </span>
-                      ) : '—'}
+                      ) : '-'}
                     </td>
                     <td style={tdStyle}>
                       <span

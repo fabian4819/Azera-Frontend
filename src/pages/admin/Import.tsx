@@ -30,7 +30,7 @@ export default function Import() {
   const [result, setResult] = useState<{ created: number; updated: number; skipped: { rowNumber: number; reason: string }[] } | null>(null);
   const [error, setError] = useState('');
 
-  // Langsung preview begitu file dipilih — tidak ada tombol Preview terpisah
+  // Langsung preview begitu file dipilih, tidak ada tombol Preview terpisah
   const preview = async (picked: File | string) => {
     setSource(typeof picked === 'string' ? 'Google Sheets' : picked.name);
     setRows([]);
@@ -83,7 +83,7 @@ export default function Import() {
           Upload spreadsheet (.xlsx atau .csv) dengan kolom: <strong>Nama Campaign, Brand, Nama Creator, Platform, Link Konten,
           Niche Akun, Views, Reach, Likes, Comments, Shares, Saved, Tanggal Posting, Fee Creator, Fee PIC, Fee MG</strong>. Satu file = satu campaign = satu brand (sheet pertama saja yang dibaca). Satu baris = satu platform per creator.
           Fee = fee per creator untuk campaign tsb (cukup diisi di salah satu baris kalau creator punya lebih dari satu platform). Tanggal pakai format dd/mm/yyyy.
-          Bisa juga pakai link Google Sheets yang aksesnya "Anyone with the link" — tab yang dibaca sesuai link (gid). Import ulang file/link yang sama akan meng-update angka, bukan menggandakan data.
+          Bisa juga pakai link Google Sheets yang aksesnya "Anyone with the link", tab yang dibaca sesuai link (gid). Import ulang file/link yang sama akan meng-update angka, bukan menggandakan data.
         </p>
         <input
           ref={inputRef} type="file" accept=".xlsx,.csv" hidden
@@ -147,7 +147,7 @@ export default function Import() {
           {sheetCount > 1 && (
             <p style={{ fontFamily: f, fontSize: '0.8rem', color: '#92400E', marginBottom: '12px' }}>
               <AlertTriangle size={12} style={{ verticalAlign: 'middle', marginRight: '4px' }} />
-              File ini punya {sheetCount} sheet — yang dibaca hanya sheet pertama. Pisahkan tiap campaign ke file sendiri.
+              File ini punya {sheetCount} sheet, yang dibaca hanya sheet pertama. Pisahkan tiap campaign ke file sendiri.
             </p>
           )}
           {ignoredHeaders.length > 0 && (

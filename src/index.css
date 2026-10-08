@@ -5,7 +5,7 @@
    Mengikuti referensi pitch.com: display = Mark Pro, body = Eina 03.
    Taruh file font di client/public/fonts/ dengan nama persis di bawah ini.
    Kalau punya weight tambahan (mis. Eina Medium/Semibold/Bold), tambahkan
-   @font-face baru dengan font-weight yang sesuai — beri tahu aku file-nya. */
+   @font-face baru dengan font-weight yang sesuai, beri tahu aku file-nya. */
 @font-face {
   font-family: 'Mark Pro';
   src: url('/fonts/MarkPro-Bold.ttf') format('truetype');
@@ -45,11 +45,11 @@
   --error: #ba1a1a;
   --error-container: #ffdad6;
 
-  /* Latar ungu hero — dipakai juga oleh Payoff, Solutions, For Brand, FAQ */
+  /* Latar ungu hero, dipakai juga oleh Payoff, Solutions, For Brand, FAQ */
   /* Disamakan dengan palet gambar hero service (sampling: #a47dfc atas → #5332b1 bawah) */
   --hero-bg: radial-gradient(70% 55% at 50% -8%, #a47dfc, rgba(164,125,252,0) 62%),
     linear-gradient(180deg, #8b66eb 0%, #7250d2 50%, #5332b1 100%);
-  /* Varian ungu tua — khusus kotak showcase di halaman Portfolio & Portfolio Detail */
+  /* Varian ungu tua, khusus kotak showcase di halaman Portfolio & Portfolio Detail */
   --portfolio-bg: radial-gradient(70% 55% at 50% -8%, #5b2fc4, rgba(91,47,196,0) 62%),
     linear-gradient(180deg, #34168a 0%, #25106a 50%, #170a47 100%);
 
@@ -89,12 +89,12 @@
   --font-mono: 'Space Mono', ui-monospace, 'SF Mono', monospace;
 
   /* ─── Aksen lime + colored-glow (mengikuti pitch.com) ───────────
-     Lime jadi "pop accent" di atas basis ungu-navy — dipakai hemat
+     Lime jadi "pop accent" di atas basis ungu-navy, dipakai hemat
      (CTA utama, highlight, satu tag) supaya tetap menonjol. */
   --lime: #c4ee87;
   --lime-strong: #b3e768;
   --on-lime: #15157d;
-  /* Bayangan BERWARNA (bukan abu-abu) — tanda khas pitch */
+  /* Bayangan BERWARNA (bukan abu-abu), tanda khas pitch */
   --shadow-pitch: 0 20px 60px -20px rgba(198, 165, 255, 0.45);
   --shadow-lime: 0 18px 50px -18px rgba(196, 238, 135, 0.65);
   /* Easing reveal khas pitch (easeOutQuint) */
@@ -262,7 +262,7 @@ select::-ms-expand {
   transform: none;
 }
 
-/* Lime CTA — aksen pop khas pitch (lime bg + teks navy) */
+/* Lime CTA, aksen pop khas pitch (lime bg + teks navy) */
 .btn-lime {
   display: inline-flex;
   align-items: center;
@@ -288,7 +288,7 @@ select::-ms-expand {
 }
 .btn-lime:active { transform: scale(0.97); }
 
-/* Outline terang — untuk tombol sekunder di atas background gelap (hero) */
+/* Outline terang, untuk tombol sekunder di atas background gelap (hero) */
 .btn-outline-white {
   display: inline-flex;
   align-items: center;
@@ -395,7 +395,7 @@ select::-ms-expand {
   gap: 8px;
 }
 
-/* Eyebrow monospace — label kecil di atas heading (signature pitch) */
+/* Eyebrow monospace, label kecil di atas heading (signature pitch) */
 .eyebrow {
   font-family: var(--font-mono);
   font-size: 0.72rem;
@@ -408,7 +408,7 @@ select::-ms-expand {
   gap: 8px;
 }
 
-/* Highlight marker lime — untuk menyorot kata di headline */
+/* Highlight marker lime, untuk menyorot kata di headline */
 .mark-lime {
   background: var(--lime);
   color: var(--on-background);
@@ -496,7 +496,7 @@ select::-ms-expand {
   .detail-fields { grid-template-columns: 1fr !important; }
 }
 
-/* ─── Bento Cards (Landing v2 — bordered, no blur/glow) ───────── */
+/* ─── Bento Cards (Landing v2, bordered, no blur/glow) ───────── */
 .bento-card {
   background: #ffffff;
   border: 1.5px solid var(--outline-variant);
@@ -514,11 +514,11 @@ select::-ms-expand {
   border-radius: var(--radius-lg);
   color: #fff;
 }
-/* Varian kartu solusi — hover glow lime (aksen pitch) */
+/* Varian kartu solusi, hover glow lime (aksen pitch) */
 .bento-card-sol { border-color: rgba(196, 238, 135, 0.55); }
 .bento-card-sol:hover { border-color: var(--lime-strong); box-shadow: var(--shadow-lime); }
 
-/* ─── Tag Pills (tinted, flat — no glow rings) ─────────────────── */
+/* ─── Tag Pills (tinted, flat, no glow rings) ─────────────────── */
 .tag-pill {
   display: inline-flex;
   align-items: center;
@@ -566,7 +566,7 @@ select::-ms-expand {
   background: var(--outline);
 }
 
-/* Embed IG (SocialEmbed.tsx): potong bawah iframe supaya berhenti tepat setelah jumlah likes —
+/* Embed IG (SocialEmbed.tsx): potong bawah iframe supaya berhenti tepat setelah jumlah likes,
    baris "Add a comment..." disembunyikan. Margin negatif + overflow hidden = tinggi wrapper ikut
    menyusut. Setel angka ini kalau potongannya kurang/kelebihan. */
 .ig-embed-crop { overflow: hidden; }

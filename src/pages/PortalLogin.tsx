@@ -210,7 +210,7 @@ export default function PortalLogin() {
                       <label style={labelStyle}>Email *</label>
                       <input type="email" value={creatorEmail} onChange={(e) => setCreatorEmail(e.target.value)} placeholder="you@email.com" required style={inputStyle} />
                       <p style={{ fontSize: '0.75rem', color: '#8a8a99', fontFamily: f, marginTop: '6px' }}>
-                        Belum ada email di data kamu sebelumnya — isi dulu ya.
+                        Belum ada email di data kamu sebelumnya, isi dulu ya.
                       </p>
                     </div>
                   )}

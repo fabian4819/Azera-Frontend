@@ -9,7 +9,7 @@ const GRID = '#e2e3e3';
 const HEAD_BG = '#f8f9fa';
 const ROW_NO_W = 46;
 
-/** A, B, …, Z, AA, AB … — label kolom ala spreadsheet */
+/** A, B, …, Z, AA, AB …, label kolom ala spreadsheet */
 const colLetter = (i: number): string => (i < 26 ? String.fromCharCode(65 + i) : colLetter(Math.floor(i / 26) - 1) + colLetter(i % 26));
 
 function renderCell(v: Cell) {
@@ -37,7 +37,7 @@ interface FilterMenuProps {
   onSort: (dir: 1 | -1) => void;
   onApply: (hidden: Set<string>) => void;
   onClose: () => void;
-  /** Pengaturan kolom (admin) — tampil di atas opsi urut/filter */
+  /** Pengaturan kolom (admin), tampil di atas opsi urut/filter */
   extra?: ReactNode;
 }
 

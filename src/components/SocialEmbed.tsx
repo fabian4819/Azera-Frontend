@@ -21,12 +21,12 @@ function loadScriptOnce(src: string, id: string, onLoad: () => void) {
 }
 
 /**
- * Embed resmi Instagram/TikTok (oEmbed publik, gratis, tanpa API key) — sistem
+ * Embed resmi Instagram/TikTok (oEmbed publik, gratis, tanpa API key), sistem
  * ini tidak punya penyimpanan video sendiri, jadi "video creator" berarti
  * postingan aslinya di-embed langsung dari platform. Lihat docs/plan section AD-49.
  */
 // ≈ tinggi embed IG yang sudah dipotong sampai baris likes (.ig-embed-crop) di lebar 340px, supaya
-// kartu IG & TikTok sejajar. Embed TikTok aslinya ±740px — sisa bawah (caption & nama musik) ikut terpotong.
+// kartu IG & TikTok sejajar. Embed TikTok aslinya ±740px, sisa bawah (caption & nama musik) ikut terpotong.
 const TIKTOK_H = 590;
 
 function tiktokVideoId(url: string) {
@@ -34,7 +34,7 @@ function tiktokVideoId(url: string) {
 }
 
 export default function SocialEmbed({ platform: savedPlatform, url }: { platform: 'instagram' | 'tiktok'; url: string }) {
-  // Link adalah sumber kebenaran — pilihan platform di admin bisa salah (default-nya Instagram),
+  // Link adalah sumber kebenaran, pilihan platform di admin bisa salah (default-nya Instagram),
   // dan link TikTok yang dirender sebagai embed IG cuma jadi kotak putih kosong.
   const platform = /tiktok\.com/i.test(url) ? 'tiktok' : /instagram\.com/i.test(url) ? 'instagram' : savedPlatform;
   useEffect(() => {
@@ -58,7 +58,7 @@ export default function SocialEmbed({ platform: savedPlatform, url }: { platform
         </div>
       ) : (
         // Player resmi player/v1, BUKAN embed.js / embed/v2: keduanya kena rate-limit TikTok
-        // ("overload-protect triggered", HTTP 503) — embed/v2 terkonfirmasi 503 sementara player/v1 tetap 200.
+        // ("overload-protect triggered", HTTP 503), embed/v2 terkonfirmasi 503 sementara player/v1 tetap 200.
         <iframe
           src={`https://www.tiktok.com/player/v1/${tiktokVideoId(url)}?rel=0`}
           title="TikTok video"

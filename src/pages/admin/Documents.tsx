@@ -43,7 +43,7 @@ const CONFIGS: Record<string, DocConfig> = {
 function getPath(o: unknown, path: string): unknown {
   return path.split('.').reduce<unknown>((acc, k) => (acc && typeof acc === 'object' ? (acc as Data)[k] : undefined), o);
 }
-/** Set nilai di path "a.b.0.c" tanpa mutasi — array (items) tetap array */
+/** Set nilai di path "a.b.0.c" tanpa mutasi, array (items) tetap array */
 function setPath(o: unknown, keys: string[], value: unknown): unknown {
   const [head, ...rest] = keys;
   const base: Record<string, unknown> = Array.isArray(o) ? ([...o] as unknown as Record<string, unknown>) : { ...(o && typeof o === 'object' ? (o as Data) : {}) };
@@ -73,7 +73,7 @@ const rupiah = (v: number) => {
   return `Rp${x.toLocaleString('id-ID', { minimumFractionDigits: dp, maximumFractionDigits: dp })}`;
 };
 
-/** Angka turunan yang ditampilkan template (data-calc) — rumus sama dengan server (docTemplates.ts) */
+/** Angka turunan yang ditampilkan template (data-calc), rumus sama dengan server (docTemplates.ts) */
 function computeCalcs(data: Data): Record<string, number> {
   const out: Record<string, number> = {};
   const items = Array.isArray(data.items) ? (data.items as Data[]) : [];
@@ -92,7 +92,7 @@ function computeCalcs(data: Data): Record<string, number> {
   return out;
 }
 
-/** Nilai elemen isian di iframe. Pakai tagName, bukan instanceof — elemen iframe beda realm */
+/** Nilai elemen isian di iframe. Pakai tagName, bukan instanceof, elemen iframe beda realm */
 function readValue(el: HTMLElement): unknown {
   if (el.tagName === 'INPUT') {
     const input = el as HTMLInputElement;
@@ -206,7 +206,7 @@ function DocEditor({ config, initialId, initialData, onBack, onSaved }: {
       idRef.current = res.data._id;
       dataRef.current = res.data.data;
       dirtyRef.current = false;
-      setNotice(`Tersimpan — nomor ${String(res.data.data.number)}`);
+      setNotice(`Tersimpan, nomor ${String(res.data.data.number)}`);
       onSaved();
       render(); // tampilkan nomor otomatis yang baru didapat
       if (thenPdf && !(await openPdf(res.data._id, tab))) setError('Tersimpan, tapi gagal membuat PDF.');
@@ -270,7 +270,7 @@ function DocEditor({ config, initialId, initialData, onBack, onSaved }: {
 }
 
 interface ListRow { _id: string; number: string; client: string; mastersheetUrl?: string; updatedAt: string }
-/** Link Mastersheet dari bot WA (/invoice) — hanya link Google Sheets yang dijadikan tautan */
+/** Link Mastersheet dari bot WA (/invoice), hanya link Google Sheets yang dijadikan tautan */
 const isSheetUrl = (u?: string) => !!u && /^https:\/\/docs\.google\.com\/spreadsheets\//.test(u);
 
 const fetchRows = (apiType: string): Promise<ListRow[]> =>

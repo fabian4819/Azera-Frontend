@@ -46,7 +46,7 @@ const complianceLabels: Record<string, { label: string; color: string; bg: strin
 };
 
 function compactNumber(n?: number | null): string {
-  if (n == null) return '—';
+  if (n == null) return '-';
   if (n >= 1_000_000) return (n / 1_000_000).toFixed(1) + 'M';
   if (n >= 1_000) return (n / 1_000).toFixed(1) + 'K';
   return String(n);
@@ -63,7 +63,7 @@ function socialUrl(s: Social | undefined): string {
   return s.profileUrl || `${PLATFORM_URL_PREFIX[s.platform]}${handle}`;
 }
 
-// Satu filterFn generik dipakai semua kolom — nilai kolom boleh scalar atau array (niche dkk),
+// Satu filterFn generik dipakai semua kolom, nilai kolom boleh scalar atau array (niche dkk),
 // dicocokkan sebagai "salah satu token-nya ada di daftar yang dicentang user". Ini bikin filter
 // checkbox model Sheets/Excel bisa dipakai seragam di semua 44 kolom tanpa widget per-tipe.
 function multiTokenFilter(row: { getValue: (id: string) => unknown }, columnId: string, filterValue: string[]): boolean {
@@ -118,7 +118,7 @@ export default function Creators({ scope = 'general' }: { scope?: 'general' | 'c
           filterFn: multiTokenFilter,
           cell: ({ getValue, row }) => {
             const username = getValue<string>();
-            if (!username) return <span style={{ color: '#c7c8cf' }}>—</span>;
+            if (!username) return <span style={{ color: '#c7c8cf' }}>-</span>;
             const url = socialUrl(social(row.original));
             return url ? <a href={url} target="_blank" rel="noopener noreferrer" style={{ color: '#6728e4', textDecoration: 'none', fontWeight: 600 }}>@{username}</a> : `@${username}`;
           },
@@ -130,7 +130,7 @@ export default function Creators({ scope = 'general' }: { scope?: 'general' | 'c
         },
         {
           id: `${platform}_er`, header: `${label} ER`, accessorFn: (c) => m(c)?.engagementRate ?? null,
-          filterFn: multiTokenFilter, cell: ({ getValue }) => { const v = getValue<number | null>(); return v == null ? '—' : `${v}%`; },
+          filterFn: multiTokenFilter, cell: ({ getValue }) => { const v = getValue<number | null>(); return v == null ? '-' : `${v}%`; },
         },
         {
           id: `${platform}_avgViews`, header: `${label} Avg Views`, accessorFn: (c) => m(c)?.avgViews ?? null,
@@ -146,17 +146,17 @@ export default function Creators({ scope = 'general' }: { scope?: 'general' | 'c
     const arrayCol = (id: string, header: string, accessorFn: (c: CreatorItem) => string[]): ColumnDef<CreatorItem> => ({
       id, header, accessorFn, filterFn: multiTokenFilter,
       sortingFn: (a, b) => (accessorFn(a.original).join(', ')).localeCompare(accessorFn(b.original).join(', ')),
-      cell: ({ getValue }) => { const arr = getValue<string[]>(); return arr.length ? arr.join(', ') : <span style={{ color: '#c7c8cf' }}>—</span>; },
+      cell: ({ getValue }) => { const arr = getValue<string[]>(); return arr.length ? arr.join(', ') : <span style={{ color: '#c7c8cf' }}>-</span>; },
     });
 
     const textCol = (id: string, header: string, accessorFn: (c: CreatorItem) => string, cell?: ColumnDef<CreatorItem>['cell']): ColumnDef<CreatorItem> => ({
       id, header, accessorFn, filterFn: multiTokenFilter,
-      cell: cell ?? (({ getValue }) => { const v = getValue<string>(); return v || <span style={{ color: '#c7c8cf' }}>—</span>; }),
+      cell: cell ?? (({ getValue }) => { const v = getValue<string>(); return v || <span style={{ color: '#c7c8cf' }}>-</span>; }),
     });
 
     const numCol = (id: string, header: string, accessorFn: (c: CreatorItem) => number | null, cell?: ColumnDef<CreatorItem>['cell']): ColumnDef<CreatorItem> => ({
       id, header, accessorFn, filterFn: multiTokenFilter,
-      cell: cell ?? (({ getValue }) => { const v = getValue<number | null>(); return v ?? <span style={{ color: '#c7c8cf' }}>—</span>; }),
+      cell: cell ?? (({ getValue }) => { const v = getValue<number | null>(); return v ?? <span style={{ color: '#c7c8cf' }}>-</span>; }),
     });
 
     return [
@@ -185,7 +185,7 @@ export default function Creators({ scope = 'general' }: { scope?: 'general' | 'c
       textCol('npwp', 'NPWP', (c) => c.npwp || ''),
       textCol('portfolio', 'Portfolio', (c) => c.portfolioLink || '', ({ getValue }) => {
         const v = getValue<string>();
-        return v ? <a href={v} target="_blank" rel="noopener noreferrer" style={{ color: '#6728e4', textDecoration: 'none' }}>Buka link</a> : <span style={{ color: '#c7c8cf' }}>—</span>;
+        return v ? <a href={v} target="_blank" rel="noopener noreferrer" style={{ color: '#6728e4', textDecoration: 'none' }}>Buka link</a> : <span style={{ color: '#c7c8cf' }}>-</span>;
       }),
       numCol('performanceScore', 'Skor', (c) => c.performanceScore?.overall ?? 0, ({ getValue }) => <span style={{ fontWeight: 700, color: '#6728e4' }}>{getValue<number>()}</span>),
       numCol('cancelCount', 'Jumlah Cancel', (c) => c.cancelCount ?? 0),
@@ -314,7 +314,7 @@ export default function Creators({ scope = 'general' }: { scope?: 'general' | 'c
 }
 
 // Header sel: klik label buat sort (klik lagi buat balik arah / lepas sort), klik ikon corong
-// buka daftar checkbox nilai unik kolom itu — persis pola filter default Sheets/Excel, dipakai
+// buka daftar checkbox nilai unik kolom itu, persis pola filter default Sheets/Excel, dipakai
 // seragam buat semua kolom (baik nilai scalar maupun array) lewat multiTokenFilter di atas.
 function ColumnHeaderCell({ column, table, children }: { column: Column<CreatorItem, unknown>; table: ReactTableInstance<CreatorItem>; children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
@@ -336,7 +336,7 @@ function ColumnHeaderCell({ column, table, children }: { column: Column<CreatorI
     }
     return Array.from(set).sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
     // otherColumnFilters dipakai murni sebagai trigger recompute (facet berubah kalau kolom LAIN
-    // difilter) — bukan dibaca di body, makanya lint kira "tidak perlu".
+    // difilter), bukan dibaca di body, makanya lint kira "tidak perlu".
   }, [column, otherColumnFilters]);
 
   const selected = filterValue ?? uniqueValues; // undefined filter = semua tercentang

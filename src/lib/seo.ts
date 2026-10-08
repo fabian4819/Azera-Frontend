@@ -171,7 +171,7 @@ export const seoByPath: Record<string, SEOConfig> = {
   '/kamus': {
     title: 'Kamus KOL | Istilah Influencer Marketing | AzeraKOL',
     description:
-      'Kamus istilah KOL dan influencer marketing dari AzeraKOL — pahami arti nano influencer, engagement rate, KOC, GMV, dan istilah campaign lainnya.',
+      'Kamus istilah KOL dan influencer marketing dari AzeraKOL, pahami arti nano influencer, engagement rate, KOC, GMV, dan istilah campaign lainnya.',
     path: '/kamus',
     keywords: 'kamus KOL, istilah influencer marketing, glosarium KOL, arti KOL, istilah campaign brand',
     jsonLd: [breadcrumb([{ name: 'Home', path: '/' }, { name: 'Kamus KOL', path: '/kamus' }])],
@@ -195,7 +195,7 @@ export function getSeoForPath(pathname: string): SEOConfig {
     const term = glossaryTerms.find((t) => t.slug === slug);
     if (term) {
       return {
-        title: `${term.term} — Arti & Penjelasan | Kamus KOL AzeraKOL`,
+        title: `${term.term}: Arti & Penjelasan | Kamus KOL AzeraKOL`,
         description: term.summary,
         path: pathname,
         jsonLd: breadcrumb([

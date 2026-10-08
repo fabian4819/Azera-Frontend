@@ -80,7 +80,7 @@ export default function LeadBotTemplates() {
   return (
     <div>
       <p style={{ fontFamily: f, fontSize: '0.85rem', color: '#777683', marginBottom: '20px' }}>
-        Pesan yang dibalas otomatis bot di CHAT PERTAMA nomor yang belum pernah chat (2 pilihan: daftar info / langsung ke Admin) — beda dari Template Pesan di menu sebelah, yang itu untuk notifikasi ke creator/client yang sudah terdaftar.
+        Pesan yang dibalas otomatis bot di CHAT PERTAMA nomor yang belum pernah chat (2 pilihan: daftar info / langsung ke Admin), beda dari Template Pesan di menu sebelah, yang itu untuk notifikasi ke creator/client yang sudah terdaftar.
       </p>
       <div style={{ ...cardStyle, display: 'flex', flexWrap: 'wrap', gap: '12px 32px', alignItems: 'center' }}>
         <p style={{ fontFamily: f, fontWeight: 700, fontSize: '0.88rem', color: '#191c20', flex: '1 1 100%' }}>Balasan otomatis</p>
@@ -139,7 +139,7 @@ export default function LeadBotTemplates() {
             <Lock size={16} color="#ba1a1a" /> Bagian yang Tidak Bisa Diubah
           </h2>
           <p style={{ fontFamily: f, fontSize: '0.8rem', color: '#777683', marginBottom: '14px', lineHeight: 1.6 }}>
-            Bot membaca balasan Brand dengan mencocokkan teks label ini secara persis. Kalau diubah, bot bisa gagal total menyimpan data yang dikirim Brand — jadi bagian ini tampil sebagai referensi saja, bukan form edit.
+            Bot membaca balasan Brand dengan mencocokkan teks label ini secara persis. Kalau diubah, bot bisa gagal total menyimpan data yang dikirim Brand, jadi bagian ini tampil sebagai referensi saja, bukan form edit.
           </p>
 
           <div style={{ ...cardStyle, background: '#faf9fc', border: '1.5px dashed #c7c8cf' }}>

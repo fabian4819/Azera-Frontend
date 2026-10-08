@@ -120,7 +120,7 @@ const checkChip = (on: boolean): React.CSSProperties => ({
 export default function PortfolioManager() {
   const [items, setItems] = useState<PortfolioItem[]>([]);
   const [loading, setLoading] = useState(true);
-  // Drag & drop urutan Top Creator — kartu cuma draggable saat grip ditekan, biar input tetap bisa diseleksi
+  // Drag & drop urutan Top Creator, kartu cuma draggable saat grip ditekan, biar input tetap bisa diseleksi
   const [dragArmed, setDragArmed] = useState<number | null>(null);
   const [dragFrom, setDragFrom] = useState<number | null>(null);
   const [dragOver, setDragOver] = useState<number | null>(null);
@@ -334,15 +334,15 @@ export default function PortfolioManager() {
                   onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.background = i % 2 === 0 ? 'white' : '#fcfcff')}
                 >
                   <td style={{ ...tdStyle, fontWeight: 600, color: '#191c20' }}>{item.brand}</td>
-                  <td style={tdStyle}>{item.title || '—'}</td>
+                  <td style={tdStyle}>{item.title || '-'}</td>
                   <td style={tdStyle}>
                     <span style={{ background: '#e1e0ff', color: '#6728e4', borderRadius: '999px', padding: '3px 10px', fontSize: '0.72rem', fontFamily: "var(--font-display)", fontWeight: 700, whiteSpace: 'nowrap' }}>
-                      {item.category || '—'}
+                      {item.category || '-'}
                     </span>
                   </td>
-                  <td style={tdStyle}>{item.kolCount ?? '—'}</td>
-                  <td style={tdStyle}>{item.platforms?.length ? item.platforms.reduce((s, r) => s + (r.posts || 0), 0) : '—'}</td>
-                  <td style={tdStyle}>{(() => { const v = totalViews(item); return v === null ? '—' : formatCompact(v); })()}</td>
+                  <td style={tdStyle}>{item.kolCount ?? '-'}</td>
+                  <td style={tdStyle}>{item.platforms?.length ? item.platforms.reduce((s, r) => s + (r.posts || 0), 0) : '-'}</td>
+                  <td style={tdStyle}>{(() => { const v = totalViews(item); return v === null ? '-' : formatCompact(v); })()}</td>
                   <td style={tdStyle}>
                     <span style={{ color: item.status === 'draft' ? '#b45309' : '#10B981', fontFamily: "var(--font-display)", fontWeight: 700, fontSize: '0.78rem' }}>
                       {item.status === 'draft' ? 'Draft' : 'Publish'}
@@ -353,7 +353,7 @@ export default function PortfolioManager() {
                       {item.featured ? 'Ya' : 'Tidak'}
                     </span>
                   </td>
-                  <td style={{ ...tdStyle, whiteSpace: 'nowrap' }}>{item.createdAt ? formatDate(item.createdAt) : '—'}</td>
+                  <td style={{ ...tdStyle, whiteSpace: 'nowrap' }}>{item.createdAt ? formatDate(item.createdAt) : '-'}</td>
                   <td style={tdStyle}>
                     <div style={{ display: 'flex', gap: '6px' }}>
                       <button
@@ -575,7 +575,7 @@ export default function PortfolioManager() {
             )}
             <p style={{ ...hintStyle, marginTop: '8px' }}>
               Total postingan tayang: <b>{formPosts.toLocaleString('id-ID')}</b> · Total views: <b>{formViews === null ? 'n/a' : formViews.toLocaleString('id-ID')}</b>.
-              Kreator per platform tidak dijumlah menjadi total kreator — satu orang bisa posting di beberapa platform.
+              Kreator per platform tidak dijumlah menjadi total kreator, satu orang bisa posting di beberapa platform.
             </p>
 
             <p style={{ ...sectionTitle, marginTop: '18px' }}>Hasil Tambahan</p>
@@ -653,7 +653,7 @@ export default function PortfolioManager() {
                           <Trash2 size={14} />
                         </button>
                       </div>
-                      <input value={c.postLink} onChange={(e) => { const v = e.target.value; updateCreator(i, { postLink: v, ...(/tiktok\.com/i.test(v) ? { platform: 'tiktok' } : /instagram\.com/i.test(v) ? { platform: 'instagram' } : {}) }); }} placeholder="Link postingan asli (opsional) — instagram.com/p/... atau tiktok.com/@.../video/..." style={{ ...modalInputStyle, padding: '8px 10px', fontSize: '0.8rem', marginBottom: '8px' }} />
+                      <input value={c.postLink} onChange={(e) => { const v = e.target.value; updateCreator(i, { postLink: v, ...(/tiktok\.com/i.test(v) ? { platform: 'tiktok' } : /instagram\.com/i.test(v) ? { platform: 'instagram' } : {}) }); }} placeholder="Link postingan asli (opsional), instagram.com/p/... atau tiktok.com/@.../video/..." style={{ ...modalInputStyle, padding: '8px 10px', fontSize: '0.8rem', marginBottom: '8px' }} />
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px' }}>
                         <input value={c.views} onChange={(e) => updateCreator(i, { views: e.target.value })} placeholder="Views" style={{ ...modalInputStyle, padding: '8px 10px', fontSize: '0.78rem' }} />
                         <input value={c.likes} onChange={(e) => updateCreator(i, { likes: e.target.value })} placeholder="Likes" style={{ ...modalInputStyle, padding: '8px 10px', fontSize: '0.78rem' }} />
@@ -665,7 +665,7 @@ export default function PortfolioManager() {
                 </div>
               )}
               <p style={{ fontSize: '0.72rem', color: '#8a8a99', marginTop: '8px' }}>
-                Urutan menentukan ranking (creator pertama = Top 1) — geser ikon ⋮⋮ untuk mengubah urutan. Data diisi manual — belum dihitung otomatis dari data campaign.
+                Urutan menentukan ranking (creator pertama = Top 1), geser ikon ⋮⋮ untuk mengubah urutan. Data diisi manual, belum dihitung otomatis dari data campaign.
               </p>
             </div>
 

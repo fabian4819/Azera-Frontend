@@ -75,7 +75,7 @@ function Field({ label, value }: { label: string; value?: string }) {
   return (
     <div>
       <p style={labelSmall}>{label}</p>
-      <p style={valueStyle}>{value || '—'}</p>
+      <p style={valueStyle}>{value || '-'}</p>
     </div>
   );
 }

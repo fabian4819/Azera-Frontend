@@ -271,7 +271,7 @@ export default function ServiceDetail() {
         </motion.div>
       </section>
 
-      {/* Paket Campaign + CTA — gaya sama dengan CTA "Untuk Creator" di home */}
+      {/* Paket Campaign + CTA, gaya sama dengan CTA "Untuk Creator" di home */}
       <section ref={pricingRef} style={{ position: 'relative', overflow: 'hidden', padding: '90px 24px' }}>
         <div style={{ position: 'absolute', inset: 0, zIndex: 0 }} aria-hidden="true">
           <motion.img

@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-// Instance terpisah dari lib/api.ts dan lib/talentApi.ts — akun PIC/Handle-by
+// Instance terpisah dari lib/api.ts dan lib/talentApi.ts, akun PIC/Handle-by
 // punya token & redirect sendiri, supaya beberapa sesi login bisa hidup berdampingan.
 const picApi = axios.create({
   baseURL: '/api',

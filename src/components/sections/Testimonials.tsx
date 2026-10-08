@@ -57,7 +57,7 @@ function TestimonialCard({ item, styleIdx }: { item: QuoteItem; styleIdx: number
         </div>
         <div>
           <p style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '0.78rem', color: s.text }}>
-            {item.name}{item.title ? ` — ${item.title}` : ''}
+            {item.name}{item.title ? `, ${item.title}` : ''}
           </p>
           <p style={{ fontSize: '0.7rem', color: s.sub }}>{item.badge}</p>
         </div>
@@ -67,7 +67,7 @@ function TestimonialCard({ item, styleIdx }: { item: QuoteItem; styleIdx: number
 }
 
 function MarqueeRow({ items, direction, duration }: { items: QuoteItem[]; direction: 'left' | 'right'; duration: number }) {
-  // Konten digandakan 2x (dua set identik berurutan) — trik CSS marquee klasik:
+  // Konten digandakan 2x (dua set identik berurutan), trik CSS marquee klasik:
   // animasikan translateX 0 -> -50%, begitu sampai -50% posisinya identik dengan
   // awal lagi, jadi loop-nya mulus tak terlihat sambungannya.
   const doubled = [...items, ...items];
@@ -89,7 +89,7 @@ export default function Testimonials() {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: '-100px' });
 
-  // Cuma 2 testimoni — diulang beberapa kali dulu supaya track-nya cukup panjang
+  // Cuma 2 testimoni, diulang beberapa kali dulu supaya track-nya cukup panjang
   // dan terasa looping tak berujung, bukan cuma bolak-balik 2 kartu.
   const loopItems = Array(6).fill(quoteItems).flat();
 

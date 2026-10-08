@@ -49,12 +49,12 @@ const CreatorDetail = lazy(() => import('./pages/admin/CreatorDetail'));
 const PicUsers = lazy(() => import('./pages/admin/PicUsers'));
 const ExtensionConnect = lazy(() => import('./pages/admin/ExtensionConnect'));
 
-// Talent Portal — creator-facing, juga bukan target SEO
+// Talent Portal, creator-facing, juga bukan target SEO
 const TalentLayout = lazy(() => import('./components/layout/TalentLayout'));
 const TalentCampaigns = lazy(() => import('./pages/talent/TalentCampaigns'));
 const CreatorPortal = lazy(() => import('./pages/CreatorPortal'));
 
-// PIC/Handle-by Portal — campaign contact-facing, akun bisa link banyak campaign
+// PIC/Handle-by Portal, campaign contact-facing, akun bisa link banyak campaign
 const PicLayout = lazy(() => import('./components/layout/PicLayout'));
 const PicCampaigns = lazy(() => import('./pages/pic/PicCampaigns'));
 const PicCampaignDetail = lazy(() => import('./pages/pic/PicCampaignDetail'));
@@ -76,7 +76,7 @@ function PublicLayout() {
   );
 }
 
-/** Role developer = akses admin, tapi Inbox WhatsApp (chat pribadi) ditutup — API-nya juga menolak. */
+/** Role developer = akses admin, tapi Inbox WhatsApp (chat pribadi) ditutup, API-nya juga menolak. */
 function NoDeveloper({ children }: { children: React.ReactElement }) {
   let role: string | undefined;
   try { role = JSON.parse(localStorage.getItem('azera_admin') || '{}').role; } catch { role = undefined; }
@@ -125,14 +125,14 @@ export default function App() {
             <Route path="/apply/:slug" element={<CampaignApply />} />
           </Route>
 
-          {/* Invoice payment — halaman publik transaksional, tanpa Navbar/Footer marketing */}
+          {/* Invoice payment, halaman publik transaksional, tanpa Navbar/Footer marketing */}
           <Route path="/invoice/:id" element={<InvoicePayment />} />
 
           {/* AD-48: dashboard PIC/Handle-by, akses via accessCode (query ?code=), tanpa login/Navbar/Footer */}
           <Route path="/campaign-dashboard/:id" element={<CampaignDashboard />} />
           <Route path="/portal/:token" element={<CreatorPortal />} />
 
-          {/* Admin login — no layout */}
+          {/* Admin login, no layout */}
           <Route path="/admin/login" element={<AdminLogin />} />
 
           {/* Admin protected routes */}
@@ -161,7 +161,7 @@ export default function App() {
             <Route path="portfolio" element={<PortfolioManager />} />
           </Route>
 
-          {/* Unified sign in/up for Creator & PIC campaign portals — no layout */}
+          {/* Unified sign in/up for Creator & PIC campaign portals, no layout */}
           <Route path="/login" element={<PortalLogin />} />
           <Route path="/talent/login" element={<Navigate to="/login" replace />} />
 

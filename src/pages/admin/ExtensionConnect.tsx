@@ -130,7 +130,7 @@ export default function ExtensionConnect() {
         {freshCode && (
           <div style={{ background: '#f0eeff', border: '1px solid #d9d2ff', borderRadius: '12px', padding: '14px 16px' }}>
             <p style={{ fontSize: '0.75rem', color: '#3a1d8a', fontWeight: 700, marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              Kode baru — salin sekarang, tidak ditampilkan lagi
+              Kode baru, salin sekarang, tidak ditampilkan lagi
             </p>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <code style={{ flex: 1, fontSize: '0.82rem', wordBreak: 'break-all', color: '#1E0A5E', fontFamily: 'ui-monospace, Menlo, monospace' }}>{freshCode}</code>
@@ -148,7 +148,7 @@ export default function ExtensionConnect() {
                 <div>
                   <b>{t.label}</b> <span style={{ color: '#999' }}>· AZK1-{t.hint}…</span>
                   <p style={{ fontSize: '0.72rem', color: '#777683' }}>
-                    {t.createdBy?.name || '—'} · {t.lastUsedAt ? `dipakai ${new Date(t.lastUsedAt).toLocaleDateString('id-ID')}` : 'belum dipakai'}
+                    {t.createdBy?.name || '-'} · {t.lastUsedAt ? `dipakai ${new Date(t.lastUsedAt).toLocaleDateString('id-ID')}` : 'belum dipakai'}
                   </p>
                 </div>
                 <button onClick={() => revoke(t._id)} title="Cabut kode ini" style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ba1a1a', display: 'flex' }}>
@@ -227,16 +227,16 @@ export default function ExtensionConnect() {
                           )}
                         </td>
                         <td style={{ padding: '10px' }}>
-                          {r.followers?.toLocaleString('id-ID') ?? '—'}
+                          {r.followers?.toLocaleString('id-ID') ?? '-'}
                           {r.followersDelta != null && r.followersDelta !== 0 && (
                             <span style={{ color: r.followersDelta > 0 ? '#065F46' : '#ba1a1a', fontSize: '0.72rem', marginLeft: '4px' }}>
                               {r.followersDelta > 0 ? '+' : ''}{r.followersDelta.toLocaleString('id-ID')}
                             </span>
                           )}
                         </td>
-                        <td style={{ padding: '10px' }}>{r.engagementRate != null ? `${r.engagementRate}%` : '—'}</td>
-                        <td style={{ padding: '10px' }}>{r.avgLikes != null ? Math.round(r.avgLikes).toLocaleString('id-ID') : '—'}</td>
-                        <td style={{ padding: '10px' }}>{r.postsCount != null ? r.postsCount.toLocaleString('id-ID') : '—'}</td>
+                        <td style={{ padding: '10px' }}>{r.engagementRate != null ? `${r.engagementRate}%` : '-'}</td>
+                        <td style={{ padding: '10px' }}>{r.avgLikes != null ? Math.round(r.avgLikes).toLocaleString('id-ID') : '-'}</td>
+                        <td style={{ padding: '10px' }}>{r.postsCount != null ? r.postsCount.toLocaleString('id-ID') : '-'}</td>
                         <td style={{ padding: '10px' }}>{r.snapshotCount}× · {new Date(r.capturedAt).toLocaleDateString('id-ID')}</td>
                         <td style={{ padding: '10px' }}>
                           {r.creator ? (

@@ -41,7 +41,7 @@ export interface SnapshotView {
 
 /* ---------- format ---------- */
 function fmt(n?: number | null): string {
-  if (n === null || n === undefined || !Number.isFinite(n)) return '—';
+  if (n === null || n === undefined || !Number.isFinite(n)) return '-';
   const abs = Math.abs(n);
   const koma = (x: number, d: number) => x.toFixed(d).replace('.', ',');
   if (abs >= 1_000_000_000) return koma(n / 1_000_000_000, 1) + 'M';
@@ -50,21 +50,21 @@ function fmt(n?: number | null): string {
   return String(Math.round(n * 100) / 100).replace('.', ',');
 }
 function pct(n?: number | null): string {
-  return n === null || n === undefined || !Number.isFinite(n) ? '—' : (Math.round(n * 100) / 100).toFixed(2).replace('.', ',') + '%';
+  return n === null || n === undefined || !Number.isFinite(n) ? '-' : (Math.round(n * 100) / 100).toFixed(2).replace('.', ',') + '%';
 }
 function tgl(s?: string): string {
-  if (!s) return '—';
+  if (!s) return '-';
   try { return new Date(s).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: '2-digit' }); }
-  catch { return '—'; }
+  catch { return '-'; }
 }
 function ringkasRentang(hari?: number | null): string {
-  if (hari === null || hari === undefined) return '—';
+  if (hari === null || hari === undefined) return '-';
   if (hari < 60) return hari + ' hari';
   if (hari < 730) return (Math.round((hari / 30.4) * 10) / 10).toString().replace('.', ',') + ' bulan';
   return (Math.round((hari / 365) * 10) / 10).toString().replace('.', ',') + ' tahun';
 }
 function num1(n?: number | null): string {
-  return n == null || !Number.isFinite(n) ? '—' : String(Math.round(n * 100) / 100).replace('.', ',');
+  return n == null || !Number.isFinite(n) ? '-' : String(Math.round(n * 100) / 100).replace('.', ',');
 }
 
 /* ---------- recompute dari baris (port dari KolxMetrics.compute ekstensi) ---------- */
@@ -192,7 +192,7 @@ function ErTooltip({
 }
 
 /**
- * Tren ER per post — (likes + komentar) ÷ followers per post, urut lama → baru.
+ * Tren ER per post, (likes + komentar) ÷ followers per post, urut lama → baru.
  * Recharts area chart; hijau naik / merah turun; titik kuning = berbayar.
  * Hover → popup gambar + info post; klik → buka post-nya.
  */
@@ -371,7 +371,7 @@ export default function SnapshotDetail({ s, compact }: { s: SnapshotView; compac
       )}
       {s.bio && !compact && <p style={{ fontSize: '0.78rem', color: '#55516b', whiteSpace: 'pre-wrap' }}>{s.bio}</p>}
 
-      {/* pemilih ukuran sampel — seperti dropdown "Sampel" di ekstensi */}
+      {/* pemilih ukuran sampel, seperti dropdown "Sampel" di ekstensi */}
       {hasRows && (
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.75rem', color: '#55516b' }}>
           <span style={lbl}>Sampel</span>
@@ -434,7 +434,7 @@ export default function SnapshotDetail({ s, compact }: { s: SnapshotView; compac
         </div>
       )}
 
-      {/* tren ER per post — grafik + popup gambar seperti ekstensi */}
+      {/* tren ER per post, grafik + popup gambar seperti ekstensi */}
       <ErTrendChart rows={rows} followers={s.followers} komentarLabel={komentarLabel} />
 
       {/* tren followers antar snapshot */}
@@ -472,7 +472,7 @@ export default function SnapshotDetail({ s, compact }: { s: SnapshotView; compac
                         : `${r.approxDate ? '≈' : ''}${tgl(r.date)}`}
                       {r.paid && <span style={{ marginLeft: 4, color: '#b45309', fontWeight: 700 }} title="berbayar">$</span>}
                     </td>
-                    <td style={{ textAlign: 'left', padding: '4px 6px', color: '#8a869c' }}>{r.format || '—'}</td>
+                    <td style={{ textAlign: 'left', padding: '4px 6px', color: '#8a869c' }}>{r.format || '-'}</td>
                     <td style={{ padding: '4px 6px' }}>{fmt(r.likes)}</td>
                     <td style={{ padding: '4px 6px' }}>{fmt(r.comments)}</td>
                     {anyViews && <td style={{ padding: '4px 6px' }}>{fmt(r.views)}</td>}

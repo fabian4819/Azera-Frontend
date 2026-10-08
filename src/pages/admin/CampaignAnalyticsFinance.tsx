@@ -2,7 +2,7 @@ import { useEffect, useState, Fragment } from 'react';
 import { Sparkles, RefreshCw, FileText, ImageIcon, Plus, Trash2, ExternalLink, Radar } from 'lucide-react';
 import api from '../../lib/api';
 
-/** AI insight text hanya pakai **bold** dan "- " bullet — render itu saja, bukan full markdown parser. */
+/** AI insight text hanya pakai **bold** dan "- " bullet, render itu saja, bukan full markdown parser. */
 function renderBoldSegments(line: string) {
   const parts = line.split(/(\*\*[^*]+\*\*)/g);
   return parts.map((part, i) =>

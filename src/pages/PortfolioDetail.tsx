@@ -8,7 +8,7 @@ import {
 } from '../lib/portfolio';
 
 const num = (v: number | null | undefined, compact = false) =>
-  v === null || v === undefined ? '—' : compact ? formatCompact(v) : v.toLocaleString('id-ID');
+  v === null || v === undefined ? '-' : compact ? formatCompact(v) : v.toLocaleString('id-ID');
 
 const cell: React.CSSProperties = { padding: '8px 10px 8px 0', fontSize: '0.82rem', color: 'rgba(255,255,255,0.85)', whiteSpace: 'nowrap', textAlign: 'left' };
 const head: React.CSSProperties = { ...cell, fontWeight: 700, color: '#fff' };
@@ -70,7 +70,7 @@ export default function PortfolioDetail() {
   const rows = item.platforms || [];
   // kolom Metrik Tambahan hanya muncul bila ada baris yang diizinkan tampil publik (server sudah strip sisanya)
   const extraCols = (Object.keys(EXTRA_LABELS) as ExtraKey[]).filter((k) => rows.some((r) => r[k] !== undefined && r[k] !== null && r[k] !== ''));
-  const extraValue = (r: PlatformResult, k: ExtraKey) => (k === 'er' ? r.er || '—' : num(r[k], true));
+  const extraValue = (r: PlatformResult, k: ExtraKey) => (k === 'er' ? r.er || '-' : num(r[k], true));
   const scope = scopeText(item);
   const clips: Clip[] = [
     ...(item.topCreators || []).slice(0, 3).filter((c) => c.postLink).map((creator) => ({ kind: 'embed' as const, creator })),

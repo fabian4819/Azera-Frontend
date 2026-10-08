@@ -11,7 +11,7 @@ const features: Feature[] = [
   { title: 'Fokus pada Performa', desc: 'Laporan transparan dengan metrik yang relevan. Setiap campaign dioptimalkan untuk mencapai tujuan bisnis yang sudah disepakati.', image: '/why-azera/4-performance-roi.webp' },
 ];
 
-// Ilustrasi polos tanpa bingkai — PNG/WebP transparan, langsung di atas latar section.
+// Ilustrasi polos tanpa bingkai, PNG/WebP transparan, langsung di atas latar section.
 function renderVisual(i: number) {
   const f = features[i];
   if (!f) return null;
@@ -60,7 +60,7 @@ function ScrollFade({ children, style }: { children: React.ReactNode; style?: Re
   return <motion.div ref={ref} style={{ ...style, opacity, y, scale }}>{children}</motion.div>;
 }
 
-// Teks kiri: slide vertikal terarah — masuk dari bawah saat maju, dari atas saat mundur.
+// Teks kiri: slide vertikal terarah, masuk dari bawah saat maju, dari atas saat mundur.
 const textVariants = {
   enter: (dir: number) => ({ y: dir > 0 ? 36 : -36, opacity: 0 }),
   center: { y: 0, opacity: 1 },
@@ -96,7 +96,7 @@ export default function WhyAzera() {
     setActive(idx);
   };
 
-  // Mobile: tumpuk biasa — tiap poin + visualnya fade mengikuti scroll
+  // Mobile: tumpuk biasa, tiap poin + visualnya fade mengikuti scroll
   if (!isDesktop) {
     return (
       <section style={{ background: 'linear-gradient(180deg, #ece6ff 0%, var(--surface) 12%)', padding: '48px 0 72px' }}>
@@ -119,7 +119,7 @@ export default function WhyAzera() {
   return (
     <section style={{ position: 'relative', background: 'linear-gradient(180deg, #ece6ff 0%, var(--surface) 10%)' }}>
       <div style={{ maxWidth: '1160px', margin: '0 auto', padding: '0 24px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '56px' }}>
-        {/* LEFT — heading + poin aktif, sticky */}
+        {/* LEFT, heading + poin aktif, sticky */}
         <div style={{ position: 'sticky', top: 0, height: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
           <HeadingBlock />
           <div style={{ minHeight: '150px', marginTop: '44px', overflow: 'hidden' }}>
@@ -139,7 +139,7 @@ export default function WhyAzera() {
           </div>
         </div>
 
-        {/* RIGHT — tiap visual satu layar, terang penuh saat di tengah */}
+        {/* RIGHT, tiap visual satu layar, terang penuh saat di tengah */}
         <div>
           {features.map((f, i) => (
             <motion.div

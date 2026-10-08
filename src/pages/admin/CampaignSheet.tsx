@@ -74,7 +74,7 @@ export default function CampaignSheet() {
     setError('');
   };
 
-  // Data tab lain ikut basi setelah edit/approve — buang cache-nya, muat ulang tab yang sedang dibuka.
+  // Data tab lain ikut basi setelah edit/approve, buang cache-nya, muat ulang tab yang sedang dibuka.
   const reloadCurrent = async () => {
     setCache((c) => ({ [kind]: c[kind] }));
     await load(kind);
@@ -95,7 +95,7 @@ export default function CampaignSheet() {
     await reloadCurrent();
   };
 
-  // Kelola kolom langsung dari header tabel — tiap perubahan langsung disimpan ke campaign
+  // Kelola kolom langsung dari header tabel, tiap perubahan langsung disimpan ke campaign
   const progressCols = view?.progressColumns ?? [];
   const saveColumns = async (progressColumns: ProgressColumn[], columnAccess?: Record<string, Access>) => {
     setActionError('');
@@ -264,7 +264,7 @@ export default function CampaignSheet() {
           columnMenu={isMaster ? columnMenu : undefined}
           headerIcon={isMaster ? (col) => (view.columns?.[col] ? <AccessIcon access={view.columns[col].access} /> : null) : undefined}
           addColumnMenu={isMaster ? (close) => <AddColumnMenu onAdd={(cols) => { close(); void saveColumns([...progressCols, ...cols]); }} /> : undefined}
-          footer=" · Data langsung dari database — sama dengan yang disinkron ke Google Sheets."
+          footer=" · Data langsung dari database, sama dengan yang disinkron ke Google Sheets."
         />
       )}
 

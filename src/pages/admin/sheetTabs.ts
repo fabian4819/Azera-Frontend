@@ -1,6 +1,6 @@
 import { Table2, BarChart3, Wallet, UserCheck } from 'lucide-react';
 
-/** 4 sheet per campaign — dipakai tab di CampaignSheet & tombol di kartu CampaignDashboard. */
+/** 4 sheet per campaign, dipakai tab di CampaignSheet & tombol di kartu CampaignDashboard. */
 export type SheetKind = 'master' | 'report' | 'recap' | 'applicants';
 
 export const SHEET_TABS: { kind: SheetKind; label: string; hint: string; empty: string; icon: typeof Table2 }[] = [

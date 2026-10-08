@@ -150,7 +150,7 @@ export default function CampaignNew() {
         type,
         eventDetails: type === 'offline' ? { location: eventLocation, date: eventDate, timeWindow: eventTimeWindow } : undefined,
       });
-      // PIC yang dicentang di tahap 2 — best-effort, campaign sudah terbuat
+      // PIC yang dicentang di tahap 2, best-effort, campaign sudah terbuat
       await Promise.all(allPics.filter((p) => picIds.includes(p._id)).map((p) => api.post(`/admin/campaigns/${res.data._id}/pic`, { email: p.email }).catch(() => undefined)));
       setCreated({ id: res.data._id, broadcast: buildBroadcast(res.data, `${window.location.origin}/apply/${res.data.applySlug}`) });
     } catch {

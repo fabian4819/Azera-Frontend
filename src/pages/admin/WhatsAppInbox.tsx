@@ -20,7 +20,7 @@ function contactLabel(c: WaContact) {
   const isGroup = c.jid.endsWith('@g.us');
   const raw = c.jid.split('@')[0];
   if (isGroup) return `Grup ${raw}`;
-  // @lid = ID anonim WhatsApp, bukan nomor — jangan tampilkan angka acaknya.
+  // @lid = ID anonim WhatsApp, bukan nomor, jangan tampilkan angka acaknya.
   return c.jid.endsWith('@lid') ? 'Kontak (nomor belum terbaca)' : raw;
 }
 

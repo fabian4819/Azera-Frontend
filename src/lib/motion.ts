@@ -3,7 +3,7 @@ import { useScroll, useTransform } from 'framer-motion';
 import type { MotionValue } from 'framer-motion';
 import type { RefObject } from 'react';
 
-// Easing reveal khas pitch.com (easeOutQuint) — deselerasi mulus
+// Easing reveal khas pitch.com (easeOutQuint), deselerasi mulus
 export const ease = [0.22, 1, 0.36, 1] as const;
 
 // ─── Variants ───────────────────────────────────────────────────────────────
