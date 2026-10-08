@@ -181,9 +181,75 @@ export default function Portfolio() {
         </AnimatePresence>
 
         {filtered.length === 0 && (
-          <div style={{ textAlign: 'center', padding: '60px 24px', color: 'var(--outline)' }}>
-            <p style={{ fontSize: '1rem' }}>Belum ada portfolio untuk kategori ini.</p>
-          </div>
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.35, ease }}
+            style={{
+              textAlign: 'center',
+              padding: '24px 24px 72px',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <img
+              src="/empty-portfolio.webp"
+              alt="Belum ada portfolio"
+              width={420}
+              height={294}
+              style={{
+                width: '100%',
+                maxWidth: '380px',
+                height: 'auto',
+                marginBottom: '20px',
+                userSelect: 'none',
+                pointerEvents: 'none',
+              }}
+            />
+            <h3
+              style={{
+                fontFamily: 'var(--font-display)',
+                fontSize: '1.25rem',
+                fontWeight: 700,
+                color: 'var(--on-background)',
+                marginBottom: '8px',
+              }}
+            >
+              Belum ada portfolio untuk kategori ini
+            </h3>
+            <p
+              style={{
+                fontSize: '0.92rem',
+                color: 'var(--outline)',
+                maxWidth: '440px',
+                lineHeight: 1.5,
+                marginBottom: category !== 'All Campaigns' ? '20px' : '0',
+              }}
+            >
+              Portfolio untuk kategori {category !== 'All Campaigns' ? `"${category}"` : 'ini'} sedang dalam proses kurasi. Silakan telusuri kategori campaign lainnya.
+            </p>
+            {category !== 'All Campaigns' && (
+              <button
+                onClick={() => setCategory('All Campaigns')}
+                style={{
+                  padding: '10px 22px',
+                  borderRadius: '999px',
+                  border: '1.5px solid var(--primary)',
+                  background: 'var(--primary)',
+                  color: '#fff',
+                  fontFamily: 'var(--font-display)',
+                  fontWeight: 600,
+                  fontSize: '0.85rem',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                }}
+              >
+                Lihat Semua Campaign
+              </button>
+            )}
+          </motion.div>
         )}
 
         {/* Detail campaign brand terpilih */}
