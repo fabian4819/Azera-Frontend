@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Plus, Trash2, Copy, ArrowUp, ArrowDown, X, Circle, Square, GripHorizontal, Lock, Undo2 } from 'lucide-react';
 import api from '../../lib/api';
 
@@ -21,15 +21,28 @@ const iconBtn: React.CSSProperties = {
   padding: '8px', background: 'none', border: 'none', borderRadius: '50%', color: '#5f6368', cursor: 'pointer', display: 'flex',
 };
 
+/** Buang pertanyaan tanpa judul & opsi kosong sebelum disimpan */
+// eslint-disable-next-line react-refresh/only-export-components
+export const cleanFields = (fields: CustomField[]): CustomField[] =>
+  fields
+    .filter((f) => f.label.trim())
+    .map((f) => ({
+      ...f,
+      label: f.label.trim(),
+      options: isChoice(f.type) ? (f.options || []).map((o) => o.trim()).filter(Boolean) : [],
+    }));
+
 interface Props {
-  campaignId: string;
+  /** Tanpa campaignId = mode lokal (wizard buat campaign): tidak ada tombol simpan, state dilapor lewat onChange */
+  campaignId?: string;
+  onChange?: (fields: CustomField[], applyFields: ApplyFields) => void;
   initial: CustomField[];
   initialApplyFields?: ApplyFields;
   /** Semua akun PIC terdaftar + yang dicentang untuk campaign ini (jadi opsi dropdown PIC di form) */
   pics: { _id: string; name: string; email: string }[];
   assignedPicIds: string[];
   onTogglePic: (pic: { _id: string; name: string; email: string; phone: string }, on: boolean) => Promise<void>;
-  onSaved: (fields: CustomField[], applyFields: ApplyFields) => void;
+  onSaved?: (fields: CustomField[], applyFields: ApplyFields) => void;
 }
 
 const Toggle = ({ checked, onChange, label }: { checked: boolean; onChange: (v: boolean) => void; label: string }) => (
@@ -48,7 +61,7 @@ const answerLine = (w: string, text: string) => (
 );
 
 /** Builder pertanyaan tambahan form Apply, pengalaman ala Google Forms (AD-47). */
-export default function CustomFormBuilder({ campaignId, initial, initialApplyFields, pics, assignedPicIds, onTogglePic, onSaved }: Props) {
+export default function CustomFormBuilder({ campaignId, onChange, initial, initialApplyFields, pics, assignedPicIds, onTogglePic, onSaved }: Props) {
   const [fields, setFields] = useState<CustomField[]>(initial);
   const [applyFields, setApplyFields] = useState<ApplyFields>(initialApplyFields ?? DEFAULT_APPLY_FIELDS);
   const [saved, setSaved] = useState(JSON.stringify([initial, initialApplyFields ?? DEFAULT_APPLY_FIELDS]));
@@ -73,6 +86,7 @@ export default function CustomFormBuilder({ campaignId, initial, initialApplyFie
       setPicBusy(null);
     }
   };
+  useEffect(() => { onChange?.(fields, applyFields); }, [fields, applyFields]); // eslint-disable-line react-hooks/exhaustive-deps
   const dirty = JSON.stringify([fields, applyFields]) !== saved;
   const setApply = (patch: Partial<ApplyFields>) => setApplyFields((a) => ({ ...a, ...patch }));
 
@@ -140,20 +154,14 @@ export default function CustomFormBuilder({ campaignId, initial, initialApplyFie
     setSaving(true);
     setStatus(null);
     try {
-      const cleaned = fields
-        .filter((f) => f.label.trim())
-        .map((f) => ({
-          ...f,
-          label: f.label.trim(),
-          options: isChoice(f.type) ? (f.options || []).map((o) => o.trim()).filter(Boolean) : [],
-        }));
+      const cleaned = cleanFields(fields);
       const res = await api.patch(`/admin/campaigns/${campaignId}`, { customFields: cleaned, applyFields });
       const next: CustomField[] = res.data.customFields || [];
       const nextApply: ApplyFields = res.data.applyFields ?? applyFields;
       setFields(next);
       setApplyFields(nextApply);
       setSaved(JSON.stringify([next, nextApply]));
-      onSaved(next, nextApply);
+      onSaved?.(next, nextApply);
       setStatus({ ok: true, text: 'Form kustom disimpan.' });
       setTimeout(() => setStatus(null), 2500);
     } catch {
@@ -353,14 +361,14 @@ export default function CustomFormBuilder({ campaignId, initial, initialApplyFie
         <Plus size={16} /> Tambah Pertanyaan
       </button>
 
-      <div style={{ position: 'sticky', bottom: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', background: 'white', border: '1px solid #e1e0ff', borderRadius: '12px', padding: '12px 16px', boxShadow: '0 4px 20px rgba(107,46,232,0.12)' }}>
+      {campaignId && <div style={{ position: 'sticky', bottom: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', background: 'white', border: '1px solid #e1e0ff', borderRadius: '12px', padding: '12px 16px', boxShadow: '0 4px 20px rgba(107,46,232,0.12)' }}>
         <span style={{ fontSize: '0.8rem', fontFamily: font, color: status ? (status.ok ? '#1e7e34' : '#ba1a1a') : dirty ? '#b26a00' : '#777683' }}>
           {status?.text ?? (dirty ? 'Ada perubahan yang belum disimpan' : 'Semua perubahan tersimpan')}
         </span>
         <button onClick={save} disabled={saving || !dirty} className="btn-primary" style={{ padding: '9px 20px', fontSize: '0.82rem', opacity: saving || !dirty ? 0.6 : 1 }}>
           {saving ? 'Menyimpan...' : 'Simpan Form'}
         </button>
-      </div>
+      </div>}
     </div>
   );
 }

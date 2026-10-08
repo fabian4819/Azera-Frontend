@@ -5,6 +5,7 @@ import api from '../../lib/api';
 import CampaignAnalyticsFinance from './CampaignAnalyticsFinance';
 import WorkflowTracker from './WorkflowTracker';
 import AssetLibrary from './AssetLibrary';
+import { buildBroadcast } from '../../lib/broadcast';
 import CustomFormBuilder, { type CustomField, type ApplyFields } from './CustomFormBuilder';
 
 const REMINDER_OPTIONS = [
@@ -36,6 +37,8 @@ interface Campaign {
   budget: number; criteria: { niches: string[]; minFollowers?: number; provinces: string[]; platforms: string[] };
   status: string; workflowStage: string; applyOpen: boolean; applySlug: string; waGroupLink?: string;
   customFields: CustomField[]; applyFields?: ApplyFields; accessCode: string;
+  type?: 'online' | 'offline'; eventDetails?: { location?: string; date?: string; timeWindow?: string };
+  fee?: { creatorFee?: number; picFee?: number; mgFee?: number }; feeNote?: string; benefits?: string[]; requirements?: string[]; infoLink?: string;
   masterSheetUrl?: string | null; reportSheetUrl?: string | null; recapPaymentSheetUrl?: string | null;
 }
 interface PicUser { _id: string; name: string; email: string; phone: string }
@@ -82,35 +85,6 @@ const td: React.CSSProperties = {
   padding: '10px 12px', fontSize: '0.82rem', color: '#191c20', borderBottom: '1px solid #eceef3', verticalAlign: 'top',
 };
 
-/** Kerangka Broadcast Campaign (format WA Azera) — admin lengkapi bagian "...". */
-const broadcastTemplate = (name: string, applyUrl: string) => `*${name.toUpperCase()} | AZERA*
-
-*Info event:*
-...
-
-*Fee talent:*
-* ...
-_fee pic ..., mg ..._
-
-*Kriteria*
-- Usia ...
-- ...
-
-*OPSI Lokasi & Tanggal*
-> bisa pilih di form
-1️⃣ *Option 1*
-📅 ...
-📍 ...
-⏰ ...
-
-*SOW:*
-- ...
-
-*Daftar:*
-${applyUrl}
-
-PIC: AZERA
-Handle by + WA:`;
 
 export default function CampaignDetail() {
   const { id } = useParams();
@@ -409,7 +383,7 @@ export default function CampaignDetail() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
               <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: '1rem', color: '#191c20' }}>Broadcast Campaign</p>
               <div style={{ display: 'flex', gap: '8px' }}>
-              <button onClick={() => setBriefDraft(broadcastTemplate(campaign.name, `${window.location.origin}/apply/${campaign.applySlug}`))} style={{ padding: '8px 16px', borderRadius: '10px', border: '1.5px solid #6728e4', background: 'white', color: '#6728e4', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer', fontFamily: "var(--font-display)" }}>
+              <button onClick={() => setBriefDraft(buildBroadcast(campaign, `${window.location.origin}/apply/${campaign.applySlug}`))} style={{ padding: '8px 16px', borderRadius: '10px', border: '1.5px solid #6728e4', background: 'white', color: '#6728e4', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer', fontFamily: "var(--font-display)" }}>
                 Pakai Template
               </button>
               <button onClick={generateBrief} disabled={generating} className="btn-primary" style={{ padding: '8px 16px', fontSize: '0.8rem', opacity: generating ? 0.7 : 1 }}>

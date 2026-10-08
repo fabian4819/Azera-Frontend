@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Zap } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Zap } from 'lucide-react';
 import api from '../../lib/api';
+import { buildBroadcast } from '../../lib/broadcast';
+import CustomFormBuilder, { cleanFields, type CustomField, type ApplyFields } from './CustomFormBuilder';
+import BroadcastShareModal from './BroadcastShareModal';
 
 const niches = ['Beauty', 'Fashion', 'Food & Beverage', 'Travel', 'Tech', 'Fitness', 'Parenting', 'Gaming', 'Finance', 'Education', 'Lifestyle', 'Entertainment'];
 const platforms = [
@@ -12,6 +15,10 @@ const platforms = [
 ];
 
 interface Brand { _id: string; namaBrand: string }
+interface PicUser { _id: string; name: string; email: string; phone: string }
+
+/** Textarea "satu baris = satu item" → array */
+const lines = (v: string) => v.split('\n').map((l) => l.trim()).filter(Boolean);
 
 const inputStyle: React.CSSProperties = {
   width: '100%', padding: '11px 14px', borderRadius: '12px', border: '1.5px solid #c7c8cf',
@@ -29,10 +36,22 @@ const cardStyle: React.CSSProperties = {
   boxShadow: '0 2px 12px rgba(107,46,232,0.05)', marginBottom: '20px',
 };
 
-const SectionTitle = ({ title }: { title: string }) => (
+const SectionTitle = ({ title, hint }: { title: string; hint?: string }) => (
   <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: '1rem', color: '#6728e4', marginBottom: '18px' }}>
-    {title}
+    {title}{hint && <span style={{ display: 'block', fontWeight: 400, fontSize: '0.78rem', color: '#777683', marginTop: '4px' }}>{hint}</span>}
   </p>
+);
+
+const Steps = ({ step }: { step: 1 | 2 }) => (
+  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px', fontFamily: "var(--font-display)", fontSize: '0.85rem', fontWeight: 700 }}>
+    {['Kebutuhan Campaign', 'Setup Form'].map((label, i) => (
+      <div key={label} style={{ display: 'flex', alignItems: 'center', gap: '8px', color: step === i + 1 ? '#6728e4' : '#9a99a6' }}>
+        {i > 0 && <span style={{ width: '28px', height: '2px', background: '#e1e0ff' }} />}
+        <span style={{ width: '26px', height: '26px', borderRadius: '50%', display: 'grid', placeItems: 'center', background: step === i + 1 ? '#6728e4' : '#e1e0ff', color: step === i + 1 ? 'white' : '#6728e4' }}>{i + 1}</span>
+        {label}
+      </div>
+    ))}
+  </div>
 );
 
 const Pill = ({ label, selected, onClick }: { label: string; selected: boolean; onClick: () => void }) => (
@@ -66,9 +85,26 @@ export default function CampaignNew() {
   const [eventLocation, setEventLocation] = useState('');
   const [eventDate, setEventDate] = useState('');
   const [eventTimeWindow, setEventTimeWindow] = useState('');
+  // Listing / broadcast
+  const [creatorFee, setCreatorFee] = useState('');
+  const [feeNote, setFeeNote] = useState('');
+  const [picFee, setPicFee] = useState('');
+  const [mgFee, setMgFee] = useState('');
+  const [benefits, setBenefits] = useState('');
+  const [requirements, setRequirements] = useState('');
+  const [sow, setSow] = useState('');
+  const [infoLink, setInfoLink] = useState('');
+  // Tahap 2: setup form apply
+  const [step, setStep] = useState<1 | 2>(1);
+  const [customFields, setCustomFields] = useState<CustomField[]>([]);
+  const [applyFields, setApplyFields] = useState<ApplyFields>({ pic: true, handleBy: true, handleByRequired: false });
+  const [allPics, setAllPics] = useState<PicUser[]>([]);
+  const [picIds, setPicIds] = useState<string[]>([]);
+  const [created, setCreated] = useState<{ id: string; broadcast: string } | null>(null);
 
   useEffect(() => {
     api.get('/admin/brands').then((res) => setBrands(res.data)).catch(() => setBrands([]));
+    api.get('/admin/pic').then((res) => setAllPics(res.data)).catch(() => setAllPics([]));
   }, []);
 
   const toggle = (list: string[], setList: (v: string[]) => void, val: string) => {
@@ -76,18 +112,34 @@ export default function CampaignNew() {
     else setList([...list, val]);
   };
 
-  const onSubmit = async (e: React.FormEvent) => {
+  const num = (v: string) => (v ? Number(v) : undefined);
+
+  const next = (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     if (!brandId || !name || !objective || !budget) {
       setError('Brand, nama, tujuan, dan budget wajib diisi.');
       return;
     }
+    setStep(2);
+    window.scrollTo({ top: 0 });
+  };
+
+  const onSubmit = async () => {
+    setError('');
     setSaving(true);
     try {
       const res = await api.post('/admin/campaigns', {
         brandId, name, objective,
         budget: Number(budget),
+        deliverables: lines(sow),
+        fee: { creatorFee: num(creatorFee), picFee: num(picFee), mgFee: num(mgFee) },
+        feeNote: feeNote.trim() || undefined,
+        benefits: lines(benefits),
+        requirements: lines(requirements),
+        infoLink: infoLink.trim() || undefined,
+        customFields: cleanFields(customFields),
+        applyFields,
         timeline: { startDate: startDate || undefined, endDate: endDate || undefined },
         criteria: {
           niches: selectedNiches,
@@ -98,7 +150,9 @@ export default function CampaignNew() {
         type,
         eventDetails: type === 'offline' ? { location: eventLocation, date: eventDate, timeWindow: eventTimeWindow } : undefined,
       });
-      navigate(`/admin/campaigns/${res.data._id}`);
+      // PIC yang dicentang di tahap 2 — best-effort, campaign sudah terbuat
+      await Promise.all(allPics.filter((p) => picIds.includes(p._id)).map((p) => api.post(`/admin/campaigns/${res.data._id}/pic`, { email: p.email }).catch(() => undefined)));
+      setCreated({ id: res.data._id, broadcast: buildBroadcast(res.data, `${window.location.origin}/apply/${res.data.applySlug}`) });
     } catch {
       setError('Gagal membuat campaign. Coba lagi.');
     } finally {
@@ -116,7 +170,8 @@ export default function CampaignNew() {
         Kembali ke Campaigns
       </button>
 
-      <form onSubmit={onSubmit} style={{ maxWidth: '720px' }}>
+      <Steps step={step} />
+      {step === 1 && <form onSubmit={next} style={{ maxWidth: '720px' }}>
         <div style={cardStyle}>
           <SectionTitle title="Informasi Dasar" />
           <div style={{ marginBottom: '14px' }}>
@@ -180,7 +235,45 @@ export default function CampaignNew() {
         </div>
 
         <div style={cardStyle}>
-          <SectionTitle title="Kriteria Creator" />
+          <SectionTitle title="Fee, Benefit & SOW" hint="Dipakai untuk generate Broadcast Campaign. Satu baris = satu poin." />
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }} className="form-2col">
+            <div>
+              <label style={labelStyle}>Fee Talent (Rp)</label>
+              <input value={creatorFee} onChange={(e) => setCreatorFee(e.target.value)} type="number" placeholder="75000" style={inputStyle} />
+            </div>
+            <div>
+              <label style={labelStyle}>Keterangan Fee</label>
+              <input value={feeNote} onChange={(e) => setFeeNote(e.target.value)} placeholder="include beli tiket PRJ 30k" style={inputStyle} />
+            </div>
+            <div>
+              <label style={labelStyle}>Fee PIC (Rp)</label>
+              <input value={picFee} onChange={(e) => setPicFee(e.target.value)} type="number" placeholder="7500" style={inputStyle} />
+            </div>
+            <div>
+              <label style={labelStyle}>Fee MG (Rp)</label>
+              <input value={mgFee} onChange={(e) => setMgFee(e.target.value)} type="number" placeholder="7500" style={inputStyle} />
+            </div>
+          </div>
+          <div style={{ marginBottom: '14px' }}>
+            <label style={labelStyle}>Benefit Lain</label>
+            <textarea value={benefits} onChange={(e) => setBenefits(e.target.value)} rows={3} placeholder={'🎟️ Free tiket konser senilai Rp175.000\n🎶 Guest star: Naykilla, Sal Priadi, dll'} style={{ ...inputStyle, resize: 'vertical' }} />
+          </div>
+          <div style={{ marginBottom: '14px' }}>
+            <label style={labelStyle}>Syarat / Kriteria</label>
+            <textarea value={requirements} onChange={(e) => setRequirements(e.target.value)} rows={3} placeholder={'Gen Z (18-25 tahun)\nTiktok no minimal folls\nBersedia visit di lokasi, hari, dan jam yang sudah ditentukan'} style={{ ...inputStyle, resize: 'vertical' }} />
+          </div>
+          <div style={{ marginBottom: '14px' }}>
+            <label style={labelStyle}>SOW</label>
+            <textarea value={sow} onChange={(e) => setSow(e.target.value)} rows={3} placeholder={'1x Visit\n1x Video TikTok'} style={{ ...inputStyle, resize: 'vertical' }} />
+          </div>
+          <div>
+            <label style={labelStyle}>Link Info <span style={{ fontWeight: 400, color: '#777683' }}>(opsional, mis. post IG event)</span></label>
+            <input value={infoLink} onChange={(e) => setInfoLink(e.target.value)} placeholder="https://www.instagram.com/p/..." style={inputStyle} />
+          </div>
+        </div>
+
+        <div style={cardStyle}>
+          <SectionTitle title="Kriteria Creator" hint="Untuk Smart Curation." />
           <div style={{ marginBottom: '16px' }}>
             <label style={labelStyle}>Niche</label>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
@@ -207,11 +300,39 @@ export default function CampaignNew() {
 
         {error && <p style={{ color: '#ba1a1a', fontSize: '0.85rem', marginBottom: '16px', fontFamily: "var(--font-display)" }}>{error}</p>}
 
-        <button type="submit" disabled={saving} className="btn-primary" style={{ width: '100%', justifyContent: 'center', padding: '14px', opacity: saving ? 0.7 : 1 }}>
-          <Zap size={18} />
-          {saving ? 'Membuat...' : 'Buat Campaign'}
+        <button type="submit" className="btn-primary" style={{ width: '100%', justifyContent: 'center', padding: '14px' }}>
+          Lanjut: Setup Form <ArrowRight size={18} />
         </button>
-      </form>
+      </form>}
+
+      {step === 2 && (
+        <div>
+          <CustomFormBuilder
+            initial={customFields}
+            initialApplyFields={applyFields}
+            onChange={(f, a) => { setCustomFields(f); setApplyFields(a); }}
+            pics={allPics}
+            assignedPicIds={picIds}
+            onTogglePic={async (p, on) => setPicIds((ids) => (on ? [...ids, p._id] : ids.filter((i) => i !== p._id)))}
+          />
+          <div style={{ maxWidth: '760px', margin: '0 auto' }}>
+            {error && <p style={{ color: '#ba1a1a', fontSize: '0.85rem', marginBottom: '16px', fontFamily: "var(--font-display)" }}>{error}</p>}
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <button type="button" onClick={() => setStep(1)} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '14px 20px', borderRadius: '12px', border: '1.5px solid #6728e4', background: 'white', color: '#6728e4', fontWeight: 700, cursor: 'pointer', fontFamily: "var(--font-display)" }}>
+                <ArrowLeft size={16} /> Kembali
+              </button>
+              <button type="button" onClick={() => void onSubmit()} disabled={saving} className="btn-primary" style={{ flex: 1, justifyContent: 'center', padding: '14px', opacity: saving ? 0.7 : 1 }}>
+                <Zap size={18} />
+                {saving ? 'Menyimpan...' : 'Simpan Campaign'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {created && (
+        <BroadcastShareModal campaignId={created.id} initialText={created.broadcast} onClose={() => navigate(`/admin/campaigns/${created.id}`)} />
+      )}
     </div>
   );
 }
