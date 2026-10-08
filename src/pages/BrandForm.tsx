@@ -106,7 +106,7 @@ export default function BrandForm() {
 
   if (submitted) {
     return (
-      <div className="purple-page" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--hero-bg)', padding: '24px', paddingTop: '100px' }}>
+      <div className="purple-page" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--form-bg)', padding: '24px', paddingTop: '100px' }}>
         <div style={{ textAlign: 'center', maxWidth: '480px', background: 'white', borderRadius: '24px', padding: 'clamp(28px, 5vw, 40px)', boxShadow: '0 12px 40px rgba(28,10,68,0.25)' }}>
           <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px' }}>
             <CheckCircle2 size={40} color="white" />
@@ -126,7 +126,7 @@ export default function BrandForm() {
   }
 
   return (
-    <div className="purple-page" style={{ background: 'var(--hero-bg)', minHeight: '100vh' }}>
+    <div className="purple-page" style={{ background: 'var(--form-bg)', minHeight: '100vh' }}>
       <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '24px 24px 80px' }}>
         <PageHero
           title="Konsultasi Campaign"

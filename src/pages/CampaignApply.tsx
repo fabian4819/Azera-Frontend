@@ -235,7 +235,7 @@ export default function CampaignApply() {
 
   if (closed) {
     return (
-      <div className="purple-page" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--hero-bg)', padding: '24px', paddingTop: '100px' }}>
+      <div className="purple-page" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--form-bg)', padding: '24px', paddingTop: '100px' }}>
         <div style={{ textAlign: 'center', maxWidth: '480px', background: 'white', borderRadius: '24px', padding: 'clamp(28px, 5vw, 40px)', boxShadow: '0 12px 40px rgba(28,10,68,0.25)', fontFamily: "var(--font-display)" }}>
           <ClosedIllustration />
           {closed.name && <span className="section-label" style={{ marginBottom: '10px' }}>{closed.name}</span>}
@@ -253,7 +253,7 @@ export default function CampaignApply() {
 
   if (notFound) {
     return (
-      <div className="purple-page" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--hero-bg)', padding: '24px' }}>
+      <div className="purple-page" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--form-bg)', padding: '24px' }}>
         <p style={{ fontFamily: "var(--font-display)", color: 'white' }}>Campaign tidak ditemukan. Cek lagi link yang kamu buka ya.</p>
       </div>
     );
@@ -261,7 +261,7 @@ export default function CampaignApply() {
 
   if (submitted) {
     return (
-      <div className="purple-page" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--hero-bg)', padding: '24px', paddingTop: '100px' }}>
+      <div className="purple-page" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--form-bg)', padding: '24px', paddingTop: '100px' }}>
         <div style={{ textAlign: 'center', maxWidth: '480px', background: 'white', borderRadius: '24px', padding: 'clamp(28px, 5vw, 40px)', boxShadow: '0 12px 40px rgba(28,10,68,0.25)' }}>
           <div className="kinetic-glow" style={{ width: '80px', height: '80px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px' }}>
             <CheckCircle2 size={40} color="white" />
@@ -278,12 +278,12 @@ export default function CampaignApply() {
   }
 
   if (!campaign) {
-    return <div className="purple-page" style={{ minHeight: '100vh', background: 'var(--hero-bg)' }} />;
+    return <div className="purple-page" style={{ minHeight: '100vh', background: 'var(--form-bg)' }} />;
   }
 
   return (
     // Tanpa overflow:hidden di wrapper, kalau ada, brief sticky tidak jalan
-    <div className="purple-page" style={{ background: 'var(--hero-bg)', minHeight: '100vh' }}>
+    <div className="purple-page" style={{ background: 'var(--form-bg)', minHeight: '100vh' }}>
       <div style={{ maxWidth: campaign.briefContent ? '1160px' : '760px', margin: '0 auto', padding: '24px 24px 80px', position: 'relative', zIndex: 1 }}>
         <PageHero
           accent={campaign.name}

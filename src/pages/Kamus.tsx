@@ -32,7 +32,7 @@ export default function Kamus() {
   }, [filtered]);
 
   return (
-    <div className="purple-page" style={{ background: 'var(--hero-bg)', minHeight: '100vh' }}>
+    <div className="purple-page" style={{ background: 'var(--form-bg)', minHeight: '100vh' }}>
       <div style={{ maxWidth: '1080px', margin: '0 auto', padding: '32px 24px 0' }}>
         <PageHero
           title="Istilah KOL &"
