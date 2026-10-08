@@ -15,11 +15,12 @@ interface WaMessageLog {
   status: 'queued' | 'sent' | 'failed' | 'skipped'; error?: string; createdAt: string;
 }
 
-// Dua bot WhatsApp terpisah, nomor & pairing sendiri-sendiri.
-const BOTS = [
-  { id: 'partnership', label: 'Bot Partnership / Brand', hint: 'Nomor untuk brand & klien. Menerima lead brand + notifikasi invoice/pembayaran/campaign.' },
-  { id: 'creator', label: 'Bot Creator / KOL', hint: 'Nomor untuk KOL/creator. Balas link pendaftaran + notifikasi brief/reminder ke creator.' },
-] as const;
+// Bot WhatsApp terpisah, nomor & pairing sendiri-sendiri. `developer` cuma dikirim server lokal (GET /bots).
+const BOTS: Record<string, { label: string; hint: string }> = {
+  partnership: { label: 'Bot Partnership / Brand', hint: 'Nomor untuk brand & klien. Menerima lead brand + notifikasi invoice/pembayaran/campaign.' },
+  creator: { label: 'Bot Creator / KOL', hint: 'Nomor untuk KOL/creator. Balas link pendaftaran + notifikasi brief/reminder ke creator.' },
+  developer: { label: 'Bot Developer (lokal)', hint: 'Hanya ada di backend lokal. Semua pesan dari backend lokal dikirim lewat nomor ini; tidak ada yang disimpan ke database, log hilang saat server restart.' },
+};
 
 function BotPanel({ botId, label, hint }: { botId: string; label: string; hint: string }) {
   const [status, setStatus] = useState<WaStatus>('disconnected');
@@ -238,10 +239,14 @@ function BotPanel({ botId, label, hint }: { botId: string; label: string; hint: 
 }
 
 export default function WhatsApp() {
+  const [botIds, setBotIds] = useState<string[]>(['partnership', 'creator']);
+  useEffect(() => {
+    api.get('/admin/whatsapp/bots').then((res) => setBotIds(res.data)).catch(() => undefined);
+  }, []);
   return (
     <div>
-      {BOTS.map((b) => (
-        <BotPanel key={b.id} botId={b.id} label={b.label} hint={b.hint} />
+      {botIds.filter((id) => BOTS[id]).map((id) => (
+        <BotPanel key={id} botId={id} label={BOTS[id].label} hint={BOTS[id].hint} />
       ))}
     </div>
   );
