@@ -1,9 +1,12 @@
+import PageHero from '../components/sections/PageHero';
+import FormSidePanel, { PANEL_POINTS } from '../components/sections/FormSidePanel';
+import { BrandIllustration } from '../components/illustrations';
 import { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { CheckCircle2, MessageCircle, ShieldCheck } from 'lucide-react';
+import { CheckCircle2 } from 'lucide-react';
 import api from '../lib/api';
 import { buildBrandWALink } from '../utils/whatsapp';
 
@@ -103,8 +106,8 @@ export default function BrandForm() {
 
   if (submitted) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--surface)', padding: '24px', paddingTop: '100px' }}>
-        <div style={{ textAlign: 'center', maxWidth: '480px' }}>
+      <div className="purple-page" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--hero-bg)', padding: '24px', paddingTop: '100px' }}>
+        <div style={{ textAlign: 'center', maxWidth: '480px', background: 'white', borderRadius: '24px', padding: 'clamp(28px, 5vw, 40px)', boxShadow: '0 12px 40px rgba(28,10,68,0.25)' }}>
           <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px' }}>
             <CheckCircle2 size={40} color="white" />
           </div>
@@ -123,63 +126,20 @@ export default function BrandForm() {
   }
 
   return (
-    <div style={{ background: 'var(--surface)', minHeight: '100vh', paddingTop: '80px' }}>
-      <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '48px 24px 80px' }}>
-        <div style={{ textAlign: 'center', marginBottom: '48px' }}>
-          <span className="tag-pill tag-pill-navy" style={{ margin: '0 auto 12px' }}>Mulai Campaign</span>
-          <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 'clamp(1.8rem, 4vw, 3rem)', color: 'var(--on-background)', lineHeight: 1.15 }}>
-            Konsultasi Campaign{' '}
-            <span style={{ color: 'var(--secondary)' }}>Gratis</span>
-          </h1>
-          <p style={{ color: 'var(--on-surface-variant)', marginTop: '12px' }}>
-            Isi form di bawah dan tim kami akan menghubungi kamu via WhatsApp.
-          </p>
-        </div>
+    <div className="purple-page" style={{ background: 'var(--hero-bg)', minHeight: '100vh' }}>
+      <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '24px 24px 80px' }}>
+        <PageHero
+          title="Konsultasi Campaign"
+          accent="Gratis"
+          subtitle="Isi form di bawah dan tim kami akan menghubungi kamu via WhatsApp."
+          illustration={<BrandIllustration />}
+        />
 
-        <div style={{ display: 'grid', gridTemplateColumns: '300px 1fr', gap: '32px', alignItems: 'start' }} className="brandform-grid">
-          <div style={{ position: 'sticky', top: '96px' }} className="brandform-panel">
-            <div className="bento-card" style={{ padding: '28px', marginBottom: '20px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
-                <img src="/logo-transparent.png" alt="AzeraKOL" style={{ height: '28px' }} />
-                <span style={{ fontFamily: "var(--font-display)", fontWeight: 900, fontStyle: 'italic', fontSize: '1rem', color: '#15157d', letterSpacing: '-0.02em' }}>AZERAKOL</span>
-              </div>
-              <p style={{ color: '#464652', fontSize: '0.85rem', lineHeight: 1.7, marginBottom: '20px', fontFamily: "var(--font-display)" }}>
-                Konsultasi gratis, tidak ada biaya di awal. Tim kami siap membantu merencanakan campaign terbaik untuk brand kamu.
-              </p>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#464652', fontSize: '0.82rem', marginBottom: '10px' }}>
-                <MessageCircle size={15} color="#25D366" />
-                <span>Respon via WhatsApp dalam 1x24 jam</span>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#464652', fontSize: '0.82rem', marginBottom: '10px' }}>
-                <ShieldCheck size={15} color="#6728e4" />
-                <span>Data kamu aman & terjaga privasi</span>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#464652', fontSize: '0.82rem' }}>
-                <CheckCircle2 size={15} color="#6728e4" />
-                <span>Tidak ada komitmen awal</span>
-              </div>
-            </div>
-            <div className="bento-card-dark" style={{ padding: '20px' }}>
-              <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, marginBottom: '6px' }}>Butuh bantuan?</p>
-              <p style={{ fontSize: '0.82rem', opacity: 0.85, marginBottom: '14px' }}>
-                Hubungi kami langsung via WhatsApp
-              </p>
-              <a
-                href="https://wa.me/6288201586126"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  display: 'inline-flex', alignItems: 'center', gap: '6px',
-                  background: 'rgba(255,255,255,0.2)', color: 'white',
-                  borderRadius: '8px', padding: '9px 16px', fontSize: '0.82rem',
-                  fontWeight: 600, textDecoration: 'none',
-                  fontFamily: "var(--font-display)",
-                }}
-              >
-                <MessageCircle size={14} /> Chat Sekarang
-              </a>
-            </div>
-          </div>
+        <div style={{ display: 'grid', gridTemplateColumns: '300px 1fr', gap: '32px', alignItems: 'start' }} className="form-side-grid">
+          <FormSidePanel
+            blurb="Konsultasi gratis, tidak ada biaya di awal. Tim kami siap membantu merencanakan campaign terbaik untuk brand kamu."
+            points={[PANEL_POINTS.whatsapp, PANEL_POINTS.privacy, PANEL_POINTS.check('Tidak ada komitmen awal')]}
+          />
 
           <form onSubmit={handleSubmit(onSubmit)} style={{ minWidth: 0, background: 'white', borderRadius: '24px', padding: '40px', boxShadow: '0 4px 24px rgba(0,0,0,0.06)' }}>
             <p style={sectionTitleStyle}>Informasi Brand</p>
@@ -321,13 +281,8 @@ export default function BrandForm() {
       </div>
 
       <style>{`
-        @media (max-width: 900px) {
-          .brandform-grid { grid-template-columns: minmax(0, 1fr) !important; }
-          .brandform-panel { position: static !important; order: 1; }
-        }
         @media (max-width: 640px) {
           .form-2col { grid-template-columns: 1fr !important; }
-          .brandform-grid form { padding: 28px 20px !important; }
         }
       `}</style>
     </div>

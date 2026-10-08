@@ -1,3 +1,5 @@
+import PageHero from '../components/sections/PageHero';
+import { PortfolioIllustration } from '../components/illustrations';
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -73,26 +75,18 @@ export default function Portfolio() {
 
   return (
     <div style={{ background: 'var(--surface)', minHeight: '100vh' }}>
-      <div style={{ padding: '80px 24px 8px', textAlign: 'center' }}>
-        <div style={{ maxWidth: '640px', margin: '0 auto' }}>
-          <span className="tag-pill tag-pill-navy" style={{ margin: '0 auto 16px' }}>Portfolio</span>
-          <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 'clamp(2.4rem, 5.5vw, 4rem)', color: 'var(--on-background)', lineHeight: 1.1, marginBottom: '16px', letterSpacing: '-0.03em' }}>
-            Campaign{' '}
-            <span className="underline-accent">
-              Sukses
-              <svg viewBox="0 0 180 20" preserveAspectRatio="none" fill="none">
-                <path d="M2 14C36 4 96 2 178 12" stroke="#6728e4" strokeWidth="6" strokeLinecap="round" />
-              </svg>
-            </span>{' '}
-            Kami
-          </h1>
-          <p style={{ color: 'var(--on-surface-variant)', fontSize: '1rem', lineHeight: 1.7, maxWidth: '480px', margin: '0 auto' }}>
-            Hasil nyata dari campaign KOL yang telah kami jalankan bersama brand terpercaya.
-          </p>
-        </div>
+      <div style={{ maxWidth: '1160px', margin: '0 auto', padding: '56px 24px 0' }}>
+        <PageHero
+          tone="light"
+          title="Campaign"
+          accent="Sukses"
+          after="Kami"
+          subtitle="Hasil nyata dari campaign KOL yang telah kami jalankan bersama brand terpercaya."
+          illustration={<PortfolioIllustration />}
+        />
       </div>
 
-      <div style={{ maxWidth: '1160px', margin: '0 auto', padding: '56px 24px 90px' }}>
+      <div style={{ maxWidth: '1160px', margin: '0 auto', padding: '8px 24px 90px' }}>
         {/* Filter kategori */}
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '28px' }}>
           <div style={{ display: 'inline-flex', gap: '4px', padding: '6px', borderRadius: '999px', background: 'var(--primary)', flexWrap: 'wrap', justifyContent: 'center' }}>

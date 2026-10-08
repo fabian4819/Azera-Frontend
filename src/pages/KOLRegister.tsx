@@ -1,5 +1,8 @@
+import PageHero from '../components/sections/PageHero';
+import FormSidePanel, { PANEL_POINTS } from '../components/sections/FormSidePanel';
+import { CreatorIllustration } from '../components/illustrations';
 import { useEffect, useRef, useState } from 'react';
-import { CheckCircle2, Camera, Music2, AtSign, Hash, Zap } from 'lucide-react';
+import { CheckCircle2, Camera, Music2, AtSign, Hash } from 'lucide-react';
 import api from '../lib/api';
 import DatePicker from '../components/ui/DatePicker';
 
@@ -217,8 +220,8 @@ export default function KOLRegister() {
 
   if (submitted) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8f9ff', padding: '24px', paddingTop: '100px' }}>
-        <div style={{ textAlign: 'center', maxWidth: '480px' }}>
+      <div className="purple-page" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--hero-bg)', padding: '24px', paddingTop: '100px' }}>
+        <div style={{ textAlign: 'center', maxWidth: '480px', background: 'white', borderRadius: '24px', padding: 'clamp(28px, 5vw, 40px)', boxShadow: '0 12px 40px rgba(28,10,68,0.25)' }}>
           <div className="kinetic-glow" style={{ width: '80px', height: '80px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px' }}>
             <CheckCircle2 size={40} color="white" />
           </div>
@@ -236,22 +239,21 @@ export default function KOLRegister() {
   }
 
   return (
-    <div style={{ background: '#f8f9ff', minHeight: '100vh', paddingTop: '80px', position: 'relative', overflow: 'hidden' }}>
-      <div className="blob" style={{ width: '400px', height: '400px', background: '#e1e0ff', opacity: 0.2, top: '5%', right: '-100px' }} />
-      <div className="blob" style={{ width: '350px', height: '350px', background: '#ffd9e1', opacity: 0.15, bottom: '5%', left: '-100px' }} />
-      <div style={{ maxWidth: '760px', margin: '0 auto', padding: '48px 24px 80px', position: 'relative', zIndex: 1 }}>
-        <div style={{ textAlign: 'center', marginBottom: '40px' }}>
-          <span className="section-label" style={{ marginBottom: '12px' }}>Daftar KOL</span>
-          <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', color: '#191c20', lineHeight: 1.15 }}>
-            Bergabung dengan{' '}
-            <span className="gradient-text">AzeraKOL Network</span>
-          </h1>
-          <p style={{ color: '#464652', marginTop: '10px', fontFamily: "var(--font-display)" }}>
-            Daftar gratis, tim kami akan review profil dan menghubungi kamu.
-          </p>
-        </div>
+    <div className="purple-page" style={{ background: 'var(--hero-bg)', minHeight: '100vh' }}>
+      <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '24px 24px 80px' }}>
+        <PageHero
+          title="Bergabung dengan"
+          accent="AzeraKOL Network"
+          subtitle="Daftar gratis, tim kami akan review profil dan menghubungi kamu."
+          illustration={<CreatorIllustration />}
+        />
 
-        <form onSubmit={onSubmit} style={{ background: 'white', borderRadius: '24px', padding: '40px', boxShadow: '0 4px 24px rgba(0,0,0,0.06)' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '300px 1fr', gap: '32px', alignItems: 'start' }} className="form-side-grid">
+        <FormSidePanel
+          blurb="Daftar gratis jadi creator AzeraKOL. Tim kami review profil kamu, lalu menghubungi kamu untuk campaign yang cocok."
+          points={[PANEL_POINTS.check('Gratis, tanpa biaya pendaftaran'), PANEL_POINTS.whatsapp, PANEL_POINTS.privacy]}
+        />
+        <form onSubmit={onSubmit} style={{ minWidth: 0, background: 'white', borderRadius: '24px', padding: '40px', boxShadow: '0 4px 24px rgba(0,0,0,0.06)' }}>
           <SectionTitle title="1. Data Diri" />
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }} className="form-2col">
             <div>
@@ -428,10 +430,10 @@ export default function KOLRegister() {
           {submitError && <p style={{ color: '#ba1a1a', fontSize: '0.85rem', marginBottom: '16px', fontFamily: "var(--font-display)" }}>{submitError}</p>}
 
           <button type="submit" disabled={loading} className="btn-primary" style={{ width: '100%', justifyContent: 'center', fontSize: '1rem', padding: '16px', opacity: loading ? 0.7 : 1 }}>
-            <Zap size={18} />
             {loading ? 'Mendaftar...' : 'Daftar Sekarang'}
           </button>
         </form>
+        </div>
       </div>
     </div>
   );
