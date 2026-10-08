@@ -130,6 +130,7 @@ export default function App() {
 
           {/* AD-48: dashboard PIC/Handle-by, akses via accessCode (query ?code=), tanpa login/Navbar/Footer */}
           <Route path="/campaign-dashboard/:id" element={<CampaignDashboard />} />
+          <Route path="/client-dashboard/:id" element={<CampaignDashboard audience="client" />} />
           <Route path="/portal/:token" element={<CreatorPortal />} />
 
           {/* Admin login, no layout */}

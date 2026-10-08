@@ -65,6 +65,8 @@ interface ColumnMenuProps {
   canMoveLeft: boolean;
   canMoveRight: boolean;
   onAccess: (a: Access) => void;
+  /** Kolom sistem yang boleh diisi creator (Draft, Link Posting, Insight) */
+  creatorEditable?: boolean;
   onChange: (next: ProgressColumn) => void;
   onMove: (dir: -1 | 1) => void;
   onInsertRight: () => void;
@@ -72,8 +74,20 @@ interface ColumnMenuProps {
 }
 
 /** Bagian atas dropdown header kolom Master Sheet: pengaturan kolom langsung dari tabel. */
-export function ColumnMenu({ progress, access, canMoveLeft, canMoveRight, onAccess, onChange, onMove, onInsertRight, onDelete }: ColumnMenuProps) {
+export function ColumnMenu({ progress, access, creatorEditable, canMoveLeft, canMoveRight, onAccess, onChange, onMove, onInsertRight, onDelete }: ColumnMenuProps) {
   const [label, setLabel] = useState(progress?.label ?? '');
+
+  if (!progress && creatorEditable) {
+    return (
+      <div style={{ padding: '4px 12px 6px' }}>
+        <span style={lbl}>Akses creator (portal)</span>
+        <AccessPicker value={access} options={['hidden', 'view', 'edit']} onChange={onAccess} />
+        <p style={{ fontSize: '0.7rem', color: '#777683', marginTop: '6px', lineHeight: 1.5 }}>
+          Edit = creator bisa mengisi kolom ini di barisnya sendiri lewat portal.
+        </p>
+      </div>
+    );
+  }
 
   if (!progress) {
     return (

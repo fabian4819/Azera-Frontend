@@ -3,13 +3,14 @@ import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, Check, Copy, ExternalLink, RefreshCw, X } from 'lucide-react';
 import api from '../../lib/api';
 import SheetGrid, { type Cell, type CellKind } from '../../components/SheetGrid';
+import ReviewStatusCell from '../../components/ReviewStatusCell';
 import { AccessIcon, AddColumnMenu, ColumnMenu, type Access, type ProgressColumn } from './ColumnManager';
 import { SHEET_TABS, type SheetKind } from './sheetTabs';
 
 const f = 'var(--font-display)';
 const GRID = '#e2e3e3';
 
-interface ColumnMeta { key: string; progressId?: string; kind?: CellKind; access: Access }
+interface ColumnMeta { key: string; progressId?: string; kind?: CellKind; access: Access; submission?: { type: 'draft' | 'post'; review?: boolean } }
 interface SheetView {
   campaign: { _id: string; name: string; brandName: string | null };
   headers: string[];
@@ -19,6 +20,7 @@ interface SheetView {
   rowIds?: string[];
   rowStatus?: string[];
   rowLinks?: string[];
+  rowNotes?: { draft?: string; post?: string }[];
   progressColumns?: ProgressColumn[];
   sheetUrl: string | null;
 }
@@ -28,6 +30,8 @@ const STATUS_STYLE: Record<string, { bg: string; color: string; label: string }>
   accepted: { bg: '#d7f5e3', color: '#146c2e', label: 'Approved' },
   rejected: { bg: '#ffdad6', color: '#93000a', label: 'Rejected' },
 };
+
+const MAX_DRAFT_MB = 80; // = batas uploadDraft di server & client_max_body_size nginx
 
 /** Tampilan Master / Report / Recap Payment / Pendaftar satu campaign ala Google Sheets, di dalam admin. */
 export default function CampaignSheet() {
@@ -83,17 +87,45 @@ export default function CampaignSheet() {
 
   const editCell = async (row: number, col: number, value: string) => {
     const meta = view?.columns?.[col];
-    await api.patch(`/admin/campaigns/${id}/sheet/cell`, { applicationId: view?.rowIds?.[row], columnId: meta?.progressId, value });
+    const columnId = meta?.submission?.type === 'post' ? 'base:post' : meta?.progressId;
+    await api.patch(`/admin/campaigns/${id}/sheet/cell`, { applicationId: view?.rowIds?.[row], columnId, value });
     await reloadCurrent();
   };
 
   const uploadCell = async (row: number, col: number, files: File[]) => {
+    const meta = view?.columns?.[col];
+    const isDraft = meta?.submission?.type === 'draft';
+    if (isDraft && files.some((file) => file.size > MAX_DRAFT_MB * 1024 * 1024)) {
+      throw { response: { data: { message: `Ukuran file maksimal ${MAX_DRAFT_MB}MB per file` } } };
+    }
     const fd = new FormData();
     fd.append('applicationId', view?.rowIds?.[row] ?? '');
-    fd.append('columnId', view?.columns?.[col]?.progressId ?? '');
+    fd.append('columnId', meta?.submission?.type === 'post' ? 'base:insight' : meta?.progressId ?? '');
     files.forEach((file) => fd.append('files', file));
-    await api.post(`/admin/campaigns/${id}/sheet/cell/upload`, fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+    await api.post(`/admin/campaigns/${id}/sheet/${isDraft ? 'draft' : 'cell'}/upload`, fd, { headers: { 'Content-Type': 'multipart/form-data' } });
     await reloadCurrent();
+  };
+
+  // Approve / minta revisi draft atau hasil posting, dari sel Status Draft / Status Posting
+  const review = async (row: number, type: 'draft' | 'post', status: 'approved' | 'revision_requested', notes?: string) => {
+    setActionError('');
+    try {
+      await api.patch(`/admin/campaigns/${id}/sheet/review`, { applicationId: view?.rowIds?.[row], type, status, notes });
+      await reloadCurrent();
+    } catch (err) {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      setActionError(msg || `Gagal mengubah status ${type === 'draft' ? 'draft' : 'posting'}. Coba lagi.`);
+      throw err;
+    }
+  };
+
+  const reviewCell = (row: number, col: number, v: Cell) => {
+    const sub = view?.columns?.[col]?.submission;
+    if (!sub?.review) return undefined;
+    return (
+      <ReviewStatusCell type={sub.type} status={String(v)} notes={view?.rowNotes?.[row]?.[sub.type]}
+        onReview={(status, notes) => review(row, sub.type, status, notes)} />
+    );
   };
 
   // Kelola kolom langsung dari header tabel, tiap perubahan langsung disimpan ke campaign
@@ -118,10 +150,11 @@ export default function CampaignSheet() {
       <ColumnMenu
         progress={progress}
         access={meta.access}
+        creatorEditable={Boolean(meta.submission && !meta.submission.review)}
         canMoveLeft={pIdx > 0}
         canMoveRight={pIdx !== -1 && pIdx < progressCols.length - 1}
         onAccess={(a) => {
-          const access = Object.fromEntries((view?.columns ?? []).filter((c) => !c.progressId).map((c) => [c.key, c.access === 'view' ? 'view' : 'hidden'])) as Record<string, Access>;
+          const access = Object.fromEntries((view?.columns ?? []).filter((c) => !c.progressId).map((c) => [c.key, c.access])) as Record<string, Access>;
           void saveColumns(progressCols, { ...access, [meta.key]: a });
         }}
         onChange={(next) => void saveColumns(withCol((l) => { l[pIdx] = next; }))}
@@ -151,7 +184,8 @@ export default function CampaignSheet() {
     const link = view?.rowLinks?.[row];
     if (!link) return;
     try {
-      await navigator.clipboard.writeText(String(link));
+      // Pakai origin halaman ini (bukan CLIENT_ORIGIN server), jadi link ikut port/domain tempat admin membuka
+      await navigator.clipboard.writeText(`${window.location.origin}${new URL(String(link), window.location.origin).pathname}`);
       setCopied(view?.rowIds?.[row] ?? null);
       setTimeout(() => setCopied(null), 1800);
     } catch {
@@ -256,7 +290,8 @@ export default function CampaignSheet() {
           totals={view.totals}
           hint={tab.hint}
           emptyText={tab.empty}
-          canEdit={isMaster ? (_row, col) => Boolean(view.columns?.[col]?.progressId) : undefined}
+          canEdit={isMaster ? (_row, col) => Boolean(view.columns?.[col]?.progressId || (view.columns?.[col]?.submission && !view.columns[col].submission?.review)) : undefined}
+          customCell={isMaster ? reviewCell : undefined}
           kindOf={(col) => view.columns?.[col]?.kind}
           onEdit={editCell}
           onUpload={uploadCell}

@@ -2,7 +2,8 @@ import { useMemo, useRef, useState, type ReactNode } from 'react';
 import { ArrowDownAZ, ArrowDownZA, ListFilter, Pencil, Plus, Search, Upload, X } from 'lucide-react';
 
 export type Cell = string | number;
-export type CellKind = 'text' | 'number' | 'date' | 'link' | 'file';
+/** 'file' = upload gambar (screenshot), 'media' = upload foto/video (draft) */
+export type CellKind = 'text' | 'number' | 'date' | 'link' | 'file' | 'media';
 
 // Warna grid sama dengan Google Sheets supaya terasa familiar
 const GRID = '#e2e3e3';
@@ -118,6 +119,8 @@ interface SheetGridProps {
   headerIcon?: (col: number) => ReactNode;
   /** Admin: isi popover tombol "+" di ujung kanan header (tambah kolom) */
   addColumnMenu?: (close: () => void) => ReactNode;
+  /** Isi sel kustom (mis. badge status + tombol Approve/Revisi); undefined = render biasa */
+  customCell?: (row: number, col: number, v: Cell) => ReactNode | undefined;
 }
 
 function errorMessage(err: unknown): string {
@@ -127,7 +130,7 @@ function errorMessage(err: unknown): string {
 /** Tabel ala Google Sheets: cari, filter & urutkan per kolom, plus edit sel progress langsung di tabel. */
 export default function SheetGrid({
   headers, rows: allRows, totals, hint, emptyText, canEdit, kindOf, onEdit, onUpload, highlightRow, actionHeader, rowAction, footer, maxHeight,
-  columnMenu, headerIcon, addColumnMenu,
+  columnMenu, headerIcon, addColumnMenu, customCell,
 }: SheetGridProps) {
   const [addMenu, setAddMenu] = useState<DOMRect | null>(null);
   const [query, setQuery] = useState('');
@@ -188,7 +191,7 @@ export default function SheetGrid({
 
   const startEdit = (row: number, col: number) => {
     if (!canEdit?.(row, col) || saving) return;
-    if (kindOf?.(col) === 'file') return;
+    if (kindOf?.(col) === 'file' || kindOf?.(col) === 'media') return;
     setActionError('');
     setEditing({ row, col, value: String(allRows[row]?.[col] ?? '') });
   };
@@ -210,6 +213,7 @@ export default function SheetGrid({
 
   const pickFiles = (row: number, col: number) => {
     uploadTarget.current = { row, col };
+    if (fileInput.current) fileInput.current.accept = kindOf?.(col) === 'media' ? 'image/*,video/*' : 'image/*';
     fileInput.current?.click();
   };
 
@@ -264,17 +268,17 @@ export default function SheetGrid({
         />
       );
     }
-    if (kind === 'file') {
+    if (kind === 'file' || kind === 'media') {
       const urls = String(v || '').split(' ').filter(Boolean);
       return (
         <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-          {urls.map((u, i) => (
-            <a key={u} href={u} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} style={{ color: '#1a73e8' }}>Gambar {i + 1}</a>
+          {urls.map((u, i) => !/^https?:\/\//.test(u) ? <span key={u}>{u}</span> : (
+            <a key={u} href={u} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} style={{ color: '#1a73e8' }}>{kind === 'media' ? 'File' : 'Gambar'} {i + 1}</a>
           ))}
           {editable && (
             <button type="button" disabled={busy} onClick={(e) => { e.stopPropagation(); pickFiles(row, col); }}
               style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', border: '1px solid #c9b6f7', background: 'white', color: '#6728e4', borderRadius: '6px', padding: '2px 8px', fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer' }}>
-              <Upload size={12} /> {busy ? 'Mengunggah…' : 'Upload'}
+              <Upload size={12} /> {busy ? 'Mengunggah…' : kind === 'media' && urls.length ? 'Ganti' : 'Upload'}
             </button>
           )}
         </span>
@@ -386,13 +390,14 @@ export default function SheetGrid({
                   {headers.map((_, ci) => {
                     const v = r[ci] ?? '';
                     const editable = canEdit?.(i, ci);
+                    const custom = customCell?.(i, ci, v);
                     return (
                       <td key={ci}
-                        onMouseEnter={editable ? undefined : (e) => showTip(e, String(v))}
+                        onMouseEnter={editable || custom !== undefined ? undefined : (e) => showTip(e, String(v))}
                         onMouseLeave={() => setTip(null)}
                         onClick={editable ? (e) => { e.stopPropagation(); startEdit(i, ci); } : undefined}
                         style={{ ...cellBase, background: editable && !isSel ? '#fffdf2' : bg, cursor: editable ? 'text' : 'default', textAlign: numericCols.has(ci) ? 'right' : 'left', ...(ci === 0 ? firstColStyle : {}) }}>
-                        {canEdit ? renderEditableCell(i, ci, v) : renderCell(v)}
+                        {custom ?? (canEdit ? renderEditableCell(i, ci, v) : renderCell(v))}
                       </td>
                     );
                   })}
