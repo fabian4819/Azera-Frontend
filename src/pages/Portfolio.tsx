@@ -74,10 +74,9 @@ export default function Portfolio() {
   }
 
   return (
-    <div style={{ background: 'var(--surface)', minHeight: '100vh' }}>
-      <div style={{ maxWidth: '1160px', margin: '0 auto', padding: '56px 24px 0' }}>
+    <div className="purple-page" style={{ background: 'var(--hero-bg)', minHeight: '100vh' }}>
+      <div style={{ maxWidth: '1160px', margin: '0 auto', padding: '32px 24px 0' }}>
         <PageHero
-          tone="light"
           title="Campaign"
           accent="Sukses"
           after="Kami"
@@ -159,9 +158,9 @@ export default function Portfolio() {
                     onClick={() => setSelectedId(item._id)}
                     style={{
                       padding: '8px 18px', borderRadius: '999px',
-                      border: active ? '1.5px solid var(--primary)' : '1.5px dashed var(--outline-variant)',
-                      background: active ? 'var(--primary)' : 'transparent',
-                      color: active ? '#fff' : 'var(--on-surface-variant)',
+                      border: active ? '1.5px solid #fff' : '1.5px dashed rgba(255,255,255,0.45)',
+                      background: active ? '#fff' : 'transparent',
+                      color: active ? 'var(--secondary)' : 'rgba(255,255,255,0.85)',
                       fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '0.8rem', cursor: 'pointer',
                       transition: 'all 0.2s',
                     }}
@@ -207,7 +206,7 @@ export default function Portfolio() {
                 fontFamily: 'var(--font-display)',
                 fontSize: '1.25rem',
                 fontWeight: 700,
-                color: 'var(--on-background)',
+                color: '#fff',
                 marginBottom: '8px',
               }}
             >
@@ -216,7 +215,7 @@ export default function Portfolio() {
             <p
               style={{
                 fontSize: '0.92rem',
-                color: 'var(--outline)',
+                color: 'rgba(255,255,255,0.8)',
                 maxWidth: '440px',
                 lineHeight: 1.5,
                 marginBottom: category !== 'All Campaigns' ? '20px' : '0',
