@@ -7,7 +7,6 @@ import type { IconType } from 'react-icons';
 import api from '../../lib/api';
 import CampaignAnalyticsFinance from './CampaignAnalyticsFinance';
 import WorkflowTracker from './WorkflowTracker';
-import AssetLibrary from './AssetLibrary';
 import { BroadcastSharePanel } from './BroadcastShareModal';
 import Switch from '../../components/ui/Switch';
 import CustomFormBuilder, { type CustomField, type ApplyFields } from './CustomFormBuilder';
@@ -76,7 +75,6 @@ const TABS = [
   { key: 'form-kustom', label: 'Form Pendaftaran' },
   { key: 'distribusi', label: 'Distribusi' },
   { key: 'finance', label: 'Finance' },
-  { key: 'aset', label: 'Aset' },
 ] as const;
 type TabKey = (typeof TABS)[number]['key'];
 
@@ -325,7 +323,6 @@ export default function CampaignDetail() {
 
       {activeTab === 'finance' && <CampaignAnalyticsFinance campaignId={campaign._id} />}
 
-      {activeTab === 'aset' && <AssetLibrary campaignId={campaign._id} />}
 
       <style>{`
         @media (max-width: 900px) {
