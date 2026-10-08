@@ -191,6 +191,9 @@ export default function CampaignDetail() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px', flexWrap: 'wrap', gap: '10px' }}>
         <div>
           <div style={{ width: '40px', height: '3px', background: 'linear-gradient(135deg, #6728e4, #ff81aa)', borderRadius: '2px', marginBottom: '12px' }} />
+          {campaign.brandName && (
+            <p style={{ fontFamily: "var(--font-display)", fontSize: '0.78rem', fontWeight: 700, color: '#6728e4', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '4px' }}>{campaign.brandName}</p>
+          )}
           <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: '1.4rem', color: '#191c20' }}>{campaign.name}</h2>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
@@ -362,7 +365,6 @@ const Checklist = ({ items }: { items: string[] }) => (
 /** Keterangan campaign lengkap (isi tahap 1 pembuatan campaign). Field kosong disembunyikan. */
 function CampaignInfo({ campaign: c }: { campaign: Campaign }) {
   const ev = c.type === 'offline' ? c.eventDetails : undefined;
-  const period = [fmtDate(c.timeline?.startDate), fmtDate(c.timeline?.endDate)].filter(Boolean).join(' – ');
   const stats = [
     { label: 'Budget', value: rp(c.budget), bg: 'linear-gradient(135deg, #6728e4, #8b66eb)', fg: 'white' },
     { label: 'Fee Talent', value: rp(c.fee?.creatorFee), sub: c.feeNote, bg: '#eefad8', fg: '#2c4d00' },
@@ -380,17 +382,6 @@ function CampaignInfo({ campaign: c }: { campaign: Campaign }) {
   return (
     <div style={{ ...cardStyle, padding: 0, overflow: 'hidden' }}>
       {/* Header */}
-      <div style={{ padding: '24px 28px', borderBottom: '1px solid #eeecfb', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px', flexWrap: 'wrap' }}>
-        <div style={{ minWidth: 0 }}>
-          {c.brandName && <p style={{ fontSize: '0.75rem', fontWeight: 700, color: '#6728e4', textTransform: 'uppercase', letterSpacing: '0.08em', fontFamily: font }}>{c.brandName}</p>}
-          <p style={{ fontFamily: font, fontWeight: 800, fontSize: '1.35rem', color: '#191c20', lineHeight: 1.25, marginTop: '4px' }}>{c.name}</p>
-        </div>
-        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-          <Chip tone={c.type === 'offline' ? 'lime' : 'violet'}>{c.type === 'offline' ? 'Offline / Event' : 'Online'}</Chip>
-          {period && <Chip tone="gray">{period}</Chip>}
-        </div>
-      </div>
-
       <div style={{ padding: '24px 28px' }}>
         {/* Angka */}
         {stats.length > 0 && (
