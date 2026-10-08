@@ -32,7 +32,6 @@ const Brands = lazy(() => import('./pages/admin/Brands'));
 const BrandDetail = lazy(() => import('./pages/admin/BrandDetail'));
 const PortfolioManager = lazy(() => import('./pages/admin/PortfolioManager'));
 const Dashboard = lazy(() => import('./pages/admin/Dashboard'));
-const Campaigns = lazy(() => import('./pages/admin/Campaigns'));
 const AdminCampaignDashboard = lazy(() => import('./pages/admin/CampaignDashboard'));
 const CampaignNew = lazy(() => import('./pages/admin/CampaignNew'));
 const CampaignDetail = lazy(() => import('./pages/admin/CampaignDetail'));
@@ -140,8 +139,9 @@ export default function App() {
           <Route path="/admin" element={<ProtectedRoute />}>
             <Route index element={<Navigate to="/admin/dashboard" replace />} />
             <Route path="dashboard" element={<Dashboard />} />
-            <Route path="campaigns" element={<Campaigns />} />
-            <Route path="campaign-dashboard" element={<AdminCampaignDashboard />} />
+            <Route path="campaigns" element={<AdminCampaignDashboard />} />
+            {/* Menu Dashboard Campaign digabung ke Campaigns (tampilan card) */}
+            <Route path="campaign-dashboard" element={<Navigate to="/admin/campaigns" replace />} />
             <Route path="campaigns/new" element={<CampaignNew />} />
             <Route path="campaigns/:id" element={<CampaignDetail />} />
             <Route path="campaigns/:id/sheet" element={<CampaignSheet />} />

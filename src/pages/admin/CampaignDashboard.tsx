@@ -1,7 +1,7 @@
 import { stageLabel } from '../../lib/stages';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { RefreshCw } from 'lucide-react';
+import { RefreshCw, Plus } from 'lucide-react';
 import { SHEET_TABS } from './sheetTabs';
 import api from '../../lib/api';
 
@@ -14,7 +14,16 @@ interface CampaignDashboardItem {
   workflowStage: string;
   budget: number;
   brandId?: { namaBrand?: string } | string;
+  timeline?: { startDate?: string; endDate?: string };
+  createdAt: string;
 }
+
+const fmtDate = (d: string) => new Date(d).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Asia/Jakarta' });
+/** Periode campaign kalau diisi, kalau belum: tanggal dibuat */
+const campaignDate = (c: CampaignDashboardItem) => {
+  const period = [c.timeline?.startDate, c.timeline?.endDate].filter(Boolean).map((d) => fmtDate(d!)).join(' – ');
+  return period || `Dibuat ${fmtDate(c.createdAt)}`;
+};
 
 const sheetButtonStyle: React.CSSProperties = {
   display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '5px',
@@ -56,14 +65,20 @@ export default function CampaignDashboard() {
             Pilih campaign, lalu buka Master Sheet, Report, atau Recap Payment langsung di sini.
           </p>
         </div>
-        <button
-          type="button"
-          onClick={() => void fetchCampaigns()}
-          aria-label="Muat ulang dashboard campaign"
-          style={{ width: '38px', height: '38px', borderRadius: '10px', border: '1.5px solid #c7c8cf', background: 'white', color: '#6728e4', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-        >
-          <RefreshCw size={16} />
-        </button>
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+          <button
+            type="button"
+            onClick={() => void fetchCampaigns()}
+            aria-label="Muat ulang daftar campaign"
+            style={{ width: '38px', height: '38px', borderRadius: '10px', border: '1.5px solid #c7c8cf', background: 'white', color: '#6728e4', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          >
+            <RefreshCw size={16} />
+          </button>
+          <button onClick={() => navigate('/admin/campaigns/new')} className="btn-primary" style={{ padding: '10px 20px', fontSize: '0.875rem' }}>
+            <Plus size={16} />
+            Campaign Baru
+          </button>
+        </div>
       </div>
 
       {loading ? (
@@ -87,6 +102,7 @@ export default function CampaignDashboard() {
                     <p style={{ fontFamily: f, fontSize: '0.78rem', color: '#777683', marginTop: '4px' }}>
                       {brandName || 'Tanpa brand'} · Rp{campaign.budget.toLocaleString('id-ID')}
                     </p>
+                    <p style={{ fontFamily: f, fontSize: '0.76rem', color: '#9a99a6', marginTop: '2px' }}>{campaignDate(campaign)}</p>
                   </div>
                   <span style={{ flexShrink: 0, background: '#e1e0ff', color: '#6728e4', borderRadius: '999px', padding: '5px 10px', fontSize: '0.68rem', fontWeight: 700 }}>
                     {stageLabel(campaign.workflowStage)}

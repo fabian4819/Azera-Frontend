@@ -225,7 +225,7 @@ export default function CampaignSheet() {
 
   return (
     <div>
-      <Link to="/admin/campaign-dashboard" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', color: '#777683', fontSize: '0.8rem', textDecoration: 'none', fontFamily: f, marginBottom: '12px' }}>
+      <Link to="/admin/campaigns" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', color: '#777683', fontSize: '0.8rem', textDecoration: 'none', fontFamily: f, marginBottom: '12px' }}>
         <ArrowLeft size={14} /> Semua Campaign
       </Link>
 
