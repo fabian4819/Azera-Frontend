@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, Zap } from 'lucide-react';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
 import api from '../../lib/api';
 import { buildBroadcast } from '../../lib/broadcast';
+import { NICHES as niches } from '../../lib/niches';
+import { WILAYAH_API, type WilayahOption } from '../../lib/wilayah';
+import ChecklistDropdown from '../../components/ui/ChecklistDropdown';
 import CustomFormBuilder, { cleanFields, type CustomField, type ApplyFields } from './CustomFormBuilder';
 import BroadcastShareModal from './BroadcastShareModal';
 
-const niches = ['Beauty', 'Fashion', 'Food & Beverage', 'Travel', 'Tech', 'Fitness', 'Parenting', 'Gaming', 'Finance', 'Education', 'Lifestyle', 'Entertainment'];
 const platforms = [
   { value: 'instagram', label: 'Instagram' },
   { value: 'tiktok', label: 'TikTok' },
@@ -78,8 +80,12 @@ export default function CampaignNew() {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [selectedNiches, setSelectedNiches] = useState<string[]>([]);
-  const [minFollowers, setMinFollowers] = useState('');
-  const [provinces, setProvinces] = useState('');
+  const [minFollowers, setMinFollowers] = useState<Record<string, string>>({});
+  // Kriteria domisili (opsional, bisa lebih dari 1), id wilayah, dikirim sebagai nama saat simpan
+  const [provinceOptions, setProvinceOptions] = useState<WilayahOption[]>([]);
+  const [provinceIds, setProvinceIds] = useState<string[]>([]);
+  const [citiesByProvince, setCitiesByProvince] = useState<Record<string, WilayahOption[]>>({});
+  const [cityIds, setCityIds] = useState<string[]>([]);
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([]);
   const [type, setType] = useState<'online' | 'offline'>('online');
   const [eventLocation, setEventLocation] = useState('');
@@ -105,7 +111,23 @@ export default function CampaignNew() {
   useEffect(() => {
     api.get('/admin/brands').then((res) => setBrands(res.data)).catch(() => setBrands([]));
     api.get('/admin/pic').then((res) => setAllPics(res.data)).catch(() => setAllPics([]));
+    fetch(`${WILAYAH_API}/provinces.json`).then((r) => r.json()).then(setProvinceOptions).catch(() => setProvinceOptions([]));
   }, []);
+
+  // Kota yang provinsinya dilepas ikut dilepas; daftar kota provinsi baru di-fetch sekali (di-cache)
+  const pickProvinces = (ids: string[]) => {
+    setProvinceIds(ids);
+    const keep = new Set(ids.flatMap((id) => (citiesByProvince[id] || []).map((c) => c.id)));
+    setCityIds((prev) => prev.filter((c) => keep.has(c)));
+    for (const id of ids.filter((x) => !citiesByProvince[x])) {
+      fetch(`${WILAYAH_API}/regencies/${id}.json`).then((r) => r.json())
+        .then((data: WilayahOption[]) => setCitiesByProvince((prev) => ({ ...prev, [id]: data })))
+        .catch(() => undefined);
+    }
+  };
+  const provinceName = (id: string) => provinceOptions.find((p) => p.id === id)?.name || '';
+  const cityOptions = provinceIds.flatMap((pid) => (citiesByProvince[pid] || []).map((c) => ({ id: c.id, label: c.name, sub: provinceName(pid) })));
+  const cityName = (id: string) => cityOptions.find((c) => c.id === id)?.label || '';
 
   const toggle = (list: string[], setList: (v: string[]) => void, val: string) => {
     if (list.includes(val)) setList(list.filter((v) => v !== val));
@@ -143,8 +165,9 @@ export default function CampaignNew() {
         timeline: { startDate: startDate || undefined, endDate: endDate || undefined },
         criteria: {
           niches: selectedNiches,
-          minFollowers: minFollowers ? Number(minFollowers) : undefined,
-          provinces: provinces ? provinces.split(',').map((p) => p.trim()).filter(Boolean) : [],
+          minFollowersByPlatform: Object.fromEntries(selectedPlatforms.filter((p) => minFollowers[p]).map((p) => [p, Number(minFollowers[p])])),
+          provinces: provinceIds.map(provinceName).filter(Boolean),
+          cities: cityIds.map(cityName).filter(Boolean),
           platforms: selectedPlatforms,
         },
         type,
@@ -171,7 +194,8 @@ export default function CampaignNew() {
       </button>
 
       <Steps step={step} />
-      {step === 1 && <form onSubmit={next} style={{ maxWidth: '720px' }}>
+      {step === 1 && <div className="campaign-new-grid" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(320px, 400px)', gap: '20px', alignItems: 'start' }}>
+      <form onSubmit={next} style={{ minWidth: 0 }}>
         <div style={cardStyle}>
           <SectionTitle title="Informasi Dasar" />
           <div style={{ marginBottom: '14px' }}>
@@ -286,16 +310,27 @@ export default function CampaignNew() {
               {platforms.map((p) => <Pill key={p.value} label={p.label} selected={selectedPlatforms.includes(p.value)} onClick={() => toggle(selectedPlatforms, setSelectedPlatforms, p.value)} />)}
             </div>
           </div>
+          {selectedPlatforms.length > 0 && (
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }} className="form-2col">
+              {platforms.filter((p) => selectedPlatforms.includes(p.value)).map((p) => (
+                <div key={p.value}>
+                  <label style={labelStyle}>Min. Followers {p.label} <span style={{ fontWeight: 400, color: '#777683' }}>(kosong = bebas)</span></label>
+                  <input value={minFollowers[p.value] ?? ''} onChange={(e) => setMinFollowers((m) => ({ ...m, [p.value]: e.target.value }))} type="number" min={0} placeholder="1000" style={inputStyle} />
+                </div>
+              ))}
+            </div>
+          )}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }} className="form-2col">
             <div>
-              <label style={labelStyle}>Min. Followers</label>
-              <input value={minFollowers} onChange={(e) => setMinFollowers(e.target.value)} type="number" placeholder="1000" style={inputStyle} />
+              <label style={labelStyle}>Provinsi <span style={{ fontWeight: 400, color: '#777683' }}>(opsional, bisa lebih dari 1)</span></label>
+              <ChecklistDropdown placeholder="Semua provinsi" options={provinceOptions.map((p) => ({ id: p.id, label: p.name }))} selected={provinceIds} onChange={pickProvinces} />
             </div>
             <div>
-              <label style={labelStyle}>Provinsi <span style={{ fontWeight: 400, color: '#777683' }}>(pisah koma)</span></label>
-              <input value={provinces} onChange={(e) => setProvinces(e.target.value)} placeholder="Jawa Tengah, DKI Jakarta" style={inputStyle} />
+              <label style={labelStyle}>Kota / Kabupaten <span style={{ fontWeight: 400, color: '#777683' }}>(opsional, bisa lebih dari 1)</span></label>
+              <ChecklistDropdown placeholder={provinceIds.length ? 'Semua kota di provinsi terpilih' : 'Pilih provinsi dulu'} options={cityOptions} selected={cityIds} onChange={setCityIds} disabled={!provinceIds.length} />
             </div>
           </div>
+          <p style={{ fontSize: '0.75rem', color: '#777683', marginTop: '6px', fontFamily: "var(--font-display)" }}>Provinsi & kota kosong = field domisili tidak ditanyakan di form apply.</p>
         </div>
 
         {error && <p style={{ color: '#ba1a1a', fontSize: '0.85rem', marginBottom: '16px', fontFamily: "var(--font-display)" }}>{error}</p>}
@@ -303,13 +338,30 @@ export default function CampaignNew() {
         <button type="submit" className="btn-primary" style={{ width: '100%', justifyContent: 'center', padding: '14px' }}>
           Lanjut: Setup Form <ArrowRight size={18} />
         </button>
-      </form>}
+      </form>
+
+      {/* top 104px = header admin sticky (top 16px + tinggi ±72px) + jarak 16px, supaya tidak ketutup header */}
+      <aside style={{ ...cardStyle, position: 'sticky', top: '104px', padding: '22px', marginBottom: 0 }}>
+        <SectionTitle title="Preview Broadcast" hint="Ikut ter-update saat form diisi. Masih bisa diedit setelah disimpan." />
+        <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: 0, maxHeight: 'calc(100vh - 260px)', overflowY: 'auto', background: '#f8f9ff', borderRadius: '12px', padding: '14px', fontSize: '0.8rem', lineHeight: 1.55, color: '#191c20', fontFamily: "var(--font-display)" }}>
+          {buildBroadcast({
+            name: name || 'Nama Campaign', type,
+            eventDetails: { location: eventLocation, date: eventDate || undefined, timeWindow: eventTimeWindow },
+            fee: { creatorFee: num(creatorFee), picFee: num(picFee), mgFee: num(mgFee) },
+            feeNote: feeNote.trim(), benefits: lines(benefits), requirements: lines(requirements), deliverables: lines(sow), infoLink,
+          }, `${window.location.origin}/apply/…`)}
+        </pre>
+      </aside>
+      </div>}
 
       {step === 2 && (
         <div>
           <CustomFormBuilder
             initial={customFields}
             initialApplyFields={applyFields}
+            platforms={selectedPlatforms}
+            minFollowers={minFollowers}
+            askDomicile={provinceIds.length + cityIds.length > 0}
             onChange={(f, a) => { setCustomFields(f); setApplyFields(a); }}
             pics={allPics}
             assignedPicIds={picIds}
@@ -322,7 +374,6 @@ export default function CampaignNew() {
                 <ArrowLeft size={16} /> Kembali
               </button>
               <button type="button" onClick={() => void onSubmit()} disabled={saving} className="btn-primary" style={{ flex: 1, justifyContent: 'center', padding: '14px', opacity: saving ? 0.7 : 1 }}>
-                <Zap size={18} />
                 {saving ? 'Menyimpan...' : 'Simpan Campaign'}
               </button>
             </div>

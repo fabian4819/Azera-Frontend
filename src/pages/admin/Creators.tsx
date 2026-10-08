@@ -74,8 +74,16 @@ function multiTokenFilter(row: { getValue: (id: string) => unknown }, columnId: 
 
 const SOURCE_LABELS: Record<string, string> = { form: 'Form', extension: 'Ekstensi', campaign: 'Link Campaign', import: 'Import Sheet' };
 
-/** general = daftar lewat form KOL Register; campaign = masuk lewat link apply campaign / import sheet */
-export default function Creators({ scope = 'general' }: { scope?: 'general' | 'campaign' }) {
+interface Props {
+  /** general = daftar lewat form KOL Register; campaign = masuk lewat link apply campaign / import sheet;
+   * share = form + campaign/import yang punya nomor WA (picker Broadcast Campaign) */
+  scope?: 'general' | 'campaign' | 'share';
+  /** Mode pilih: kolom Aksi diganti checklist di paling kiri */
+  selected?: string[];
+  onSelectedChange?: (ids: string[]) => void;
+}
+
+export default function Creators({ scope = 'general', selected, onSelectedChange }: Props) {
   const [creators, setCreators] = useState<CreatorItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [globalFilter, setGlobalFilter] = useState('');
@@ -87,8 +95,8 @@ export default function Creators({ scope = 'general' }: { scope?: 'general' | 'c
   const fetchCreators = async () => {
     setLoading(true);
     try {
-      const res = await api.get('/admin/creators', { params: { scope } });
-      setCreators(res.data);
+      const res = await api.get('/admin/creators', { params: scope === 'share' ? {} : { scope } });
+      setCreators(scope === 'share' ? res.data.filter((c: CreatorItem) => c.source !== 'extension' && c.phone) : res.data);
     } catch {
       setCreators([]);
     } finally {
@@ -160,13 +168,33 @@ export default function Creators({ scope = 'general' }: { scope?: 'general' | 'c
     });
 
     return [
+      ...(onSelectedChange ? [{
+        id: 'select', enableSorting: false, enableColumnFilter: false,
+        // Centang semua = semua baris yang lolos filter/cari saat ini
+        header: ({ table }) => {
+          const ids = table.getFilteredRowModel().rows.map((r) => r.original._id);
+          const all = ids.length > 0 && ids.every((id) => selected?.includes(id));
+          return (
+            <input type="checkbox" aria-label="Pilih semua creator" checked={all} style={{ width: '16px', height: '16px', accentColor: '#6728e4', cursor: 'pointer' }}
+              onChange={() => onSelectedChange(all ? (selected || []).filter((id) => !ids.includes(id)) : [...new Set([...(selected || []), ...ids])])} />
+          );
+        },
+        cell: ({ row }) => {
+          const id = row.original._id;
+          const on = Boolean(selected?.includes(id));
+          return (
+            <input type="checkbox" aria-label={`Pilih ${row.original.name}`} checked={on} style={{ width: '16px', height: '16px', accentColor: '#6728e4', cursor: 'pointer' }}
+              onChange={() => onSelectedChange(on ? (selected || []).filter((x) => x !== id) : [...(selected || []), id])} />
+          );
+        },
+      } as ColumnDef<CreatorItem>] : []),
       {
         id: 'createdAt', header: 'Tanggal Daftar', accessorFn: (c) => c.createdAt, filterFn: multiTokenFilter,
         sortingFn: (a, b) => +new Date(a.original.createdAt) - +new Date(b.original.createdAt),
         cell: ({ getValue }) => formatDate(getValue<string>()),
       },
       textCol('name', 'Nama', (c) => c.name, ({ getValue }) => <span style={{ fontWeight: 600, color: '#191c20' }}>{getValue<string>()}</span>),
-      ...(scope === 'campaign' ? [arrayCol('campaigns', 'Campaign', (c) => c.campaigns || [])] : []),
+      ...(scope !== 'general' ? [arrayCol('campaigns', 'Campaign', (c) => c.campaigns || [])] : []),
       textCol('phone', 'WhatsApp', (c) => c.phone),
       textCol('email', 'Email', (c) => c.email || ''),
       numCol('age', 'Usia', (c) => c.age ?? null),
@@ -195,7 +223,7 @@ export default function Creators({ scope = 'general' }: { scope?: 'general' | 'c
       }),
       textCol('source', 'Sumber', (c) => SOURCE_LABELS[c.source] || c.source),
       textCol('status', 'Status', (c) => STATUS_LABELS[c.status] || c.status, ({ row }) => <StatusBadge status={row.original.status} />),
-      {
+      ...(onSelectedChange ? [] : [{
         id: 'action', header: 'Aksi', enableSorting: false, enableColumnFilter: false,
         cell: ({ row }) => (
           <button
@@ -205,9 +233,9 @@ export default function Creators({ scope = 'general' }: { scope?: 'general' | 'c
             <Eye size={14} />View
           </button>
         ),
-      },
+      } as ColumnDef<CreatorItem>]),
     ];
-  }, [navigate, scope]);
+  }, [navigate, scope, selected, onSelectedChange]);
 
   const table = useReactTable({
     data: creators,
@@ -268,7 +296,7 @@ export default function Creators({ scope = 'general' }: { scope?: 'general' | 'c
               {table.getHeaderGroups().map((hg) => (
                 <tr key={hg.id} style={{ background: '#f8f9ff', borderBottom: '1px solid #e1e0ff' }}>
                   {hg.headers.map((header) => (
-                    <th key={header.id} style={{ padding: 0, position: 'sticky', top: 0, background: '#f8f9ff', zIndex: 1 }}>
+                    <th key={header.id} style={{ padding: 0, position: 'sticky', top: 0, background: '#f8f9ff', zIndex: 1, ...(header.column.id === 'select' ? { left: 0, zIndex: 2, boxShadow: '6px 0 8px -6px rgba(0,0,0,0.12)' } : {}) }}>
                       {header.column.getCanFilter() ? (
                         <ColumnHeaderCell column={header.column} table={table}>
                           {flexRender(header.column.columnDef.header, header.getContext())}
@@ -296,7 +324,7 @@ export default function Creators({ scope = 'general' }: { scope?: 'general' | 'c
                   onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.background = i % 2 === 0 ? 'white' : '#fcfcff')}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <td key={cell.id} style={{ padding: '12px 14px', color: '#464652', whiteSpace: 'nowrap', fontFamily: 'var(--font-display)' }}>
+                    <td key={cell.id} style={{ padding: '12px 14px', color: '#464652', whiteSpace: 'nowrap', fontFamily: 'var(--font-display)', ...(cell.column.id === 'select' ? { position: 'sticky', left: 0, zIndex: 1, background: 'inherit', textAlign: 'center', boxShadow: '6px 0 8px -6px rgba(0,0,0,0.12)' } : {}) }}>
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </td>
                   ))}
@@ -306,7 +334,7 @@ export default function Creators({ scope = 'general' }: { scope?: 'general' | 'c
           </table>
         </div>
         <div style={{ padding: '12px 16px', borderTop: '1px solid #e1e0ff', color: '#777683', fontSize: '0.78rem', fontFamily: 'var(--font-display)' }}>
-          {table.getRowModel().rows.length} dari {creators.length} creator ditampilkan
+          {table.getRowModel().rows.length} dari {creators.length} creator ditampilkan{selected && ` · ${selected.length} dipilih`}
         </div>
       </div>
     </div>

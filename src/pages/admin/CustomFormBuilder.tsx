@@ -15,6 +15,7 @@ const TYPE_LABELS: Record<CustomFieldType, string> = {
 const ANSWER_PLACEHOLDER: Partial<Record<CustomFieldType, string>> = {
   text: 'Teks jawaban singkat', textarea: 'Teks jawaban panjang', number: 'Jawaban angka',
 };
+const PLATFORM_LABELS: Record<string, string> = { instagram: 'Instagram', tiktok: 'TikTok', threads: 'Threads', x: 'X' };
 const isChoice = (t: CustomFieldType) => t === 'select' || t === 'checkbox';
 const font = "var(--font-display)";
 const iconBtn: React.CSSProperties = {
@@ -38,6 +39,12 @@ interface Props {
   onChange?: (fields: CustomField[], applyFields: ApplyFields) => void;
   initial: CustomField[];
   initialApplyFields?: ApplyFields;
+  /** Platform di kriteria campaign, tiap platform jadi field wajib username + followers di form apply */
+  platforms?: string[];
+  /** Min. followers per platform dari kriteria, ditampilkan sebagai keterangan di label */
+  minFollowers?: Record<string, number | string | undefined>;
+  /** Kriteria provinsi/kota terisi → field Provinsi & Kota muncul (wajib) di form apply */
+  askDomicile?: boolean;
   /** Semua akun PIC terdaftar + yang dicentang untuk campaign ini (jadi opsi dropdown PIC di form) */
   pics: { _id: string; name: string; email: string }[];
   assignedPicIds: string[];
@@ -61,7 +68,7 @@ const answerLine = (w: string, text: string) => (
 );
 
 /** Builder pertanyaan tambahan form Apply, pengalaman ala Google Forms (AD-47). */
-export default function CustomFormBuilder({ campaignId, onChange, initial, initialApplyFields, pics, assignedPicIds, onTogglePic, onSaved }: Props) {
+export default function CustomFormBuilder({ campaignId, onChange, initial, initialApplyFields, platforms = [], minFollowers = {}, askDomicile = false, pics, assignedPicIds, onTogglePic, onSaved }: Props) {
   const [fields, setFields] = useState<CustomField[]>(initial);
   const [applyFields, setApplyFields] = useState<ApplyFields>(initialApplyFields ?? DEFAULT_APPLY_FIELDS);
   const [saved, setSaved] = useState(JSON.stringify([initial, initialApplyFields ?? DEFAULT_APPLY_FIELDS]));
@@ -176,12 +183,14 @@ export default function CustomFormBuilder({ campaignId, onChange, initial, initi
       <div style={{ background: 'white', borderRadius: '12px', border: '1px solid #e1e0ff', borderTop: '10px solid #6728e4', padding: '22px 24px', marginBottom: '12px' }}>
         <p style={{ fontFamily: font, fontWeight: 700, fontSize: '1.4rem', color: '#191c20', marginBottom: '6px' }}>Form Kustom Pendaftaran</p>
         <p style={{ fontSize: '0.82rem', color: '#777683' }}>
-          Field default di bawah otomatis ada di form Apply. Nama, WhatsApp, dan Email wajib; PIC dan Handle by boleh dihapus.
+          Field default di bawah otomatis ada di form Apply. Nama, WhatsApp, Email, dan Niche wajib; Provinsi & Kota
+          muncul (wajib) kalau kriteria provinsi/kota diisi di tahap 1; username + followers
+          muncul otomatis untuk tiap platform yang dipilih di kriteria campaign (tahap 1). PIC dan Handle by boleh dihapus.
           Tambahkan pertanyaan lain sesuai kebutuhan campaign.
         </p>
       </div>
 
-      {['Nama Lengkap', 'WhatsApp', 'Email'].map((label) => (
+      {['Nama Lengkap', 'WhatsApp', 'Email', 'Niche', ...(askDomicile ? ['Provinsi', 'Kota / Kabupaten'] : []), ...platforms.map((p) => `Username & Followers ${PLATFORM_LABELS[p] ?? p}${minFollowers[p] ? ` (min. ${Number(minFollowers[p]).toLocaleString('id-ID')})` : ''}`)].map((label) => (
         <div key={label} style={{ ...defaultCard, display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '12px' }}>
           <div style={{ flex: 1 }}>
             <p style={{ fontFamily: font, fontSize: '0.95rem', color: '#191c20' }}>{label}<span style={{ color: '#d93025' }}> *</span></p>
@@ -228,7 +237,7 @@ export default function CustomFormBuilder({ campaignId, onChange, initial, initi
             <p style={{ fontFamily: font, fontSize: '0.95rem', color: '#191c20' }}>Handle by{applyFields.handleByRequired && <span style={{ color: '#d93025' }}> *</span>}</p>
             <button onClick={() => setApply({ handleBy: false })} title="Hapus field Handle by dari form" style={iconBtn}><Trash2 size={18} /></button>
           </div>
-          {answerLine('50%', 'Teks jawaban singkat (isian bebas)')}
+          {answerLine('50%', 'Nama HB + nomor WA')}
           <div style={{ display: 'flex', justifyContent: 'flex-end', borderTop: '1px solid #e1e0ff', paddingTop: '8px', marginTop: '12px' }}>
             <Toggle label="Wajib diisi" checked={applyFields.handleByRequired} onChange={(v) => setApply({ handleByRequired: v })} />
           </div>

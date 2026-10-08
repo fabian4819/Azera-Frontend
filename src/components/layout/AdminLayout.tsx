@@ -228,7 +228,7 @@ export default function AdminLayout() {
             </div>
           </div>
         </header>
-        <main style={{ flex: 1, background: '#f8f9ff', borderRadius: '24px', padding: '28px', overflow: 'auto' }}>
+        <main className="admin-main" style={{ flex: 1, background: '#f8f9ff', borderRadius: '24px', padding: '28px', overflow: 'auto' }}>
           <Outlet />
         </main>
       </div>

@@ -1,40 +1,18 @@
-import { Fragment, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, Sparkles, Copy, Check, ThumbsUp, ThumbsDown, Send, MessageCircle, Megaphone, ChevronDown, ChevronUp, LayoutDashboard, ExternalLink } from 'lucide-react';
+import { ArrowLeft, Copy, Check, MessageCircle, Megaphone, LayoutDashboard, ExternalLink, UserCheck } from 'lucide-react';
 import api from '../../lib/api';
 import CampaignAnalyticsFinance from './CampaignAnalyticsFinance';
 import WorkflowTracker from './WorkflowTracker';
 import AssetLibrary from './AssetLibrary';
-import { buildBroadcast } from '../../lib/broadcast';
+import { BroadcastSharePanel } from './BroadcastShareModal';
+import Switch from '../../components/ui/Switch';
 import CustomFormBuilder, { type CustomField, type ApplyFields } from './CustomFormBuilder';
 
-const REMINDER_OPTIONS = [
-  { trigger: 'reminder_draft', label: 'Reminder Draft' },
-  { trigger: 'reminder_upload', label: 'Reminder Upload' },
-  { trigger: 'reminder_revision', label: 'Reminder Revisi' },
-  { trigger: 'reminder_insight', label: 'Reminder Insight' },
-  { trigger: 'reminder_payment_creator', label: 'Reminder Pembayaran' },
-];
 
-interface Social { platform: string; username: string; followers: number }
-interface Creator {
-  _id: string; name: string; phone: string; gender: string;
-  domicile: { province: string; city: string }; socials: Social[]; niches: string[];
-  performanceScore: { overall: number };
-}
-interface Submission {
-  type: string; platform: string; link?: string; status: string; createdAt: string;
-  parsedInsight?: { views?: number; likes?: number; comments?: number; shares?: number };
-}
-interface Application {
-  _id: string; creatorId: Creator; curationResult: string; curationReason?: string; status: string;
-  customAnswers?: Record<string, string | string[]>;
-  picUserId?: { _id: string; name: string; email: string } | null;
-  latestSubmission?: Submission | null;
-}
 interface Campaign {
   _id: string; name: string; objective: string; briefContent?: string; deliverables: string[];
-  budget: number; criteria: { niches: string[]; minFollowers?: number; provinces: string[]; platforms: string[] };
+  budget: number; criteria: { niches: string[]; minFollowers?: number; minFollowersByPlatform?: Record<string, number | undefined>; provinces: string[]; cities?: string[]; platforms: string[] };
   status: string; workflowStage: string; applyOpen: boolean; applySlug: string; waGroupLink?: string;
   customFields: CustomField[]; applyFields?: ApplyFields; accessCode: string;
   type?: 'online' | 'offline'; eventDetails?: { location?: string; date?: string; timeWindow?: string };
@@ -53,61 +31,29 @@ const labelSmall: React.CSSProperties = {
   marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.06em',
 };
 
-const curationColors: Record<string, { bg: string; color: string; label: string }> = {
-  highly_recommended: { bg: '#d1fae5', color: '#065F46', label: 'Highly Recommended' },
-  recommended: { bg: '#dbeafe', color: '#1E40AF', label: 'Recommended' },
-  need_review: { bg: '#fef3c7', color: '#92400E', label: 'Need Review' },
-  rejected: { bg: '#ffdad6', color: '#ba1a1a', label: 'Rejected' },
-};
-
-const statusColors: Record<string, { bg: string; color: string }> = {
-  pending: { bg: '#eceef3', color: '#464652' },
-  accepted: { bg: '#d1fae5', color: '#065F46' },
-  rejected: { bg: '#ffdad6', color: '#ba1a1a' },
-};
-
 const TABS = [
   { key: 'overview', label: 'Overview' },
-  { key: 'pendaftar', label: 'Pendaftar' },
-  { key: 'form-kustom', label: 'Form Kustom' },
+  { key: 'form-kustom', label: 'Form Pendaftaran' },
   { key: 'distribusi', label: 'Pendaftaran & Distribusi' },
   { key: 'finance', label: 'Finance' },
   { key: 'aset', label: 'Aset' },
 ] as const;
 type TabKey = (typeof TABS)[number]['key'];
 
-const th: React.CSSProperties = {
-  textAlign: 'left', padding: '10px 12px', fontSize: '0.72rem', fontFamily: "var(--font-display)",
-  fontWeight: 700, color: '#777683', textTransform: 'uppercase', letterSpacing: '0.04em',
-  borderBottom: '1.5px solid #e1e0ff', whiteSpace: 'nowrap',
-};
-const td: React.CSSProperties = {
-  padding: '10px 12px', fontSize: '0.82rem', color: '#191c20', borderBottom: '1px solid #eceef3', verticalAlign: 'top',
-};
 
 
 export default function CampaignDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [campaign, setCampaign] = useState<Campaign | null>(null);
-  const [applications, setApplications] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true);
   const [briefDraft, setBriefDraft] = useState('');
-  const [generating, setGenerating] = useState(false);
-  const [briefError, setBriefError] = useState('');
-  const [saving, setSaving] = useState(false);
   const [copied, setCopied] = useState(false);
   const [dashboardCopied, setDashboardCopied] = useState(false);
-  const [decidingId, setDecidingId] = useState<string | null>(null);
-  const [lastPassword, setLastPassword] = useState<{ name: string; password: string } | null>(null);
   const [waGroupLinkDraft, setWaGroupLinkDraft] = useState('');
-  const [sendingBrief, setSendingBrief] = useState(false);
-  const [remindingId, setRemindingId] = useState<string | null>(null);
-  const [assigningPicId, setAssigningPicId] = useState<string | null>(null);
   const [actionMessage, setActionMessage] = useState('');
   const [actionError, setActionError] = useState('');
   const [activeTab, setActiveTab] = useState<TabKey>('overview');
-  const [expandedId, setExpandedId] = useState<string | null>(null);
   const [picUsers, setPicUsers] = useState<PicUser[]>([]);
   // Semua akun PIC terdaftar, jadi daftar centang pilihan PIC di Form Kustom
   const [allPics, setAllPics] = useState<PicUser[]>([]);
@@ -117,9 +63,8 @@ export default function CampaignDetail() {
 
   const load = async () => {
     try {
-      const [cRes, aRes, pRes, allRes] = await Promise.all([
+      const [cRes, pRes, allRes] = await Promise.all([
         api.get(`/admin/campaigns/${id}`),
-        api.get(`/admin/applications/campaign/${id}`),
         api.get(`/admin/campaigns/${id}/pic`),
         api.get('/admin/pic').catch(() => ({ data: [] })),
       ]);
@@ -127,7 +72,6 @@ export default function CampaignDetail() {
       setCampaign(cRes.data);
       setBriefDraft(cRes.data.briefContent || '');
       setWaGroupLinkDraft(cRes.data.waGroupLink || '');
-      setApplications(aRes.data);
       setPicUsers(pRes.data);
     } catch {
       navigate('/admin/campaigns');
@@ -145,51 +89,18 @@ export default function CampaignDetail() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
-  const generateBrief = async () => {
-    setGenerating(true);
-    setBriefError('');
-    try {
-      const res = await api.post(`/admin/campaigns/${id}/generate-brief`, { applyUrl: `${window.location.origin}/apply/${campaign?.applySlug}` });
-      setCampaign(res.data);
-      setBriefDraft(res.data.briefContent || '');
-    } catch (err: unknown) {
-      const message = (err as { response?: { data?: { error?: string } } })?.response?.data?.error;
-      setBriefError(message || 'Gagal generate broadcast. Coba lagi.');
-    } finally {
-      setGenerating(false);
-    }
-  };
-
-  const saveBrief = async () => {
-    setSaving(true);
-    try {
-      const res = await api.patch(`/admin/campaigns/${id}`, { briefContent: briefDraft });
-      setCampaign(res.data);
-    } catch {
-      alert('Gagal menyimpan broadcast.');
-    } finally {
-      setSaving(false);
-    }
-  };
-
+  const [applyBusy, setApplyBusy] = useState(false);
   const toggleApplyOpen = async () => {
     if (!campaign) return;
-    const res = await api.patch(`/admin/campaigns/${id}`, { applyOpen: !campaign.applyOpen });
-    setCampaign(res.data);
-  };
-
-  const decide = async (appId: string, status: 'accepted' | 'rejected', creatorName: string) => {
-    setDecidingId(appId);
+    setApplyBusy(true);
+    setActionError('');
     try {
-      const res = await api.patch(`/admin/applications/${appId}`, { status });
-      setApplications((prev) => prev.map((a) => (a._id === appId ? res.data.application : a)));
-      if (res.data.generatedPassword) {
-        setLastPassword({ name: creatorName, password: res.data.generatedPassword });
-      }
+      const res = await api.patch(`/admin/campaigns/${id}`, { applyOpen: !campaign.applyOpen });
+      setCampaign(res.data);
     } catch {
-      alert('Gagal menyimpan keputusan.');
+      setActionError(`Gagal ${campaign.applyOpen ? 'menutup' : 'membuka'} pendaftaran. Coba lagi.`);
     } finally {
-      setDecidingId(null);
+      setApplyBusy(false);
     }
   };
 
@@ -270,51 +181,6 @@ export default function CampaignDetail() {
     }
   };
 
-  const sendBrief = async () => {
-    setSendingBrief(true);
-    setActionError('');
-    try {
-      const res = await api.post(`/admin/campaigns/${id}/send-brief`);
-      setActionMessage(`Broadcast terkirim ke ${res.data.sent} creator.`);
-      setTimeout(() => setActionMessage(''), 3000);
-    } catch (err: unknown) {
-      const data = (err as { response?: { data?: { error?: string; message?: string } } })?.response?.data;
-      setActionError(data?.error || data?.message || 'Gagal mengirim broadcast.');
-    } finally {
-      setSendingBrief(false);
-    }
-  };
-
-  const sendReminder = async (appId: string, trigger: string) => {
-    setRemindingId(appId);
-    setActionError('');
-    try {
-      await api.post(`/admin/applications/${appId}/remind`, { trigger });
-      setActionMessage('Reminder terkirim.');
-      setTimeout(() => setActionMessage(''), 2500);
-    } catch (err: unknown) {
-      const data = (err as { response?: { data?: { error?: string; message?: string } } })?.response?.data;
-      setActionError(data?.error || data?.message || 'Gagal mengirim reminder.');
-    } finally {
-      setRemindingId(null);
-    }
-  };
-
-  // picUserId kosong ('') = lepas assignment (dikirim sebagai null ke server).
-  const assignPic = async (appId: string, picUserId: string) => {
-    setAssigningPicId(appId);
-    setActionError('');
-    try {
-      const res = await api.patch(`/admin/applications/${appId}/pic`, { picUserId: picUserId || null });
-      setApplications((prev) => prev.map((a) => (a._id === appId ? res.data : a)));
-    } catch (err: unknown) {
-      const data = (err as { response?: { data?: { message?: string } } })?.response?.data;
-      setActionError(data?.message || 'Gagal menugaskan PIC.');
-    } finally {
-      setAssigningPicId(null);
-    }
-  };
-
   if (loading) return <div style={{ textAlign: 'center', padding: '80px', color: '#777683' }}>Memuat...</div>;
   if (!campaign) return null;
 
@@ -380,38 +246,14 @@ export default function CampaignDetail() {
           </div>
 
           <div style={cardStyle}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-              <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: '1rem', color: '#191c20' }}>Broadcast Campaign</p>
-              <div style={{ display: 'flex', gap: '8px' }}>
-              <button onClick={() => setBriefDraft(buildBroadcast(campaign, `${window.location.origin}/apply/${campaign.applySlug}`))} style={{ padding: '8px 16px', borderRadius: '10px', border: '1.5px solid #6728e4', background: 'white', color: '#6728e4', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer', fontFamily: "var(--font-display)" }}>
-                Pakai Template
-              </button>
-              <button onClick={generateBrief} disabled={generating} className="btn-primary" style={{ padding: '8px 16px', fontSize: '0.8rem', opacity: generating ? 0.7 : 1 }}>
-                <Sparkles size={14} />
-                {generating ? 'Generating...' : 'Generate dengan AI'}
-              </button>
-              </div>
-            </div>
-            {briefError && (
-              <p style={{ color: '#ba1a1a', fontSize: '0.82rem', marginBottom: '12px', background: '#ffdad6', padding: '10px 14px', borderRadius: '10px' }}>
-                {briefError}
-              </p>
-            )}
-            <textarea
-              value={briefDraft}
-              onChange={(e) => setBriefDraft(e.target.value)}
-              rows={14}
-              placeholder="Broadcast belum dibuat. Klik Pakai Template, Generate dengan AI, atau tulis manual di sini."
-              style={{ width: '100%', padding: '14px', borderRadius: '12px', border: '1.5px solid #c7c8cf', fontSize: '0.875rem', color: '#191c20', fontFamily: "var(--font-display)", resize: 'vertical', outline: 'none', marginBottom: '12px' }}
+            <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: '1rem', color: '#191c20', marginBottom: '16px' }}>Broadcast Campaign</p>
+            <BroadcastSharePanel
+              campaignId={campaign._id}
+              text={briefDraft}
+              onTextChange={setBriefDraft}
+              onPersisted={(c) => setCampaign(c as Campaign)}
+              showSave
             />
-            <div style={{ display: 'flex', gap: '10px' }}>
-              <button onClick={saveBrief} disabled={saving} style={{ padding: '9px 18px', borderRadius: '10px', border: '1.5px solid #6728e4', background: 'white', color: '#6728e4', fontWeight: 700, fontSize: '0.82rem', cursor: 'pointer', fontFamily: "var(--font-display)" }}>
-                {saving ? 'Menyimpan...' : 'Simpan Broadcast'}
-              </button>
-              <button onClick={sendBrief} disabled={sendingBrief || !campaign.briefContent} className="btn-primary" style={{ padding: '9px 18px', fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: '6px', opacity: sendingBrief || !campaign.briefContent ? 0.6 : 1 }}>
-                <Send size={14} /> {sendingBrief ? 'Mengirim...' : 'Kirim Broadcast ke Creator'}
-              </button>
-            </div>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }} className="overview-grid">
@@ -434,8 +276,9 @@ export default function CampaignDetail() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 <div><p style={labelSmall}>Niche</p><p style={{ fontSize: '0.85rem', color: '#191c20' }}>{campaign.criteria.niches.join(', ') || '-'}</p></div>
                 <div><p style={labelSmall}>Platform</p><p style={{ fontSize: '0.85rem', color: '#191c20' }}>{campaign.criteria.platforms.join(', ') || '-'}</p></div>
-                <div><p style={labelSmall}>Min. Followers</p><p style={{ fontSize: '0.85rem', color: '#191c20' }}>{campaign.criteria.minFollowers?.toLocaleString('id-ID') || '-'}</p></div>
+                <div><p style={labelSmall}>Min. Followers</p><p style={{ fontSize: '0.85rem', color: '#191c20' }}>{Object.entries(campaign.criteria.minFollowersByPlatform || {}).filter(([, n]) => n).map(([p, n]) => `${p} ${n!.toLocaleString('id-ID')}`).join(', ') || campaign.criteria.minFollowers?.toLocaleString('id-ID') || '-'}</p></div>
                 <div><p style={labelSmall}>Provinsi</p><p style={{ fontSize: '0.85rem', color: '#191c20' }}>{campaign.criteria.provinces.join(', ') || '-'}</p></div>
+                <div><p style={labelSmall}>Kota</p><p style={{ fontSize: '0.85rem', color: '#191c20' }}>{campaign.criteria.cities?.join(', ') || '-'}</p></div>
               </div>
             </div>
           </div>
@@ -444,177 +287,40 @@ export default function CampaignDetail() {
         </div>
       )}
 
-      {activeTab === 'pendaftar' && (
-        <div style={cardStyle}>
-          <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: '1rem', color: '#191c20', marginBottom: '16px' }}>
-            Pendaftar ({applications.length})
-          </p>
-          {lastPassword && (
-            <div style={{ background: '#d1fae5', borderRadius: '12px', padding: '14px 16px', marginBottom: '16px' }}>
-              <p style={{ fontSize: '0.82rem', color: '#065F46', fontFamily: "var(--font-display)" }}>
-                <strong>{lastPassword.name}</strong> diterima. Password Talent Portal: <code style={{ background: 'white', padding: '2px 8px', borderRadius: '6px' }}>{lastPassword.password}</code>
-                <br />Sudah otomatis terkirim ke creator via WhatsApp.
-              </p>
-            </div>
-          )}
-          {applications.length === 0 ? (
-            <p style={{ color: '#777683', fontSize: '0.875rem', textAlign: 'center', padding: '24px' }}>Belum ada pendaftar.</p>
-          ) : (
-            <div style={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                <thead>
-                  <tr>
-                    <th style={th}></th>
-                    <th style={th}>Creator</th>
-                    <th style={th}>WA</th>
-                    <th style={th}>Domisili</th>
-                    <th style={th}>Skor</th>
-                    <th style={th}>Kurasi</th>
-                    <th style={th}>Status</th>
-                    <th style={th}>Tipe Submission</th>
-                    <th style={th}>Platform</th>
-                    <th style={th}>Link Submission</th>
-                    <th style={th}>Status Submission</th>
-                    <th style={th}>Views</th>
-                    <th style={th}>Likes</th>
-                    <th style={th}>Comments</th>
-                    <th style={th}>Shares</th>
-                    <th style={th}>Tanggal Submission</th>
-                    <th style={th}>PIC</th>
-                    <th style={th}>Aksi</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {applications.map((a) => {
-                    const cc = curationColors[a.curationResult] || curationColors.need_review;
-                    const sc = statusColors[a.status] || statusColors.pending;
-                    const expanded = expandedId === a._id;
-                    const hasDetail = !!a.curationReason || (a.customAnswers && Object.keys(a.customAnswers).length > 0);
-                    return (
-                      <Fragment key={a._id}>
-                        <tr>
-                          <td style={{ ...td, width: '28px' }}>
-                            {hasDetail && (
-                              <button
-                                onClick={() => setExpandedId(expanded ? null : a._id)}
-                                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#777683', padding: 0, display: 'flex' }}
-                              >
-                                {expanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-                              </button>
-                            )}
-                          </td>
-                          <td style={td}>{a.creatorId?.name || 'Creator dihapus'}</td>
-                          <td style={td}>{a.creatorId?.phone || '-'}</td>
-                          <td style={td}>{a.creatorId?.domicile?.province || '-'}</td>
-                          <td style={td}>{a.creatorId?.performanceScore?.overall ?? '-'}</td>
-                          <td style={td}>
-                            <span style={{ background: cc.bg, color: cc.color, borderRadius: '999px', padding: '3px 10px', fontSize: '0.7rem', fontWeight: 700, whiteSpace: 'nowrap' }}>{cc.label}</span>
-                          </td>
-                          <td style={td}>
-                            <span style={{ background: sc.bg, color: sc.color, borderRadius: '999px', padding: '3px 10px', fontSize: '0.7rem', fontWeight: 700, textTransform: 'capitalize' }}>{a.status}</span>
-                          </td>
-                          <td style={{ ...td, textTransform: 'capitalize' }}>{a.latestSubmission?.type || '-'}</td>
-                          <td style={{ ...td, textTransform: 'capitalize' }}>{a.latestSubmission?.platform || '-'}</td>
-                          <td style={td}>
-                            {a.latestSubmission?.link ? (
-                              <a href={a.latestSubmission.link} target="_blank" rel="noopener noreferrer" style={{ color: '#6728e4', textDecoration: 'none' }}>Buka link</a>
-                            ) : '-'}
-                          </td>
-                          <td style={{ ...td, textTransform: 'capitalize' }}>{a.latestSubmission?.status || '-'}</td>
-                          <td style={td}>{a.latestSubmission?.parsedInsight?.views ?? '-'}</td>
-                          <td style={td}>{a.latestSubmission?.parsedInsight?.likes ?? '-'}</td>
-                          <td style={td}>{a.latestSubmission?.parsedInsight?.comments ?? '-'}</td>
-                          <td style={td}>{a.latestSubmission?.parsedInsight?.shares ?? '-'}</td>
-                          <td style={td}>{a.latestSubmission ? new Date(a.latestSubmission.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : '-'}</td>
-                          <td style={td}>
-                            <select
-                              value={a.picUserId?._id || ''}
-                              disabled={assigningPicId === a._id || picUsers.length === 0}
-                              onChange={(e) => assignPic(a._id, e.target.value)}
-                              title={picUsers.length === 0 ? 'Belum ada PIC di-assign ke campaign ini (tab Pendaftaran & Distribusi)' : undefined}
-                              style={{ padding: '6px 8px', borderRadius: '8px', border: '1.5px solid #c7c8cf', fontSize: '0.74rem', fontFamily: "var(--font-display)", color: '#464652', cursor: picUsers.length === 0 ? 'not-allowed' : 'pointer', maxWidth: '140px' }}
-                            >
-                              <option value="">Belum ditugaskan</option>
-                              {picUsers.map((p) => (
-                                <option key={p._id} value={p._id}>{p.name}</option>
-                              ))}
-                            </select>
-                          </td>
-                          <td style={td}>
-                            {a.status === 'pending' && (
-                              <div style={{ display: 'flex', gap: '6px' }}>
-                                <button
-                                  onClick={() => decide(a._id, 'accepted', a.creatorId?.name)}
-                                  disabled={decidingId === a._id}
-                                  style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '6px 10px', background: '#d1fae5', color: '#065F46', borderRadius: '8px', border: 'none', cursor: 'pointer', fontSize: '0.74rem', fontWeight: 700 }}
-                                >
-                                  <ThumbsUp size={12} /> Terima
-                                </button>
-                                <button
-                                  onClick={() => decide(a._id, 'rejected', a.creatorId?.name)}
-                                  disabled={decidingId === a._id}
-                                  style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '6px 10px', background: '#ffdad6', color: '#ba1a1a', borderRadius: '8px', border: 'none', cursor: 'pointer', fontSize: '0.74rem', fontWeight: 700 }}
-                                >
-                                  <ThumbsDown size={12} /> Tolak
-                                </button>
-                              </div>
-                            )}
-                            {a.status === 'accepted' && (
-                              <select
-                                value=""
-                                disabled={remindingId === a._id}
-                                onChange={(e) => { if (e.target.value) sendReminder(a._id, e.target.value); e.target.value = ''; }}
-                                style={{ padding: '6px 8px', borderRadius: '8px', border: '1.5px solid #c7c8cf', fontSize: '0.72rem', fontFamily: "var(--font-display)", color: '#464652', cursor: 'pointer' }}
-                              >
-                                <option value="">{remindingId === a._id ? 'Mengirim...' : 'Reminder...'}</option>
-                                {REMINDER_OPTIONS.map((r) => (
-                                  <option key={r.trigger} value={r.trigger}>{r.label}</option>
-                                ))}
-                              </select>
-                            )}
-                          </td>
-                        </tr>
-                        {expanded && hasDetail && (
-                          <tr>
-                            <td></td>
-                            <td colSpan={17} style={{ ...td, background: '#f8f9ff' }}>
-                              {a.curationReason && <p style={{ fontSize: '0.78rem', color: '#464652', marginBottom: '8px', lineHeight: 1.5 }}>{a.curationReason}</p>}
-                              {a.customAnswers && Object.keys(a.customAnswers).length > 0 && campaign.customFields.length > 0 && (
-                                <div>
-                                  {campaign.customFields.map((f) => {
-                                    const val = a.customAnswers?.[f.id];
-                                    if (val === undefined || val === '' || (Array.isArray(val) && val.length === 0)) return null;
-                                    return (
-                                      <p key={f.id} style={{ fontSize: '0.76rem', color: '#464652', marginBottom: '4px' }}>
-                                        <strong style={{ color: '#191c20' }}>{f.label}:</strong> {Array.isArray(val) ? val.join(', ') : val}
-                                      </p>
-                                    );
-                                  })}
-                                </div>
-                              )}
-                            </td>
-                          </tr>
-                        )}
-                      </Fragment>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-      )}
-
       {activeTab === 'form-kustom' && (
+        <>
+        {/* Buka/tutup form + link ke tabel pendaftar (sheet Pendaftar di Dashboard Campaign) */}
+        <div style={{ maxWidth: '760px', margin: '0 auto 12px', background: 'white', borderRadius: '12px', border: '1px solid #e1e0ff', borderLeft: `6px solid ${campaign.applyOpen ? '#1e7e34' : '#ba1a1a'}`, padding: '16px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '14px', flexWrap: 'wrap' }}>
+          <div style={{ minWidth: 0, flex: '1 1 260px' }}>
+            <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: '0.95rem', color: '#191c20' }}>
+              Pendaftaran {campaign.applyOpen ? 'Dibuka' : 'Ditutup'}
+            </p>
+            <p style={{ fontSize: '0.78rem', color: '#777683', marginTop: '2px' }}>
+              {campaign.applyOpen
+                ? 'Creator bisa daftar lewat link form. Tutup kalau kebutuhan creator sudah terpenuhi.'
+                : 'Link form menampilkan info "pendaftaran sudah ditutup", creator tidak bisa daftar.'}
+            </p>
+          </div>
+          <Switch label={campaign.applyOpen ? 'Buka' : 'Tutup'} checked={campaign.applyOpen} disabled={applyBusy} onChange={() => void toggleApplyOpen()} />
+        </div>
+        <div style={{ maxWidth: '760px', margin: '0 auto 12px', display: 'flex', justifyContent: 'flex-end' }}>
+          <Link to={`/admin/campaigns/${campaign._id}/sheet?tab=applicants`} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '9px 16px', borderRadius: '10px', border: '1.5px solid #6728e4', background: 'white', color: '#6728e4', fontWeight: 700, fontSize: '0.82rem', fontFamily: "var(--font-display)", textDecoration: 'none' }}>
+            <UserCheck size={15} /> Lihat Pendaftar
+          </Link>
+        </div>
         <CustomFormBuilder
           campaignId={campaign._id}
           initial={campaign.customFields || []}
           initialApplyFields={campaign.applyFields}
+          platforms={campaign.criteria.platforms}
+          minFollowers={campaign.criteria.minFollowersByPlatform}
+          askDomicile={campaign.criteria.provinces.length + (campaign.criteria.cities?.length ?? 0) > 0}
           pics={allPics}
           assignedPicIds={picUsers.map((p) => p._id)}
           onTogglePic={togglePic}
           onSaved={(customFields, applyFields) => setCampaign((c) => (c ? { ...c, customFields, applyFields } : c))}
         />
+        </>
       )}
 
       {activeTab === 'distribusi' && (
