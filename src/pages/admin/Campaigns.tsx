@@ -1,3 +1,4 @@
+import { stageLabel } from '../../lib/stages';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Eye, RefreshCw, Plus } from 'lucide-react';
@@ -117,7 +118,7 @@ export default function Campaigns() {
                       <td style={tdStyle}>{formatBudget(c.budget)}</td>
                       <td style={tdStyle}>
                         <span style={{ background: '#e1e0ff', color: '#6728e4', borderRadius: '999px', padding: '3px 10px', fontSize: '0.72rem', fontWeight: 700 }}>
-                          {c.workflowStage.replace(/_/g, ' ')}
+                          {stageLabel(c.workflowStage)}
                         </span>
                       </td>
                       <td style={tdStyle}>

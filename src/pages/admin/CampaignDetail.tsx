@@ -1,6 +1,9 @@
+import { stageLabel } from '../../lib/stages';
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, Copy, Check, MessageCircle, Megaphone, LayoutDashboard, ExternalLink, UserCheck } from 'lucide-react';
+import { ArrowLeft, Copy, Check, MessageCircle, LayoutDashboard, Building2, ExternalLink, UserCheck } from 'lucide-react';
+import { SiInstagram, SiTiktok, SiThreads, SiX } from 'react-icons/si';
+import type { IconType } from 'react-icons';
 import api from '../../lib/api';
 import CampaignAnalyticsFinance from './CampaignAnalyticsFinance';
 import WorkflowTracker from './WorkflowTracker';
@@ -14,9 +17,10 @@ interface Campaign {
   _id: string; name: string; objective: string; briefContent?: string; deliverables: string[];
   budget: number; criteria: { niches: string[]; minFollowers?: number; minFollowersByPlatform?: Record<string, number | undefined>; provinces: string[]; cities?: string[]; platforms: string[] };
   status: string; workflowStage: string; applyOpen: boolean; applySlug: string; waGroupLink?: string;
-  customFields: CustomField[]; applyFields?: ApplyFields; accessCode: string;
+  customFields: CustomField[]; applyFields?: ApplyFields; accessCode: string; clientAccessCode?: string;
   type?: 'online' | 'offline'; eventDetails?: { location?: string; date?: string; timeWindow?: string };
   fee?: { creatorFee?: number; picFee?: number; mgFee?: number }; feeNote?: string; benefits?: string[]; requirements?: string[]; infoLink?: string;
+  brandName?: string | null; timeline?: { startDate?: string; endDate?: string };
   masterSheetUrl?: string | null; reportSheetUrl?: string | null; recapPaymentSheetUrl?: string | null;
 }
 interface PicUser { _id: string; name: string; email: string; phone: string }
@@ -26,15 +30,51 @@ const cardStyle: React.CSSProperties = {
   boxShadow: '0 2px 12px rgba(107,46,232,0.05)', marginBottom: '20px',
 };
 
-const labelSmall: React.CSSProperties = {
-  fontSize: '0.7rem', fontFamily: "var(--font-display)", fontWeight: 700, color: '#777683',
-  marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.06em',
+const iconBox: React.CSSProperties = {
+  width: '40px', height: '40px', borderRadius: '12px', background: '#f0eeff', color: '#6728e4',
+  display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
 };
+const shareTitle: React.CSSProperties = { fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '0.95rem', color: '#191c20' };
+const shareDesc: React.CSSProperties = { fontSize: '0.78rem', color: '#777683', lineHeight: 1.5, margin: '2px 0 12px' };
+const shareBtn: React.CSSProperties = {
+  display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '0 14px', height: '38px', borderRadius: '10px',
+  border: '1.5px solid #c7c8cf', background: 'white', color: '#464652', fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer',
+  fontFamily: 'var(--font-display)', textDecoration: 'none', whiteSpace: 'nowrap',
+};
+
+/** Kartu link yang dibagikan (form apply, dashboard client/PIC): URL terlihat + Salin + Buka. */
+function ShareLink({ icon: Icon, title, description, url, copied, onCopy, compact }: {
+  icon?: React.ComponentType<{ size?: number }>; title: string; description?: string; url: string;
+  copied: boolean; onCopy: (url: string) => void; compact?: boolean;
+}) {
+  return (
+    <div style={{ ...cardStyle, padding: compact ? '14px 16px' : '20px', marginBottom: 0, display: 'flex', alignItems: 'flex-start', gap: '14px', height: '100%', boxSizing: 'border-box' }}>
+      {Icon && <span style={iconBox}><Icon size={18} /></span>}
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <p style={shareTitle}>{title}</p>
+        {description && <p style={shareDesc}>{description}</p>}
+        {url ? (
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: description ? 0 : '8px' }}>
+            <input readOnly value={url} aria-label={`URL ${title}`} onFocus={(e) => e.currentTarget.select()}
+              style={{ flex: '1 1 220px', minWidth: 0, height: '38px', padding: '0 12px', borderRadius: '10px', border: '1.5px solid #e1e0ff', background: '#f8f9ff', color: '#464652', fontSize: '0.78rem', boxSizing: 'border-box' }} />
+            <button type="button" onClick={() => onCopy(url)} style={{ ...shareBtn, background: '#6728e4', color: 'white', border: 'none' }}>
+              {copied ? <Check size={14} /> : <Copy size={14} />} {copied ? 'Tersalin' : 'Salin'}
+            </button>
+            <a href={url} target="_blank" rel="noopener noreferrer" style={shareBtn}><ExternalLink size={14} /> Buka</a>
+          </div>
+        ) : (
+          <p style={{ fontSize: '0.78rem', color: '#9a99a6' }}>Muat ulang halaman untuk membuat link.</p>
+        )}
+      </div>
+    </div>
+  );
+}
+
 
 const TABS = [
   { key: 'overview', label: 'Overview' },
   { key: 'form-kustom', label: 'Form Pendaftaran' },
-  { key: 'distribusi', label: 'Pendaftaran & Distribusi' },
+  { key: 'distribusi', label: 'Distribusi' },
   { key: 'finance', label: 'Finance' },
   { key: 'aset', label: 'Aset' },
 ] as const;
@@ -48,8 +88,7 @@ export default function CampaignDetail() {
   const [campaign, setCampaign] = useState<Campaign | null>(null);
   const [loading, setLoading] = useState(true);
   const [briefDraft, setBriefDraft] = useState('');
-  const [copied, setCopied] = useState(false);
-  const [dashboardCopied, setDashboardCopied] = useState(false);
+  const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [waGroupLinkDraft, setWaGroupLinkDraft] = useState('');
   const [actionMessage, setActionMessage] = useState('');
   const [actionError, setActionError] = useState('');
@@ -57,9 +96,6 @@ export default function CampaignDetail() {
   const [picUsers, setPicUsers] = useState<PicUser[]>([]);
   // Semua akun PIC terdaftar, jadi daftar centang pilihan PIC di Form Kustom
   const [allPics, setAllPics] = useState<PicUser[]>([]);
-  const [picEmailDraft, setPicEmailDraft] = useState('');
-  const [addingPic, setAddingPic] = useState(false);
-  const [picError, setPicError] = useState('');
 
   const load = async () => {
     try {
@@ -104,43 +140,13 @@ export default function CampaignDetail() {
     }
   };
 
-  const copyApplyLink = () => {
-    const url = `${window.location.origin}/apply/${campaign?.applySlug}`;
-    navigator.clipboard.writeText(url);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  const copyDashboardLink = () => {
-    if (!campaign) return;
-    const url = `${window.location.origin}/campaign-dashboard/${campaign._id}?code=${campaign.accessCode}`;
-    navigator.clipboard.writeText(url);
-    setDashboardCopied(true);
-    setTimeout(() => setDashboardCopied(false), 2000);
-  };
-
-  const addPic = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setAddingPic(true);
-    setPicError('');
+  const copyLink = async (key: string, url: string) => {
     try {
-      const res = await api.post(`/admin/campaigns/${id}/pic`, { email: picEmailDraft });
-      setPicUsers((prev) => [...prev, res.data]);
-      setPicEmailDraft('');
-    } catch (err: unknown) {
-      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
-      setPicError(message || 'Gagal menambahkan PIC');
-    } finally {
-      setAddingPic(false);
-    }
-  };
-
-  const removePic = async (picUserId: string) => {
-    try {
-      await api.delete(`/admin/campaigns/${id}/pic/${picUserId}`);
-      setPicUsers((prev) => prev.filter((p) => p._id !== picUserId));
+      await navigator.clipboard.writeText(url);
+      setCopiedKey(key);
+      setTimeout(() => setCopiedKey(null), 2000);
     } catch {
-      setPicError('Gagal melepas PIC');
+      setActionError('Gagal menyalin link. Coba lagi.');
     }
   };
 
@@ -168,18 +174,6 @@ export default function CampaignDetail() {
     }
   };
 
-  const changeStatus = async (status: string) => {
-    setActionError('');
-    try {
-      const res = await api.patch(`/admin/campaigns/${id}`, { status });
-      setCampaign(res.data);
-      setActionMessage(`Status campaign diubah ke ${status}.`);
-      setTimeout(() => setActionMessage(''), 2500);
-    } catch (err: unknown) {
-      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
-      setActionError(message || 'Gagal mengubah status.');
-    }
-  };
 
   if (loading) return <div style={{ textAlign: 'center', padding: '80px', color: '#777683' }}>Memuat...</div>;
   if (!campaign) return null;
@@ -201,7 +195,7 @@ export default function CampaignDetail() {
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
           <span style={{ background: '#e1e0ff', color: '#6728e4', borderRadius: '999px', padding: '4px 12px', fontSize: '0.75rem', fontWeight: 700 }}>
-            {campaign.workflowStage.replace(/_/g, ' ')}
+            {stageLabel(campaign.workflowStage)}
           </span>
         </div>
       </div>
@@ -238,12 +232,8 @@ export default function CampaignDetail() {
 
       {activeTab === 'overview' && (
         <div>
-          <div style={cardStyle}>
-            <p style={labelSmall}>Tujuan</p>
-            <p style={{ color: '#191c20', fontSize: '0.9rem', marginBottom: '16px', lineHeight: 1.6 }}>{campaign.objective}</p>
-            <p style={labelSmall}>Budget</p>
-            <p style={{ color: '#191c20', fontSize: '0.9rem' }}>Rp{campaign.budget.toLocaleString('id-ID')}</p>
-          </div>
+          <WorkflowTracker campaignId={campaign._id} stage={campaign.workflowStage} decide={campaign.workflowStage === 'listing' && !campaign.applyOpen} onChanged={(workflowStage) => setCampaign((c) => (c ? { ...c, workflowStage } : c))} />
+          <CampaignInfo campaign={campaign} />
 
           <div style={cardStyle}>
             <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: '1rem', color: '#191c20', marginBottom: '16px' }}>Broadcast Campaign</p>
@@ -256,57 +246,27 @@ export default function CampaignDetail() {
             />
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }} className="overview-grid">
-            <div style={cardStyle}>
-              <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: '1rem', color: '#191c20', marginBottom: '14px' }}>Status Campaign</p>
-              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '10px' }}>
-                {campaign.status === 'draft' && (
-                  <button onClick={() => changeStatus('active')} className="btn-primary" style={{ padding: '8px 14px', fontSize: '0.78rem' }}>Mulai Campaign</button>
-                )}
-                {campaign.status === 'active' && (
-                  <button onClick={() => changeStatus('completed')} className="btn-primary" style={{ padding: '8px 14px', fontSize: '0.78rem' }}>Tandai Selesai</button>
-                )}
-                <span style={{ background: '#eceef3', color: '#464652', borderRadius: '999px', padding: '6px 12px', fontSize: '0.75rem', fontWeight: 700, textTransform: 'capitalize' }}>{campaign.status}</span>
-              </div>
-              <p style={{ fontSize: '0.72rem', color: '#8a8a99' }}>Mengubah status ke Active/Completed otomatis kirim notifikasi WA ke client.</p>
-            </div>
-
-            <div style={cardStyle}>
-              <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: '1rem', color: '#191c20', marginBottom: '14px' }}>Kriteria</p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                <div><p style={labelSmall}>Niche</p><p style={{ fontSize: '0.85rem', color: '#191c20' }}>{campaign.criteria.niches.join(', ') || '-'}</p></div>
-                <div><p style={labelSmall}>Platform</p><p style={{ fontSize: '0.85rem', color: '#191c20' }}>{campaign.criteria.platforms.join(', ') || '-'}</p></div>
-                <div><p style={labelSmall}>Min. Followers</p><p style={{ fontSize: '0.85rem', color: '#191c20' }}>{Object.entries(campaign.criteria.minFollowersByPlatform || {}).filter(([, n]) => n).map(([p, n]) => `${p} ${n!.toLocaleString('id-ID')}`).join(', ') || campaign.criteria.minFollowers?.toLocaleString('id-ID') || '-'}</p></div>
-                <div><p style={labelSmall}>Provinsi</p><p style={{ fontSize: '0.85rem', color: '#191c20' }}>{campaign.criteria.provinces.join(', ') || '-'}</p></div>
-                <div><p style={labelSmall}>Kota</p><p style={{ fontSize: '0.85rem', color: '#191c20' }}>{campaign.criteria.cities?.join(', ') || '-'}</p></div>
-              </div>
-            </div>
-          </div>
-
-          <WorkflowTracker campaignId={campaign._id} />
         </div>
       )}
 
       {activeTab === 'form-kustom' && (
         <>
-        {/* Buka/tutup form + link ke tabel pendaftar (sheet Pendaftar di Dashboard Campaign) */}
-        <div style={{ maxWidth: '760px', margin: '0 auto 12px', background: 'white', borderRadius: '12px', border: '1px solid #e1e0ff', borderLeft: `6px solid ${campaign.applyOpen ? '#1e7e34' : '#ba1a1a'}`, padding: '16px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '14px', flexWrap: 'wrap' }}>
-          <div style={{ minWidth: 0, flex: '1 1 260px' }}>
-            <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: '0.95rem', color: '#191c20' }}>
-              Pendaftaran {campaign.applyOpen ? 'Dibuka' : 'Ditutup'}
-            </p>
-            <p style={{ fontSize: '0.78rem', color: '#777683', marginTop: '2px' }}>
-              {campaign.applyOpen
-                ? 'Creator bisa daftar lewat link form. Tutup kalau kebutuhan creator sudah terpenuhi.'
-                : 'Link form menampilkan info "pendaftaran sudah ditutup", creator tidak bisa daftar.'}
-            </p>
+        {/* Link form + kolom kanan: toggle buka/tutup di atas tombol Lihat Pendaftar (lebar sama) */}
+        <div style={{ maxWidth: '760px', margin: '0 auto 12px', display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'stretch' }}>
+          <div style={{ flex: '1 1 380px', minWidth: 0 }}>
+            <ShareLink title="Link Form Pendaftaran" url={`${window.location.origin}/apply/${campaign.applySlug}`}
+              description={campaign.applyOpen ? undefined : 'Pendaftaran ditutup: link ini menampilkan info "pendaftaran sudah ditutup".'}
+              copied={copiedKey === 'apply'} onCopy={(url) => void copyLink('apply', url)} compact />
           </div>
-          <Switch label={campaign.applyOpen ? 'Buka' : 'Tutup'} checked={campaign.applyOpen} disabled={applyBusy} onChange={() => void toggleApplyOpen()} />
-        </div>
-        <div style={{ maxWidth: '760px', margin: '0 auto 12px', display: 'flex', justifyContent: 'flex-end' }}>
-          <Link to={`/admin/campaigns/${campaign._id}/sheet?tab=applicants`} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '9px 16px', borderRadius: '10px', border: '1.5px solid #6728e4', background: 'white', color: '#6728e4', fontWeight: 700, fontSize: '0.82rem', fontFamily: "var(--font-display)", textDecoration: 'none' }}>
-            <UserCheck size={15} /> Lihat Pendaftar
-          </Link>
+          <div style={{ flex: '0 0 190px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <div title={campaign.applyOpen ? 'Tutup kalau kebutuhan creator sudah terpenuhi' : 'Creator tidak bisa daftar selama ditutup'}
+              style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '9px 16px', borderRadius: '10px', border: '1.5px solid #e1e0ff', background: 'white' }}>
+              <Switch label={campaign.applyOpen ? 'Pendaftaran Dibuka' : 'Pendaftaran Ditutup'} checked={campaign.applyOpen} disabled={applyBusy} onChange={() => void toggleApplyOpen()} />
+            </div>
+            <Link to={`/admin/campaigns/${campaign._id}/sheet?tab=applicants`} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '9px 16px', borderRadius: '10px', border: '1.5px solid #6728e4', background: 'white', color: '#6728e4', fontWeight: 700, fontSize: '0.82rem', fontFamily: "var(--font-display)", textDecoration: 'none' }}>
+              <UserCheck size={15} /> Lihat Pendaftar
+            </Link>
+          </div>
         </div>
         <CustomFormBuilder
           campaignId={campaign._id}
@@ -324,124 +284,38 @@ export default function CampaignDetail() {
       )}
 
       {activeTab === 'distribusi' && (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }} className="overview-grid">
-          <div style={cardStyle}>
-            <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: '1rem', color: '#191c20', marginBottom: '16px' }}>Pendaftaran</p>
-            <button
-              onClick={toggleApplyOpen}
-              className="btn-primary"
-              style={{ width: '100%', justifyContent: 'center', marginBottom: '12px', background: campaign.applyOpen ? '#ba1a1a' : undefined }}
-            >
-              {campaign.applyOpen ? 'Tutup Pendaftaran' : 'Buka Pendaftaran'}
-            </button>
-            {campaign.applyOpen && (
-              <button
-                onClick={copyApplyLink}
-                style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '10px', borderRadius: '10px', border: '1.5px solid #c7c8cf', background: 'white', color: '#464652', fontSize: '0.82rem', fontWeight: 600, cursor: 'pointer', fontFamily: "var(--font-display)" }}
-              >
-                {copied ? <Check size={14} /> : <Copy size={14} />}
-                {copied ? 'Tersalin!' : 'Salin Link Apply'}
-              </button>
-            )}
-          </div>
+        <div style={{ maxWidth: '760px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <ShareLink icon={Building2} title="Dashboard Client"
+            description="Untuk brand/client: lihat progress creator, lalu Approve atau minta Revisi draft & hasil posting (dengan catatan). Tanpa login."
+            url={campaign.clientAccessCode ? `${window.location.origin}/client-dashboard/${campaign._id}?code=${campaign.clientAccessCode}` : ''}
+            copied={copiedKey === 'client'} onCopy={(url) => void copyLink('client', url)} />
+          <ShareLink icon={LayoutDashboard} title="Dashboard PIC / Handle-by"
+            description="Untuk PIC/Handle-by: lihat progress semua creator di campaign ini (hanya lihat). Tanpa login."
+            url={`${window.location.origin}/campaign-dashboard/${campaign._id}?code=${campaign.accessCode}`}
+            copied={copiedKey === 'pic'} onCopy={(url) => void copyLink('pic', url)} />
+          <p style={{ fontSize: '0.75rem', color: '#777683', padding: '0 4px' }}>
+            Kolom yang terlihat di kedua dashboard sama dengan dashboard creator, atur lewat ikon di header kolom Master Sheet.
+          </p>
 
-          <div style={cardStyle}>
-            <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: '1rem', color: '#191c20', marginBottom: '8px' }}>Dashboard PIC / Handle-by</p>
-            <p style={{ fontSize: '0.78rem', color: '#777683', marginBottom: '14px', lineHeight: 1.5 }}>
-              Link read-only berisi seluruh data campaign ini (pendaftar & progress), bagikan ke PIC/Handle-by, tidak perlu login.
-            </p>
-            <button
-              onClick={copyDashboardLink}
-              style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '10px', borderRadius: '10px', border: '1.5px solid #c7c8cf', background: 'white', color: '#464652', fontSize: '0.82rem', fontWeight: 600, cursor: 'pointer', fontFamily: "var(--font-display)" }}
-            >
-              {dashboardCopied ? <Check size={14} /> : <LayoutDashboard size={14} />}
-              {dashboardCopied ? 'Tersalin!' : 'Salin Link Dashboard'}
-            </button>
-          </div>
-
-          {(campaign.masterSheetUrl || campaign.reportSheetUrl || campaign.recapPaymentSheetUrl) && (
-            <div style={cardStyle}>
-              <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: '1rem', color: '#191c20', marginBottom: '8px' }}>Google Sheet</p>
-              <p style={{ fontSize: '0.78rem', color: '#777683', marginBottom: '14px', lineHeight: 1.5 }}>
-                Sheet operasional campaign ini, data pendaftar & submission (master) tersinkron otomatis dari platform, report & recap payment dikelola manual.
-              </p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {[
-                  { url: campaign.masterSheetUrl, label: 'Buka Master Sheet' },
-                  { url: campaign.reportSheetUrl, label: 'Buka Report Sheet' },
-                  { url: campaign.recapPaymentSheetUrl, label: 'Buka Recap Payment' },
-                ].filter((s) => s.url).map((s) => (
-                  <a
-                    key={s.label}
-                    href={s.url!} target="_blank" rel="noopener noreferrer"
-                    style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '10px', borderRadius: '10px', border: '1.5px solid #c7c8cf', background: 'white', color: '#464652', fontSize: '0.82rem', fontWeight: 600, cursor: 'pointer', fontFamily: "var(--font-display)", textDecoration: 'none', boxSizing: 'border-box' }}
-                  >
-                    <ExternalLink size={14} />
-                    {s.label}
-                  </a>
-                ))}
+          <div style={{ ...cardStyle, display: 'flex', alignItems: 'flex-start', gap: '14px' }}>
+            <span style={iconBox}><MessageCircle size={18} /></span>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <p style={shareTitle}>Link Grup WA</p>
+              <p style={shareDesc}>Dikirim otomatis ke creator saat diterima, dan tampil sebagai tombol di dashboard creator.</p>
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                <input
+                  value={waGroupLinkDraft}
+                  onChange={(e) => setWaGroupLinkDraft(e.target.value)}
+                  placeholder="https://chat.whatsapp.com/..."
+                  aria-label="Link grup WhatsApp"
+                  style={{ flex: '1 1 240px', minWidth: 0, padding: '9px 12px', borderRadius: '10px', border: '1.5px solid #c7c8cf', fontSize: '0.8rem', fontFamily: "var(--font-display)", boxSizing: 'border-box' }}
+                />
+                <button type="button" onClick={saveWaGroupLink} disabled={waGroupLinkDraft === (campaign.waGroupLink || '')}
+                  style={{ ...shareBtn, background: '#6728e4', color: 'white', border: 'none', opacity: waGroupLinkDraft === (campaign.waGroupLink || '') ? 0.5 : 1 }}>
+                  Simpan
+                </button>
               </div>
             </div>
-          )}
-
-          <div style={cardStyle}>
-            <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: '1rem', color: '#191c20', marginBottom: '8px' }}>Akun PIC / Handle-by</p>
-            <p style={{ fontSize: '0.78rem', color: '#777683', marginBottom: '14px', lineHeight: 1.5 }}>
-              Assign akun PIC yang sudah sign up (di /login) ke campaign ini pakai email. Campaign ini otomatis muncul di dashboard mereka.
-            </p>
-            <form onSubmit={addPic} style={{ display: 'flex', gap: '8px', marginBottom: '10px' }}>
-              <input
-                value={picEmailDraft}
-                onChange={(e) => setPicEmailDraft(e.target.value)}
-                placeholder="email@pic.com"
-                type="email"
-                required
-                style={{ flex: 1, padding: '9px 12px', borderRadius: '8px', border: '1.5px solid #c7c8cf', fontSize: '0.8rem', fontFamily: "var(--font-display)", boxSizing: 'border-box' }}
-              />
-              <button type="submit" disabled={addingPic} className="btn-primary" style={{ padding: '9px 16px', fontSize: '0.78rem', opacity: addingPic ? 0.6 : 1 }}>
-                {addingPic ? '...' : 'Tambah'}
-              </button>
-            </form>
-            {picError && <p style={{ color: '#ba1a1a', fontSize: '0.76rem', marginBottom: '10px', fontFamily: "var(--font-display)" }}>{picError}</p>}
-            {picUsers.length > 0 && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                {picUsers.map((p) => (
-                  <div key={p._id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8f9ff', borderRadius: '8px', padding: '8px 10px' }}>
-                    <div>
-                      <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: '0.78rem', color: '#191c20' }}>{p.name}</p>
-                      <p style={{ fontSize: '0.72rem', color: '#777683' }}>{p.email}</p>
-                    </div>
-                    <button onClick={() => removePic(p._id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ba1a1a', fontSize: '0.72rem', fontWeight: 700, fontFamily: "var(--font-display)" }}>
-                      Lepas
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          <div style={cardStyle}>
-            <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: '1rem', color: '#191c20', marginBottom: '14px' }}>Link Grup WA</p>
-            <input
-              value={waGroupLinkDraft}
-              onChange={(e) => setWaGroupLinkDraft(e.target.value)}
-              placeholder="https://chat.whatsapp.com/..."
-              style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1.5px solid #c7c8cf', fontSize: '0.8rem', fontFamily: "var(--font-display)", marginBottom: '10px', boxSizing: 'border-box' }}
-            />
-            <button onClick={saveWaGroupLink} style={{ width: '100%', padding: '8px', borderRadius: '8px', border: '1.5px solid #6728e4', background: 'white', color: '#6728e4', fontWeight: 700, fontSize: '0.78rem', cursor: 'pointer', fontFamily: "var(--font-display)" }}>
-              Simpan
-            </button>
-            <p style={{ fontSize: '0.72rem', color: '#8a8a99', marginTop: '8px' }}>Dikirim otomatis ke creator saat diterima.</p>
-          </div>
-
-          <div style={cardStyle}>
-            <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: '1rem', color: '#191c20', marginBottom: '14px' }}>WhatsApp</p>
-            <Link to={`/admin/campaigns/${id}/broadcast`} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '9px 12px', borderRadius: '8px', border: '1.5px solid #c7c8cf', color: '#464652', fontSize: '0.8rem', fontWeight: 600, textDecoration: 'none', marginBottom: '8px', fontFamily: "var(--font-display)" }}>
-              <Megaphone size={14} /> Broadcast Campaign Ini
-            </Link>
-            <Link to="/admin/wa-templates" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '9px 12px', borderRadius: '8px', border: '1.5px solid #c7c8cf', color: '#464652', fontSize: '0.8rem', fontWeight: 600, textDecoration: 'none', fontFamily: "var(--font-display)" }}>
-              <MessageCircle size={14} /> Edit Template Pesan
-            </Link>
           </div>
         </div>
       )}
@@ -455,6 +329,141 @@ export default function CampaignDetail() {
           .overview-grid { grid-template-columns: 1fr !important; }
         }
       `}</style>
+    </div>
+  );
+}
+
+const PLATFORM_META: Record<string, { name: string; icon: IconType; color: string }> = {
+  instagram: { name: 'Instagram', icon: SiInstagram, color: '#E1306C' },
+  tiktok: { name: 'TikTok', icon: SiTiktok, color: '#000000' },
+  threads: { name: 'Threads', icon: SiThreads, color: '#000000' },
+  x: { name: 'X', icon: SiX, color: '#000000' },
+};
+const fmtDate = (d?: string) => (d ? new Date(d).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Asia/Jakarta' }) : '');
+const rp = (n?: number) => (n ? `Rp${n.toLocaleString('id-ID')}` : '');
+const font = "var(--font-display)";
+
+const Chip = ({ children, tone = 'violet' }: { children: React.ReactNode; tone?: 'violet' | 'lime' | 'gray' }) => {
+  const t = { violet: ['#f0eeff', '#6728e4'], lime: ['#eefad8', '#3d6b00'], gray: ['#f3f3f6', '#464652'] }[tone];
+  return <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '5px 12px', borderRadius: '999px', background: t[0], color: t[1], fontSize: '0.78rem', fontWeight: 600, fontFamily: font }}>{children}</span>;
+};
+const Block = ({ title, children }: { title: string; children: React.ReactNode }) => (
+  <div style={{ marginBottom: '18px' }}>
+    <p style={{ fontFamily: font, fontWeight: 700, fontSize: '0.82rem', color: '#191c20', marginBottom: '8px' }}>{title}</p>
+    {children}
+  </div>
+);
+const Checklist = ({ items }: { items: string[] }) => (
+  <ul style={{ margin: 0, paddingLeft: '18px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+    {items.map((x) => <li key={x} style={{ fontSize: '0.85rem', color: '#2d2d3a', lineHeight: 1.5 }}>{x}</li>)}
+  </ul>
+);
+
+/** Keterangan campaign lengkap (isi tahap 1 pembuatan campaign). Field kosong disembunyikan. */
+function CampaignInfo({ campaign: c }: { campaign: Campaign }) {
+  const ev = c.type === 'offline' ? c.eventDetails : undefined;
+  const period = [fmtDate(c.timeline?.startDate), fmtDate(c.timeline?.endDate)].filter(Boolean).join(' – ');
+  const stats = [
+    { label: 'Budget', value: rp(c.budget), bg: 'linear-gradient(135deg, #6728e4, #8b66eb)', fg: 'white' },
+    { label: 'Fee Talent', value: rp(c.fee?.creatorFee), sub: c.feeNote, bg: '#eefad8', fg: '#2c4d00' },
+    { label: 'Fee PIC', value: rp(c.fee?.picFee), bg: '#f0eeff', fg: '#4a2a9e' },
+    { label: 'Fee MG', value: rp(c.fee?.mgFee), bg: '#f0eeff', fg: '#4a2a9e' },
+  ].filter((x) => x.value);
+  const followersOf = (p: string) => c.criteria.minFollowersByPlatform?.[p];
+  const lists = [
+    { title: 'Benefit', items: c.benefits },
+    { title: 'Syarat', items: c.requirements },
+    { title: 'SOW', items: c.deliverables },
+  ].filter((l) => l.items?.length);
+  const locations = [...c.criteria.provinces, ...(c.criteria.cities || [])];
+
+  return (
+    <div style={{ ...cardStyle, padding: 0, overflow: 'hidden' }}>
+      {/* Header */}
+      <div style={{ padding: '24px 28px', borderBottom: '1px solid #eeecfb', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px', flexWrap: 'wrap' }}>
+        <div style={{ minWidth: 0 }}>
+          {c.brandName && <p style={{ fontSize: '0.75rem', fontWeight: 700, color: '#6728e4', textTransform: 'uppercase', letterSpacing: '0.08em', fontFamily: font }}>{c.brandName}</p>}
+          <p style={{ fontFamily: font, fontWeight: 800, fontSize: '1.35rem', color: '#191c20', lineHeight: 1.25, marginTop: '4px' }}>{c.name}</p>
+        </div>
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+          <Chip tone={c.type === 'offline' ? 'lime' : 'violet'}>{c.type === 'offline' ? 'Offline / Event' : 'Online'}</Chip>
+          {period && <Chip tone="gray">{period}</Chip>}
+        </div>
+      </div>
+
+      <div style={{ padding: '24px 28px' }}>
+        {/* Angka */}
+        {stats.length > 0 && (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '12px', marginBottom: '22px' }}>
+            {stats.map((x) => (
+              <div key={x.label} style={{ background: x.bg, color: x.fg, borderRadius: '14px', padding: '14px 16px' }}>
+                <p style={{ fontSize: '0.72rem', fontWeight: 700, opacity: 0.8, textTransform: 'uppercase', letterSpacing: '0.06em', fontFamily: font }}>{x.label}</p>
+                <p style={{ fontSize: '1.15rem', fontWeight: 800, fontFamily: font, marginTop: '4px' }}>{x.value}</p>
+                {x.sub && <p style={{ fontSize: '0.74rem', opacity: 0.8, marginTop: '2px' }}>{x.sub}</p>}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Tujuan */}
+        <div style={{ background: '#f8f7ff', borderLeft: '4px solid #6728e4', borderRadius: '10px', padding: '14px 16px', marginBottom: '22px' }}>
+          <p style={{ fontSize: '0.72rem', fontWeight: 700, color: '#6728e4', textTransform: 'uppercase', letterSpacing: '0.06em', fontFamily: font, marginBottom: '4px' }}>Tujuan</p>
+          <p style={{ fontSize: '0.9rem', color: '#191c20', lineHeight: 1.6 }}>{c.objective}</p>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '8px 32px' }}>
+          <div style={{ minWidth: 0 }}>
+            {lists.map((l) => <Block key={l.title} title={l.title}><Checklist items={l.items!} /></Block>)}
+            {ev && (ev.location || ev.date || ev.timeWindow) && (
+              <Block title="Detail Event">
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                  {ev.location && <Chip tone="gray">{ev.location}</Chip>}
+                  {ev.date && <Chip tone="gray">{fmtDate(ev.date)}</Chip>}
+                  {ev.timeWindow && <Chip tone="gray">{ev.timeWindow}</Chip>}
+                </div>
+              </Block>
+            )}
+            {c.infoLink && (
+              <Block title="Link Info">
+                <a href={c.infoLink} target="_blank" rel="noopener noreferrer" style={{ color: '#6728e4', fontSize: '0.85rem', wordBreak: 'break-all' }}>{c.infoLink}</a>
+              </Block>
+            )}
+          </div>
+
+          <div style={{ minWidth: 0 }}>
+            {c.criteria.platforms.length > 0 && (
+              <Block title="Platform & Min. Followers">
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  {c.criteria.platforms.map((p) => {
+                    const m = PLATFORM_META[p];
+                    const Icon = m?.icon;
+                    return (
+                      <div key={p} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', padding: '10px 14px', border: '1px solid #eeecfb', borderRadius: '12px' }}>
+                        <span style={{ display: 'flex', alignItems: 'center', gap: '10px', fontWeight: 700, fontSize: '0.85rem', fontFamily: font, color: '#191c20' }}>
+                          {Icon && <Icon size={16} color={m.color} />} {m?.name ?? p}
+                        </span>
+                        <span style={{ fontSize: '0.8rem', color: followersOf(p) ? '#6728e4' : '#8a8a99', fontWeight: 700 }}>
+                          {followersOf(p) ? `min. ${followersOf(p)!.toLocaleString('id-ID')} followers` : 'tanpa minimum'}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </Block>
+            )}
+            {c.criteria.niches.length > 0 && (
+              <Block title="Niche">
+                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>{c.criteria.niches.map((n) => <Chip key={n}>{n}</Chip>)}</div>
+              </Block>
+            )}
+            {locations.length > 0 && (
+              <Block title="Domisili Creator">
+                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>{locations.map((l) => <Chip key={l} tone="lime">{l}</Chip>)}</div>
+              </Block>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

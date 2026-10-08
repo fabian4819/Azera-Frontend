@@ -1,3 +1,4 @@
+import { stageLabel } from '../../lib/stages';
 import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { ExternalLink } from 'lucide-react';
@@ -97,7 +98,7 @@ export default function PicCampaignDetail() {
         </div>
         <div style={{ display: 'flex', gap: '8px' }}>
           <span style={{ background: '#e1e0ff', color: '#6728e4', borderRadius: '999px', padding: '5px 14px', fontSize: '0.75rem', fontWeight: 700 }}>
-            {data.campaign.workflowStage.replace(/_/g, ' ')}
+            {stageLabel(data.campaign.workflowStage)}
           </span>
           <span style={{ background: '#eceef3', color: '#464652', borderRadius: '999px', padding: '5px 14px', fontSize: '0.75rem', fontWeight: 700, textTransform: 'capitalize' }}>
             {data.campaign.status}

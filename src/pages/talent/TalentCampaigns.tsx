@@ -1,3 +1,4 @@
+import { stageLabel } from '../../lib/stages';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronRight } from 'lucide-react';
@@ -41,7 +42,7 @@ export default function TalentCampaigns() {
               <div>
                 <p style={{ fontFamily: f, fontWeight: 700, fontSize: '0.95rem', color: '#191c20', marginBottom: '4px' }}>{item.campaign.name}</p>
                 <span style={{ background: '#e1e0ff', color: '#6728e4', borderRadius: '999px', padding: '3px 10px', fontSize: '0.7rem', fontWeight: 700 }}>
-                  {item.campaign.workflowStage.replace(/_/g, ' ')}
+                  {stageLabel(item.campaign.workflowStage)}
                 </span>
               </div>
               <ChevronRight size={18} color="#777683" />

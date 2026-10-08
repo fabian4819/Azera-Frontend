@@ -1,3 +1,4 @@
+import { stageLabel } from '../../lib/stages';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { RefreshCw } from 'lucide-react';
@@ -88,7 +89,7 @@ export default function CampaignDashboard() {
                     </p>
                   </div>
                   <span style={{ flexShrink: 0, background: '#e1e0ff', color: '#6728e4', borderRadius: '999px', padding: '5px 10px', fontSize: '0.68rem', fontWeight: 700 }}>
-                    {campaign.workflowStage.replace(/_/g, ' ')}
+                    {stageLabel(campaign.workflowStage)}
                   </span>
                 </div>
 
