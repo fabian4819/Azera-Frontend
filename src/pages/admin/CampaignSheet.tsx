@@ -18,6 +18,7 @@ interface SheetView {
   columns?: ColumnMeta[];
   rowIds?: string[];
   rowStatus?: string[];
+  rowLinks?: string[];
   progressColumns?: ProgressColumn[];
   sheetUrl: string | null;
 }
@@ -147,14 +148,14 @@ export default function CampaignSheet() {
   };
 
   const copyPortal = async (row: number) => {
-    const link = view?.rows[row]?.[view.headers.indexOf('Link Portal')];
+    const link = view?.rowLinks?.[row];
     if (!link) return;
     try {
       await navigator.clipboard.writeText(String(link));
       setCopied(view?.rowIds?.[row] ?? null);
       setTimeout(() => setCopied(null), 1800);
     } catch {
-      setActionError('Gagal menyalin link. Salin manual dari kolom Link Portal.');
+      setActionError('Gagal menyalin link portal. Coba lagi.');
     }
   };
 

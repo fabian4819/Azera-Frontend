@@ -132,6 +132,12 @@ export default function SheetGrid({
   const [addMenu, setAddMenu] = useState<DOMRect | null>(null);
   const [query, setQuery] = useState('');
   const [selected, setSelected] = useState<number | null>(null);
+  // Popup isi lengkap sel yang terpotong (ellipsis) saat hover
+  const [tip, setTip] = useState<{ text: string; rect: DOMRect } | null>(null);
+  const showTip = (e: React.MouseEvent<HTMLTableCellElement>, text: string) => {
+    const el = e.currentTarget;
+    if (text && el.scrollWidth > el.clientWidth) setTip({ text, rect: el.getBoundingClientRect() });
+  };
   // Filter & sort per kolom; `hidden` = nilai yang disembunyikan per index kolom
   const [sort, setSort] = useState<{ col: number; dir: 1 | -1 } | null>(null);
   const [hidden, setHidden] = useState<Record<number, Set<string>>>({});
@@ -288,6 +294,18 @@ export default function SheetGrid({
 
   return (
     <div>
+      {tip && (
+        <div role="tooltip" style={{
+          position: 'fixed', zIndex: 300, pointerEvents: 'none', maxWidth: '380px',
+          // di bawah sel; kalau mepet bawah layar, taruh di atasnya
+          ...(tip.rect.bottom + 160 > window.innerHeight ? { bottom: window.innerHeight - tip.rect.top + 6 } : { top: tip.rect.bottom + 6 }),
+          left: Math.min(tip.rect.left, window.innerWidth - 396),
+          background: '#191c20', color: 'white', borderRadius: '10px', padding: '10px 12px',
+          fontSize: '0.78rem', lineHeight: 1.5, whiteSpace: 'pre-wrap', wordBreak: 'break-word', boxShadow: '0 8px 24px rgba(0,0,0,0.2)',
+        }}>
+          {tip.text}
+        </div>
+      )}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap', marginBottom: '10px' }}>
         <div style={{ color: '#777683', fontSize: '0.8rem', minWidth: 0 }}>{hint}</div>
         <label style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '0 12px', height: '36px', border: '1.5px solid #e1e0ff', borderRadius: '10px', background: 'white', flex: '0 1 280px', minWidth: 0 }}>
@@ -369,7 +387,9 @@ export default function SheetGrid({
                     const v = r[ci] ?? '';
                     const editable = canEdit?.(i, ci);
                     return (
-                      <td key={ci} title={String(v)}
+                      <td key={ci}
+                        onMouseEnter={editable ? undefined : (e) => showTip(e, String(v))}
+                        onMouseLeave={() => setTip(null)}
                         onClick={editable ? (e) => { e.stopPropagation(); startEdit(i, ci); } : undefined}
                         style={{ ...cellBase, background: editable && !isSel ? '#fffdf2' : bg, cursor: editable ? 'text' : 'default', textAlign: numericCols.has(ci) ? 'right' : 'left', ...(ci === 0 ? firstColStyle : {}) }}>
                         {canEdit ? renderEditableCell(i, ci, v) : renderCell(v)}
