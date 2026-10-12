@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, Check, Copy, ExternalLink, RefreshCw, X } from 'lucide-react';
+import { ArrowLeft, Check, Copy, ExternalLink, MessageCircle, RefreshCw, X } from 'lucide-react';
 import api from '../../lib/api';
 import SheetGrid, { type Cell, type CellKind } from '../../components/SheetGrid';
 import ReviewStatusCell from '../../components/ReviewStatusCell';
@@ -22,7 +22,15 @@ interface SheetView {
   rowLinks?: string[];
   rowNotes?: { draft?: string; post?: string }[];
   progressColumns?: ProgressColumn[];
+  byPic?: { headers: string[]; rows: Cell[][]; rowIds?: string[]; totals?: Cell[] };
   sheetUrl: string | null;
+}
+
+interface PicPaymentInfo {
+  _id: string; name: string; phone: string;
+  paymentInfo?: { bankName?: string; accountNumber?: string; accountName?: string; ewalletType?: string; ewalletNumber?: string };
+  pendingPaymentReply?: { raw: string; receivedAt: string };
+  paymentInfoRequestedAt?: string;
 }
 
 const STATUS_STYLE: Record<string, { bg: string; color: string; label: string }> = {
@@ -32,6 +40,58 @@ const STATUS_STYLE: Record<string, { bg: string; color: string; label: string }>
 };
 
 const MAX_DRAFT_MB = 80; // = batas uploadDraft di server & client_max_body_size nginx
+
+/** Modal konfirmasi manual (BUKAN auto-save) info bank/e-wallet PIC, AD-adjustment-6. Admin lihat
+ * balasan WA mentah (kalau ada) lalu isi field terstruktur sendiri sebelum simpan. */
+function PicConfirmModal({ info, saving, onClose, onSave }: {
+  info: PicPaymentInfo | null; saving: boolean; onClose: () => void;
+  onSave: (fields: { bankName: string; accountNumber: string; accountName: string; ewalletType: string; ewalletNumber: string }) => void;
+}) {
+  const [bankName, setBankName] = useState(info?.paymentInfo?.bankName || '');
+  const [accountNumber, setAccountNumber] = useState(info?.paymentInfo?.accountNumber || '');
+  const [accountName, setAccountName] = useState(info?.paymentInfo?.accountName || '');
+  const [ewalletType, setEwalletType] = useState(info?.paymentInfo?.ewalletType || '');
+  const [ewalletNumber, setEwalletNumber] = useState(info?.paymentInfo?.ewalletNumber || '');
+
+  const inputStyle: React.CSSProperties = { padding: '9px 12px', borderRadius: '10px', border: '1.5px solid #c7c8cf', fontSize: '0.82rem', fontFamily: f };
+
+  return (
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(25,28,32,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px', zIndex: 100 }}>
+      <div style={{ background: 'var(--surface)', borderRadius: '16px', padding: '24px', width: '100%', maxWidth: '440px', maxHeight: '85vh', overflowY: 'auto' }}>
+        <p style={{ fontFamily: f, fontWeight: 700, fontSize: '1rem', color: '#191c20', marginBottom: '4px' }}>Konfirmasi Info Bank/E-Wallet</p>
+        <p style={{ fontSize: '0.78rem', color: '#777683', marginBottom: '14px' }}>{info?.name} · {info?.phone}</p>
+
+        {info?.pendingPaymentReply ? (
+          <div style={{ background: '#fff4d6', borderRadius: '10px', padding: '12px 14px', marginBottom: '16px' }}>
+            <p style={{ fontSize: '0.72rem', color: '#8a5a00', fontWeight: 700, marginBottom: '4px' }}>Balasan WA (belum final, cocokkan ke form di bawah):</p>
+            <p style={{ fontSize: '0.82rem', color: '#191c20', whiteSpace: 'pre-wrap' }}>{info.pendingPaymentReply.raw}</p>
+          </div>
+        ) : !info ? (
+          <p style={{ fontSize: '0.8rem', color: '#777683', marginBottom: '16px' }}>Memuat…</p>
+        ) : null}
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          <input value={bankName} onChange={(e) => setBankName(e.target.value)} placeholder="Nama Bank" style={inputStyle} />
+          <input value={accountNumber} onChange={(e) => setAccountNumber(e.target.value)} placeholder="No. Rekening" style={inputStyle} />
+          <input value={accountName} onChange={(e) => setAccountName(e.target.value)} placeholder="Nama Pemilik Rekening" style={inputStyle} />
+          <p style={{ fontSize: '0.74rem', color: '#9a99a6', margin: '4px 0 0' }}>Atau isi e-wallet (kalau tidak pakai rekening bank):</p>
+          <input value={ewalletType} onChange={(e) => setEwalletType(e.target.value)} placeholder="Jenis E-Wallet (GoPay/OVO/Dana, dst)" style={inputStyle} />
+          <input value={ewalletNumber} onChange={(e) => setEwalletNumber(e.target.value)} placeholder="No. E-Wallet" style={inputStyle} />
+        </div>
+
+        <div style={{ display: 'flex', gap: '8px', marginTop: '18px', justifyContent: 'flex-end' }}>
+          <button type="button" onClick={onClose} style={{ background: 'none', border: '1.5px solid #c7c8cf', borderRadius: '10px', padding: '9px 16px', color: '#777683', fontFamily: f, fontSize: '0.82rem', fontWeight: 700, cursor: 'pointer' }}>
+            Batal
+          </button>
+          <button type="button" disabled={saving} onClick={() => onSave({ bankName, accountNumber, accountName, ewalletType, ewalletNumber })}
+            style={{ background: '#6728e4', border: 'none', borderRadius: '10px', padding: '9px 16px', color: 'white', fontFamily: f, fontSize: '0.82rem', fontWeight: 700, cursor: 'pointer', opacity: saving ? 0.7 : 1 }}>
+            {saving ? 'Menyimpan...' : 'Konfirmasi & Simpan'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 /** Tampilan Master / Report / Recap Payment / Pendaftar satu campaign ala Google Sheets, di dalam admin. */
 export default function CampaignSheet() {
@@ -47,6 +107,10 @@ export default function CampaignSheet() {
   const [deciding, setDeciding] = useState<string | null>(null);
   const [actionError, setActionError] = useState('');
   const [copied, setCopied] = useState<string | null>(null);
+  const [requestingBankInfo, setRequestingBankInfo] = useState(false);
+  const [confirmPicId, setConfirmPicId] = useState<string | null>(null);
+  const [confirmPicInfo, setConfirmPicInfo] = useState<PicPaymentInfo | null>(null);
+  const [confirmSaving, setConfirmSaving] = useState(false);
   const view = cache[kind];
 
   const load = useCallback(async (k: SheetKind) => {
@@ -87,6 +151,11 @@ export default function CampaignSheet() {
 
   const editCell = async (row: number, col: number, value: string) => {
     const meta = view?.columns?.[col];
+    if (kind === 'recap') {
+      await api.patch(`/admin/campaigns/${id}/sheet/recap-cell`, { applicationId: view?.rowIds?.[row], columnKey: meta?.key, value });
+      await reloadCurrent();
+      return;
+    }
     const columnId = meta?.submission?.type === 'post' ? 'base:post' : meta?.progressId;
     await api.patch(`/admin/campaigns/${id}/sheet/cell`, { applicationId: view?.rowIds?.[row], columnId, value });
     await reloadCurrent();
@@ -193,6 +262,50 @@ export default function CampaignSheet() {
     }
   };
 
+  // AD-adjustment-6: admin minta info bank/e-wallet via WA ke semua PIC campaign ini
+  const requestBankInfo = async () => {
+    setRequestingBankInfo(true);
+    setActionError('');
+    try {
+      const res = await api.post(`/admin/campaigns/${id}/recap/request-bank-info`);
+      setActionError('');
+      window.alert(`Pesan WA terkirim ke ${res.data.count} PIC.`);
+      await reloadCurrent();
+    } catch (err) {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      setActionError(msg || 'Gagal mengirim pesan WA.');
+    } finally {
+      setRequestingBankInfo(false);
+    }
+  };
+
+  const openConfirmPic = async (picId: string) => {
+    setConfirmPicId(picId);
+    setConfirmPicInfo(null);
+    try {
+      const res = await api.get(`/admin/pic/${picId}/payment-info`);
+      setConfirmPicInfo(res.data);
+    } catch {
+      setActionError('Gagal memuat info PIC. Coba lagi.');
+      setConfirmPicId(null);
+    }
+  };
+
+  const submitConfirmPic = async (fields: { bankName: string; accountNumber: string; accountName: string; ewalletType: string; ewalletNumber: string }) => {
+    if (!confirmPicId) return;
+    setConfirmSaving(true);
+    try {
+      await api.patch(`/admin/pic/${confirmPicId}/payment-info`, fields);
+      setConfirmPicId(null);
+      setConfirmPicInfo(null);
+      await reloadCurrent();
+    } catch {
+      setActionError('Gagal menyimpan info bank/e-wallet. Coba lagi.');
+    } finally {
+      setConfirmSaving(false);
+    }
+  };
+
   const applicantAction = (row: number) => {
     const status = view?.rowStatus?.[row] ?? 'pending';
     const appId = view?.rowIds?.[row];
@@ -222,6 +335,7 @@ export default function CampaignSheet() {
 
   const campaign = view?.campaign ?? Object.values(cache)[0]?.campaign;
   const isMaster = kind === 'master';
+  const isRecap = kind === 'recap';
 
   return (
     <div>
@@ -238,14 +352,20 @@ export default function CampaignSheet() {
         </div>
         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
           <button type="button" onClick={refresh} disabled={loading} aria-label="Muat ulang data" title="Muat ulang data"
-            style={{ width: '38px', height: '38px', borderRadius: '10px', border: '1.5px solid #c7c8cf', background: 'white', color: '#6728e4', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: loading ? 0.5 : 1 }}>
+            style={{ width: '38px', height: '38px', borderRadius: '10px', border: '1.5px solid #c7c8cf', background: 'var(--surface)', color: '#6728e4', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: loading ? 0.5 : 1 }}>
             <RefreshCw size={16} />
           </button>
           {view?.sheetUrl && (
             <a href={view.sheetUrl} target="_blank" rel="noopener noreferrer"
-              style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '0 14px', height: '38px', borderRadius: '10px', border: '1.5px solid #c7c8cf', background: 'white', color: '#188038', fontFamily: f, fontSize: '0.78rem', fontWeight: 700, textDecoration: 'none' }}>
+              style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '0 14px', height: '38px', borderRadius: '10px', border: '1.5px solid #c7c8cf', background: 'var(--surface)', color: '#188038', fontFamily: f, fontSize: '0.78rem', fontWeight: 700, textDecoration: 'none' }}>
               <ExternalLink size={14} /> Buka di Google Sheets
             </a>
+          )}
+          {isRecap && (
+            <button type="button" onClick={() => void requestBankInfo()} disabled={requestingBankInfo}
+              style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '0 14px', height: '38px', borderRadius: '10px', border: 'none', background: '#25d366', color: 'white', fontFamily: f, fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer', opacity: requestingBankInfo ? 0.6 : 1 }}>
+              <MessageCircle size={14} /> {requestingBankInfo ? 'Mengirim...' : 'Minta Info Bank/E-Wallet'}
+            </button>
           )}
         </div>
       </div>
@@ -279,9 +399,9 @@ export default function CampaignSheet() {
       )}
 
       {error ? (
-        <div style={{ textAlign: 'center', padding: '48px', color: '#ba1a1a', background: 'white', borderRadius: '12px', border: '1px solid #ffdad6' }}>{error}</div>
+        <div style={{ textAlign: 'center', padding: '48px', color: '#ba1a1a', background: 'var(--surface)', borderRadius: '12px', border: '1px solid #ffdad6' }}>{error}</div>
       ) : !view ? (
-        <div style={{ textAlign: 'center', padding: '70px', color: '#777683', background: 'white', borderRadius: '12px', border: `1px solid ${GRID}` }}>Memuat sheet…</div>
+        <div style={{ textAlign: 'center', padding: '70px', color: '#777683', background: 'var(--surface)', borderRadius: '12px', border: `1px solid ${GRID}` }}>Memuat sheet…</div>
       ) : (
         <SheetGrid
           key={kind}
@@ -290,7 +410,9 @@ export default function CampaignSheet() {
           totals={view.totals}
           hint={tab.hint}
           emptyText={tab.empty}
-          canEdit={isMaster ? (_row, col) => Boolean(view.columns?.[col]?.progressId || (view.columns?.[col]?.submission && !view.columns[col].submission?.review)) : undefined}
+          canEdit={isMaster ? (_row, col) => Boolean(view.columns?.[col]?.progressId || (view.columns?.[col]?.submission && !view.columns[col].submission?.review))
+            : isRecap ? (_row, col) => view.columns?.[col]?.access === 'edit'
+              : undefined}
           customCell={isMaster ? reviewCell : undefined}
           kindOf={(col) => view.columns?.[col]?.kind}
           onEdit={editCell}
@@ -304,6 +426,38 @@ export default function CampaignSheet() {
         />
       )}
 
+      {isRecap && view?.byPic && (
+        <div style={{ marginTop: '24px' }}>
+          <p style={{ fontFamily: f, fontWeight: 700, fontSize: '0.95rem', color: '#191c20', marginBottom: '10px' }}>Rekap per PIC</p>
+          <SheetGrid
+            key={`${kind}-byPic`}
+            headers={view.byPic.headers}
+            rows={view.byPic.rows}
+            totals={view.byPic.totals}
+            emptyText="Belum ada PIC yang pegang creator di campaign ini."
+            actionHeader="Info Bank/E-Wallet"
+            rowAction={(row) => {
+              const picId = view.byPic?.rowIds?.[row];
+              if (!picId) return null;
+              return (
+                <button type="button" onClick={() => void openConfirmPic(picId)}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '4px 10px', borderRadius: '6px', border: 'none', background: '#f0eeff', color: '#6728e4', fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer' }}>
+                  Konfirmasi
+                </button>
+              );
+            }}
+          />
+        </div>
+      )}
+
+      {confirmPicId && (
+        <PicConfirmModal
+          info={confirmPicInfo}
+          saving={confirmSaving}
+          onClose={() => { setConfirmPicId(null); setConfirmPicInfo(null); }}
+          onSave={(fields) => void submitConfirmPic(fields)}
+        />
+      )}
     </div>
   );
 }

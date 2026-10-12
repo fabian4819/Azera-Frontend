@@ -38,7 +38,7 @@ function renderInsightText(text: string) {
 
 const f = "var(--font-display)";
 const cardStyle: React.CSSProperties = {
-  background: 'white', borderRadius: '16px', padding: '28px', border: '1px solid #e1e0ff',
+  background: 'var(--surface)', borderRadius: '16px', padding: '28px', border: '1px solid #e1e0ff',
   boxShadow: '0 2px 12px rgba(107,46,232,0.05)', marginBottom: '20px',
 };
 const labelSmall: React.CSSProperties = {
@@ -52,7 +52,7 @@ const inputStyle: React.CSSProperties = {
 };
 const smallBtn: React.CSSProperties = {
   padding: '8px 16px', fontSize: '0.8rem', fontWeight: 700, borderRadius: '10px', border: '1.5px solid #6728e4',
-  background: 'white', color: '#6728e4', cursor: 'pointer', fontFamily: f, display: 'flex', alignItems: 'center', gap: '6px',
+  background: 'var(--surface)', color: '#6728e4', cursor: 'pointer', fontFamily: f, display: 'flex', alignItems: 'center', gap: '6px',
 };
 
 interface Analytics {
@@ -196,7 +196,7 @@ export default function CampaignAnalyticsFinance({ campaignId, view, stage, onSt
   if (error) return <div style={cardStyle}><p style={{ color: '#ba1a1a', fontFamily: f }}>{error}</p></div>;
 
   const statBox = (label: string, value: string) => (
-    <div style={{ background: '#f8f9ff', border: '1px solid #e1e0ff', borderRadius: '12px', padding: '14px 16px', flex: 1, minWidth: '110px' }}>
+    <div style={{ background: 'var(--surface)', border: '1px solid #e1e0ff', borderRadius: '12px', padding: '14px 16px', flex: 1, minWidth: '110px' }}>
       <p style={labelSmall}>{label}</p>
       <p style={{ fontFamily: f, fontWeight: 700, fontSize: '1.2rem', color: '#6728e4' }}>{value}</p>
     </div>
@@ -273,6 +273,12 @@ export default function CampaignAnalyticsFinance({ campaignId, view, stage, onSt
                 <div key={field}>
                   <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.74rem', color: '#464652', fontFamily: f, fontWeight: 600, marginBottom: '4px' }}>
                     {FEE_LABELS[field]}
+                    {field === 'feePic' && (
+                      <Link to={`/admin/campaigns/${campaignId}/sheet?tab=recap`} title="Lihat rincian per PIC + info bank/e-wallet di Recap Payment"
+                        style={{ fontSize: '0.64rem', fontWeight: 700, color: '#6728e4', textDecoration: 'underline' }}>
+                        Rincian per PIC →
+                      </Link>
+                    )}
                     {isAuto && (
                       <span style={{ fontSize: '0.64rem', fontWeight: 700, padding: '1px 7px', borderRadius: '999px', background: manual ? '#fef3c7' : '#eefad8', color: manual ? '#92400E' : '#3d6b00' }}>
                         {manual ? 'Manual' : 'Otomatis'}
