@@ -2,6 +2,10 @@ import { Fragment, useState } from 'react';
 import { Link, useLocation, Outlet } from 'react-router-dom';
 import { LayoutDashboard, Building2, Users, Contact, UserCheck, ImageIcon, Megaphone, Upload, MessageCircle, Inbox, MessageSquareText, Bot, Plug, LogOut, ChevronsLeft, ChevronsRight, FolderOpen, FileText, Receipt, FileSignature, ChevronDown } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
+import BottomNav from './BottomNav';
+
+/** 4 tab utama di bottom nav mobile; sisanya (termasuk docItems) masuk sheet "Lainnya". */
+const BOTTOM_NAV_PRIMARY = ['/admin/dashboard', '/admin/campaigns', '/admin/whatsapp', '/admin/brands'];
 
 const navItems = [
   { label: 'Dashboard', to: '/admin/dashboard', icon: LayoutDashboard },
@@ -87,6 +91,10 @@ export default function AdminLayout() {
     .filter((item) => location.pathname === item.to || location.pathname.startsWith(item.to + '/'))
     .sort((a, b) => b.to.length - a.to.length)[0]?.to;
 
+  const visibleNavItems = navItems.filter((item) => !((admin?.role === 'developer' || admin?.role === 'admin') && item.to === '/admin/whatsapp/inbox'));
+  const bottomPrimary = BOTTOM_NAV_PRIMARY.map((to) => visibleNavItems.find((i) => i.to === to)).filter((i): i is typeof visibleNavItems[number] => !!i);
+  const bottomMore = [...visibleNavItems.filter((i) => !BOTTOM_NAV_PRIMARY.includes(i.to)), ...docItems];
+
   const renderLink = ({ label, to, icon: Icon }: { label: string; to: string; icon: typeof LayoutDashboard }, nested = false) => {
     const active = to === activeTo;
     return (
@@ -124,6 +132,7 @@ export default function AdminLayout() {
       }}
     >
       <aside
+        className="dashboard-sidebar-desktop"
         style={{
           width: collapsed ? '76px' : '236px', flexShrink: 0, borderRadius: '22px',
           background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
@@ -161,7 +170,7 @@ export default function AdminLayout() {
         </Link>
 
         <nav style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '6px', padding: collapsed ? '0 15px' : '0 14px', overflowY: 'auto', overflowX: 'hidden' }}>
-          {navItems.filter((item) => !((admin?.role === 'developer' || admin?.role === 'admin') && item.to === '/admin/whatsapp/inbox')).map((item) => (
+          {visibleNavItems.map((item) => (
             <Fragment key={item.to}>
               {renderLink(item)}
               {item.to === DOCS_AFTER && (collapsed ? docItems.map((d) => renderLink(d)) : (
@@ -226,10 +235,12 @@ export default function AdminLayout() {
             </div>
           </div>
         </header>
-        <main className="admin-main" style={{ flex: 1, background: '#f8f9ff', borderRadius: '24px', padding: '28px', overflow: 'auto' }}>
+        <main className="admin-main dashboard-main-mobile-pad" style={{ flex: 1, background: '#f8f9ff', borderRadius: '24px', padding: '28px', overflow: 'auto' }}>
           <Outlet />
         </main>
       </div>
+
+      <BottomNav primaryItems={bottomPrimary} moreItems={bottomMore} activeTo={activeTo} onLogout={logout} />
     </div>
   );
 }

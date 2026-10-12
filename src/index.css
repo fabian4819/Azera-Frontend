@@ -477,14 +477,12 @@ select::-ms-expand {
   color: var(--outline-variant);
 }
 
-/* ─── Admin Layout ─────────────────────────────── */
-@media (min-width: 768px) {
-  .admin-sidebar-desktop { display: block !important; }
-  .admin-hamburger { display: none !important; }
-}
+/* ─── Dashboard shells (Admin/PIC/Talent): sidebar di desktop, bottom tab bar di mobile ─────────────────────────────── */
+.mobile-bottom-nav { display: none; }
 @media (max-width: 767px) {
-  .admin-sidebar-desktop { display: none !important; }
-  .admin-hamburger { display: flex !important; }
+  .dashboard-sidebar-desktop { display: none !important; }
+  .mobile-bottom-nav { display: flex !important; }
+  .dashboard-main-mobile-pad { padding-bottom: 86px !important; }
 }
 
 /* ─── Form responsive helpers ──────────────────── */

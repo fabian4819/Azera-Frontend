@@ -3,6 +3,7 @@ import { Link, useLocation, Outlet } from 'react-router-dom';
 import { Megaphone, LogOut, ChevronsLeft, ChevronsRight, Mail } from 'lucide-react';
 import { useTalentAuth } from '../../hooks/useTalentAuth';
 import talentApi from '../../lib/talentApi';
+import BottomNav from './BottomNav';
 
 const navItems = [
   { label: 'My Campaigns', to: '/talent/campaigns', icon: Megaphone },
@@ -110,7 +111,7 @@ export default function TalentLayout() {
       }}
     >
       <aside
-        className="talent-sidebar"
+        className="talent-sidebar dashboard-sidebar-desktop"
         style={{
           width: collapsed ? '76px' : '236px', flexShrink: 0, borderRadius: '22px',
           background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
@@ -210,7 +211,7 @@ export default function TalentLayout() {
             </div>
           </div>
         </header>
-        <main style={{ flex: 1, padding: '24px', overflow: 'auto' }}>
+        <main className="dashboard-main-mobile-pad" style={{ flex: 1, padding: '24px', overflow: 'auto' }}>
           <Outlet />
         </main>
       </div>
@@ -219,12 +220,7 @@ export default function TalentLayout() {
         <CompleteEmailModal onSaved={() => setShowEmailModal(false)} />
       )}
 
-      <style>{`
-        @media (max-width: 640px) {
-          .talent-sidebar { width: 64px !important; }
-          .talent-sidebar span { display: none !important; }
-        }
-      `}</style>
+      <BottomNav primaryItems={navItems} activeTo={activeTo} onLogout={logout} />
     </div>
   );
 }

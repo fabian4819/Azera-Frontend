@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useLocation, Outlet } from 'react-router-dom';
 import { Megaphone, LogOut, ChevronsLeft, ChevronsRight } from 'lucide-react';
 import { usePicAuth } from '../../hooks/usePicAuth';
+import BottomNav from './BottomNav';
 
 const navItems = [
   { label: 'My Campaigns', to: '/pic/campaigns', icon: Megaphone },
@@ -39,6 +40,7 @@ export default function PicLayout() {
       }}
     >
       <aside
+        className="dashboard-sidebar-desktop"
         style={{
           width: collapsed ? '76px' : '236px', flexShrink: 0, borderRadius: '22px',
           background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
@@ -138,10 +140,12 @@ export default function PicLayout() {
             </div>
           </div>
         </header>
-        <main style={{ flex: 1, padding: '28px', overflow: 'auto' }}>
+        <main className="dashboard-main-mobile-pad" style={{ flex: 1, padding: '28px', overflow: 'auto' }}>
           <Outlet />
         </main>
       </div>
+
+      <BottomNav primaryItems={navItems} activeTo={activeTo} onLogout={logout} />
     </div>
   );
 }
