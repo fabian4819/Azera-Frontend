@@ -14,7 +14,7 @@ import CustomFormBuilder, { type CustomField, type ApplyFields } from './CustomF
 
 interface Campaign {
   _id: string; name: string; objective: string; briefContent?: string; deliverables: string[];
-  budget: number; criteria: { niches: string[]; minFollowers?: number; minFollowersByPlatform?: Record<string, number | undefined>; provinces: string[]; cities?: string[]; platforms: string[] };
+  budget?: number; criteria: { niches: string[]; minFollowers?: number; minFollowersByPlatform?: Record<string, number | undefined>; provinces: string[]; cities?: string[]; platforms: string[] };
   status: string; workflowStage: string; applyOpen: boolean; applySlug: string; waGroupLink?: string;
   customFields: CustomField[]; applyFields?: ApplyFields; accessCode: string; clientAccessCode?: string;
   type?: 'online' | 'offline'; eventDetails?: { location?: string; date?: string; timeWindow?: string };

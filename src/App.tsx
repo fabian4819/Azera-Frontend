@@ -75,11 +75,11 @@ function PublicLayout() {
   );
 }
 
-/** Role developer = akses admin, tapi Inbox WhatsApp (chat pribadi) ditutup, API-nya juga menolak. */
+/** Role developer & admin = akses admin, tapi Inbox WhatsApp (chat pribadi) ditutup, API-nya juga menolak. */
 function NoDeveloper({ children }: { children: React.ReactElement }) {
   let role: string | undefined;
   try { role = JSON.parse(localStorage.getItem('azera_admin') || '{}').role; } catch { role = undefined; }
-  return role === 'developer' ? <Navigate to="/admin" replace /> : children;
+  return role === 'developer' || role === 'admin' ? <Navigate to="/admin" replace /> : children;
 }
 
 function ProtectedRoute() {

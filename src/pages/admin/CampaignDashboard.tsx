@@ -12,7 +12,7 @@ interface CampaignDashboardItem {
   name: string;
   status: string;
   workflowStage: string;
-  budget: number;
+  budget?: number;
   brandId?: { namaBrand?: string } | string;
   timeline?: { startDate?: string; endDate?: string };
   createdAt: string;
@@ -100,7 +100,7 @@ export default function CampaignDashboard() {
                       {campaign.name}
                     </Link>
                     <p style={{ fontFamily: f, fontSize: '0.78rem', color: '#777683', marginTop: '4px' }}>
-                      {brandName || 'Tanpa brand'} · Rp{campaign.budget.toLocaleString('id-ID')}
+                      {brandName || 'Tanpa brand'}{campaign.budget != null ? ` · Rp${campaign.budget.toLocaleString('id-ID')}` : ''}
                     </p>
                     <p style={{ fontFamily: f, fontSize: '0.76rem', color: '#9a99a6', marginTop: '2px' }}>{campaignDate(campaign)}</p>
                   </div>
