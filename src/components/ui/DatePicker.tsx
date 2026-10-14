@@ -56,7 +56,7 @@ export default function DatePicker({ value, onChange, max, placeholder, style }:
         <div
           style={{
             position: 'absolute', zIndex: 20, top: 'calc(100% + 6px)', left: 0,
-            background: 'white', borderRadius: '16px', boxShadow: '0 12px 32px rgba(0,0,0,0.14)',
+            background: 'var(--surface)', borderRadius: '16px', boxShadow: '0 12px 32px rgba(0,0,0,0.14)',
             border: '1px solid #e1e0ff', padding: '12px',
             ['--rdp-accent-color' as string]: '#6728e4',
             ['--rdp-accent-background-color' as string]: '#f2effe',

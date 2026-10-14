@@ -40,7 +40,7 @@ const curationColors: Record<string, { bg: string; color: string; label: string 
   rejected: { bg: '#ffdad6', color: '#ba1a1a', label: 'Rejected' },
 };
 const statusColors: Record<string, { bg: string; color: string }> = {
-  pending: { bg: '#eceef3', color: '#464652' },
+  pending: { bg: 'var(--surface-container)', color: '#464652' },
   accepted: { bg: '#d1fae5', color: '#065F46' },
   rejected: { bg: '#ffdad6', color: '#ba1a1a' },
 };
@@ -53,7 +53,7 @@ const submissionStatusColors: Record<string, { bg: string; color: string }> = {
 const th: React.CSSProperties = {
   textAlign: 'left', padding: '10px 14px', fontSize: '0.7rem', fontFamily: f,
   fontWeight: 700, color: '#777683', textTransform: 'uppercase', letterSpacing: '0.04em',
-  borderBottom: '1.5px solid #e1e0ff', whiteSpace: 'nowrap', position: 'sticky', top: 0, background: 'white',
+  borderBottom: '1.5px solid #e1e0ff', whiteSpace: 'nowrap', position: 'sticky', top: 0, background: 'var(--surface)',
 };
 const td: React.CSSProperties = {
   padding: '10px 14px', fontSize: '0.82rem', color: '#191c20', borderBottom: '1px solid #eceef3', whiteSpace: 'nowrap',
@@ -100,13 +100,13 @@ export default function PicCampaignDetail() {
           <span style={{ background: '#e1e0ff', color: '#6728e4', borderRadius: '999px', padding: '5px 14px', fontSize: '0.75rem', fontWeight: 700 }}>
             {stageLabel(data.campaign.workflowStage)}
           </span>
-          <span style={{ background: '#eceef3', color: '#464652', borderRadius: '999px', padding: '5px 14px', fontSize: '0.75rem', fontWeight: 700, textTransform: 'capitalize' }}>
+          <span style={{ background: 'var(--surface-container)', color: '#464652', borderRadius: '999px', padding: '5px 14px', fontSize: '0.75rem', fontWeight: 700, textTransform: 'capitalize' }}>
             {data.campaign.status}
           </span>
           {data.masterSheetUrl && (
             <a
               href={data.masterSheetUrl} target="_blank" rel="noopener noreferrer"
-              style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'white', color: '#6728e4', border: '1.5px solid #e1e0ff', borderRadius: '999px', padding: '5px 14px', fontSize: '0.75rem', fontWeight: 700, fontFamily: f, textDecoration: 'none' }}
+              style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'var(--surface)', color: '#6728e4', border: '1.5px solid #e1e0ff', borderRadius: '999px', padding: '5px 14px', fontSize: '0.75rem', fontWeight: 700, fontFamily: f, textDecoration: 'none' }}
             >
               <ExternalLink size={13} />Buka Sheet
             </a>
@@ -114,7 +114,7 @@ export default function PicCampaignDetail() {
         </div>
       </div>
 
-      <div style={{ background: 'white', borderRadius: '16px', border: '1px solid #e1e0ff', boxShadow: '0 2px 12px rgba(107,46,232,0.05)', overflow: 'hidden' }}>
+      <div style={{ background: 'var(--surface)', borderRadius: '16px', border: '1px solid #e1e0ff', boxShadow: '0 2px 12px rgba(107,46,232,0.05)', overflow: 'hidden' }}>
         <div style={{ padding: '16px 14px 0' }}>
           <p style={{ fontFamily: f, fontWeight: 700, fontSize: '0.9rem', color: '#191c20' }}>
             Applicants & Progress ({rows.length})
@@ -177,7 +177,7 @@ export default function PicCampaignDetail() {
         </div>
       </div>
 
-      <p style={{ fontFamily: f, fontSize: '0.72rem', color: '#8a8a99', marginTop: '14px', textAlign: 'center' }}>
+      <p style={{ fontFamily: f, fontSize: '0.72rem', color: '#777683', marginTop: '14px', textAlign: 'center' }}>
         Read-only dashboard for this campaign's PIC & Handle-by. Data updates automatically.
       </p>
     </div>

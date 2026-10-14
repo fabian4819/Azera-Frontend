@@ -80,7 +80,7 @@ export default function ReviewStatusCell({ type, status, notes, onReview }: Prop
           onMouseEnter={(e) => setHover(e.currentTarget.getBoundingClientRect())} onMouseLeave={() => setHover(null)}
           onFocus={(e) => setHover(e.currentTarget.getBoundingClientRect())} onBlur={() => setHover(null)}
           onClick={(e) => openEditor(e, notes)}
-          style={{ maxWidth: '160px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', background: 'none', border: 'none', padding: 0, color: '#5f6368', fontStyle: 'italic', fontSize: '0.72rem', cursor: onReview ? 'pointer' : 'help' }}>
+          style={{ maxWidth: '160px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', background: 'none', border: 'none', padding: 0, color: '#464652', fontStyle: 'italic', fontSize: '0.72rem', cursor: onReview ? 'pointer' : 'help' }}>
           “{notes}”
         </button>
       )}
@@ -103,7 +103,7 @@ export default function ReviewStatusCell({ type, status, notes, onReview }: Prop
           <div onClick={(e) => { e.stopPropagation(); if (!busy) setEditing(null); }} style={{ position: 'fixed', inset: 0, zIndex: 299 }} />
           <div role="dialog" aria-label="Catatan revisi" onClick={(e) => e.stopPropagation()}
             onKeyDown={(e) => { if (e.key === 'Escape' && !busy) setEditing(null); }}
-            style={{ ...popupPos(editing.rect, 230), background: 'white', borderRadius: '12px', padding: '14px', boxShadow: '0 8px 28px rgba(0,0,0,0.22)', whiteSpace: 'normal' }}>
+            style={{ ...popupPos(editing.rect, 230), background: 'var(--surface)', borderRadius: '12px', padding: '14px', boxShadow: '0 8px 28px rgba(0,0,0,0.22)', whiteSpace: 'normal' }}>
             <p style={{ fontSize: '0.78rem', fontWeight: 700, color: '#191c20', marginBottom: '8px', fontFamily: 'var(--font-display)' }}>
               Catatan revisi {type === 'draft' ? 'draft' : 'posting'}
             </p>

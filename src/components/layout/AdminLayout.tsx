@@ -146,7 +146,7 @@ export default function AdminLayout() {
           title={collapsed ? 'Perluas sidebar' : 'Ciutkan sidebar'}
           style={{
             position: 'absolute', top: '28px', right: '-13px', width: '26px', height: '26px',
-            borderRadius: '50%', background: '#fff', border: '1.5px solid rgba(255,255,255,0.3)',
+            borderRadius: '50%', background: 'var(--surface)', border: '1.5px solid rgba(255,255,255,0.3)',
             display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
             color: 'var(--secondary)', boxShadow: '0 2px 8px rgba(0,0,0,0.25)', zIndex: 10,
           }}
@@ -216,7 +216,7 @@ export default function AdminLayout() {
       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '16px' }}>
         <header
           style={{
-            background: '#f8f9ff', borderRadius: '999px', padding: '14px 28px',
+            background: 'var(--surface)', borderRadius: '999px', padding: '14px 28px',
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
             flexShrink: 0, boxShadow: '0 4px 16px rgba(21,21,125,0.06)',
             position: 'sticky', top: '16px', zIndex: 5,
@@ -235,7 +235,7 @@ export default function AdminLayout() {
             </div>
           </div>
         </header>
-        <main className="admin-main dashboard-main-mobile-pad" style={{ flex: 1, background: '#f8f9ff', borderRadius: '24px', padding: '28px', overflow: 'auto' }}>
+        <main className="admin-main dashboard-main-mobile-pad" style={{ flex: 1, background: 'var(--surface)', borderRadius: '24px', padding: '28px', overflow: 'auto' }}>
           <Outlet />
         </main>
       </div>

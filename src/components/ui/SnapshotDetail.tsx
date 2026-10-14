@@ -115,9 +115,9 @@ function computeFromRows(rows: SampleRow[], followers?: number | null, erBasis?:
   };
 }
 
-const box: React.CSSProperties = { background: '#f8f9ff', borderRadius: '10px', padding: '10px 12px' };
+const box: React.CSSProperties = { background: 'var(--surface)', borderRadius: '10px', padding: '10px 12px' };
 const lbl: React.CSSProperties = {
-  fontSize: '0.62rem', fontFamily: f, fontWeight: 700, color: '#8a869c',
+  fontSize: '0.62rem', fontFamily: f, fontWeight: 700, color: '#777683',
   textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '2px',
 };
 const val: React.CSSProperties = { fontSize: '0.98rem', fontWeight: 800, color: '#191c20', fontFamily: f };
@@ -127,7 +127,7 @@ function Stat({ label, value, sub }: { label: string; value: string; sub?: strin
     <div style={box}>
       <p style={lbl}>{label}</p>
       <p style={val}>{value}</p>
-      {sub && <p style={{ fontSize: '0.68rem', color: '#8a869c' }}>{sub}</p>}
+      {sub && <p style={{ fontSize: '0.68rem', color: '#777683' }}>{sub}</p>}
     </div>
   );
 }
@@ -168,24 +168,24 @@ function ErTooltip({
   if (!d) return null;
   const r = d.row;
   return (
-    <div style={{ width: 190, background: '#fff', border: '1px solid #e1e0ff', borderRadius: 10, boxShadow: '0 10px 28px rgba(30,10,94,0.2)', padding: 8, fontFamily: f }}>
+    <div style={{ width: 190, background: 'var(--surface)', border: '1px solid #e1e0ff', borderRadius: 10, boxShadow: '0 10px 28px rgba(30,10,94,0.2)', padding: 8, fontFamily: f }}>
       {r.thumb && imgOk && (
         <img src={r.thumb} alt="" onError={() => setImgOk(false)}
           style={{ width: '100%', height: 100, objectFit: 'cover', borderRadius: 6, display: 'block', marginBottom: 6 }} />
       )}
-      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.68rem', color: '#8a869c' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.68rem', color: '#777683' }}>
         <span>{r.approxDate ? '≈' : ''}{tgl(r.date)}</span>
         {r.paid && <span style={{ color: '#b45309', fontWeight: 700 }}>BERBAYAR</span>}
       </div>
       <div style={{ fontWeight: 800, fontSize: '0.92rem', color: '#191c20' }}>
         {usesEr ? pct(d.er) : fmt(d.er)}
-        {r.format && <span style={{ fontSize: '0.62rem', color: '#8a869c', fontWeight: 600 }}> · {r.format}</span>}
+        {r.format && <span style={{ fontSize: '0.62rem', color: '#777683', fontWeight: 600 }}> · {r.format}</span>}
       </div>
-      <div style={{ fontSize: '0.68rem', color: '#55516b' }}>
+      <div style={{ fontSize: '0.68rem', color: '#464652' }}>
         {fmt(r.likes)} suka · {fmt(r.comments)} {komentarLabel.toLowerCase()}
         {typeof r.views === 'number' ? ` · ${fmt(r.views)} views` : ''}
       </div>
-      {r.title && <div style={{ fontSize: '0.66rem', color: '#8a869c', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.title}</div>}
+      {r.title && <div style={{ fontSize: '0.66rem', color: '#777683', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.title}</div>}
       {r.url && <div style={{ fontSize: '0.62rem', color: '#6728e4', marginTop: 3, fontWeight: 700 }}>klik untuk buka post ↗</div>}
     </div>
   );
@@ -349,7 +349,7 @@ export default function SnapshotDetail({ s, compact }: { s: SnapshotView; compac
             @{s.username} <ExternalLink size={9} />
           </a>
           {s.isVerified && <BadgeCheck size={13} color="#6728e4" />}
-          {s.displayName && <span style={{ color: '#999', fontWeight: 500 }}>· {s.displayName}</span>}
+          {s.displayName && <span style={{ color: '#9a99a6', fontWeight: 500 }}>· {s.displayName}</span>}
         </p>
       )}
 
@@ -369,11 +369,11 @@ export default function SnapshotDetail({ s, compact }: { s: SnapshotView; compac
           </div>
         </div>
       )}
-      {s.bio && !compact && <p style={{ fontSize: '0.78rem', color: '#55516b', whiteSpace: 'pre-wrap' }}>{s.bio}</p>}
+      {s.bio && !compact && <p style={{ fontSize: '0.78rem', color: '#464652', whiteSpace: 'pre-wrap' }}>{s.bio}</p>}
 
       {/* pemilih ukuran sampel, seperti dropdown "Sampel" di ekstensi */}
       {hasRows && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.75rem', color: '#55516b' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.75rem', color: '#464652' }}>
           <span style={lbl}>Sampel</span>
           <select
             value={sampleKey}
@@ -382,7 +382,7 @@ export default function SnapshotDetail({ s, compact }: { s: SnapshotView; compac
           >
             {SAMPLE_OPTS.map((o) => <option key={o.key} value={o.key}>{o.label}</option>)}
           </select>
-          <span style={{ color: '#8a869c' }}>{rows.length} dari {allRows.length} terkumpul</span>
+          <span style={{ color: '#777683' }}>{rows.length} dari {allRows.length} terkumpul</span>
         </div>
       )}
 
@@ -416,7 +416,7 @@ export default function SnapshotDetail({ s, compact }: { s: SnapshotView; compac
       </div>
 
       {/* konteks sampel */}
-      <div style={{ fontSize: '0.75rem', color: '#55516b', lineHeight: 1.6 }}>
+      <div style={{ fontSize: '0.75rem', color: '#464652', lineHeight: 1.6 }}>
         Dihitung dari <b>{m.n} post</b>
         {allRows.length ? ` (dari ${allRows.length} terkumpul)` : s.totalCollected != null ? ` (dari ${s.totalCollected} terkumpul)` : ''}
         {m.rangeDays != null ? ` dalam ${ringkasRentang(m.rangeDays)}` : ''}
@@ -427,7 +427,7 @@ export default function SnapshotDetail({ s, compact }: { s: SnapshotView; compac
       </div>
 
       {(s.niche || s.shortlistCampaign || s.notes) && (
-        <div style={{ fontSize: '0.75rem', color: '#55516b', display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+        <div style={{ fontSize: '0.75rem', color: '#464652', display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
           {s.niche && <span style={{ background: '#f0eeff', color: '#4a2ba8', padding: '2px 8px', borderRadius: '999px', fontWeight: 700 }}>{s.niche}</span>}
           {s.shortlistCampaign && <span style={{ background: '#fff4e6', color: '#b45309', padding: '2px 8px', borderRadius: '999px', fontWeight: 700 }}>shortlist: {s.shortlistCampaign}</span>}
           {s.notes && <span>“{s.notes}”</span>}
@@ -456,7 +456,7 @@ export default function SnapshotDetail({ s, compact }: { s: SnapshotView; compac
               <thead>
                 <tr style={{ textAlign: 'right' }}>
                   {sortableTh('date', 'Tanggal')}
-                  <th style={{ textAlign: 'left', padding: '4px 6px', color: '#8a869c' }}>Format</th>
+                  <th style={{ textAlign: 'left', padding: '4px 6px', color: '#777683' }}>Format</th>
                   {sortableTh('likes', 'Likes')}
                   {sortableTh('comments', komentarLabel)}
                   {anyViews && sortableTh('views', 'Views')}
@@ -472,7 +472,7 @@ export default function SnapshotDetail({ s, compact }: { s: SnapshotView; compac
                         : `${r.approxDate ? '≈' : ''}${tgl(r.date)}`}
                       {r.paid && <span style={{ marginLeft: 4, color: '#b45309', fontWeight: 700 }} title="berbayar">$</span>}
                     </td>
-                    <td style={{ textAlign: 'left', padding: '4px 6px', color: '#8a869c' }}>{r.format || '-'}</td>
+                    <td style={{ textAlign: 'left', padding: '4px 6px', color: '#777683' }}>{r.format || '-'}</td>
                     <td style={{ padding: '4px 6px' }}>{fmt(r.likes)}</td>
                     <td style={{ padding: '4px 6px' }}>{fmt(r.comments)}</td>
                     {anyViews && <td style={{ padding: '4px 6px' }}>{fmt(r.views)}</td>}
@@ -493,7 +493,7 @@ export default function SnapshotDetail({ s, compact }: { s: SnapshotView; compac
       {(s.missingFields?.length ?? 0) > 0 && (
         <p style={{ fontSize: '0.72rem', color: '#b45309' }}>Belum kebaca ekstensi (isi manual bila perlu): {s.missingFields!.join(', ')}</p>
       )}
-      <p style={{ fontSize: '0.68rem', color: '#8a869c' }}>
+      <p style={{ fontSize: '0.68rem', color: '#777683' }}>
         Ditarik {tgl(capturedAt)}{s.capturedBy?.name ? ` oleh ${s.capturedBy.name}` : ''}
         {s.firstCapturedAt && s.firstCapturedAt !== capturedAt ? ` · pertama ${tgl(s.firstCapturedAt)}` : ''}
       </p>

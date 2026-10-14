@@ -13,12 +13,12 @@ export default function ChecklistDropdown({ placeholder, options, selected, onCh
     onChange(allShown ? selected.filter((s) => !shown.some((o) => o.id === s)) : [...new Set([...selected, ...shown.map((o) => o.id)])]);
 
   return (
-    <details style={{ marginTop: '10px', border: '1.5px solid #c7c8cf', borderRadius: '12px', background: disabled ? '#f3f3f6' : 'white', pointerEvents: disabled ? 'none' : undefined, opacity: disabled ? 0.7 : 1 }}>
+    <details style={{ marginTop: '10px', border: '1.5px solid #e1e0ff', borderRadius: '12px', background: disabled ? '#f3f3f6' : 'white', pointerEvents: disabled ? 'none' : undefined, opacity: disabled ? 0.7 : 1 }}>
       <summary style={{ padding: '10px 14px', cursor: 'pointer', fontSize: '0.82rem', fontFamily: font, color: selected.length ? '#191c20' : '#777683' }}>
         {selected.length ? `${selected.length} dipilih` : placeholder}
       </summary>
       <div style={{ borderTop: '1px solid #e1e0ff', padding: '10px 14px' }}>
-        <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Cari..." style={{ width: '100%', padding: '8px 10px', borderRadius: '8px', border: '1px solid #c7c8cf', fontSize: '0.8rem', fontFamily: font, marginBottom: '6px' }} />
+        <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Cari..." style={{ width: '100%', padding: '8px 10px', borderRadius: '8px', border: '1px solid #e1e0ff', fontSize: '0.8rem', fontFamily: font, marginBottom: '6px' }} />
         {options.length === 0 ? (
           <p style={{ fontSize: '0.78rem', color: '#9a99a6', fontFamily: font, padding: '6px 0' }}>Tidak ada data.</p>
         ) : (
