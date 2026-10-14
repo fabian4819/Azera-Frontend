@@ -79,10 +79,8 @@ function normalizeUrl(url: string) {
 }
 
 interface ScoreBreakdown {
-  reliability: { score: number; totalCampaigns: number; onTimeCount: number; violationCount: number };
-  quality: { score: number; totalCampaigns: number; avgRevisions: number; noRevisionCount: number };
-  performance: { score: number; note: string };
-  communication: { score: number | null; avgResponseHours: number | null; sampleCount: number };
+  engagement: { score: number; avgEngagementRate: number | null; platforms: number };
+  reach: { score: number; totalFollowers: number };
   overall: number;
 }
 
@@ -350,24 +348,18 @@ export default function CreatorDetail() {
               <p style={{ fontFamily: f, fontWeight: 700, fontSize: '1rem', color: '#191c20', marginBottom: '16px' }}>Performance Score: {scoreBreakdown.overall}</p>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
                 <div style={{ padding: '14px', background: '#f8f9ff', borderRadius: '10px' }}>
-                  <p style={labelSmall}>Reliability (40%)</p>
-                  <p style={{ fontSize: '1.2rem', fontWeight: 800, color: '#6728e4' }}>{scoreBreakdown.reliability.score}</p>
-                  <p style={{ fontSize: '0.75rem', color: '#777683' }}>{scoreBreakdown.reliability.onTimeCount}/{scoreBreakdown.reliability.totalCampaigns} on-time, {scoreBreakdown.reliability.violationCount} pelanggaran</p>
+                  <p style={labelSmall}>Engagement (60%)</p>
+                  <p style={{ fontSize: '1.2rem', fontWeight: 800, color: '#6728e4' }}>{scoreBreakdown.engagement.score}</p>
+                  <p style={{ fontSize: '0.75rem', color: '#777683' }}>
+                    {scoreBreakdown.engagement.avgEngagementRate !== null
+                      ? `ER rata-rata ${scoreBreakdown.engagement.avgEngagementRate.toFixed(2)}%, ${scoreBreakdown.engagement.platforms} platform`
+                      : 'Belum ada data (belum di-scan ekstensi KOL Lister)'}
+                  </p>
                 </div>
                 <div style={{ padding: '14px', background: '#f8f9ff', borderRadius: '10px' }}>
-                  <p style={labelSmall}>Quality (25%)</p>
-                  <p style={{ fontSize: '1.2rem', fontWeight: 800, color: '#6728e4' }}>{scoreBreakdown.quality.score}</p>
-                  <p style={{ fontSize: '0.75rem', color: '#777683' }}>avg {scoreBreakdown.quality.avgRevisions} revisi, {scoreBreakdown.quality.noRevisionCount} tanpa revisi</p>
-                </div>
-                <div style={{ padding: '14px', background: '#f8f9ff', borderRadius: '10px' }}>
-                  <p style={labelSmall}>Performance (20%)</p>
-                  <p style={{ fontSize: '1.2rem', fontWeight: 800, color: '#6728e4' }}>{scoreBreakdown.performance.score}</p>
-                  <p style={{ fontSize: '0.75rem', color: '#777683' }}>{scoreBreakdown.performance.note}</p>
-                </div>
-                <div style={{ padding: '14px', background: '#f8f9ff', borderRadius: '10px' }}>
-                  <p style={labelSmall}>Communication (15%)</p>
-                  <p style={{ fontSize: '1.2rem', fontWeight: 800, color: '#6728e4' }}>{scoreBreakdown.communication.score ?? '-'}</p>
-                  <p style={{ fontSize: '0.75rem', color: '#777683' }}>{scoreBreakdown.communication.sampleCount} sample{scoreBreakdown.communication.avgResponseHours ? `, avg ${scoreBreakdown.communication.avgResponseHours}j respon` : ''}</p>
+                  <p style={labelSmall}>Reach (40%)</p>
+                  <p style={{ fontSize: '1.2rem', fontWeight: 800, color: '#6728e4' }}>{scoreBreakdown.reach.score}</p>
+                  <p style={{ fontSize: '0.75rem', color: '#777683' }}>{scoreBreakdown.reach.totalFollowers.toLocaleString('id-ID')} total followers</p>
                 </div>
               </div>
             </div>
