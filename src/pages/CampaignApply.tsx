@@ -21,7 +21,7 @@ interface CampaignInfo {
   customFields?: CustomField[];
   applyFields?: ApplyFields;
   picOptions?: PicOption[];
-  criteria?: { platforms?: string[]; provinces?: string[]; cities?: string[]; minFollowersByPlatform?: Record<string, number | undefined> };
+  criteria?: { niches?: string[]; platforms?: string[]; provinces?: string[]; cities?: string[]; minFollowersByPlatform?: Record<string, number | undefined> };
 }
 
 const inputStyle: React.CSSProperties = {
@@ -156,6 +156,8 @@ export default function CampaignApply() {
   };
 
   const platforms = campaign?.criteria?.platforms ?? [];
+  // Pilihan niche ikut yang dipilih admin pas bikin campaign; fallback ke daftar umum kalau campaign-nya belum punya niche (lama).
+  const nicheOptions = campaign?.criteria?.niches?.length ? campaign.criteria.niches : NICHES;
   // Provinsi & kota cuma ditanya kalau campaign punya kriteria provinsi/kota
   const askDomicile = (campaign?.criteria?.provinces?.length ?? 0) + (campaign?.criteria?.cities?.length ?? 0) > 0;
   const minFollowers = (p: string) => campaign?.criteria?.minFollowersByPlatform?.[p];
@@ -342,7 +344,7 @@ export default function CampaignApply() {
           <div style={{ marginBottom: '18px' }}>
             <label style={labelStyle}>Niche * <span style={{ fontWeight: 400, color: '#777683' }}>(boleh lebih dari satu)</span></label>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-              {NICHES.map((n) => (
+              {nicheOptions.map((n) => (
                 <Pill key={n} label={n} selected={niches.includes(n)} onClick={() => setNiches((prev) => (prev.includes(n) ? prev.filter((x) => x !== n) : [...prev, n]))} />
               ))}
             </div>

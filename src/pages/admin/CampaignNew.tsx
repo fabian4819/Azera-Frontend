@@ -80,6 +80,8 @@ export default function CampaignNew() {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [selectedNiches, setSelectedNiches] = useState<string[]>([]);
+  const [addingCustomNiche, setAddingCustomNiche] = useState(false);
+  const [customNicheInput, setCustomNicheInput] = useState('');
   const [minFollowers, setMinFollowers] = useState<Record<string, string>>({});
   // Kriteria domisili (opsional, bisa lebih dari 1), id wilayah, dikirim sebagai nama saat simpan
   const [provinceOptions, setProvinceOptions] = useState<WilayahOption[]>([]);
@@ -300,9 +302,46 @@ export default function CampaignNew() {
           <SectionTitle title="Kriteria Creator" hint="Untuk Smart Curation." />
           <div style={{ marginBottom: '16px' }}>
             <label style={labelStyle}>Niche</label>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
               {niches.map((n) => <Pill key={n} label={n} selected={selectedNiches.includes(n)} onClick={() => toggle(selectedNiches, setSelectedNiches, n)} />)}
+              {selectedNiches.filter((n) => !niches.includes(n)).map((n) => (
+                <Pill key={n} label={n} selected onClick={() => toggle(selectedNiches, setSelectedNiches, n)} />
+              ))}
+              {!addingCustomNiche && (
+                <button type="button" onClick={() => { setCustomNicheInput(''); setAddingCustomNiche(true); }}
+                  style={{ padding: '7px 14px', borderRadius: '999px', border: '1.5px dashed #c7c8cf', background: 'none', color: '#777683', fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-display)' }}>
+                  + Lainnya
+                </button>
+              )}
             </div>
+            {addingCustomNiche && (
+              <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+                <input
+                  value={customNicheInput}
+                  onChange={(e) => setCustomNicheInput(e.target.value)}
+                  placeholder="Niche custom..."
+                  onKeyDown={(e) => {
+                    if (e.key !== 'Enter') return;
+                    e.preventDefault();
+                    const v = customNicheInput.trim();
+                    if (v && !selectedNiches.includes(v)) setSelectedNiches([...selectedNiches, v]);
+                    setCustomNicheInput('');
+                  }}
+                  style={{ ...inputStyle, width: 'auto', flex: '0 1 220px' }}
+                />
+                <button type="button" onClick={() => {
+                  const v = customNicheInput.trim();
+                  if (v && !selectedNiches.includes(v)) setSelectedNiches([...selectedNiches, v]);
+                  setCustomNicheInput('');
+                }} style={{ padding: '0 16px', borderRadius: '10px', border: 'none', background: '#6728e4', color: 'white', fontSize: '0.8rem', fontWeight: 700, cursor: 'pointer', fontFamily: 'var(--font-display)' }}>
+                  Tambah
+                </button>
+                <button type="button" onClick={() => setAddingCustomNiche(false)}
+                  style={{ padding: '0 16px', borderRadius: '10px', border: '1.5px solid #c7c8cf', background: 'none', color: '#777683', fontSize: '0.8rem', fontWeight: 700, cursor: 'pointer', fontFamily: 'var(--font-display)' }}>
+                  Selesai
+                </button>
+              </div>
+            )}
           </div>
           <div style={{ marginBottom: '16px' }}>
             <label style={labelStyle}>Platform</label>

@@ -55,7 +55,7 @@ export default function CampaignDashboard({ audience = 'pic' }: { audience?: 'pi
   };
 
   const saveBrief = async (kind: 'text' | 'link', content: string) => {
-    await api.patch(`/campaigns/${id}/client/brief`, { code, kind, content });
+    await api.post(`/campaigns/${id}/client/brief/blocks`, { code, kind, content });
     await load();
   };
 
@@ -64,7 +64,12 @@ export default function CampaignDashboard({ audience = 'pic' }: { audience?: 'pi
     fd.append('code', code);
     fd.append('kind', kind);
     fd.append('file', file);
-    await api.post(`/campaigns/${id}/client/brief/upload`, fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+    await api.post(`/campaigns/${id}/client/brief/blocks/upload`, fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+    await load();
+  };
+
+  const removeBrief = async (index: number) => {
+    await api.delete(`/campaigns/${id}/client/brief/blocks/${index}`, { data: { code } });
     await load();
   };
 
@@ -82,6 +87,7 @@ export default function CampaignDashboard({ audience = 'pic' }: { audience?: 'pi
       onDecideApplicant={audience === 'client' ? decideApplicant : undefined}
       onSaveBrief={audience === 'client' ? saveBrief : undefined}
       onUploadBrief={audience === 'client' ? uploadBrief : undefined}
+      onRemoveBrief={audience === 'client' ? removeBrief : undefined}
     />
   );
 }

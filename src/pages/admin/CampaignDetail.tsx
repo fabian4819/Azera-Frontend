@@ -14,7 +14,7 @@ import CustomFormBuilder, { type CustomField, type ApplyFields } from './CustomF
 
 interface Campaign {
   _id: string; name: string; objective: string; briefContent?: string; deliverables: string[];
-  briefCampaign?: { kind: 'text' | 'file' | 'image' | 'video' | 'link'; content: string; filledBy: 'admin' | 'client'; updatedAt: string };
+  briefCampaign?: { blocks: { kind: 'text' | 'file' | 'image' | 'video' | 'link'; content: string }[]; filledBy: 'admin' | 'client'; updatedAt: string };
   budget?: number; criteria: { niches: string[]; minFollowers?: number; minFollowersByPlatform?: Record<string, number | undefined>; provinces: string[]; cities?: string[]; platforms: string[] };
   status: string; workflowStage: string; applyOpen: boolean; applySlug: string; waGroupLink?: string;
   customFields: CustomField[]; applyFields?: ApplyFields; accessCode: string; clientAccessCode?: string;
@@ -89,7 +89,11 @@ export default function CampaignDetail() {
   const [campaign, setCampaign] = useState<Campaign | null>(null);
   const [loading, setLoading] = useState(true);
   const [briefDraft, setBriefDraft] = useState('');
-  const [briefCampaignDraft, setBriefCampaignDraft] = useState('');
+  const [briefBlockAdding, setBriefBlockAdding] = useState(false);
+  const [briefBlockKind, setBriefBlockKind] = useState<'text' | 'link' | 'file' | 'image' | 'video'>('text');
+  const [briefBlockText, setBriefBlockText] = useState('');
+  const [briefBlockSaving, setBriefBlockSaving] = useState(false);
+  const [removingBriefIndex, setRemovingBriefIndex] = useState<number | null>(null);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [waGroupLinkDraft, setWaGroupLinkDraft] = useState('');
   const [actionMessage, setActionMessage] = useState('');
@@ -109,7 +113,6 @@ export default function CampaignDetail() {
       setAllPics(allRes.data);
       setCampaign(cRes.data);
       setBriefDraft(cRes.data.briefContent || '');
-      setBriefCampaignDraft(cRes.data.briefCampaign?.kind === 'text' ? cRes.data.briefCampaign.content : '');
       setWaGroupLinkDraft(cRes.data.waGroupLink || '');
       setPicUsers(pRes.data);
     } catch {
@@ -164,16 +167,53 @@ export default function CampaignDetail() {
     }
   };
 
-  const saveBriefCampaign = async () => {
+  const addBriefBlock = async () => {
+    if ((briefBlockKind === 'text' || briefBlockKind === 'link') && !briefBlockText.trim()) {
+      setActionError('Isi dulu kontennya.');
+      return;
+    }
     setActionError('');
+    setBriefBlockSaving(true);
     try {
-      const res = await api.patch(`/admin/campaigns/${id}/brief`, { kind: 'text', content: briefCampaignDraft });
+      const res = await api.post(`/admin/campaigns/${id}/brief/blocks`, { kind: briefBlockKind, content: briefBlockText.trim() });
       setCampaign(res.data);
-      setActionMessage('Brief Campaign disimpan.');
-      setTimeout(() => setActionMessage(''), 2500);
+      setBriefBlockText('');
+      setBriefBlockAdding(false);
     } catch (err: unknown) {
       const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
-      setActionError(message || 'Gagal menyimpan Brief Campaign.');
+      setActionError(message || 'Gagal menambah blok brief.');
+    } finally {
+      setBriefBlockSaving(false);
+    }
+  };
+
+  const uploadBriefBlock = async (file: File) => {
+    setActionError('');
+    setBriefBlockSaving(true);
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      fd.append('kind', briefBlockKind);
+      const res = await api.post(`/admin/campaigns/${id}/brief/blocks/upload`, fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+      setCampaign(res.data);
+      setBriefBlockAdding(false);
+    } catch (err: unknown) {
+      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      setActionError(message || 'Gagal upload file brief.');
+    } finally {
+      setBriefBlockSaving(false);
+    }
+  };
+
+  const removeBriefBlock = async (index: number) => {
+    setRemovingBriefIndex(index);
+    try {
+      const res = await api.delete(`/admin/campaigns/${id}/brief/blocks/${index}`);
+      setCampaign(res.data);
+    } catch {
+      setActionError('Gagal menghapus blok brief.');
+    } finally {
+      setRemovingBriefIndex(null);
     }
   };
 
@@ -345,31 +385,81 @@ export default function CampaignDetail() {
             <p style={shareTitle}>Brief Campaign</p>
             <p style={shareDesc}>
               Beda dari Broadcast Campaign di atas (dikirim lewat WA ke creator). Ini brief kreatif yang tampil di
-              dashboard creator/PIC/client. Client juga bisa isi/edit sendiri dari dashboard mereka (teks, file, gambar, video, atau link).
+              dashboard creator/PIC/client. Campur bebas — teks, link, file, gambar, video sekaligus, bukan satu tipe
+              saja. Client juga bisa isi/edit sendiri dari dashboard mereka.
             </p>
-            {campaign.briefCampaign && campaign.briefCampaign.kind !== 'text' && (
-              <p style={{ fontSize: '0.78rem', color: '#9a99a6', marginBottom: '10px' }}>
-                Saat ini diisi client ({campaign.briefCampaign.kind}): <a href={campaign.briefCampaign.content} target="_blank" rel="noopener noreferrer" style={{ color: '#6728e4' }}>{campaign.briefCampaign.content}</a>. Simpan teks di bawah untuk menggantinya.
-              </p>
+
+            {(campaign.briefCampaign?.blocks.length ?? 0) === 0 && (
+              <p style={{ fontSize: '0.82rem', color: '#9a99a6', margin: '10px 0' }}>Belum ada isi.</p>
             )}
-            <textarea
-              value={briefCampaignDraft}
-              onChange={(e) => setBriefCampaignDraft(e.target.value)}
-              rows={6}
-              placeholder="Tulis brief campaign di sini..."
-              style={{ width: '100%', padding: '12px 14px', borderRadius: '10px', border: '1.5px solid #c7c8cf', fontSize: '0.85rem', fontFamily: "var(--font-display)", boxSizing: 'border-box', resize: 'vertical' }}
-            />
-            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '10px' }}>
-              <button type="button" onClick={saveBriefCampaign}
-                disabled={briefCampaignDraft === (campaign.briefCampaign?.kind === 'text' ? campaign.briefCampaign.content : '')}
-                style={{ ...shareBtn, background: '#6728e4', color: 'white', border: 'none', opacity: briefCampaignDraft === (campaign.briefCampaign?.kind === 'text' ? campaign.briefCampaign.content : '') ? 0.5 : 1 }}>
-                Simpan
-              </button>
-            </div>
+
+            {(campaign.briefCampaign?.blocks.length ?? 0) > 0 && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', margin: '10px 0' }}>
+                {campaign.briefCampaign!.blocks.map((block, i) => (
+                  <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      {block.kind === 'image' ? <img src={block.content} alt="Brief" style={{ maxWidth: '100%', borderRadius: '10px', display: 'block' }} />
+                        : block.kind === 'video' ? <video src={block.content} controls style={{ maxWidth: '100%', borderRadius: '10px', display: 'block' }} />
+                        : block.kind === 'link' || block.kind === 'file'
+                          ? <a href={block.content} target="_blank" rel="noopener noreferrer" style={{ color: '#6728e4', fontWeight: 700, wordBreak: 'break-all', fontSize: '0.85rem' }}>{block.content}</a>
+                          : <p style={{ whiteSpace: 'pre-wrap', margin: 0, fontSize: '0.85rem', color: '#191c20' }}>{block.content}</p>}
+                    </div>
+                    <button type="button" disabled={removingBriefIndex === i} onClick={() => void removeBriefBlock(i)}
+                      style={{ background: 'none', border: 'none', color: '#ba1a1a', cursor: 'pointer', fontSize: '0.72rem', fontFamily: 'var(--font-display)', fontWeight: 700, flexShrink: 0, opacity: removingBriefIndex === i ? 0.5 : 1 }}>
+                      Hapus
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
             {campaign.briefCampaign && (
-              <p style={{ fontSize: '0.72rem', color: '#9a99a6', marginTop: '8px' }}>
+              <p style={{ fontSize: '0.72rem', color: '#9a99a6', marginBottom: '14px' }}>
                 Terakhir diisi oleh {campaign.briefCampaign.filledBy === 'admin' ? 'Admin' : 'Client'} · {new Date(campaign.briefCampaign.updatedAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
               </p>
+            )}
+
+            {!briefBlockAdding ? (
+              <button type="button" onClick={() => { setBriefBlockKind('text'); setBriefBlockText(''); setBriefBlockAdding(true); }}
+                style={{ ...shareBtn, background: 'none', border: '1.5px solid #6728e4', color: '#6728e4' }}>
+                + Tambah Blok
+              </button>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <select value={briefBlockKind} onChange={(e) => setBriefBlockKind(e.target.value as typeof briefBlockKind)}
+                  style={{ padding: '8px 10px', borderRadius: '8px', border: '1.5px solid #c7c8cf', fontFamily: 'var(--font-display)', fontSize: '0.82rem', width: 'fit-content' }}>
+                  <option value="text">Teks</option>
+                  <option value="link">Link</option>
+                  <option value="image">Gambar</option>
+                  <option value="video">Video</option>
+                  <option value="file">File</option>
+                </select>
+                {briefBlockKind === 'text' && (
+                  <textarea value={briefBlockText} onChange={(e) => setBriefBlockText(e.target.value)} rows={5} placeholder="Tulis brief campaign di sini..."
+                    style={{ width: '100%', padding: '12px 14px', borderRadius: '10px', border: '1.5px solid #c7c8cf', fontSize: '0.85rem', fontFamily: 'var(--font-display)', boxSizing: 'border-box', resize: 'vertical' }} />
+                )}
+                {briefBlockKind === 'link' && (
+                  <input value={briefBlockText} onChange={(e) => setBriefBlockText(e.target.value)} placeholder="https://..."
+                    style={{ width: '100%', padding: '10px 12px', borderRadius: '10px', border: '1.5px solid #c7c8cf', fontSize: '0.85rem', fontFamily: 'var(--font-display)', boxSizing: 'border-box' }} />
+                )}
+                {(briefBlockKind === 'image' || briefBlockKind === 'video' || briefBlockKind === 'file') && (
+                  <input type="file" accept={briefBlockKind === 'image' ? 'image/*' : briefBlockKind === 'video' ? 'video/*' : undefined}
+                    onChange={(e) => { const file = e.target.files?.[0]; if (file) void uploadBriefBlock(file); }}
+                    style={{ fontFamily: 'var(--font-display)', fontSize: '0.82rem' }} />
+                )}
+                <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                  {(briefBlockKind === 'text' || briefBlockKind === 'link') && (
+                    <button type="button" onClick={() => void addBriefBlock()} disabled={briefBlockSaving}
+                      style={{ ...shareBtn, background: '#6728e4', color: 'white', border: 'none', opacity: briefBlockSaving ? 0.7 : 1 }}>
+                      {briefBlockSaving ? 'Menyimpan...' : 'Tambah'}
+                    </button>
+                  )}
+                  <button type="button" onClick={() => setBriefBlockAdding(false)}
+                    style={{ background: 'none', border: '1.5px solid #c7c8cf', borderRadius: '10px', padding: '9px 16px', color: '#777683', fontFamily: 'var(--font-display)', fontSize: '0.82rem', fontWeight: 700, cursor: 'pointer' }}>
+                    Batal
+                  </button>
+                </div>
+              </div>
             )}
           </div>
         </div>

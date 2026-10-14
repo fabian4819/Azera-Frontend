@@ -8,9 +8,13 @@ const f = 'var(--font-display)';
 
 export type BoardAudience = 'creator' | 'pic' | 'client';
 
-export interface BriefCampaignData {
+export interface BriefBlock {
   kind: 'text' | 'file' | 'image' | 'video' | 'link';
   content: string;
+}
+
+export interface BriefCampaignData {
+  blocks: BriefBlock[];
   filledBy: 'admin' | 'client';
   updatedAt: string;
 }
@@ -40,7 +44,7 @@ const STATUS_STYLE: Record<string, { bg: string; color: string; label: string }>
   accepted: { bg: '#d7f5e3', color: '#146c2e', label: 'Approved' },
   rejected: { bg: '#ffdad6', color: '#93000a', label: 'Rejected' },
 };
-const BRIEF_KIND_LABEL: Record<BriefCampaignData['kind'], string> = { text: 'Teks', link: 'Link', image: 'Gambar', video: 'Video', file: 'File' };
+const BRIEF_KIND_LABEL: Record<BriefBlock['kind'], string> = { text: 'Teks', link: 'Link', image: 'Gambar', video: 'Video', file: 'File' };
 
 const fmtDate = (d?: string) => (d ? new Date(d).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : '');
 
@@ -126,29 +130,27 @@ function ApplicantsTab({ view, onDecide }: { view: ApplicantsView | null; onDeci
 }
 
 /** Section "Brief Campaign" baru (beda dari Broadcast Campaign di atas). Client bisa isi/edit,
- * creator/PIC view-only. Kalau kosong, client pilih isi sendiri (text/file/image/video/link)
- * atau biarkan admin yang isi. */
+ * creator/PIC view-only. Campur bebas: beberapa blok teks/link/file/gambar/video sekaligus,
+ * bukan exclusive satu kind — tambah/hapus blok satu-satu. */
 function BriefCampaignSection({
-  brief, canEdit, onSaveText, onUploadFile,
+  brief, canEdit, onSaveText, onUploadFile, onRemoveBlock,
 }: {
   brief: BriefCampaignData | null | undefined;
   canEdit: boolean;
   onSaveText: (kind: 'text' | 'link', content: string) => Promise<void>;
   onUploadFile: (kind: 'file' | 'image' | 'video', file: File) => Promise<void>;
+  onRemoveBlock: (index: number) => Promise<void>;
 }) {
-  const [editing, setEditing] = useState(false);
-  const [dismissed, setDismissed] = useState(false);
-  const [kind, setKind] = useState<BriefCampaignData['kind']>(brief?.kind ?? 'text');
+  const [adding, setAdding] = useState(false);
+  const [kind, setKind] = useState<BriefBlock['kind']>('text');
   const [text, setText] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [removingIndex, setRemovingIndex] = useState<number | null>(null);
 
-  const startEdit = () => {
-    setKind(brief?.kind ?? 'text');
-    setText(brief && (brief.kind === 'text' || brief.kind === 'link') ? brief.content : '');
-    setError('');
-    setEditing(true);
-  };
+  const blocks = brief?.blocks ?? [];
+
+  const startAdd = () => { setKind('text'); setText(''); setError(''); setAdding(true); };
 
   const save = async () => {
     if (!text.trim()) { setError('Isi dulu kontennya.'); return; }
@@ -156,7 +158,8 @@ function BriefCampaignSection({
     setError('');
     try {
       await onSaveText(kind as 'text' | 'link', text.trim());
-      setEditing(false);
+      setAdding(false);
+      setText('');
     } catch {
       setError('Gagal menyimpan. Coba lagi.');
     } finally {
@@ -169,7 +172,7 @@ function BriefCampaignSection({
     setError('');
     try {
       await onUploadFile(kind as 'file' | 'image' | 'video', file);
-      setEditing(false);
+      setAdding(false);
     } catch {
       setError('Gagal upload. Coba lagi.');
     } finally {
@@ -177,55 +180,67 @@ function BriefCampaignSection({
     }
   };
 
-  const renderContent = () => {
-    if (!brief) return null;
-    if (brief.kind === 'image') return <img src={brief.content} alt="Brief Campaign" style={{ maxWidth: '100%', borderRadius: '12px', display: 'block' }} />;
-    if (brief.kind === 'video') return <video src={brief.content} controls style={{ maxWidth: '100%', borderRadius: '12px', display: 'block' }} />;
-    if (brief.kind === 'link' || brief.kind === 'file') {
-      return <a href={brief.content} target="_blank" rel="noopener noreferrer" style={{ color: '#6728e4', fontWeight: 700, wordBreak: 'break-all' }}>{brief.content}</a>;
+  const removeBlock = async (index: number) => {
+    setRemovingIndex(index);
+    try {
+      await onRemoveBlock(index);
+    } catch {
+      setError('Gagal menghapus. Coba lagi.');
+    } finally {
+      setRemovingIndex(null);
     }
-    return <p style={{ whiteSpace: 'pre-wrap', margin: 0 }}>{brief.content}</p>;
+  };
+
+  const renderBlock = (block: BriefBlock) => {
+    if (block.kind === 'image') return <img src={block.content} alt="Brief Campaign" style={{ maxWidth: '100%', borderRadius: '12px', display: 'block' }} />;
+    if (block.kind === 'video') return <video src={block.content} controls style={{ maxWidth: '100%', borderRadius: '12px', display: 'block' }} />;
+    if (block.kind === 'link' || block.kind === 'file') {
+      return <a href={block.content} target="_blank" rel="noopener noreferrer" style={{ color: '#6728e4', fontWeight: 700, wordBreak: 'break-all' }}>{block.content}</a>;
+    }
+    return <p style={{ whiteSpace: 'pre-wrap', margin: 0 }}>{block.content}</p>;
   };
 
   return (
     <div style={{ background: '#fff', borderRadius: '20px', marginBottom: '14px', padding: '16px 20px', boxShadow: '0 10px 30px rgba(30,10,94,0.18)' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px' }}>
         <p style={{ fontFamily: f, fontWeight: 700, fontSize: '0.92rem', color: '#191c20', margin: 0 }}>Brief Campaign</p>
-        {canEdit && !editing && (
-          <button type="button" onClick={startEdit} style={{ background: 'none', border: 'none', color: '#6728e4', fontFamily: f, fontWeight: 700, fontSize: '0.78rem', cursor: 'pointer' }}>
-            {brief ? 'Edit' : 'Isi Brief'}
+        {canEdit && !adding && (
+          <button type="button" onClick={startAdd} style={{ background: 'none', border: 'none', color: '#6728e4', fontFamily: f, fontWeight: 700, fontSize: '0.78rem', cursor: 'pointer' }}>
+            + Tambah
           </button>
         )}
       </div>
 
-      {!brief && !editing && (
-        <>
-          <p style={{ fontFamily: f, fontSize: '0.85rem', color: '#777683', margin: '8px 0 0' }}>
-            {canEdit ? 'Belum diisi. Isi sendiri, atau biarkan tim AzeraKOL yang isi.' : 'Belum diisi tim AzeraKOL.'}
-          </p>
-          {canEdit && !dismissed && (
-            <button type="button" onClick={() => setDismissed(true)} style={{ marginTop: '8px', background: 'none', border: '1.5px solid #e1e0ff', borderRadius: '8px', padding: '6px 12px', color: '#6728e4', fontFamily: f, fontSize: '0.76rem', fontWeight: 700, cursor: 'pointer' }}>
-              Biar Admin yang Isi
-            </button>
-          )}
-          {canEdit && dismissed && (
-            <p style={{ fontFamily: f, fontSize: '0.8rem', color: '#777683', marginTop: '6px', fontStyle: 'italic' }}>Oke, tim AzeraKOL akan isi brief ini.</p>
-          )}
-        </>
+      {blocks.length === 0 && !adding && (
+        <p style={{ fontFamily: f, fontSize: '0.85rem', color: '#777683', margin: '8px 0 0' }}>
+          {canEdit ? 'Belum diisi. Tambah teks, link, atau file — boleh campur beberapa sekaligus.' : 'Belum diisi tim AzeraKOL.'}
+        </p>
       )}
 
-      {brief && !editing && (
-        <div style={{ marginTop: '12px' }}>
-          {renderContent()}
-          <p style={{ fontFamily: f, fontSize: '0.72rem', color: '#9a99a6', marginTop: '10px' }}>
-            Diisi oleh {brief.filledBy === 'admin' ? 'Admin' : 'Client'} · {fmtDate(brief.updatedAt)}
-          </p>
+      {blocks.length > 0 && (
+        <div style={{ marginTop: '12px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          {blocks.map((block, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+              <div style={{ flex: 1, minWidth: 0 }}>{renderBlock(block)}</div>
+              {canEdit && (
+                <button type="button" disabled={removingIndex === i} onClick={() => void removeBlock(i)}
+                  style={{ background: 'none', border: 'none', color: '#ba1a1a', cursor: 'pointer', fontSize: '0.72rem', fontFamily: f, fontWeight: 700, flexShrink: 0, opacity: removingIndex === i ? 0.5 : 1 }}>
+                  Hapus
+                </button>
+              )}
+            </div>
+          ))}
+          {brief && (
+            <p style={{ fontFamily: f, fontSize: '0.72rem', color: '#9a99a6', margin: 0 }}>
+              Terakhir diisi oleh {brief.filledBy === 'admin' ? 'Admin' : 'Client'} · {fmtDate(brief.updatedAt)}
+            </p>
+          )}
         </div>
       )}
 
-      {editing && (
+      {adding && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '12px' }}>
-          <select value={kind} onChange={(e) => setKind(e.target.value as BriefCampaignData['kind'])}
+          <select value={kind} onChange={(e) => setKind(e.target.value as BriefBlock['kind'])}
             style={{ padding: '8px 10px', borderRadius: '8px', border: '1.5px solid #e1e0ff', fontFamily: f, fontSize: '0.82rem', width: 'fit-content' }}>
             {(['text', 'link', 'image', 'video', 'file'] as const).map((k) => <option key={k} value={k}>{BRIEF_KIND_LABEL[k]}</option>)}
           </select>
@@ -245,10 +260,10 @@ function BriefCampaignSection({
           <div style={{ display: 'flex', gap: '8px' }}>
             {(kind === 'text' || kind === 'link') && (
               <button type="button" onClick={() => void save()} disabled={saving} className="btn-primary" style={{ padding: '8px 16px', fontSize: '0.8rem', opacity: saving ? 0.7 : 1 }}>
-                {saving ? 'Menyimpan...' : 'Simpan'}
+                {saving ? 'Menyimpan...' : 'Tambah'}
               </button>
             )}
-            <button type="button" onClick={() => setEditing(false)} style={{ background: 'none', border: '1.5px solid #e1e0ff', borderRadius: '8px', padding: '8px 16px', color: '#777683', fontFamily: f, fontSize: '0.8rem', fontWeight: 700, cursor: 'pointer' }}>
+            <button type="button" onClick={() => setAdding(false)} style={{ background: 'none', border: '1.5px solid #e1e0ff', borderRadius: '8px', padding: '8px 16px', color: '#777683', fontFamily: f, fontSize: '0.8rem', fontWeight: 700, cursor: 'pointer' }}>
               Batal
             </button>
           </div>
@@ -273,9 +288,10 @@ interface Props {
   /** Client-only: isi/edit Brief Campaign */
   onSaveBrief?: (kind: 'text' | 'link', content: string) => Promise<void>;
   onUploadBrief?: (kind: 'file' | 'image' | 'video', file: File) => Promise<void>;
+  onRemoveBrief?: (index: number) => Promise<void>;
 }
 
-export default function CampaignBoard({ audience, view, loading, onReload, onEdit, onUpload, onReview, applicants, onLoadApplicants, onDecideApplicant, onSaveBrief, onUploadBrief }: Props) {
+export default function CampaignBoard({ audience, view, loading, onReload, onEdit, onUpload, onReview, applicants, onLoadApplicants, onDecideApplicant, onSaveBrief, onUploadBrief, onRemoveBrief }: Props) {
   const [briefOpen, setBriefOpen] = useState(false);
   const [actionError, setActionError] = useState('');
   const [tab, setTab] = useState<'pendaftar' | 'tracker'>('pendaftar');
@@ -385,9 +401,10 @@ export default function CampaignBoard({ audience, view, loading, onReload, onEdi
 
           <BriefCampaignSection
             brief={campaign.briefCampaign}
-            canEdit={audience === 'client' && Boolean(onSaveBrief && onUploadBrief)}
+            canEdit={audience === 'client' && Boolean(onSaveBrief && onUploadBrief && onRemoveBrief)}
             onSaveText={onSaveBrief ?? (async () => {})}
             onUploadFile={onUploadBrief ?? (async () => {})}
+            onRemoveBlock={onRemoveBrief ?? (async () => {})}
           />
 
           <section style={{ background: '#fff', borderRadius: '20px', padding: '18px', boxShadow: '0 10px 30px rgba(30,10,94,0.18)' }}>
