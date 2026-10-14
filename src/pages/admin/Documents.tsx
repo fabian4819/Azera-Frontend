@@ -11,12 +11,12 @@ import api from '../../lib/api';
 
 const f = 'var(--font-display)';
 const cardStyle: React.CSSProperties = {
-  background: 'white', borderRadius: '16px', padding: '24px', border: '1px solid #e1e0ff',
+  background: 'var(--surface)', borderRadius: '16px', padding: '24px', border: '1px solid #e1e0ff',
   boxShadow: '0 2px 12px rgba(107,46,232,0.05)', marginBottom: '20px',
 };
 const btn = (primary = true): React.CSSProperties => ({
   display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '9px 16px', borderRadius: '999px', cursor: 'pointer',
-  fontFamily: f, fontSize: '0.8rem', fontWeight: 600, border: primary ? 'none' : '1.5px solid #c7c8cf',
+  fontFamily: f, fontSize: '0.8rem', fontWeight: 600, border: primary ? 'none' : '1.5px solid #e1e0ff',
   background: primary ? 'var(--secondary)' : 'white', color: primary ? 'white' : '#191c20',
 });
 
@@ -228,7 +228,7 @@ function DocEditor({ config, initialId, initialData, onBack, onSaved }: {
     <div>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', flexWrap: 'wrap', marginBottom: '12px' }}>
         <button onClick={back} style={btn(false)}><ArrowLeft size={14} /> Kembali ke daftar</button>
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', background: 'white', border: '1.5px solid #c7c8cf', borderRadius: '999px', padding: '3px' }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', background: 'var(--surface)', border: '1.5px solid #e1e0ff', borderRadius: '999px', padding: '3px' }}>
           <button onClick={() => changeZoom(-ZOOM_STEP)} disabled={zoom <= ZOOM_MIN} aria-label="Perkecil" title="Perkecil" style={{ ...btn(false), border: 'none', padding: '6px 10px' }}><ZoomOut size={15} /></button>
           <button onClick={() => setZoom(1)} title="Kembali ke 100%" style={{ ...btn(false), border: 'none', padding: '6px 8px', minWidth: '56px', justifyContent: 'center' }}>{Math.round(zoom * 100)}%</button>
           <button onClick={() => changeZoom(ZOOM_STEP)} disabled={zoom >= ZOOM_MAX} aria-label="Perbesar" title="Perbesar" style={{ ...btn(false), border: 'none', padding: '6px 10px' }}><ZoomIn size={15} /></button>
@@ -359,7 +359,7 @@ export default function Documents() {
           <div style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem', fontFamily: f }}>
               <thead>
-                <tr style={{ background: '#f8f9ff', textAlign: 'left' }}>
+                <tr style={{ background: 'var(--surface)', textAlign: 'left' }}>
                   {['Nomor', 'Klien', ...(config.apiType === 'invoice' ? ['Mastersheet'] : []), 'Terakhir Diubah', ''].map((h) => <th key={h} style={{ padding: '9px 10px', fontWeight: 700 }}>{h}</th>)}
                 </tr>
               </thead>

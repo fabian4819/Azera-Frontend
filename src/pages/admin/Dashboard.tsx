@@ -6,7 +6,7 @@ import { useAuth } from '../../hooks/useAuth';
 
 const f = "var(--font-display)";
 const cardStyle: React.CSSProperties = {
-  background: 'white', borderRadius: '16px', padding: '24px', border: '1px solid #e1e0ff',
+  background: 'var(--surface)', borderRadius: '16px', padding: '24px', border: '1px solid #e1e0ff',
   boxShadow: '0 2px 12px rgba(107,46,232,0.05)',
 };
 
@@ -29,7 +29,7 @@ function KpiCard({ icon: Icon, label, value, hint }: { icon: React.ComponentType
         <p style={{ fontFamily: f, fontWeight: 700, fontSize: '0.85rem', color: '#464652' }}>{label}</p>
       </div>
       <p style={{ fontFamily: f, fontWeight: 800, fontSize: '2rem', color: '#191c20', lineHeight: 1 }}>{value}</p>
-      <p style={{ fontSize: '0.78rem', color: '#8a8a99', marginTop: '6px' }}>{hint}</p>
+      <p style={{ fontSize: '0.78rem', color: '#777683', marginTop: '6px' }}>{hint}</p>
     </div>
   );
 }
@@ -101,15 +101,15 @@ export default function Dashboard() {
 
           <div style={cardStyle}>
             <p style={{ fontFamily: f, fontWeight: 700, fontSize: '0.95rem', color: '#191c20', marginBottom: '4px' }}>Pendaftaran Creator</p>
-            <p style={{ fontSize: '0.78rem', color: '#8a8a99', marginBottom: '16px' }}>30 hari terakhir</p>
+            <p style={{ fontSize: '0.78rem', color: '#777683', marginBottom: '16px' }}>30 hari terakhir</p>
             {stats ? <LineChart data={stats.dailyRegistrations} /> : (
-              <div style={{ height: '160px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#8a8a99', fontSize: '0.82rem' }}>Memuat...</div>
+              <div style={{ height: '160px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#777683', fontSize: '0.82rem' }}>Memuat...</div>
             )}
           </div>
 
           <div style={cardStyle}>
             <p style={{ fontFamily: f, fontWeight: 700, fontSize: '0.95rem', color: '#191c20', marginBottom: '4px' }}>Pipeline Brand Lead</p>
-            <p style={{ fontSize: '0.78rem', color: '#8a8a99', marginBottom: '16px' }}>Total {pipeline.new + pipeline.reviewed + pipeline.contacted} lead</p>
+            <p style={{ fontSize: '0.78rem', color: '#777683', marginBottom: '16px' }}>Total {pipeline.new + pipeline.reviewed + pipeline.contacted} lead</p>
             <div style={{ display: 'flex', height: '10px', borderRadius: '999px', overflow: 'hidden', marginBottom: '14px' }}>
               <div style={{ width: `${(pipeline.new / pipelineTotal) * 100}%`, background: '#c4ee87' }} />
               <div style={{ width: `${(pipeline.reviewed / pipelineTotal) * 100}%`, background: '#814bfe' }} />
@@ -154,14 +154,14 @@ export default function Dashboard() {
                   </div>
                   <div style={{ minWidth: 0 }}>
                     <p style={{ fontFamily: f, fontWeight: 600, fontSize: '0.85rem', color: '#191c20', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</p>
-                    <p style={{ fontSize: '0.75rem', color: '#8a8a99', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.subtitle} · {timeAgo(item.createdAt)}</p>
+                    <p style={{ fontSize: '0.75rem', color: '#777683', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.subtitle} · {timeAgo(item.createdAt)}</p>
                   </div>
                 </div>
-                <ChevronRight size={15} color="#c7c8cf" style={{ flexShrink: 0 }} />
+                <ChevronRight size={15} color="#9a99a6" style={{ flexShrink: 0 }} />
               </button>
             ))}
             {stats && stats.recentActivity.length === 0 && (
-              <p style={{ textAlign: 'center', color: '#8a8a99', fontSize: '0.82rem', padding: '20px 0' }}>Belum ada aktivitas.</p>
+              <p style={{ textAlign: 'center', color: '#777683', fontSize: '0.82rem', padding: '20px 0' }}>Belum ada aktivitas.</p>
             )}
           </div>
         </div>

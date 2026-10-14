@@ -5,11 +5,11 @@ import api from '../../lib/api';
 
 const f = "var(--font-display)";
 const cardStyle: React.CSSProperties = {
-  background: 'white', borderRadius: '16px', padding: '28px', border: '1px solid #e1e0ff',
+  background: 'var(--surface)', borderRadius: '16px', padding: '28px', border: '1px solid #e1e0ff',
   boxShadow: '0 2px 12px rgba(107,46,232,0.05)', marginBottom: '20px',
 };
 const inputStyle: React.CSSProperties = {
-  width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1.5px solid #c7c8cf',
+  width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1.5px solid #e1e0ff',
   fontSize: '0.85rem', fontFamily: f, marginBottom: '14px', boxSizing: 'border-box',
 };
 const labelStyle: React.CSSProperties = {

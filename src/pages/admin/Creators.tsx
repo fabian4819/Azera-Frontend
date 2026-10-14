@@ -126,7 +126,7 @@ export default function Creators({ scope = 'general', selected, onSelectedChange
           filterFn: multiTokenFilter,
           cell: ({ getValue, row }) => {
             const username = getValue<string>();
-            if (!username) return <span style={{ color: '#c7c8cf' }}>-</span>;
+            if (!username) return <span style={{ color: '#9a99a6' }}>-</span>;
             const url = socialUrl(social(row.original));
             return url ? <a href={url} target="_blank" rel="noopener noreferrer" style={{ color: '#6728e4', textDecoration: 'none', fontWeight: 600 }}>@{username}</a> : `@${username}`;
           },
@@ -154,17 +154,17 @@ export default function Creators({ scope = 'general', selected, onSelectedChange
     const arrayCol = (id: string, header: string, accessorFn: (c: CreatorItem) => string[]): ColumnDef<CreatorItem> => ({
       id, header, accessorFn, filterFn: multiTokenFilter,
       sortingFn: (a, b) => (accessorFn(a.original).join(', ')).localeCompare(accessorFn(b.original).join(', ')),
-      cell: ({ getValue }) => { const arr = getValue<string[]>(); return arr.length ? arr.join(', ') : <span style={{ color: '#c7c8cf' }}>-</span>; },
+      cell: ({ getValue }) => { const arr = getValue<string[]>(); return arr.length ? arr.join(', ') : <span style={{ color: '#9a99a6' }}>-</span>; },
     });
 
     const textCol = (id: string, header: string, accessorFn: (c: CreatorItem) => string, cell?: ColumnDef<CreatorItem>['cell']): ColumnDef<CreatorItem> => ({
       id, header, accessorFn, filterFn: multiTokenFilter,
-      cell: cell ?? (({ getValue }) => { const v = getValue<string>(); return v || <span style={{ color: '#c7c8cf' }}>-</span>; }),
+      cell: cell ?? (({ getValue }) => { const v = getValue<string>(); return v || <span style={{ color: '#9a99a6' }}>-</span>; }),
     });
 
     const numCol = (id: string, header: string, accessorFn: (c: CreatorItem) => number | null, cell?: ColumnDef<CreatorItem>['cell']): ColumnDef<CreatorItem> => ({
       id, header, accessorFn, filterFn: multiTokenFilter,
-      cell: cell ?? (({ getValue }) => { const v = getValue<number | null>(); return v ?? <span style={{ color: '#c7c8cf' }}>-</span>; }),
+      cell: cell ?? (({ getValue }) => { const v = getValue<number | null>(); return v ?? <span style={{ color: '#9a99a6' }}>-</span>; }),
     });
 
     return [
@@ -213,7 +213,7 @@ export default function Creators({ scope = 'general', selected, onSelectedChange
       textCol('npwp', 'NPWP', (c) => c.npwp || ''),
       textCol('portfolio', 'Portfolio', (c) => c.portfolioLink || '', ({ getValue }) => {
         const v = getValue<string>();
-        return v ? <a href={v} target="_blank" rel="noopener noreferrer" style={{ color: '#6728e4', textDecoration: 'none' }}>Buka link</a> : <span style={{ color: '#c7c8cf' }}>-</span>;
+        return v ? <a href={v} target="_blank" rel="noopener noreferrer" style={{ color: '#6728e4', textDecoration: 'none' }}>Buka link</a> : <span style={{ color: '#9a99a6' }}>-</span>;
       }),
       numCol('performanceScore', 'Skor', (c) => c.performanceScore?.overall ?? 0, ({ getValue }) => <span style={{ fontWeight: 700, color: '#6728e4' }}>{getValue<number>()}</span>),
       numCol('cancelCount', 'Jumlah Cancel', (c) => c.cancelCount ?? 0),
@@ -263,7 +263,7 @@ export default function Creators({ scope = 'general', selected, onSelectedChange
           <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#777683' }} />
           <input
             value={globalFilter} onChange={(e) => setGlobalFilter(e.target.value)} placeholder="Cari nama, WhatsApp, atau email..."
-            style={{ padding: '10px 14px 10px 36px', borderRadius: '10px', border: '1.5px solid #c7c8cf', fontSize: '0.875rem', outline: 'none', fontFamily: 'var(--font-display)', background: 'white', width: '100%' }}
+            style={{ padding: '10px 14px 10px 36px', borderRadius: '10px', border: '1.5px solid #e1e0ff', fontSize: '0.875rem', outline: 'none', fontFamily: 'var(--font-display)', background: 'var(--surface)', width: '100%' }}
           />
         </div>
         <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
@@ -275,13 +275,13 @@ export default function Creators({ scope = 'general', selected, onSelectedChange
               Hapus {activeFilterCount} filter kolom
             </button>
           )}
-          <button onClick={fetchCreators} style={{ padding: '10px', borderRadius: '10px', border: '1.5px solid #c7c8cf', background: 'white', cursor: 'pointer', color: '#777683', display: 'flex' }}>
+          <button onClick={fetchCreators} style={{ padding: '10px', borderRadius: '10px', border: '1.5px solid #e1e0ff', background: 'var(--surface)', cursor: 'pointer', color: '#777683', display: 'flex' }}>
             <RefreshCw size={16} />
           </button>
           {sheetUrl && (
             <a
               href={sheetUrl} target="_blank" rel="noopener noreferrer"
-              style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '10px 16px', borderRadius: '10px', border: '1.5px solid #c7c8cf', background: 'white', color: '#464652', fontSize: '0.82rem', fontWeight: 700, fontFamily: "var(--font-display)", textDecoration: 'none', whiteSpace: 'nowrap' }}
+              style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '10px 16px', borderRadius: '10px', border: '1.5px solid #e1e0ff', background: 'var(--surface)', color: '#464652', fontSize: '0.82rem', fontWeight: 700, fontFamily: "var(--font-display)", textDecoration: 'none', whiteSpace: 'nowrap' }}
             >
               <ExternalLink size={14} />Buka Sheet
             </a>
@@ -289,14 +289,14 @@ export default function Creators({ scope = 'general', selected, onSelectedChange
         </div>
       </div>
 
-      <div style={{ background: 'white', borderRadius: '16px', border: '1px solid #e1e0ff', overflow: 'hidden', boxShadow: '0 2px 12px rgba(107,46,232,0.06)' }}>
+      <div style={{ background: 'var(--surface)', borderRadius: '16px', border: '1px solid #e1e0ff', overflow: 'hidden', boxShadow: '0 2px 12px rgba(107,46,232,0.06)' }}>
         <div style={{ overflow: 'auto', maxHeight: '75vh' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
             <thead>
               {table.getHeaderGroups().map((hg) => (
-                <tr key={hg.id} style={{ background: '#f8f9ff', borderBottom: '1px solid #e1e0ff' }}>
+                <tr key={hg.id} style={{ background: 'var(--surface)', borderBottom: '1px solid #e1e0ff' }}>
                   {hg.headers.map((header) => (
-                    <th key={header.id} style={{ padding: 0, position: 'sticky', top: 0, background: '#f8f9ff', zIndex: 1, ...(header.column.id === 'select' ? { left: 0, zIndex: 2, boxShadow: '6px 0 8px -6px rgba(0,0,0,0.12)' } : {}) }}>
+                    <th key={header.id} style={{ padding: 0, position: 'sticky', top: 0, background: 'var(--surface)', zIndex: 1, ...(header.column.id === 'select' ? { left: 0, zIndex: 2, boxShadow: '6px 0 8px -6px rgba(0,0,0,0.12)' } : {}) }}>
                       {header.column.getCanFilter() ? (
                         <ColumnHeaderCell column={header.column} table={table}>
                           {flexRender(header.column.columnDef.header, header.getContext())}
@@ -389,7 +389,7 @@ function ColumnHeaderCell({ column, table, children }: { column: Column<CreatorI
         style={{ display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer', fontFamily: "var(--font-display)", fontWeight: 700, color: '#191c20', fontSize: '0.75rem', userSelect: 'none' }}
       >
         {children}
-        {sort === 'asc' ? <ChevronUp size={13} /> : sort === 'desc' ? <ChevronDown size={13} /> : <ChevronsUpDown size={12} color="#c7c8cf" />}
+        {sort === 'asc' ? <ChevronUp size={13} /> : sort === 'desc' ? <ChevronDown size={13} /> : <ChevronsUpDown size={12} color="#9a99a6" />}
       </span>
       <button
         ref={btnRef}
@@ -402,7 +402,7 @@ function ColumnHeaderCell({ column, table, children }: { column: Column<CreatorI
       {open && pos && createPortal(
         <>
           <div onClick={() => setOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 200 }} />
-          <div style={{ position: 'absolute', top: pos.top, left: pos.left, zIndex: 201, background: 'white', borderRadius: '10px', border: '1px solid #e1e0ff', boxShadow: '0 8px 24px rgba(0,0,0,0.15)', width: '230px', maxHeight: '340px', display: 'flex', flexDirection: 'column', fontFamily: 'var(--font-display)' }}>
+          <div style={{ position: 'absolute', top: pos.top, left: pos.left, zIndex: 201, background: 'var(--surface)', borderRadius: '10px', border: '1px solid #e1e0ff', boxShadow: '0 8px 24px rgba(0,0,0,0.15)', width: '230px', maxHeight: '340px', display: 'flex', flexDirection: 'column', fontFamily: 'var(--font-display)' }}>
             <div style={{ padding: '8px', borderBottom: '1px solid #eee', display: 'flex', alignItems: 'center', gap: '6px' }}>
               <Search size={13} color="#777683" />
               <input

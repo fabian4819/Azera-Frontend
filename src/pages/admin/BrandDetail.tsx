@@ -52,7 +52,7 @@ const valueStyle: React.CSSProperties = {
 };
 
 const cardStyle: React.CSSProperties = {
-  background: 'white',
+  background: 'var(--surface)',
   borderRadius: '16px',
   padding: '28px',
   border: '1px solid #e1e0ff',
@@ -63,11 +63,11 @@ const inputStyle: React.CSSProperties = {
   width: '100%',
   padding: '11px 14px',
   borderRadius: '10px',
-  border: '1.5px solid #c7c8cf',
+  border: '1.5px solid #e1e0ff',
   fontSize: '0.875rem',
   outline: 'none',
   fontFamily: 'var(--font-display)',
-  background: 'white',
+  background: 'var(--surface)',
   color: '#191c20',
 };
 

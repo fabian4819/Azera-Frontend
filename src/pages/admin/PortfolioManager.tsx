@@ -88,11 +88,11 @@ const modalInputStyle: React.CSSProperties = {
   width: '100%',
   padding: '11px 14px',
   borderRadius: '10px',
-  border: '1.5px solid #c7c8cf',
+  border: '1.5px solid #e1e0ff',
   fontSize: '0.875rem',
   outline: 'none',
   fontFamily: 'var(--font-display)',
-  background: 'white',
+  background: 'var(--surface)',
   color: '#191c20',
 };
 
@@ -106,10 +106,10 @@ const labelStyle: React.CSSProperties = {
 };
 
 const sectionTitle: React.CSSProperties = { fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '0.95rem', color: '#191c20', marginBottom: '12px' };
-const hintStyle: React.CSSProperties = { fontSize: '0.72rem', color: '#8a8a99', marginTop: '-6px', marginBottom: '14px', lineHeight: 1.5 };
+const hintStyle: React.CSSProperties = { fontSize: '0.72rem', color: '#777683', marginTop: '-6px', marginBottom: '14px', lineHeight: 1.5 };
 const miniLabel: React.CSSProperties = { ...labelStyle, fontSize: '0.72rem', fontWeight: 500 };
 const miniInput: React.CSSProperties = { ...modalInputStyle, padding: '8px 10px', fontSize: '0.8rem' };
-const emptyBox: React.CSSProperties = { color: '#777683', fontSize: '0.8rem', textAlign: 'center', padding: '14px', background: '#f8f9ff', borderRadius: '10px' };
+const emptyBox: React.CSSProperties = { color: '#777683', fontSize: '0.8rem', textAlign: 'center', padding: '14px', background: 'var(--surface)', borderRadius: '10px' };
 const smallBtn: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: '5px', padding: '8px 12px', background: '#e1e0ff', color: '#6728e4', borderRadius: '8px', border: 'none', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 700, fontFamily: 'var(--font-display)', whiteSpace: 'nowrap' };
 const linkBtn: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: '4px', background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: '#6728e4', fontSize: '0.75rem', fontWeight: 700, fontFamily: 'var(--font-display)' };
 const checkChip = (on: boolean): React.CSSProperties => ({
@@ -311,11 +311,11 @@ export default function PortfolioManager() {
       </div>
 
       {/* Table */}
-      <div style={{ background: 'white', borderRadius: '16px', border: '1px solid #e1e0ff', overflow: 'hidden', boxShadow: '0 2px 12px rgba(107,46,232,0.06)' }}>
+      <div style={{ background: 'var(--surface)', borderRadius: '16px', border: '1px solid #e1e0ff', overflow: 'hidden', boxShadow: '0 2px 12px rgba(107,46,232,0.06)' }}>
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem' }}>
             <thead>
-              <tr style={{ background: '#f8f9ff', borderBottom: '1px solid #e1e0ff' }}>
+              <tr style={{ background: 'var(--surface)', borderBottom: '1px solid #e1e0ff' }}>
                 {['Brand', 'Judul', 'Kategori', 'Kreator', 'Postingan', 'Views', 'Status', 'Featured', 'Tanggal', 'Aksi'].map((h) => (
                   <th key={h} style={thStyle}>{h}</th>
                 ))}
@@ -380,7 +380,7 @@ export default function PortfolioManager() {
       {/* Add/Edit Modal */}
       {showModal && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
-          <div style={{ background: 'white', borderRadius: '20px', padding: '32px', width: '100%', maxWidth: '680px', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' }}>
+          <div style={{ background: 'var(--surface)', borderRadius: '20px', padding: '32px', width: '100%', maxWidth: '680px', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
               <h3 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: '1.1rem', color: '#191c20' }}>
                 {editId ? 'Edit Portfolio' : 'Tambah Portfolio'}
@@ -619,7 +619,7 @@ export default function PortfolioManager() {
                 </button>
               </div>
               {form.topCreators.length === 0 ? (
-                <p style={{ color: '#777683', fontSize: '0.8rem', textAlign: 'center', padding: '14px', background: '#f8f9ff', borderRadius: '10px' }}>Belum ada creator ditambahkan.</p>
+                <p style={{ color: '#777683', fontSize: '0.8rem', textAlign: 'center', padding: '14px', background: 'var(--surface)', borderRadius: '10px' }}>Belum ada creator ditambahkan.</p>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                   {form.topCreators.map((c, i) => (
@@ -664,7 +664,7 @@ export default function PortfolioManager() {
                   ))}
                 </div>
               )}
-              <p style={{ fontSize: '0.72rem', color: '#8a8a99', marginTop: '8px' }}>
+              <p style={{ fontSize: '0.72rem', color: '#777683', marginTop: '8px' }}>
                 Urutan menentukan ranking (creator pertama = Top 1), geser ikon ⋮⋮ untuk mengubah urutan. Data diisi manual, belum dihitung otomatis dari data campaign.
               </p>
             </div>
@@ -703,14 +703,14 @@ export default function PortfolioManager() {
             <div style={{ display: 'flex', gap: '12px' }}>
               <button
                 onClick={() => setShowModal(false)}
-                style={{ flex: 1, padding: '12px', borderRadius: '10px', border: '1.5px solid #c7c8cf', background: 'white', cursor: 'pointer', fontFamily: 'var(--font-display)', fontWeight: 600, color: '#777683' }}
+                style={{ flex: 1, padding: '12px', borderRadius: '10px', border: '1.5px solid #e1e0ff', background: 'var(--surface)', cursor: 'pointer', fontFamily: 'var(--font-display)', fontWeight: 600, color: '#777683' }}
               >
                 Batal
               </button>
               <button
                 onClick={() => save('draft')}
                 disabled={saving}
-                style={{ flex: 1, padding: '12px', borderRadius: '10px', border: '1.5px solid #6728e4', background: 'white', cursor: 'pointer', fontFamily: 'var(--font-display)', fontWeight: 700, color: '#6728e4', opacity: saving ? 0.7 : 1 }}
+                style={{ flex: 1, padding: '12px', borderRadius: '10px', border: '1.5px solid #6728e4', background: 'var(--surface)', cursor: 'pointer', fontFamily: 'var(--font-display)', fontWeight: 700, color: '#6728e4', opacity: saving ? 0.7 : 1 }}
               >
                 Simpan Draft
               </button>
@@ -725,7 +725,7 @@ export default function PortfolioManager() {
       {/* Delete confirm */}
       {deleteConfirm && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
-          <div style={{ background: 'white', borderRadius: '20px', padding: '32px', maxWidth: '380px', width: '100%', textAlign: 'center', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' }}>
+          <div style={{ background: 'var(--surface)', borderRadius: '20px', padding: '32px', maxWidth: '380px', width: '100%', textAlign: 'center', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' }}>
             <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: '#ffdad6', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
               <Trash2 size={24} color="#ba1a1a" />
             </div>
@@ -738,7 +738,7 @@ export default function PortfolioManager() {
             <div style={{ display: 'flex', gap: '12px' }}>
               <button
                 onClick={() => setDeleteConfirm(null)}
-                style={{ flex: 1, padding: '12px', borderRadius: '10px', border: '1.5px solid #c7c8cf', background: 'white', cursor: 'pointer', fontFamily: 'var(--font-display)', fontWeight: 600, color: '#777683' }}
+                style={{ flex: 1, padding: '12px', borderRadius: '10px', border: '1.5px solid #e1e0ff', background: 'var(--surface)', cursor: 'pointer', fontFamily: 'var(--font-display)', fontWeight: 600, color: '#777683' }}
               >
                 Batal
               </button>

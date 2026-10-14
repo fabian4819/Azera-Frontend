@@ -7,7 +7,7 @@ import SnapshotDetail, { type SnapshotView } from '../../components/ui/SnapshotD
 
 const f = 'var(--font-display)';
 const card: React.CSSProperties = {
-  background: 'white', borderRadius: '16px', padding: '24px', border: '1px solid #e1e0ff',
+  background: 'var(--surface)', borderRadius: '16px', padding: '24px', border: '1px solid #e1e0ff',
   boxShadow: '0 2px 12px rgba(107,46,232,0.05)', marginBottom: '20px',
 };
 const h2: React.CSSProperties = { fontFamily: f, fontWeight: 800, fontSize: '1.05rem', color: '#191c20', marginBottom: '4px' };
@@ -144,9 +144,9 @@ export default function ExtensionConnect() {
         {tokens.length > 0 && (
           <div style={{ marginTop: '18px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
             {tokens.map((t) => (
-              <div key={t._id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', background: '#f8f9ff', borderRadius: '10px', fontSize: '0.82rem' }}>
+              <div key={t._id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', background: 'var(--surface)', borderRadius: '10px', fontSize: '0.82rem' }}>
                 <div>
-                  <b>{t.label}</b> <span style={{ color: '#999' }}>· AZK1-{t.hint}…</span>
+                  <b>{t.label}</b> <span style={{ color: '#9a99a6' }}>· AZK1-{t.hint}…</span>
                   <p style={{ fontSize: '0.72rem', color: '#777683' }}>
                     {t.createdBy?.name || '-'} · {t.lastUsedAt ? `dipakai ${new Date(t.lastUsedAt).toLocaleDateString('id-ID')}` : 'belum dipakai'}
                   </p>
@@ -210,7 +210,7 @@ export default function ExtensionConnect() {
                   return (
                     <Fragment key={key}>
                       <tr style={{ borderTop: '1px solid #eee', cursor: 'pointer' }} onClick={() => setExpanded(open ? null : key)}>
-                        <td style={{ padding: '10px', color: '#999' }}>{open ? <ChevronDown size={14} /> : <ChevronRight size={14} />}</td>
+                        <td style={{ padding: '10px', color: '#9a99a6' }}>{open ? <ChevronDown size={14} /> : <ChevronRight size={14} />}</td>
                         <td style={{ padding: '10px' }}>
                           <span style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
                             {Icon && <Icon size={14} />}
@@ -221,7 +221,7 @@ export default function ExtensionConnect() {
                             ) : <b>@{r.username}</b>}
                           </span>
                           {(r.displayName || r.niche) && (
-                            <span style={{ color: '#999', fontSize: '0.75rem' }}>
+                            <span style={{ color: '#9a99a6', fontSize: '0.75rem' }}>
                               {r.displayName}{r.displayName && r.niche ? ' · ' : ''}{r.niche}
                             </span>
                           )}

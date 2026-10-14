@@ -12,7 +12,7 @@ const socialIcons: Record<string, React.ComponentType<{ size?: number }>> = {
 
 const f = "var(--font-display)";
 const cardStyle: React.CSSProperties = {
-  background: 'white', borderRadius: '16px', padding: '28px', border: '1px solid #e1e0ff',
+  background: 'var(--surface)', borderRadius: '16px', padding: '28px', border: '1px solid #e1e0ff',
   boxShadow: '0 2px 12px rgba(107,46,232,0.05)', marginBottom: '20px',
 };
 const labelSmall: React.CSSProperties = {
@@ -289,7 +289,7 @@ export default function CreatorDetail() {
                     };
                   }
                   return (
-                    <div key={i} style={{ background: '#f8f9ff', borderRadius: '10px', overflow: 'hidden' }}>
+                    <div key={i} style={{ background: 'var(--surface)', borderRadius: '10px', overflow: 'hidden' }}>
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', fontSize: '0.85rem' }}>
                         <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                           {href && Icon && (
@@ -313,7 +313,7 @@ export default function CreatorDetail() {
                             title={href ? 'Buka profil di tab baru, kirim metrik lewat panel ekstensi KOL Lister' : 'Username-nya belum valid (mis. "-"/"0"), perbaiki dulu sebelum bisa ditarik'}
                             style={{
                               display: 'flex', alignItems: 'center', gap: '5px', padding: '4px 10px',
-                              background: 'white', color: href ? '#6728e4' : '#bbb', border: `1px solid ${href ? '#6728e4' : '#ddd'}`,
+                              background: 'var(--surface)', color: href ? '#6728e4' : '#bbb', border: `1px solid ${href ? '#6728e4' : '#ddd'}`,
                               borderRadius: '8px', cursor: href ? 'pointer' : 'not-allowed', fontSize: '0.72rem', fontWeight: 700, fontFamily: f, whiteSpace: 'nowrap',
                             }}
                           >
@@ -349,22 +349,22 @@ export default function CreatorDetail() {
             <div style={cardStyle}>
               <p style={{ fontFamily: f, fontWeight: 700, fontSize: '1rem', color: '#191c20', marginBottom: '16px' }}>Performance Score: {scoreBreakdown.overall}</p>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
-                <div style={{ padding: '14px', background: '#f8f9ff', borderRadius: '10px' }}>
+                <div style={{ padding: '14px', background: 'var(--surface)', borderRadius: '10px' }}>
                   <p style={labelSmall}>Reliability (40%)</p>
                   <p style={{ fontSize: '1.2rem', fontWeight: 800, color: '#6728e4' }}>{scoreBreakdown.reliability.score}</p>
                   <p style={{ fontSize: '0.75rem', color: '#777683' }}>{scoreBreakdown.reliability.onTimeCount}/{scoreBreakdown.reliability.totalCampaigns} on-time, {scoreBreakdown.reliability.violationCount} pelanggaran</p>
                 </div>
-                <div style={{ padding: '14px', background: '#f8f9ff', borderRadius: '10px' }}>
+                <div style={{ padding: '14px', background: 'var(--surface)', borderRadius: '10px' }}>
                   <p style={labelSmall}>Quality (25%)</p>
                   <p style={{ fontSize: '1.2rem', fontWeight: 800, color: '#6728e4' }}>{scoreBreakdown.quality.score}</p>
                   <p style={{ fontSize: '0.75rem', color: '#777683' }}>avg {scoreBreakdown.quality.avgRevisions} revisi, {scoreBreakdown.quality.noRevisionCount} tanpa revisi</p>
                 </div>
-                <div style={{ padding: '14px', background: '#f8f9ff', borderRadius: '10px' }}>
+                <div style={{ padding: '14px', background: 'var(--surface)', borderRadius: '10px' }}>
                   <p style={labelSmall}>Performance (20%)</p>
                   <p style={{ fontSize: '1.2rem', fontWeight: 800, color: '#6728e4' }}>{scoreBreakdown.performance.score}</p>
                   <p style={{ fontSize: '0.75rem', color: '#777683' }}>{scoreBreakdown.performance.note}</p>
                 </div>
-                <div style={{ padding: '14px', background: '#f8f9ff', borderRadius: '10px' }}>
+                <div style={{ padding: '14px', background: 'var(--surface)', borderRadius: '10px' }}>
                   <p style={labelSmall}>Communication (15%)</p>
                   <p style={{ fontSize: '1.2rem', fontWeight: 800, color: '#6728e4' }}>{scoreBreakdown.communication.score ?? '-'}</p>
                   <p style={{ fontSize: '0.75rem', color: '#777683' }}>{scoreBreakdown.communication.sampleCount} sample{scoreBreakdown.communication.avgResponseHours ? `, avg ${scoreBreakdown.communication.avgResponseHours}j respon` : ''}</p>
@@ -378,7 +378,7 @@ export default function CreatorDetail() {
             {history.length === 0 ? <p style={{ color: '#777683', fontSize: '0.85rem' }}>Belum ada riwayat.</p> : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {history.map((h) => (
-                  <div key={h._id} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 14px', background: '#f8f9ff', borderRadius: '10px', fontSize: '0.8rem' }}>
+                  <div key={h._id} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 14px', background: 'var(--surface)', borderRadius: '10px', fontSize: '0.8rem' }}>
                     <span>{h.campaignId?.name || '-'} · {h.brandId?.namaBrand || '-'}</span>
                     <span style={{ color: h.violation ? '#ba1a1a' : '#065F46' }}>{h.violation || (h.uploadedOnTime ? 'On-time' : 'Telat')}</span>
                   </div>
@@ -420,7 +420,7 @@ export default function CreatorDetail() {
             {creator.complianceStatus !== 'ok' && (
               <button
                 onClick={unlock}
-                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', width: '100%', padding: '9px', background: 'white', color: '#6728e4', borderRadius: '10px', border: '1.5px solid #6728e4', cursor: 'pointer', fontSize: '0.82rem', fontWeight: 700, fontFamily: f }}
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', width: '100%', padding: '9px', background: 'var(--surface)', color: '#6728e4', borderRadius: '10px', border: '1.5px solid #6728e4', cursor: 'pointer', fontSize: '0.82rem', fontWeight: 700, fontFamily: f }}
               >
                 <Unlock size={14} /> Unlock Manual
               </button>

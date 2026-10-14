@@ -47,7 +47,7 @@ const labelSmall: React.CSSProperties = {
 };
 const sectionTitle: React.CSSProperties = { fontFamily: f, fontWeight: 700, fontSize: '1rem', color: '#191c20', marginBottom: '16px' };
 const inputStyle: React.CSSProperties = {
-  width: '100%', padding: '10px 12px', borderRadius: '10px', border: '1.5px solid #c7c8cf',
+  width: '100%', padding: '10px 12px', borderRadius: '10px', border: '1.5px solid #e1e0ff',
   fontSize: '0.85rem', color: '#191c20', fontFamily: f, outline: 'none',
 };
 const smallBtn: React.CSSProperties = {
@@ -293,7 +293,7 @@ export default function CampaignAnalyticsFinance({ campaignId, view, stage, onSt
                     style={{ ...inputStyle, padding: '8px 10px' }}
                   />
                   {isAuto && (
-                    <p style={{ fontSize: '0.68rem', color: '#8a8a99', fontFamily: f, marginTop: '4px' }}>
+                    <p style={{ fontSize: '0.68rem', color: '#777683', fontFamily: f, marginTop: '4px' }}>
                       {manual ? (
                         <button onClick={() => void saveFinanceField(field, null)} style={{ background: 'none', border: 'none', padding: 0, color: '#6728e4', cursor: 'pointer', fontSize: '0.68rem', fontWeight: 700, fontFamily: f }}>
                           Pakai otomatis ({rupiah(finance.auto.totals[field as AutoFee])})

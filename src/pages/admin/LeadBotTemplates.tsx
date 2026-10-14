@@ -5,7 +5,7 @@ import Switch from '../../components/ui/Switch';
 
 const f = "var(--font-display)";
 const cardStyle: React.CSSProperties = {
-  background: 'white', borderRadius: '16px', padding: '24px', border: '1px solid #e1e0ff',
+  background: 'var(--surface)', borderRadius: '16px', padding: '24px', border: '1px solid #e1e0ff',
   boxShadow: '0 2px 12px rgba(107,46,232,0.05)', marginBottom: '16px',
 };
 
@@ -120,7 +120,7 @@ export default function LeadBotTemplates() {
             value={drafts[t.trigger] ?? ''}
             onChange={(e) => setDrafts((prev) => ({ ...prev, [t.trigger]: e.target.value }))}
             rows={4}
-            style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1.5px solid #c7c8cf', fontSize: '0.82rem', fontFamily: f, resize: 'vertical', outline: 'none', marginBottom: '10px', boxSizing: 'border-box' }}
+            style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1.5px solid #e1e0ff', fontSize: '0.82rem', fontFamily: f, resize: 'vertical', outline: 'none', marginBottom: '10px', boxSizing: 'border-box' }}
           />
           <button
             onClick={() => save(t.trigger)}
@@ -142,19 +142,19 @@ export default function LeadBotTemplates() {
             Bot membaca balasan Brand dengan mencocokkan teks label ini secara persis. Kalau diubah, bot bisa gagal total menyimpan data yang dikirim Brand, jadi bagian ini tampil sebagai referensi saja, bukan form edit.
           </p>
 
-          <div style={{ ...cardStyle, background: '#faf9fc', border: '1.5px dashed #c7c8cf' }}>
+          <div style={{ ...cardStyle, background: '#faf9fc', border: '1.5px dashed #e1e0ff' }}>
             <p style={{ fontFamily: f, fontWeight: 700, fontSize: '0.85rem', color: '#191c20', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
               <Lock size={13} color="#ba1a1a" /> Label Field Template Brand
             </p>
             <pre style={{
-              fontFamily: 'monospace', fontSize: '0.8rem', color: '#464652', background: 'white',
+              fontFamily: 'monospace', fontSize: '0.8rem', color: '#464652', background: 'var(--surface)',
               border: '1px solid #e1e0ff', borderRadius: '10px', padding: '14px', whiteSpace: 'pre-wrap', margin: 0,
             }}>
               {locked.templateBlock}
             </pre>
           </div>
 
-          <div style={{ ...cardStyle, background: '#faf9fc', border: '1.5px dashed #c7c8cf' }}>
+          <div style={{ ...cardStyle, background: '#faf9fc', border: '1.5px dashed #e1e0ff' }}>
             <p style={{ fontFamily: f, fontWeight: 700, fontSize: '0.85rem', color: '#191c20', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
               <Lock size={13} color="#ba1a1a" /> Pilihan Jasa
             </p>
@@ -163,7 +163,7 @@ export default function LeadBotTemplates() {
             ))}
           </div>
 
-          <div style={{ ...cardStyle, background: '#faf9fc', border: '1.5px dashed #c7c8cf' }}>
+          <div style={{ ...cardStyle, background: '#faf9fc', border: '1.5px dashed #e1e0ff' }}>
             <p style={{ fontFamily: f, fontWeight: 700, fontSize: '0.85rem', color: '#191c20', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
               <Lock size={13} color="#ba1a1a" /> Pilihan Budget
             </p>

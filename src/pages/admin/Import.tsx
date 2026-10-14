@@ -4,7 +4,7 @@ import api from '../../lib/api';
 
 const f = "var(--font-display)";
 const cardStyle: React.CSSProperties = {
-  background: 'white', borderRadius: '16px', padding: '28px', border: '1px solid #e1e0ff',
+  background: 'var(--surface)', borderRadius: '16px', padding: '28px', border: '1px solid #e1e0ff',
   boxShadow: '0 2px 12px rgba(107,46,232,0.05)', marginBottom: '20px',
 };
 
@@ -159,7 +159,7 @@ export default function Import() {
           <div style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.78rem', fontFamily: f }}>
               <thead>
-                <tr style={{ background: '#f8f9ff', textAlign: 'left' }}>
+                <tr style={{ background: 'var(--surface)', textAlign: 'left' }}>
                   {['#', 'Campaign', 'Brand', 'Creator', 'Platform', 'Link', 'Niche', 'Views', 'Reach', 'Likes', 'Comments', 'Shares', 'Saved', 'Tanggal', 'Fee Creator', 'Fee PIC', 'Fee MG', 'Status'].map((h) => (
                     <th key={h} style={{ padding: '8px 10px', fontWeight: 700 }}>{h}</th>
                   ))}

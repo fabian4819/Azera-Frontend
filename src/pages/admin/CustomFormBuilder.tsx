@@ -19,7 +19,7 @@ const PLATFORM_LABELS: Record<string, string> = { instagram: 'Instagram', tiktok
 const isChoice = (t: CustomFieldType) => t === 'select' || t === 'checkbox';
 const font = "var(--font-display)";
 const iconBtn: React.CSSProperties = {
-  padding: '8px', background: 'none', border: 'none', borderRadius: '50%', color: '#5f6368', cursor: 'pointer', display: 'flex',
+  padding: '8px', background: 'none', border: 'none', borderRadius: '50%', color: '#464652', cursor: 'pointer', display: 'flex',
 };
 
 /** Buang pertanyaan tanpa judul & opsi kosong sebelum disimpan */
@@ -56,15 +56,15 @@ const Toggle = ({ checked, onChange, label }: { checked: boolean; onChange: (v: 
   <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.85rem', color: '#191c20', fontFamily: font, cursor: 'pointer' }}>
     {label}
     <input type="checkbox" role="switch" checked={checked} onChange={(e) => onChange(e.target.checked)} style={{ position: 'absolute', opacity: 0, width: 0, height: 0 }} />
-    <span style={{ width: '36px', height: '20px', borderRadius: '10px', background: checked ? '#c9b6f7' : '#c7c8cf', position: 'relative', transition: 'background .15s' }}>
+    <span style={{ width: '36px', height: '20px', borderRadius: '10px', background: checked ? '#c9b6f7' : '#e1e0ff', position: 'relative', transition: 'background .15s' }}>
       <span style={{ position: 'absolute', top: '2px', left: checked ? '18px' : '2px', width: '16px', height: '16px', borderRadius: '50%', background: checked ? '#6728e4' : 'white', boxShadow: '0 1px 3px rgba(0,0,0,.3)', transition: 'left .15s' }} />
     </span>
   </label>
 );
 
-const defaultCard: React.CSSProperties = { background: 'white', borderRadius: '12px', border: '1px solid #e1e0ff', marginBottom: '12px', padding: '16px 24px' };
+const defaultCard: React.CSSProperties = { background: 'var(--surface)', borderRadius: '12px', border: '1px solid #e1e0ff', marginBottom: '12px', padding: '16px 24px' };
 const answerLine = (w: string, text: string) => (
-  <p style={{ fontSize: '0.85rem', color: '#9a99a6', borderBottom: '1px dotted #c7c8cf', paddingBottom: '6px', width: w, marginTop: '10px', fontFamily: font }}>{text}</p>
+  <p style={{ fontSize: '0.85rem', color: '#9a99a6', borderBottom: '1px dotted #e1e0ff', paddingBottom: '6px', width: w, marginTop: '10px', fontFamily: font }}>{text}</p>
 );
 
 /** Builder pertanyaan tambahan form Apply, pengalaman ala Google Forms (AD-47). */
@@ -180,7 +180,7 @@ export default function CustomFormBuilder({ campaignId, onChange, initial, initi
 
   return (
     <div style={{ maxWidth: '760px', margin: '0 auto' }}>
-      <div style={{ background: 'white', borderRadius: '12px', border: '1px solid #e1e0ff', borderTop: '10px solid #6728e4', padding: '22px 24px', marginBottom: '12px' }}>
+      <div style={{ background: 'var(--surface)', borderRadius: '12px', border: '1px solid #e1e0ff', borderTop: '10px solid #6728e4', padding: '22px 24px', marginBottom: '12px' }}>
         <p style={{ fontFamily: font, fontWeight: 700, fontSize: '1.4rem', color: '#191c20', marginBottom: '6px' }}>Form Kustom Pendaftaran</p>
         <p style={{ fontSize: '0.82rem', color: '#777683' }}>
           Field default di bawah otomatis ada di form Apply. Nama, WhatsApp, Email, dan Niche wajib; Provinsi & Kota
@@ -247,12 +247,12 @@ export default function CustomFormBuilder({ campaignId, onChange, initial, initi
       {(!applyFields.pic || !applyFields.handleBy) && (
         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '12px' }}>
           {!applyFields.pic && (
-            <button onClick={() => setApply({ pic: true })} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '7px 14px', borderRadius: '999px', border: '1px solid #c9b6f7', background: 'white', color: '#6728e4', fontSize: '0.78rem', fontWeight: 700, fontFamily: font, cursor: 'pointer' }}>
+            <button onClick={() => setApply({ pic: true })} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '7px 14px', borderRadius: '999px', border: '1px solid #c9b6f7', background: 'var(--surface)', color: '#6728e4', fontSize: '0.78rem', fontWeight: 700, fontFamily: font, cursor: 'pointer' }}>
               <Undo2 size={14} /> Kembalikan field PIC
             </button>
           )}
           {!applyFields.handleBy && (
-            <button onClick={() => setApply({ handleBy: true })} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '7px 14px', borderRadius: '999px', border: '1px solid #c9b6f7', background: 'white', color: '#6728e4', fontSize: '0.78rem', fontWeight: 700, fontFamily: font, cursor: 'pointer' }}>
+            <button onClick={() => setApply({ handleBy: true })} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '7px 14px', borderRadius: '999px', border: '1px solid #c9b6f7', background: 'var(--surface)', color: '#6728e4', fontSize: '0.78rem', fontWeight: 700, fontFamily: font, cursor: 'pointer' }}>
               <Undo2 size={14} /> Kembalikan field Handle by
             </button>
           )}
@@ -271,7 +271,7 @@ export default function CustomFormBuilder({ campaignId, onChange, initial, initi
             onDragEnd={() => { setDragId(null); setHandleId(null); }}
             style={{
               opacity: dragId === f.id ? 0.5 : 1,
-              background: 'white', borderRadius: '12px', border: '1px solid #e1e0ff', marginBottom: '12px', cursor: active ? 'default' : 'pointer',
+              background: 'var(--surface)', borderRadius: '12px', border: '1px solid #e1e0ff', marginBottom: '12px', cursor: active ? 'default' : 'pointer',
               borderLeft: active ? '6px solid #6728e4' : '6px solid transparent', boxShadow: active ? '0 4px 16px rgba(107,46,232,0.12)' : 'none',
               padding: '4px 24px 8px',
             }}
@@ -296,7 +296,7 @@ export default function CustomFormBuilder({ campaignId, onChange, initial, initi
                 <select
                   value={f.type}
                   onChange={(e) => changeType(f, e.target.value as CustomFieldType)}
-                  style={{ flex: '0 0 200px', padding: '13px 12px', borderRadius: '6px', border: '1px solid #c7c8cf', fontSize: '0.85rem', fontFamily: font, color: '#191c20', background: 'white' }}
+                  style={{ flex: '0 0 200px', padding: '13px 12px', borderRadius: '6px', border: '1px solid #e1e0ff', fontSize: '0.85rem', fontFamily: font, color: '#191c20', background: 'var(--surface)' }}
                 >
                   {(Object.keys(TYPE_LABELS) as CustomFieldType[]).map((t) => <option key={t} value={t}>{TYPE_LABELS[t]}</option>)}
                 </select>
@@ -344,7 +344,7 @@ export default function CustomFormBuilder({ campaignId, onChange, initial, initi
                 )}
               </div>
             ) : (
-              <p style={{ fontSize: '0.85rem', color: '#9a99a6', borderBottom: '1px dotted #c7c8cf', paddingBottom: '6px', width: f.type === 'textarea' ? '80%' : '50%', marginBottom: '20px', fontFamily: font }}>
+              <p style={{ fontSize: '0.85rem', color: '#9a99a6', borderBottom: '1px dotted #e1e0ff', paddingBottom: '6px', width: f.type === 'textarea' ? '80%' : '50%', marginBottom: '20px', fontFamily: font }}>
                 {ANSWER_PLACEHOLDER[f.type]}
               </p>
             )}
@@ -365,12 +365,12 @@ export default function CustomFormBuilder({ campaignId, onChange, initial, initi
 
       <button
         onClick={addField}
-        style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '16px', marginBottom: '16px', background: 'white', border: '1.5px dashed #c9b6f7', borderRadius: '12px', color: '#6728e4', fontWeight: 700, fontSize: '0.85rem', fontFamily: font, cursor: 'pointer' }}
+        style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '16px', marginBottom: '16px', background: 'var(--surface)', border: '1.5px dashed #c9b6f7', borderRadius: '12px', color: '#6728e4', fontWeight: 700, fontSize: '0.85rem', fontFamily: font, cursor: 'pointer' }}
       >
         <Plus size={16} /> Tambah Pertanyaan
       </button>
 
-      {campaignId && <div style={{ position: 'sticky', bottom: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', background: 'white', border: '1px solid #e1e0ff', borderRadius: '12px', padding: '12px 16px', boxShadow: '0 4px 20px rgba(107,46,232,0.12)' }}>
+      {campaignId && <div style={{ position: 'sticky', bottom: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', background: 'var(--surface)', border: '1px solid #e1e0ff', borderRadius: '12px', padding: '12px 16px', boxShadow: '0 4px 20px rgba(107,46,232,0.12)' }}>
         <span style={{ fontSize: '0.8rem', fontFamily: font, color: status ? (status.ok ? '#1e7e34' : '#ba1a1a') : dirty ? '#b26a00' : '#777683' }}>
           {status?.text ?? (dirty ? 'Ada perubahan yang belum disimpan' : 'Semua perubahan tersimpan')}
         </span>

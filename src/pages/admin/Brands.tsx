@@ -49,11 +49,11 @@ const tdStyle: React.CSSProperties = {
 const controlStyle: React.CSSProperties = {
   padding: '10px 14px',
   borderRadius: '10px',
-  border: '1.5px solid #c7c8cf',
+  border: '1.5px solid #e1e0ff',
   fontSize: '0.875rem',
   outline: 'none',
   fontFamily: "var(--font-display)",
-  background: 'white',
+  background: 'var(--surface)',
   cursor: 'pointer',
   color: '#191c20',
 };
@@ -155,11 +155,11 @@ export default function Brands() {
       </div>
 
       {/* Table */}
-      <div style={{ background: 'white', borderRadius: '16px', border: '1px solid #e1e0ff', overflow: 'hidden', boxShadow: '0 2px 12px rgba(107,46,232,0.06)' }}>
+      <div style={{ background: 'var(--surface)', borderRadius: '16px', border: '1px solid #e1e0ff', overflow: 'hidden', boxShadow: '0 2px 12px rgba(107,46,232,0.06)' }}>
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem' }}>
             <thead>
-              <tr style={{ background: '#f8f9ff', borderBottom: '1px solid #e1e0ff' }}>
+              <tr style={{ background: 'var(--surface)', borderBottom: '1px solid #e1e0ff' }}>
                 {['Brand', 'PIC', 'WhatsApp', 'Kategori', 'Paket', 'Sumber', 'Budget', 'Status', 'Tanggal', 'Aksi'].map((h) => (
                   <th key={h} style={thStyle}>{h}</th>
                 ))}
