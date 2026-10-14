@@ -483,7 +483,8 @@ select::-ms-expand {
   .dashboard-sidebar-desktop { display: none !important; }
   .mobile-bottom-nav { display: flex !important; }
   .dashboard-main-mobile-pad { padding-bottom: 86px !important; }
-  .floating-wa { bottom: 96px !important; }
+  .floating-wa { bottom: 96px !important; transition: bottom 0.2s ease; }
+  body.bottomnav-popup-open .floating-wa { bottom: calc(96px + var(--bottomnav-popup-h, 100px) + 12px) !important; }
 }
 
 /* ─── Form responsive helpers ──────────────────── */

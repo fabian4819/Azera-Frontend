@@ -1,9 +1,15 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { MoreHorizontal, LogOut, X } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
-export interface BottomNavItem { label: string; to: string; icon: LucideIcon }
+export interface BottomNavItem {
+  label: string;
+  to: string;
+  icon: LucideIcon;
+  /** Kalau diisi, tab ini buka popup list (bukan langsung navigasi) — dipakai untuk "Service". */
+  popupItems?: { label: string; to: string }[];
+}
 
 interface BottomNavProps {
   /** Tab yang selalu tampil di bar (maks ~4, sisanya masuk ke sheet "Lainnya"). */
@@ -19,7 +25,18 @@ interface BottomNavProps {
 /** Bottom tab bar di mobile (dashboard Admin/PIC/Talent, atau halaman public) — ditampilkan lewat CSS `.mobile-bottom-nav` (index.css), disembunyikan di desktop. */
 export default function BottomNav({ primaryItems, moreItems = [], activeTo, onLogout, showLogout = true }: BottomNavProps) {
   const [moreOpen, setMoreOpen] = useState(false);
+  const [popupFor, setPopupFor] = useState<string | null>(null);
+  const popupRef = useRef<HTMLDivElement>(null);
   const hasMore = moreItems.length > 0;
+
+  // Biar elemen fixed lain (misal tombol WhatsApp floating) bisa naik pas tinggi popup ini, bukan angka tebakan.
+  useEffect(() => {
+    if (popupFor && popupRef.current) {
+      document.documentElement.style.setProperty('--bottomnav-popup-h', `${popupRef.current.offsetHeight}px`);
+    }
+    document.body.classList.toggle('bottomnav-popup-open', popupFor !== null);
+    return () => document.body.classList.remove('bottomnav-popup-open');
+  }, [popupFor]);
 
   const tabStyle = (active: boolean): React.CSSProperties => ({
     display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px',
@@ -38,14 +55,57 @@ export default function BottomNav({ primaryItems, moreItems = [], activeTo, onLo
           boxShadow: '0 8px 24px rgba(0,0,0,0.35)', padding: '4px 2px',
         }}
       >
-        {primaryItems.map(({ label, to, icon: Icon }) => (
-          <Link key={to} to={to} onClick={() => setMoreOpen(false)} style={tabStyle(to === activeTo)}>
-            <Icon size={20} />
-            <span>{label}</span>
-          </Link>
-        ))}
+        {primaryItems.map(({ label, to, icon: Icon, popupItems }, idx) => {
+          if (popupItems) {
+            const open = popupFor === to;
+            const anchorRight = idx >= primaryItems.length / 2;
+            return (
+              <div key={to} style={{ position: 'relative', flex: 1, display: 'flex' }}>
+                <button onClick={() => { setPopupFor(open ? null : to); setMoreOpen(false); }} style={tabStyle(open || to === activeTo)}>
+                  <Icon size={20} />
+                  <span>{label}</span>
+                </button>
+                {open && (
+                  <>
+                    <div onClick={() => setPopupFor(null)} style={{ position: 'fixed', inset: 0, zIndex: 44 }} />
+                    <div
+                      ref={popupRef}
+                      style={{
+                        position: 'absolute', bottom: 'calc(100% + 10px)', minWidth: '180px', maxWidth: 'calc(100vw - 20px)',
+                        ...(anchorRight ? { right: 0 } : { left: 0 }),
+                        background: '#2c1a52', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.12)',
+                        boxShadow: '0 8px 24px rgba(0,0,0,0.35)', padding: '8px', zIndex: 45,
+                      }}
+                    >
+                      {popupItems.map((p) => (
+                        <Link
+                          key={p.to}
+                          to={p.to}
+                          onClick={() => setPopupFor(null)}
+                          style={{
+                            display: 'block', padding: '10px 14px', borderRadius: '10px', textDecoration: 'none',
+                            color: 'rgba(255,255,255,0.9)', fontFamily: 'var(--font-display)', fontWeight: 600,
+                            fontSize: '0.85rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                          }}
+                        >
+                          {p.label}
+                        </Link>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
+            );
+          }
+          return (
+            <Link key={to} to={to} onClick={() => { setMoreOpen(false); setPopupFor(null); }} style={tabStyle(to === activeTo)}>
+              <Icon size={20} />
+              <span>{label}</span>
+            </Link>
+          );
+        })}
         {hasMore ? (
-          <button onClick={() => setMoreOpen((v) => !v)} style={tabStyle(moreOpen)}>
+          <button onClick={() => { setMoreOpen((v) => !v); setPopupFor(null); }} style={tabStyle(moreOpen)}>
             <MoreHorizontal size={20} />
             <span>Lainnya</span>
           </button>

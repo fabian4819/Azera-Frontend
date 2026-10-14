@@ -19,7 +19,6 @@ export default function Navbar() {
   const [serviceOpen, setServiceOpen] = useState(false);
   const [mobileServiceOpen, setMobileServiceOpen] = useState(false);
   const [registerOpen, setRegisterOpen] = useState(false);
-  const [mobileRegisterOpen, setMobileRegisterOpen] = useState(false);
   const [contactOpen, setContactOpen] = useState(false);
   const contactCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [scrolled, setScrolled] = useState(false);
@@ -401,33 +400,16 @@ export default function Navbar() {
             </Link>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            <button
-              onClick={() => setMobileRegisterOpen((v) => !v)}
-              className="btn-outline"
-              style={{ justifyContent: 'space-between', cursor: 'pointer' }}
-            >
-              Daftar
-              <ChevronDown size={16} style={{ transform: mobileRegisterOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s ease' }} />
-            </button>
-            {mobileRegisterOpen && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', paddingLeft: '4px' }}>
-                {registerOptions.map((opt) => (
-                  <Link
-                    key={opt.label}
-                    to={opt.to}
-                    className="btn-outline"
-                    onClick={() => { setMenuOpen(false); setMobileRegisterOpen(false); }}
-                    style={{ justifyContent: 'center' }}
-                  >
-                    {opt.label}
-                  </Link>
-                ))}
-              </div>
-            )}
-            {contactOptions.map((opt) => (
-              <a key={opt.label} href={opt.href} target="_blank" rel="noopener noreferrer" className="btn-primary" onClick={() => setMenuOpen(false)} style={{ justifyContent: 'center' }}>
-                Contact {opt.label}
-              </a>
+            {registerOptions.map((opt) => (
+              <Link
+                key={opt.label}
+                to={opt.to}
+                className="btn-outline"
+                onClick={() => setMenuOpen(false)}
+                style={{ justifyContent: 'center' }}
+              >
+                {opt.label}
+              </Link>
             ))}
           </div>
         </div>

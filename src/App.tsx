@@ -1,7 +1,7 @@
 import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, Outlet, useLocation } from 'react-router-dom';
 import { Agentation } from 'agentation';
-import { Home, Image as ImageIcon, BookOpen, UserPlus, Building2 } from 'lucide-react';
+import { Home, Image as ImageIcon, BookOpen, UserPlus, Layers } from 'lucide-react';
 import ScrollToTop from './components/ScrollToTop';
 import Navbar from './components/layout/Navbar';
 import Footer from './components/layout/Footer';
@@ -67,14 +67,12 @@ function RouteFallback() {
 
 const publicBottomPrimary = [
   { label: 'Home', to: '/', icon: Home },
+  { label: 'Service', to: '/service', icon: Layers, popupItems: serviceList.map((s) => ({ label: s.navLabel, to: `/service/${s.slug}` })) },
   { label: 'Portfolio', to: '/portfolio', icon: ImageIcon },
   { label: 'Kamus', to: '/kamus', icon: BookOpen },
+  { label: 'Daftar', to: '/daftar', icon: UserPlus, popupItems: [{ label: 'KOL', to: '/kol/register' }, { label: 'Brand', to: '/brand/form' }] },
 ];
-const publicBottomMore = [
-  ...serviceList.map((s) => ({ label: s.navLabel, to: `/service/${s.slug}`, icon: BookOpen })),
-  { label: 'Daftar KOL', to: '/kol/register', icon: UserPlus },
-  { label: 'Daftar Brand', to: '/brand/form', icon: Building2 },
-];
+const publicBottomMore: typeof publicBottomPrimary = [];
 
 function PublicLayout() {
   const location = useLocation();
