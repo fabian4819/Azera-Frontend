@@ -55,12 +55,12 @@
   --portfolio-bg: radial-gradient(70% 55% at 50% -8%, #5b2fc4, rgba(91,47,196,0) 62%),
     linear-gradient(180deg, #34168a 0%, #25106a 50%, #170a47 100%);
 
-  --surface: #f8f9ff;
-  --surface-low: #f2f3f9;
-  --surface-container: #eceef3;
-  --surface-container-high: #e7e8ee;
-  --surface-container-highest: #e1e2e8;
-  --surface-dim: #d8dae0;
+  --surface: #e9ddf9;
+  --surface-low: #e0d0f5;
+  --surface-container: #d4bcf0;
+  --surface-container-high: #c6a3e8;
+  --surface-container-highest: #b88bdc;
+  --surface-dim: #a66fd1;
 
   --on-background: #191c20;
   --on-surface: #191c20;
