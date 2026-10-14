@@ -1,11 +1,14 @@
 import { lazy, Suspense } from 'react';
-import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, Outlet, useLocation } from 'react-router-dom';
 import { Agentation } from 'agentation';
+import { Home, Image as ImageIcon, BookOpen, UserPlus, Building2 } from 'lucide-react';
 import ScrollToTop from './components/ScrollToTop';
 import Navbar from './components/layout/Navbar';
 import Footer from './components/layout/Footer';
 import FloatingWhatsApp from './components/layout/FloatingWhatsApp';
+import BottomNav from './components/layout/BottomNav';
 import SEOManager from './components/SEOManager';
+import { services as serviceList } from './data/services';
 
 // Public pages
 import Landing from './pages/Landing';
@@ -62,15 +65,33 @@ function RouteFallback() {
   return <div style={{ minHeight: '100vh', background: '#f8f9ff' }} />;
 }
 
+const publicBottomPrimary = [
+  { label: 'Home', to: '/', icon: Home },
+  { label: 'Portfolio', to: '/portfolio', icon: ImageIcon },
+  { label: 'Kamus', to: '/kamus', icon: BookOpen },
+];
+const publicBottomMore = [
+  ...serviceList.map((s) => ({ label: s.navLabel, to: `/service/${s.slug}`, icon: BookOpen })),
+  { label: 'Daftar KOL', to: '/kol/register', icon: UserPlus },
+  { label: 'Daftar Brand', to: '/brand/form', icon: Building2 },
+];
+
 function PublicLayout() {
+  const location = useLocation();
+  const activeTo = [...publicBottomPrimary, ...publicBottomMore]
+    .map((i) => i.to)
+    .filter((to) => to === '/' ? location.pathname === '/' : location.pathname.startsWith(to))
+    .sort((a, b) => b.length - a.length)[0];
+
   return (
     <>
       <Navbar />
-      <main>
+      <main className="dashboard-main-mobile-pad">
         <Outlet />
       </main>
       <Footer />
       <FloatingWhatsApp />
+      <BottomNav primaryItems={publicBottomPrimary} moreItems={publicBottomMore} activeTo={activeTo} showLogout={false} />
     </>
   );
 }

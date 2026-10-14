@@ -17,7 +17,7 @@ export default function FloatingWhatsApp() {
   }, [open]);
 
   return (
-    <div ref={ref} style={{ position: 'fixed', right: '24px', bottom: '24px', zIndex: 1000, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '10px' }}>
+    <div ref={ref} className="floating-wa" style={{ position: 'fixed', right: '24px', bottom: '24px', zIndex: 1000, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '10px' }}>
       <AnimatePresence>
         {open && (
           <motion.div

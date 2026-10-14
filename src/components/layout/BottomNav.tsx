@@ -11,11 +11,13 @@ interface BottomNavProps {
   /** Kalau kosong, tab terakhir jadi Logout langsung (bukan "Lainnya"). */
   moreItems?: BottomNavItem[];
   activeTo?: string;
-  onLogout: () => void;
+  onLogout?: () => void;
+  /** false = tanpa tombol Logout (dipakai di halaman public, yang tidak ada sesi login). Default true. */
+  showLogout?: boolean;
 }
 
-/** Bottom tab bar untuk shell dashboard (Admin/PIC/Talent) di mobile — ditampilkan lewat CSS `.mobile-bottom-nav` (index.css), disembunyikan di desktop. */
-export default function BottomNav({ primaryItems, moreItems = [], activeTo, onLogout }: BottomNavProps) {
+/** Bottom tab bar di mobile (dashboard Admin/PIC/Talent, atau halaman public) — ditampilkan lewat CSS `.mobile-bottom-nav` (index.css), disembunyikan di desktop. */
+export default function BottomNav({ primaryItems, moreItems = [], activeTo, onLogout, showLogout = true }: BottomNavProps) {
   const [moreOpen, setMoreOpen] = useState(false);
   const hasMore = moreItems.length > 0;
 
@@ -47,12 +49,12 @@ export default function BottomNav({ primaryItems, moreItems = [], activeTo, onLo
             <MoreHorizontal size={20} />
             <span>Lainnya</span>
           </button>
-        ) : (
+        ) : showLogout ? (
           <button onClick={onLogout} style={tabStyle(false)}>
             <LogOut size={20} />
             <span>Logout</span>
           </button>
-        )}
+        ) : null}
       </nav>
 
       {hasMore && moreOpen && (
@@ -89,17 +91,19 @@ export default function BottomNav({ primaryItems, moreItems = [], activeTo, onLo
                   <span style={{ textAlign: 'center' }}>{label}</span>
                 </Link>
               ))}
-              <button
-                onClick={() => { setMoreOpen(false); onLogout(); }}
-                style={{
-                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', padding: '14px 4px',
-                  borderRadius: '14px', background: 'rgba(255,255,255,0.06)', border: 'none', cursor: 'pointer',
-                  color: 'rgba(255,255,255,0.8)', fontFamily: 'var(--font-display)', fontSize: '0.72rem', fontWeight: 500,
-                }}
-              >
-                <LogOut size={20} />
-                <span>Logout</span>
-              </button>
+              {showLogout && (
+                <button
+                  onClick={() => { setMoreOpen(false); onLogout?.(); }}
+                  style={{
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', padding: '14px 4px',
+                    borderRadius: '14px', background: 'rgba(255,255,255,0.06)', border: 'none', cursor: 'pointer',
+                    color: 'rgba(255,255,255,0.8)', fontFamily: 'var(--font-display)', fontSize: '0.72rem', fontWeight: 500,
+                  }}
+                >
+                  <LogOut size={20} />
+                  <span>Logout</span>
+                </button>
+              )}
             </div>
           </div>
         </div>
