@@ -25,8 +25,8 @@ interface CampaignInfo {
 }
 
 const inputStyle: React.CSSProperties = {
-  width: '100%', padding: '11px 14px', borderRadius: '12px', border: '1.5px solid #c7c8cf',
-  fontSize: '0.875rem', color: '#191c20', background: 'white', outline: 'none',
+  width: '100%', padding: '11px 14px', borderRadius: '12px', border: '1.5px solid #e1e0ff',
+  fontSize: '0.875rem', color: '#191c20', background: 'var(--surface)', outline: 'none',
   fontFamily: "var(--font-display)",
 };
 
@@ -236,7 +236,7 @@ export default function CampaignApply() {
   if (closed) {
     return (
       <div className="purple-page" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--form-bg)', padding: '24px', paddingTop: '100px' }}>
-        <div style={{ textAlign: 'center', maxWidth: '480px', background: 'white', borderRadius: '24px', padding: 'clamp(28px, 5vw, 40px)', boxShadow: '0 12px 40px rgba(28,10,68,0.25)', fontFamily: "var(--font-display)" }}>
+        <div style={{ textAlign: 'center', maxWidth: '480px', background: 'var(--surface)', borderRadius: '24px', padding: 'clamp(28px, 5vw, 40px)', boxShadow: '0 12px 40px rgba(28,10,68,0.25)', fontFamily: "var(--font-display)" }}>
           <ClosedIllustration />
           {closed.name && <span className="section-label" style={{ marginBottom: '10px' }}>{closed.name}</span>}
           <h2 style={{ fontWeight: 800, fontSize: '1.7rem', color: '#191c20', marginBottom: '12px', lineHeight: 1.25 }}>
@@ -262,7 +262,7 @@ export default function CampaignApply() {
   if (submitted) {
     return (
       <div className="purple-page" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--form-bg)', padding: '24px', paddingTop: '100px' }}>
-        <div style={{ textAlign: 'center', maxWidth: '480px', background: 'white', borderRadius: '24px', padding: 'clamp(28px, 5vw, 40px)', boxShadow: '0 12px 40px rgba(28,10,68,0.25)' }}>
+        <div style={{ textAlign: 'center', maxWidth: '480px', background: 'var(--surface)', borderRadius: '24px', padding: 'clamp(28px, 5vw, 40px)', boxShadow: '0 12px 40px rgba(28,10,68,0.25)' }}>
           <div className="kinetic-glow" style={{ width: '80px', height: '80px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px' }}>
             <CheckCircle2 size={40} color="white" />
           </div>
@@ -294,12 +294,12 @@ export default function CampaignApply() {
         {/* Brief kiri (sticky di bawah navbar), form kanan; < 900px bertumpuk (lihat .apply-grid di index.css) */}
         <div className="apply-grid" style={{ display: 'grid', gridTemplateColumns: campaign.briefContent ? 'minmax(0, 1fr) minmax(0, 1.15fr)' : '1fr', gap: '24px', alignItems: 'start' }}>
         {campaign.briefContent && (
-          <div className="apply-brief" style={{ position: 'sticky', top: '110px', background: 'white', borderRadius: '24px', padding: 'clamp(24px, 4vw, 32px)', boxShadow: '0 4px 24px rgba(0,0,0,0.06)', maxHeight: 'calc(100vh - 130px)', overflowY: 'auto' }}>
+          <div className="apply-brief" style={{ position: 'sticky', top: '110px', background: 'var(--surface)', borderRadius: '24px', padding: 'clamp(24px, 4vw, 32px)', boxShadow: '0 4px 24px rgba(0,0,0,0.06)', maxHeight: 'calc(100vh - 130px)', overflowY: 'auto' }}>
             <p style={{ fontFamily: "var(--font-display)", color: '#464652', lineHeight: 1.7, whiteSpace: 'pre-wrap', fontSize: '0.9rem', wordBreak: 'break-word' }}>{campaign.briefContent}</p>
           </div>
         )}
 
-        <form onSubmit={onSubmit} style={{ background: 'white', borderRadius: '24px', padding: 'clamp(24px, 5vw, 40px)', boxShadow: '0 4px 24px rgba(0,0,0,0.06)', minWidth: 0 }}>
+        <form onSubmit={onSubmit} style={{ background: 'var(--surface)', borderRadius: '24px', padding: 'clamp(24px, 5vw, 40px)', boxShadow: '0 4px 24px rgba(0,0,0,0.06)', minWidth: 0 }}>
           <div style={{ marginBottom: '18px' }}>
             <label style={labelStyle}>Nama Lengkap *</label>
             <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Nama lengkap" autoComplete="name" style={inputStyle} />
@@ -322,7 +322,7 @@ export default function CampaignApply() {
 
           {nameChoice && (
             <div role="dialog" aria-modal="true" aria-label="Pilih nama" style={{ position: 'fixed', inset: 0, background: 'rgba(25,28,32,0.45)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
-              <div style={{ background: 'white', borderRadius: '20px', padding: '24px', maxWidth: '420px', width: '100%', fontFamily: "var(--font-display)" }}>
+              <div style={{ background: 'var(--surface)', borderRadius: '20px', padding: '24px', maxWidth: '420px', width: '100%', fontFamily: "var(--font-display)" }}>
                 <p style={{ fontWeight: 800, fontSize: '1.1rem', color: '#191c20', marginBottom: '8px' }}>Kamu sudah pernah daftar 👋</p>
                 <p style={{ fontSize: '0.88rem', color: '#464652', lineHeight: 1.6, marginBottom: '18px' }}>
                   Nomor WhatsApp dan email ini sudah tersimpan atas nama <b>{nameChoice.saved}</b>, tapi tadi kamu menulis <b>{nameChoice.typed}</b>. Mau pakai nama yang mana?
@@ -331,7 +331,7 @@ export default function CampaignApply() {
                   <button type="button" onClick={() => pickName(false)} className="btn-primary" style={{ justifyContent: 'center', padding: '12px' }}>
                     Pakai "{nameChoice.saved}" (yang sudah tersimpan)
                   </button>
-                  <button type="button" onClick={() => pickName(true)} style={{ padding: '12px', borderRadius: '999px', border: '1.5px solid #6728e4', background: 'white', color: '#6728e4', fontWeight: 700, fontSize: '0.88rem', cursor: 'pointer', fontFamily: "var(--font-display)" }}>
+                  <button type="button" onClick={() => pickName(true)} style={{ padding: '12px', borderRadius: '999px', border: '1.5px solid #6728e4', background: 'var(--surface)', color: '#6728e4', fontWeight: 700, fontSize: '0.88rem', cursor: 'pointer', fontFamily: "var(--font-display)" }}>
                     Pakai "{nameChoice.typed}" (yang barusan saya tulis)
                   </button>
                 </div>

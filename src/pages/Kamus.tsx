@@ -59,7 +59,7 @@ export default function Kamus() {
             placeholder="Cari istilah, misalnya micro influencer..."
             style={{
               width: '100%', padding: '14px 18px 14px 48px', borderRadius: '999px',
-              border: '1.5px solid var(--outline-variant)', background: '#fff', boxShadow: '0 6px 20px rgba(28,10,68,0.25)',
+              border: '1.5px solid var(--outline-variant)', background: 'var(--surface)', boxShadow: '0 6px 20px rgba(28,10,68,0.25)',
               fontFamily: 'var(--font-body)', fontSize: '0.95rem', color: 'var(--on-background)', outline: 'none',
             }}
           />
@@ -104,7 +104,7 @@ export default function Kamus() {
                   to={`/kamus/${t.slug}`}
                   style={{
                     display: 'block', borderRadius: '16px', textDecoration: 'none', overflow: 'hidden',
-                    background: '#fff', border: '1px solid var(--outline-variant)',
+                    background: 'var(--surface)', border: '1px solid var(--outline-variant)',
                   }}
                 >
                   <img

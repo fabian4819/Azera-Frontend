@@ -56,7 +56,7 @@ export default function CreatorCTA() {
           {benefits.map((b) => {
             const Icon = b.icon;
             return (
-              <div key={b.title} style={{ background: '#fff', borderRadius: '999px', padding: '14px 22px', display: 'flex', alignItems: 'center', gap: '14px' }}>
+              <div key={b.title} style={{ background: 'var(--surface)', borderRadius: '999px', padding: '14px 22px', display: 'flex', alignItems: 'center', gap: '14px' }}>
                 <div style={{ width: '42px', height: '42px', borderRadius: '50%', background: 'var(--secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                   <Icon size={19} color="#fff" />
                 </div>

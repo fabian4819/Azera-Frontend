@@ -85,7 +85,7 @@ export default function PortfolioDetail() {
         </Link>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', marginBottom: '14px' }}>
-          {item.logo && <img src={item.logo} alt={item.brand} style={{ height: '32px', maxWidth: '120px', objectFit: 'contain', background: '#fff', borderRadius: '8px', padding: '4px 8px' }} />}
+          {item.logo && <img src={item.logo} alt={item.brand} style={{ height: '32px', maxWidth: '120px', objectFit: 'contain', background: 'var(--surface)', borderRadius: '8px', padding: '4px 8px' }} />}
           <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '1.05rem', color: 'var(--lime)' }}>{item.brand}</span>
           <span className="tag-pill tag-pill-white">{item.category}</span>
         </div>

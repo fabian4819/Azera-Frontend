@@ -58,7 +58,7 @@ export default function FAQ() {
                     animate={{ rotate: isOpen ? 45 : 0 }}
                     transition={{ duration: 0.25, ease }}
                     style={{
-                      flexShrink: 0, width: '34px', height: '34px', borderRadius: '50%', background: '#fff',
+                      flexShrink: 0, width: '34px', height: '34px', borderRadius: '50%', background: 'var(--surface)',
                       display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--secondary)',
                     }}
                   >

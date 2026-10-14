@@ -62,7 +62,7 @@ const PicCampaigns = lazy(() => import('./pages/pic/PicCampaigns'));
 const PicCampaignDetail = lazy(() => import('./pages/pic/PicCampaignDetail'));
 
 function RouteFallback() {
-  return <div style={{ minHeight: '100vh', background: '#f8f9ff' }} />;
+  return <div style={{ minHeight: '100vh', background: 'var(--surface)' }} />;
 }
 
 const publicBottomPrimary = [

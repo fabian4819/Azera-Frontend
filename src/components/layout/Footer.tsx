@@ -81,7 +81,7 @@ function SocialIcon({ href, label, children }: { href: string; label: string; ch
 
 export default function Footer() {
   return (
-    <footer style={{ background: '#ffffff', borderRadius: '32px 32px 0 0', overflow: 'hidden' }}>
+    <footer style={{ background: 'var(--surface)', borderRadius: '32px 32px 0 0', overflow: 'hidden' }}>
       <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '32px 24px 0' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px', paddingBottom: '28px', borderBottom: '1px solid var(--outline-variant)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>

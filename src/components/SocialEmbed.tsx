@@ -45,7 +45,7 @@ export default function SocialEmbed({ platform: savedPlatform, url }: { platform
   }, [platform, url]);
 
   return (
-    <div style={{ background: '#fff', borderRadius: '14px', overflow: 'hidden', minHeight: '260px', minWidth: '326px', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ background: 'var(--surface)', borderRadius: '14px', overflow: 'hidden', minHeight: '260px', minWidth: '326px', display: 'flex', flexDirection: 'column' }}>
       {platform === 'instagram' ? (
         // Wrapper memotong baris "Add a comment..." di bawah embed IG (lihat .ig-embed-crop di index.css)
         <div className="ig-embed-crop">
@@ -53,7 +53,7 @@ export default function SocialEmbed({ platform: savedPlatform, url }: { platform
             className="instagram-media"
             data-instgrm-permalink={url}
             data-instgrm-version="14"
-            style={{ background: '#fff', border: 0, margin: 0, width: '100%', minWidth: '326px' }}
+            style={{ background: 'var(--surface)', border: 0, margin: 0, width: '100%', minWidth: '326px' }}
           />
         </div>
       ) : (

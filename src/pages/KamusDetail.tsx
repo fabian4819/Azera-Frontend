@@ -77,7 +77,7 @@ export default function KamusDetail() {
                   to={`/kamus/${o.slug}`}
                   style={{
                     padding: '8px 16px', borderRadius: '999px', border: '1px solid var(--outline-variant)',
-                    background: '#fff', color: 'var(--secondary)', textDecoration: 'none',
+                    background: 'var(--surface)', color: 'var(--secondary)', textDecoration: 'none',
                     fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '0.85rem',
                   }}
                 >

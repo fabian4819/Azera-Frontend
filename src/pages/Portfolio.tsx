@@ -347,7 +347,7 @@ export default function Portfolio() {
               {/* Kanan: info campaign, rata atas, sejajar dengan atas video */}
               <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-start' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
-                  {selected.logo && <img src={selected.logo} alt={selected.brand} style={{ height: '32px', maxWidth: '120px', objectFit: 'contain', background: '#fff', borderRadius: '8px', padding: '4px 8px' }} />}
+                  {selected.logo && <img src={selected.logo} alt={selected.brand} style={{ height: '32px', maxWidth: '120px', objectFit: 'contain', background: 'var(--surface)', borderRadius: '8px', padding: '4px 8px' }} />}
                   <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '1.05rem', color: 'var(--lime)' }}>{selected.brand}</span>
                   <span className="tag-pill tag-pill-white">{selected.category}</span>
                 </div>

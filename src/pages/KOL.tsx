@@ -66,7 +66,7 @@ export default function KOL() {
         </div>
       </section>
 
-      <section id="benefits" style={{ background: '#ffffff', padding: '96px 24px' }} ref={benefitsRef}>
+      <section id="benefits" style={{ background: 'var(--surface)', padding: '96px 24px' }} ref={benefitsRef}>
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
           <motion.div style={{ textAlign: 'center', marginBottom: '56px' }}
             initial={{ opacity: 0, y: 24 }} animate={benefitsInView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6, ease: easeOut }}>
@@ -126,7 +126,7 @@ export default function KOL() {
         </div>
       </section>
 
-      <section style={{ background: '#ffffff', padding: '96px 24px' }} ref={ctaRef}>
+      <section style={{ background: 'var(--surface)', padding: '96px 24px' }} ref={ctaRef}>
         <div style={{ maxWidth: '900px', margin: '0 auto' }}>
           <motion.div initial={{ opacity: 0, y: 24 }} animate={ctaInView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.7, ease: easeOut }}
             className="bento-card-dark" style={{ padding: '60px 40px', textAlign: 'center' }}>
@@ -137,7 +137,7 @@ export default function KOL() {
             <p style={{ color: 'rgba(255,255,255,0.65)', fontSize: '1rem', lineHeight: 1.7, marginBottom: '32px', maxWidth: '480px', margin: '0 auto 32px' }}>
               Tidak ada biaya, tidak ada komitmen. Cukup daftar dan tunggu tim kami menghubungimu.
             </p>
-            <Link to="/kol/register" className="btn-secondary" style={{ fontSize: '1.02rem', background: '#fff', color: 'var(--primary)' }}>
+            <Link to="/kol/register" className="btn-secondary" style={{ fontSize: '1.02rem', background: 'var(--surface)', color: 'var(--primary)' }}>
               Daftar KOL Sekarang
             </Link>
           </motion.div>

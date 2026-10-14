@@ -48,7 +48,7 @@ function FAQAccordion({ items }: { items: { question: string; answer: string }[]
                 animate={{ rotate: isOpen ? 45 : 0 }}
                 transition={{ duration: 0.25, ease }}
                 style={{
-                  flexShrink: 0, width: '34px', height: '34px', borderRadius: '50%', background: '#fff',
+                  flexShrink: 0, width: '34px', height: '34px', borderRadius: '50%', background: 'var(--surface)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   color: 'var(--secondary)',
                 }}
@@ -328,7 +328,7 @@ export default function ServiceDetail() {
                       animate={isPricingInView ? { opacity: 1, x: 0 } : {}}
                       transition={{ duration: 0.5, ease, delay: 0.2 + fi * 0.07 + ti * 0.05 }}
                       whileHover={{ scale: 1.02, transition: { duration: 0.25, ease } }}
-                      style={{ background: '#fff', borderRadius: '999px', padding: '10px 20px 10px 10px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      style={{ background: 'var(--surface)', borderRadius: '999px', padding: '10px 20px 10px 10px', display: 'flex', alignItems: 'center', gap: '12px' }}>
                       <div style={{ width: '34px', height: '34px', borderRadius: '50%', background: 'var(--secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                         <Check size={16} color="#fff" />
                       </div>

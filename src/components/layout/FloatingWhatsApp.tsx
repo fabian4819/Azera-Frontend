@@ -25,7 +25,7 @@ export default function FloatingWhatsApp() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 8 }}
             transition={{ duration: 0.18, ease: 'easeOut' }}
-            style={{ background: '#fff', borderRadius: '16px', padding: '8px', boxShadow: '0 12px 32px rgba(25,28,32,0.18)', minWidth: '180px' }}
+            style={{ background: 'var(--surface)', borderRadius: '16px', padding: '8px', boxShadow: '0 12px 32px rgba(25,28,32,0.18)', minWidth: '180px' }}
           >
             {contactOptions.map((opt) => (
               <a

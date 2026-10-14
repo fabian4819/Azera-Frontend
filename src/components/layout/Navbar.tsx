@@ -61,7 +61,7 @@ export default function Navbar() {
           width: '92%',
           maxWidth: '980px',
           borderRadius: '999px',
-          background: '#ffffff',
+          background: 'var(--surface)',
           border: '1.5px solid var(--outline-variant)',
           boxShadow: scrolled ? '0 8px 28px rgba(25,28,32,0.1)' : '0 4px 16px rgba(25,28,32,0.06)',
           transition: 'box-shadow 0.25s ease',
@@ -132,7 +132,7 @@ export default function Navbar() {
                 <div
                   style={{
                     position: 'absolute', top: 'calc(100% + 10px)', left: '50%', transform: 'translateX(-50%)',
-                    background: '#ffffff', border: '1.5px solid var(--outline-variant)', borderRadius: '16px',
+                    background: 'var(--surface)', border: '1.5px solid var(--outline-variant)', borderRadius: '16px',
                     boxShadow: '0 12px 32px rgba(25,28,32,0.12)', padding: '8px', minWidth: '260px',
                   }}
                 >
@@ -210,7 +210,7 @@ export default function Navbar() {
                 <div
                   style={{
                     position: 'absolute', top: 'calc(100% + 10px)', left: '50%', transform: 'translateX(-50%)',
-                    background: '#ffffff', border: '1.5px solid var(--outline-variant)', borderRadius: '16px',
+                    background: 'var(--surface)', border: '1.5px solid var(--outline-variant)', borderRadius: '16px',
                     boxShadow: '0 12px 32px rgba(25,28,32,0.12)', padding: '8px', minWidth: '140px',
                   }}
                 >
@@ -255,7 +255,7 @@ export default function Navbar() {
             zIndex: 999,
             width: '95%',
             maxWidth: '480px',
-            background: '#ffffff',
+            background: 'var(--surface)',
             border: '1.5px solid var(--outline-variant)',
             borderRadius: '24px',
             boxShadow: '0 8px 28px rgba(25,28,32,0.1)',
