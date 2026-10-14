@@ -26,7 +26,7 @@ interface Campaign {
 interface PicUser { _id: string; name: string; email: string; phone: string }
 
 const cardStyle: React.CSSProperties = {
-  background: 'var(--surface)', borderRadius: '16px', padding: '28px', border: '1px solid #e1e0ff',
+  background: '#fff', borderRadius: '16px', padding: '28px', border: '1px solid #e1e0ff',
   boxShadow: '0 2px 12px rgba(107,46,232,0.05)', marginBottom: '20px',
 };
 
@@ -38,7 +38,7 @@ const shareTitle: React.CSSProperties = { fontFamily: 'var(--font-display)', fon
 const shareDesc: React.CSSProperties = { fontSize: '0.78rem', color: '#777683', lineHeight: 1.5, margin: '2px 0 12px' };
 const shareBtn: React.CSSProperties = {
   display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '0 14px', height: '38px', borderRadius: '10px',
-  border: '1.5px solid #e1e0ff', background: 'var(--surface)', color: '#464652', fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer',
+  border: '1.5px solid #c7c8cf', background: '#fff', color: '#464652', fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer',
   fontFamily: 'var(--font-display)', textDecoration: 'none', whiteSpace: 'nowrap',
 };
 
@@ -56,7 +56,7 @@ function ShareLink({ icon: Icon, title, description, url, copied, onCopy, compac
         {url ? (
           <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: description ? 0 : '8px' }}>
             <input readOnly value={url} aria-label={`URL ${title}`} onFocus={(e) => e.currentTarget.select()}
-              style={{ flex: '1 1 220px', minWidth: 0, height: '38px', padding: '0 12px', borderRadius: '10px', border: '1.5px solid #e1e0ff', background: 'var(--surface)', color: '#464652', fontSize: '0.78rem', boxSizing: 'border-box' }} />
+              style={{ flex: '1 1 220px', minWidth: 0, height: '38px', padding: '0 12px', borderRadius: '10px', border: '1.5px solid #e1e0ff', background: '#fff', color: '#464652', fontSize: '0.78rem', boxSizing: 'border-box' }} />
             <button type="button" onClick={() => onCopy(url)} style={{ ...shareBtn, background: '#6728e4', color: 'white', border: 'none' }}>
               {copied ? <Check size={14} /> : <Copy size={14} />} {copied ? 'Tersalin' : 'Salin'}
             </button>
@@ -279,10 +279,10 @@ export default function CampaignDetail() {
           </div>
           <div style={{ flex: '0 0 190px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
             <div title={campaign.applyOpen ? 'Tutup kalau kebutuhan creator sudah terpenuhi' : 'Creator tidak bisa daftar selama ditutup'}
-              style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '9px 16px', borderRadius: '10px', border: '1.5px solid #e1e0ff', background: 'var(--surface)' }}>
+              style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '9px 16px', borderRadius: '10px', border: '1.5px solid #e1e0ff', background: '#fff' }}>
               <Switch label={campaign.applyOpen ? 'Pendaftaran Dibuka' : 'Pendaftaran Ditutup'} checked={campaign.applyOpen} disabled={applyBusy} onChange={() => void toggleApplyOpen()} />
             </div>
-            <Link to={`/admin/campaigns/${campaign._id}/sheet?tab=applicants`} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '9px 16px', borderRadius: '10px', border: '1.5px solid #6728e4', background: 'var(--surface)', color: '#6728e4', fontWeight: 700, fontSize: '0.82rem', fontFamily: "var(--font-display)", textDecoration: 'none' }}>
+            <Link to={`/admin/campaigns/${campaign._id}/sheet?tab=applicants`} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '9px 16px', borderRadius: '10px', border: '1.5px solid #6728e4', background: '#fff', color: '#6728e4', fontWeight: 700, fontSize: '0.82rem', fontFamily: "var(--font-display)", textDecoration: 'none' }}>
               <UserCheck size={15} /> Lihat Pendaftar
             </Link>
           </div>
@@ -327,7 +327,7 @@ export default function CampaignDetail() {
                   onChange={(e) => setWaGroupLinkDraft(e.target.value)}
                   placeholder="https://chat.whatsapp.com/..."
                   aria-label="Link grup WhatsApp"
-                  style={{ flex: '1 1 240px', minWidth: 0, padding: '9px 12px', borderRadius: '10px', border: '1.5px solid #e1e0ff', fontSize: '0.8rem', fontFamily: "var(--font-display)", boxSizing: 'border-box' }}
+                  style={{ flex: '1 1 240px', minWidth: 0, padding: '9px 12px', borderRadius: '10px', border: '1.5px solid #c7c8cf', fontSize: '0.8rem', fontFamily: "var(--font-display)", boxSizing: 'border-box' }}
                 />
                 <button type="button" onClick={saveWaGroupLink} disabled={waGroupLinkDraft === (campaign.waGroupLink || '')}
                   style={{ ...shareBtn, background: '#6728e4', color: 'white', border: 'none', opacity: waGroupLinkDraft === (campaign.waGroupLink || '') ? 0.5 : 1 }}>
@@ -357,7 +357,7 @@ export default function CampaignDetail() {
               onChange={(e) => setBriefCampaignDraft(e.target.value)}
               rows={6}
               placeholder="Tulis brief campaign di sini..."
-              style={{ width: '100%', padding: '12px 14px', borderRadius: '10px', border: '1.5px solid #e1e0ff', fontSize: '0.85rem', fontFamily: "var(--font-display)", boxSizing: 'border-box', resize: 'vertical' }}
+              style={{ width: '100%', padding: '12px 14px', borderRadius: '10px', border: '1.5px solid #c7c8cf', fontSize: '0.85rem', fontFamily: "var(--font-display)", boxSizing: 'border-box', resize: 'vertical' }}
             />
             <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '10px' }}>
               <button type="button" onClick={saveBriefCampaign}

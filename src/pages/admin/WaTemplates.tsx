@@ -5,7 +5,7 @@ import Switch from '../../components/ui/Switch';
 
 const f = "var(--font-display)";
 const cardStyle: React.CSSProperties = {
-  background: 'var(--surface)', borderRadius: '16px', padding: '24px', border: '1px solid #e1e0ff',
+  background: 'white', borderRadius: '16px', padding: '24px', border: '1px solid #e1e0ff',
   boxShadow: '0 2px 12px rgba(107,46,232,0.05)', marginBottom: '16px',
 };
 
@@ -107,7 +107,7 @@ export default function WaTemplates() {
             value={drafts[t.trigger] ?? ''}
             onChange={(e) => setDrafts((prev) => ({ ...prev, [t.trigger]: e.target.value }))}
             rows={4}
-            style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1.5px solid #e1e0ff', fontSize: '0.82rem', fontFamily: f, resize: 'vertical', outline: 'none', marginBottom: '10px', boxSizing: 'border-box' }}
+            style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1.5px solid #c7c8cf', fontSize: '0.82rem', fontFamily: f, resize: 'vertical', outline: 'none', marginBottom: '10px', boxSizing: 'border-box' }}
           />
           <button
             onClick={() => save(t.trigger)}

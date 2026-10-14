@@ -34,9 +34,9 @@ const newSubmission = (platform: Platform = 'instagram', field: SubField = 'link
   return { id: crypto.randomUUID(), label: autoLabel(submission), type: 'text', submission, creatorAccess: 'edit' };
 };
 
-const sel: React.CSSProperties = { width: '100%', padding: '5px 6px', borderRadius: '6px', border: '1px solid #e1e0ff', fontSize: '0.76rem', background: 'var(--surface)', color: '#191c20' };
-const lbl: React.CSSProperties = { fontSize: '0.7rem', fontWeight: 700, color: '#464652', marginBottom: '3px', display: 'block' };
-const item: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: '8px', width: '100%', padding: '7px 12px', background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.8rem', color: '#191c20', textAlign: 'left' };
+const sel: React.CSSProperties = { width: '100%', padding: '5px 6px', borderRadius: '6px', border: '1px solid #c7c8cf', fontSize: '0.76rem', background: 'white', color: '#202124' };
+const lbl: React.CSSProperties = { fontSize: '0.7rem', fontWeight: 700, color: '#5f6368', marginBottom: '3px', display: 'block' };
+const item: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: '8px', width: '100%', padding: '7px 12px', background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.8rem', color: '#202124', textAlign: 'left' };
 
 /** Ikon akses creator di header kolom, supaya admin lihat sekilas kolom mana yang terlihat/bisa diedit creator. */
 export function AccessIcon({ access }: { access: Access }) {
@@ -168,7 +168,7 @@ export function AddColumnMenu({ onAdd }: { onAdd: (cols: ProgressColumn[]) => vo
       <button type="button" onClick={() => onAdd([newFree()])} style={item}><Plus size={14} /> Kolom isian bebas</button>
       <button type="button" onClick={() => onAdd([newSubmission()])} style={item}><Plus size={14} /> Kolom submission</button>
       <div style={{ borderTop: '1px solid #e2e3e3', margin: '6px 0' }} />
-      <p style={{ padding: '0 12px 4px', fontSize: '0.7rem', fontWeight: 700, color: '#464652' }}>Paket per platform (Link Post, Tanggal Tayang, Views, Likes, Comments, Shares, Screenshot)</p>
+      <p style={{ padding: '0 12px 4px', fontSize: '0.7rem', fontWeight: 700, color: '#5f6368' }}>Paket per platform (Link Post, Tanggal Tayang, Views, Likes, Comments, Shares, Screenshot)</p>
       {(Object.keys(PLATFORM_LABELS) as Platform[]).map((p) => (
         <button key={p} type="button" style={item}
           onClick={() => onAdd((['link', 'postedAt', 'views', 'likes', 'comments', 'shares', 'screenshots'] as SubField[]).map((f) => newSubmission(p, f)))}>

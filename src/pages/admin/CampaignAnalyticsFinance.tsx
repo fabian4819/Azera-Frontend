@@ -38,7 +38,7 @@ function renderInsightText(text: string) {
 
 const f = "var(--font-display)";
 const cardStyle: React.CSSProperties = {
-  background: 'var(--surface)', borderRadius: '16px', padding: '28px', border: '1px solid #e1e0ff',
+  background: '#fff', borderRadius: '16px', padding: '28px', border: '1px solid #e1e0ff',
   boxShadow: '0 2px 12px rgba(107,46,232,0.05)', marginBottom: '20px',
 };
 const labelSmall: React.CSSProperties = {
@@ -47,12 +47,12 @@ const labelSmall: React.CSSProperties = {
 };
 const sectionTitle: React.CSSProperties = { fontFamily: f, fontWeight: 700, fontSize: '1rem', color: '#191c20', marginBottom: '16px' };
 const inputStyle: React.CSSProperties = {
-  width: '100%', padding: '10px 12px', borderRadius: '10px', border: '1.5px solid #e1e0ff',
+  width: '100%', padding: '10px 12px', borderRadius: '10px', border: '1.5px solid #c7c8cf',
   fontSize: '0.85rem', color: '#191c20', fontFamily: f, outline: 'none',
 };
 const smallBtn: React.CSSProperties = {
   padding: '8px 16px', fontSize: '0.8rem', fontWeight: 700, borderRadius: '10px', border: '1.5px solid #6728e4',
-  background: 'var(--surface)', color: '#6728e4', cursor: 'pointer', fontFamily: f, display: 'flex', alignItems: 'center', gap: '6px',
+  background: '#fff', color: '#6728e4', cursor: 'pointer', fontFamily: f, display: 'flex', alignItems: 'center', gap: '6px',
 };
 
 interface Analytics {
@@ -196,7 +196,7 @@ export default function CampaignAnalyticsFinance({ campaignId, view, stage, onSt
   if (error) return <div style={cardStyle}><p style={{ color: '#ba1a1a', fontFamily: f }}>{error}</p></div>;
 
   const statBox = (label: string, value: string) => (
-    <div style={{ background: 'var(--surface)', border: '1px solid #e1e0ff', borderRadius: '12px', padding: '14px 16px', flex: 1, minWidth: '110px' }}>
+    <div style={{ background: '#fff', border: '1px solid #e1e0ff', borderRadius: '12px', padding: '14px 16px', flex: 1, minWidth: '110px' }}>
       <p style={labelSmall}>{label}</p>
       <p style={{ fontFamily: f, fontWeight: 700, fontSize: '1.2rem', color: '#6728e4' }}>{value}</p>
     </div>
@@ -293,7 +293,7 @@ export default function CampaignAnalyticsFinance({ campaignId, view, stage, onSt
                     style={{ ...inputStyle, padding: '8px 10px' }}
                   />
                   {isAuto && (
-                    <p style={{ fontSize: '0.68rem', color: '#777683', fontFamily: f, marginTop: '4px' }}>
+                    <p style={{ fontSize: '0.68rem', color: '#8a8a99', fontFamily: f, marginTop: '4px' }}>
                       {manual ? (
                         <button onClick={() => void saveFinanceField(field, null)} style={{ background: 'none', border: 'none', padding: 0, color: '#6728e4', cursor: 'pointer', fontSize: '0.68rem', fontWeight: 700, fontFamily: f }}>
                           Pakai otomatis ({rupiah(finance.auto.totals[field as AutoFee])})

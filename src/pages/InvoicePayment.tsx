@@ -50,23 +50,23 @@ export default function InvoicePayment() {
 
   if (notFound) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--surface)' }}>
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8f9ff' }}>
         <p style={{ fontFamily: f, color: '#464652' }}>Invoice tidak ditemukan.</p>
       </div>
     );
   }
-  if (!invoice) return <div style={{ minHeight: '100vh', background: 'var(--surface)' }} />;
+  if (!invoice) return <div style={{ minHeight: '100vh', background: '#f8f9ff' }} />;
 
   const fmt = (n: number) => `Rp${n.toLocaleString('id-ID')}`;
 
   return (
-    <div style={{ background: 'var(--surface)', minHeight: '100vh', padding: '60px 20px' }}>
+    <div style={{ background: '#f8f9ff', minHeight: '100vh', padding: '60px 20px' }}>
       <div style={{ maxWidth: '560px', margin: '0 auto' }}>
         <div style={{ textAlign: 'center', marginBottom: '24px' }}>
           <p style={{ fontFamily: f, fontWeight: 900, fontStyle: 'italic', fontSize: '1.4rem', color: '#15157d' }}>AZERAKOL</p>
         </div>
 
-        <div style={{ background: 'var(--surface)', borderRadius: '20px', padding: '32px', boxShadow: '0 4px 24px rgba(0,0,0,0.06)', marginBottom: '20px' }}>
+        <div style={{ background: 'white', borderRadius: '20px', padding: '32px', boxShadow: '0 4px 24px rgba(0,0,0,0.06)', marginBottom: '20px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
             <div>
               <p style={{ fontFamily: f, fontWeight: 800, fontSize: '1.2rem', color: '#191c20' }}>{invoice.number}</p>
@@ -114,7 +114,7 @@ export default function InvoicePayment() {
             <p style={{ fontFamily: f, fontWeight: 700, color: '#92400E' }}>Bukti pembayaran diterima, menunggu verifikasi admin.</p>
           </div>
         ) : (
-          <div style={{ background: 'var(--surface)', borderRadius: '16px', padding: '24px' }}>
+          <div style={{ background: 'white', borderRadius: '16px', padding: '24px' }}>
             <p style={{ fontFamily: f, fontWeight: 700, fontSize: '0.9rem', marginBottom: '12px' }}>Upload Bukti Transfer</p>
             <input type="file" accept="image/*,.pdf" onChange={(e) => setFile(e.target.files?.[0] || null)} style={{ marginBottom: '14px', fontFamily: f, fontSize: '0.85rem' }} />
             {error && <p style={{ color: '#ba1a1a', fontSize: '0.8rem', marginBottom: '10px', fontFamily: f }}>{error}</p>}

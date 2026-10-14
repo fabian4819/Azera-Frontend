@@ -84,7 +84,7 @@ function ApplicantsTab({ view, onDecide }: { view: ApplicantsView | null; onDeci
 
   if (!view) {
     return (
-      <section style={{ background: 'var(--surface)', borderRadius: '20px', padding: '48px', boxShadow: '0 10px 30px rgba(30,10,94,0.18)', textAlign: 'center', color: '#777683', fontFamily: f }}>
+      <section style={{ background: '#fff', borderRadius: '20px', padding: '48px', boxShadow: '0 10px 30px rgba(30,10,94,0.18)', textAlign: 'center', color: '#777683', fontFamily: f }}>
         Memuat…
       </section>
     );
@@ -113,7 +113,7 @@ function ApplicantsTab({ view, onDecide }: { view: ApplicantsView | null; onDeci
   };
 
   return (
-    <section style={{ background: 'var(--surface)', borderRadius: '20px', padding: '18px', boxShadow: '0 10px 30px rgba(30,10,94,0.18)' }}>
+    <section style={{ background: '#fff', borderRadius: '20px', padding: '18px', boxShadow: '0 10px 30px rgba(30,10,94,0.18)' }}>
       {error && (
         <div role="alert" style={{ display: 'flex', justifyContent: 'space-between', gap: '10px', padding: '10px 14px', marginBottom: '10px', borderRadius: '10px', background: '#ffdad6', color: '#93000a', fontSize: '0.8rem' }}>
           {error}
@@ -188,7 +188,7 @@ function BriefCampaignSection({
   };
 
   return (
-    <div style={{ background: 'var(--surface)', borderRadius: '20px', marginBottom: '14px', padding: '16px 20px', boxShadow: '0 10px 30px rgba(30,10,94,0.18)' }}>
+    <div style={{ background: '#fff', borderRadius: '20px', marginBottom: '14px', padding: '16px 20px', boxShadow: '0 10px 30px rgba(30,10,94,0.18)' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px' }}>
         <p style={{ fontFamily: f, fontWeight: 700, fontSize: '0.92rem', color: '#191c20', margin: 0 }}>Brief Campaign</p>
         {canEdit && !editing && (
@@ -366,7 +366,7 @@ export default function CampaignBoard({ audience, view, loading, onReload, onEdi
       ) : (
         <>
           {(campaign.briefContent || campaign.deliverables?.length > 0) && (
-            <div style={{ background: 'var(--surface)', borderRadius: '20px', marginBottom: '14px', boxShadow: '0 10px 30px rgba(30,10,94,0.18)' }}>
+            <div style={{ background: '#fff', borderRadius: '20px', marginBottom: '14px', boxShadow: '0 10px 30px rgba(30,10,94,0.18)' }}>
               <button type="button" onClick={() => setBriefOpen((o) => !o)} aria-expanded={briefOpen}
                 style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', background: 'none', border: 'none', cursor: 'pointer', fontFamily: f, fontWeight: 700, fontSize: '0.92rem', color: '#191c20' }}>
                 Broadcast Campaign
@@ -390,7 +390,7 @@ export default function CampaignBoard({ audience, view, loading, onReload, onEdi
             onUploadFile={onUploadBrief ?? (async () => {})}
           />
 
-          <section style={{ background: 'var(--surface)', borderRadius: '20px', padding: '18px', boxShadow: '0 10px 30px rgba(30,10,94,0.18)' }}>
+          <section style={{ background: '#fff', borderRadius: '20px', padding: '18px', boxShadow: '0 10px 30px rgba(30,10,94,0.18)' }}>
             {actionError && (
               <div role="alert" style={{ display: 'flex', justifyContent: 'space-between', gap: '10px', padding: '10px 14px', marginBottom: '10px', borderRadius: '10px', background: '#ffdad6', color: '#93000a', fontSize: '0.8rem' }}>
                 {actionError}

@@ -38,7 +38,7 @@ function CompleteEmailModal({ onSaved }: { onSaved: () => void }) {
 
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(21,21,125,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '20px' }}>
-      <div style={{ background: 'var(--surface)', borderRadius: '20px', padding: '32px', width: '100%', maxWidth: '400px', boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }}>
+      <div style={{ background: 'white', borderRadius: '20px', padding: '32px', width: '100%', maxWidth: '400px', boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }}>
         <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: '#f0eeff', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px' }}>
           <Mail size={22} color="#6728e4" />
         </div>
@@ -53,7 +53,7 @@ function CompleteEmailModal({ onSaved }: { onSaved: () => void }) {
             onChange={(e) => setEmail(e.target.value)}
             placeholder="you@email.com"
             required
-            style={{ width: '100%', padding: '12px 14px', borderRadius: '12px', border: '1.5px solid #e1e0ff', fontSize: '0.9rem', outline: 'none', fontFamily: f, color: '#191c20', background: 'var(--surface)', marginBottom: '14px', boxSizing: 'border-box' }}
+            style={{ width: '100%', padding: '12px 14px', borderRadius: '12px', border: '1.5px solid #e1e0ff', fontSize: '0.9rem', outline: 'none', fontFamily: f, color: '#191c20', background: '#f8f9ff', marginBottom: '14px', boxSizing: 'border-box' }}
           />
           {error && <p style={{ color: '#ba1a1a', fontSize: '0.8rem', marginBottom: '14px', fontFamily: f }}>{error}</p>}
           <button type="submit" disabled={saving} className="btn-primary" style={{ width: '100%', justifyContent: 'center', padding: '12px', opacity: saving ? 0.7 : 1 }}>
@@ -125,7 +125,7 @@ export default function TalentLayout() {
           title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           style={{
             position: 'absolute', top: '28px', right: '-13px', width: '26px', height: '26px',
-            borderRadius: '50%', background: 'var(--surface)', border: '1.5px solid rgba(255,255,255,0.3)',
+            borderRadius: '50%', background: '#fff', border: '1.5px solid rgba(255,255,255,0.3)',
             display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
             color: 'var(--secondary)', boxShadow: '0 2px 8px rgba(0,0,0,0.25)', zIndex: 10,
           }}
@@ -191,7 +191,7 @@ export default function TalentLayout() {
         </div>
       </aside>
 
-      <div style={{ flex: 1, minWidth: 0, background: 'var(--surface)', borderRadius: '24px', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      <div style={{ flex: 1, minWidth: 0, background: '#f8f9ff', borderRadius: '24px', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         <header
           style={{
             padding: '20px 28px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',

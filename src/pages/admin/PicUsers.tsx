@@ -43,16 +43,16 @@ export default function PicUsers() {
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '16px' }}>
-        <button onClick={fetchPicUsers} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '10px', borderRadius: '10px', border: '1.5px solid #e1e0ff', background: 'var(--surface)', cursor: 'pointer', color: '#777683' }}>
+        <button onClick={fetchPicUsers} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '10px', borderRadius: '10px', border: '1.5px solid #c7c8cf', background: 'white', cursor: 'pointer', color: '#777683' }}>
           <RefreshCw size={16} />
         </button>
       </div>
 
-      <div style={{ background: 'var(--surface)', borderRadius: '16px', border: '1px solid #e1e0ff', overflow: 'hidden', boxShadow: '0 2px 12px rgba(107,46,232,0.06)' }}>
+      <div style={{ background: 'white', borderRadius: '16px', border: '1px solid #e1e0ff', overflow: 'hidden', boxShadow: '0 2px 12px rgba(107,46,232,0.06)' }}>
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem' }}>
             <thead>
-              <tr style={{ background: 'var(--surface)', borderBottom: '1px solid #e1e0ff' }}>
+              <tr style={{ background: '#f8f9ff', borderBottom: '1px solid #e1e0ff' }}>
                 {['Nama MG', 'WhatsApp', 'Email', 'Campaign', 'Tanggal Daftar'].map((h) => (
                   <th key={h} style={thStyle}>{h}</th>
                 ))}
@@ -73,7 +73,7 @@ export default function PicUsers() {
                   <td style={tdStyle}>{p.email}</td>
                   <td style={tdStyle}>
                     {p.campaignIds.length === 0 ? (
-                      <span style={{ color: '#777683' }}>Belum ada campaign</span>
+                      <span style={{ color: '#8a8a99' }}>Belum ada campaign</span>
                     ) : (
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
                         {p.campaignIds.map((c) => (

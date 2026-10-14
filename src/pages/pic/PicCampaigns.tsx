@@ -6,7 +6,7 @@ import picApi from '../../lib/picApi';
 
 const f = "var(--font-display)";
 const cardStyle: React.CSSProperties = {
-  background: 'var(--surface)', borderRadius: '16px', padding: '20px', border: '1px solid #e1e0ff',
+  background: 'white', borderRadius: '16px', padding: '20px', border: '1px solid #e1e0ff',
   boxShadow: '0 2px 12px rgba(107,46,232,0.05)',
 };
 

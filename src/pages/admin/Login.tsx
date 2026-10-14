@@ -38,16 +38,16 @@ export default function AdminLogin() {
     width: '100%', padding: '13px 16px', borderRadius: '12px',
     border: '1.5px solid #e1e0ff', fontSize: '0.9rem', outline: 'none',
     fontFamily: f, color: '#191c20',
-    background: 'var(--surface)', transition: 'border-color 0.2s',
+    background: '#f8f9ff', transition: 'border-color 0.2s',
   };
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--surface-container)', padding: '24px' }}>
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#eef0ff', padding: '24px' }}>
       <div
         className="login-card"
         style={{
           width: 'min(980px, 100%)', minHeight: '620px', borderRadius: '32px', overflow: 'hidden',
-          boxShadow: '0 30px 80px rgba(21,21,125,0.18)', display: 'flex', background: 'var(--surface)', position: 'relative',
+          boxShadow: '0 30px 80px rgba(21,21,125,0.18)', display: 'flex', background: 'white', position: 'relative',
         }}
       >
         <div
@@ -68,7 +68,7 @@ export default function AdminLogin() {
             </p>
             <div
               style={{
-                width: '96px', height: '96px', borderRadius: '50%', background: 'var(--surface)',
+                width: '96px', height: '96px', borderRadius: '50%', background: 'white',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px',
                 boxShadow: '0 12px 28px rgba(21,21,125,0.35)',
               }}

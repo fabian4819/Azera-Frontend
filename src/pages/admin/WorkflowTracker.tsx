@@ -5,7 +5,7 @@ import { STAGE_ORDER, STAGE_LABELS, stageLabel } from '../../lib/stages';
 
 const f = "var(--font-display)";
 const cardStyle: React.CSSProperties = {
-  background: 'var(--surface)', borderRadius: '16px', padding: '28px', border: '1px solid #e1e0ff',
+  background: 'white', borderRadius: '16px', padding: '28px', border: '1px solid #e1e0ff',
   boxShadow: '0 2px 12px rgba(107,46,232,0.05)', marginBottom: '20px',
 };
 
@@ -65,7 +65,7 @@ export default function WorkflowTracker({ campaignId, stage, onChanged, decide }
         {decide && (
           <div style={{ display: 'flex', gap: '8px' }}>
             <button type="button" onClick={() => void transition('rejected')} disabled={Boolean(transitioning)}
-              style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 16px', borderRadius: '10px', border: '1.5px solid #ba1a1a', background: 'var(--surface)', color: '#ba1a1a', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer', fontFamily: f, opacity: transitioning ? 0.6 : 1 }}>
+              style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 16px', borderRadius: '10px', border: '1.5px solid #ba1a1a', background: 'white', color: '#ba1a1a', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer', fontFamily: f, opacity: transitioning ? 0.6 : 1 }}>
               <XCircle size={14} /> Ditolak
             </button>
             <button type="button" onClick={() => void transition('running')} disabled={Boolean(transitioning)} className="btn-primary"
@@ -127,12 +127,12 @@ export default function WorkflowTracker({ campaignId, stage, onChanged, decide }
       </button>
       {showHistory && (
         <div style={{ marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-          {history.length === 0 && <p style={{ fontSize: '0.78rem', color: '#777683', fontFamily: f }}>Belum ada riwayat.</p>}
+          {history.length === 0 && <p style={{ fontSize: '0.78rem', color: '#8a8a99', fontFamily: f }}>Belum ada riwayat.</p>}
           {history.map((h) => (
             <div key={h._id} style={{ fontSize: '0.76rem', color: '#464652', fontFamily: f, borderBottom: '1px solid #f0f0f0', paddingBottom: '6px' }}>
               <strong>{stageLabel(h.fromStage)}</strong> → <strong>{stageLabel(h.toStage)}</strong>
               {' '}· {h.byUserId?.name || h.byRole} · {new Date(h.createdAt).toLocaleString('id-ID')}
-              {h.reason && h.reason !== 'auto' && <div style={{ color: '#777683' }}>Catatan: {h.reason}</div>}
+              {h.reason && h.reason !== 'auto' && <div style={{ color: '#8a8a99' }}>Catatan: {h.reason}</div>}
             </div>
           ))}
         </div>

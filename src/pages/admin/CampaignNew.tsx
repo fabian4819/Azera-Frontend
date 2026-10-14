@@ -23,8 +23,8 @@ interface PicUser { _id: string; name: string; email: string; phone: string }
 const lines = (v: string) => v.split('\n').map((l) => l.trim()).filter(Boolean);
 
 const inputStyle: React.CSSProperties = {
-  width: '100%', padding: '11px 14px', borderRadius: '12px', border: '1.5px solid #e1e0ff',
-  fontSize: '0.875rem', color: '#191c20', background: 'var(--surface)', outline: 'none',
+  width: '100%', padding: '11px 14px', borderRadius: '12px', border: '1.5px solid #c7c8cf',
+  fontSize: '0.875rem', color: '#191c20', background: 'white', outline: 'none',
   fontFamily: "var(--font-display)",
 };
 
@@ -34,7 +34,7 @@ const labelStyle: React.CSSProperties = {
 };
 
 const cardStyle: React.CSSProperties = {
-  background: 'var(--surface)', borderRadius: '16px', padding: '28px', border: '1px solid #e1e0ff',
+  background: 'white', borderRadius: '16px', padding: '28px', border: '1px solid #e1e0ff',
   boxShadow: '0 2px 12px rgba(107,46,232,0.05)', marginBottom: '20px',
 };
 
@@ -238,7 +238,7 @@ export default function CampaignNew() {
           </div>
 
           {type === 'offline' && (
-            <div style={{ marginTop: '14px', background: 'var(--surface)', borderRadius: '12px', padding: '16px' }}>
+            <div style={{ marginTop: '14px', background: '#f8f9ff', borderRadius: '12px', padding: '16px' }}>
               <p style={{ ...labelStyle, marginBottom: '10px' }}>Detail Event</p>
               <div style={{ marginBottom: '10px' }}>
                 <label style={labelStyle}>Lokasi</label>
@@ -343,7 +343,7 @@ export default function CampaignNew() {
       {/* top 104px = header admin sticky (top 16px + tinggi ±72px) + jarak 16px, supaya tidak ketutup header */}
       <aside style={{ ...cardStyle, position: 'sticky', top: '104px', padding: '22px', marginBottom: 0 }}>
         <SectionTitle title="Preview Broadcast" hint="Ikut ter-update saat form diisi. Masih bisa diedit setelah disimpan." />
-        <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: 0, maxHeight: 'calc(100vh - 260px)', overflowY: 'auto', background: 'var(--surface)', borderRadius: '12px', padding: '14px', fontSize: '0.8rem', lineHeight: 1.55, color: '#191c20', fontFamily: "var(--font-display)" }}>
+        <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: 0, maxHeight: 'calc(100vh - 260px)', overflowY: 'auto', background: '#f8f9ff', borderRadius: '12px', padding: '14px', fontSize: '0.8rem', lineHeight: 1.55, color: '#191c20', fontFamily: "var(--font-display)" }}>
           {buildBroadcast({
             name: name || 'Nama Campaign', type,
             eventDetails: { location: eventLocation, date: eventDate || undefined, timeWindow: eventTimeWindow },
@@ -370,7 +370,7 @@ export default function CampaignNew() {
           <div style={{ maxWidth: '760px', margin: '0 auto' }}>
             {error && <p style={{ color: '#ba1a1a', fontSize: '0.85rem', marginBottom: '16px', fontFamily: "var(--font-display)" }}>{error}</p>}
             <div style={{ display: 'flex', gap: '12px' }}>
-              <button type="button" onClick={() => setStep(1)} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '14px 20px', borderRadius: '12px', border: '1.5px solid #6728e4', background: 'var(--surface)', color: '#6728e4', fontWeight: 700, cursor: 'pointer', fontFamily: "var(--font-display)" }}>
+              <button type="button" onClick={() => setStep(1)} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '14px 20px', borderRadius: '12px', border: '1.5px solid #6728e4', background: 'white', color: '#6728e4', fontWeight: 700, cursor: 'pointer', fontFamily: "var(--font-display)" }}>
                 <ArrowLeft size={16} /> Kembali
               </button>
               <button type="button" onClick={() => void onSubmit()} disabled={saving} className="btn-primary" style={{ flex: 1, justifyContent: 'center', padding: '14px', opacity: saving ? 0.7 : 1 }}>

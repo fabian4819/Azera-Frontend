@@ -28,7 +28,7 @@ export default function TalentCampaigns() {
       {loading ? (
         <p style={{ color: '#777683', fontFamily: f, textAlign: 'center', padding: '40px' }}>Memuat...</p>
       ) : items.length === 0 ? (
-        <div style={{ background: 'var(--surface)', borderRadius: '16px', padding: '32px', textAlign: 'center' }}>
+        <div style={{ background: 'white', borderRadius: '16px', padding: '32px', textAlign: 'center' }}>
           <p style={{ color: '#777683', fontFamily: f, fontSize: '0.9rem' }}>Belum ada campaign yang kamu ikuti.</p>
         </div>
       ) : (
@@ -37,7 +37,7 @@ export default function TalentCampaigns() {
             <button
               key={item.applicationId}
               onClick={() => navigate(`/portal/${item.portalToken}`)}
-              style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--surface)', borderRadius: '16px', padding: '18px 20px', border: '1px solid #e1e0ff', cursor: 'pointer', textAlign: 'left', width: '100%' }}
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'white', borderRadius: '16px', padding: '18px 20px', border: '1px solid #e1e0ff', cursor: 'pointer', textAlign: 'left', width: '100%' }}
             >
               <div>
                 <p style={{ fontFamily: f, fontWeight: 700, fontSize: '0.95rem', color: '#191c20', marginBottom: '4px' }}>{item.campaign.name}</p>

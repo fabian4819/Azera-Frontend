@@ -164,9 +164,9 @@ export default function WhatsAppInbox() {
       )}
 
       <div style={{ display: 'grid', gridTemplateColumns: '300px 1fr', gap: '16px', height: 'calc(100vh - 160px)', minHeight: '480px' }}>
-        <div style={{ background: 'var(--surface)', borderRadius: '16px', border: '1px solid #e1e0ff', overflowY: 'auto' }}>
+        <div style={{ background: 'white', borderRadius: '16px', border: '1px solid #e1e0ff', overflowY: 'auto' }}>
           {contacts.length === 0 && (
-            <p style={{ padding: '20px', textAlign: 'center', color: '#777683', fontFamily: f, fontSize: '0.82rem' }}>Belum ada percakapan.</p>
+            <p style={{ padding: '20px', textAlign: 'center', color: '#8a8a99', fontFamily: f, fontSize: '0.82rem' }}>Belum ada percakapan.</p>
           )}
           {contacts.map((c) => {
             const active = c.jid === selectedJid;
@@ -188,7 +188,7 @@ export default function WhatsAppInbox() {
                   </span>
                 </div>
                 {c.name && c.phone && (
-                  <p style={{ fontFamily: f, fontSize: '0.72rem', color: '#9a99a6', marginBottom: '2px' }}>{fmtPhone(c.phone)}</p>
+                  <p style={{ fontFamily: f, fontSize: '0.72rem', color: '#9a99a8', marginBottom: '2px' }}>{fmtPhone(c.phone)}</p>
                 )}
                 <p style={{ fontFamily: f, fontSize: '0.78rem', color: '#777683', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {c.lastMessagePreview}
@@ -198,9 +198,9 @@ export default function WhatsAppInbox() {
           })}
         </div>
 
-        <div style={{ background: 'var(--surface)', borderRadius: '16px', border: '1px solid #e1e0ff', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        <div style={{ background: 'white', borderRadius: '16px', border: '1px solid #e1e0ff', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
           {!selected ? (
-            <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#777683', fontFamily: f, fontSize: '0.85rem' }}>
+            <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#8a8a99', fontFamily: f, fontSize: '0.85rem' }}>
               Pilih percakapan untuk mulai.
             </div>
           ) : (
@@ -209,7 +209,7 @@ export default function WhatsAppInbox() {
                 <div>
                   <p style={{ fontFamily: f, fontWeight: 700, fontSize: '0.9rem', color: '#191c20' }}>{contactLabel(selected)}</p>
                   {selected.name && selected.phone && (
-                    <p style={{ fontFamily: f, fontSize: '0.74rem', color: '#9a99a6' }}>{fmtPhone(selected.phone)}</p>
+                    <p style={{ fontFamily: f, fontSize: '0.74rem', color: '#9a99a8' }}>{fmtPhone(selected.phone)}</p>
                   )}
                 </div>
                 <button
@@ -234,7 +234,7 @@ export default function WhatsAppInbox() {
                         <div style={{ marginBottom: '2px' }}>
                           <div style={{ fontWeight: 700, fontSize: '0.76rem', color: '#6728e4' }}>{m.senderName}</div>
                           {m.senderPhone && (
-                            <div style={{ fontSize: '0.68rem', color: '#9a99a6' }}>{fmtPhone(m.senderPhone)}</div>
+                            <div style={{ fontSize: '0.68rem', color: '#9a99a8' }}>{fmtPhone(m.senderPhone)}</div>
                           )}
                         </div>
                       )}
@@ -246,7 +246,7 @@ export default function WhatsAppInbox() {
                   </div>
                 ))}
                 {messages.length === 0 && (
-                  <p style={{ textAlign: 'center', color: '#777683', fontFamily: f, fontSize: '0.82rem' }}>Belum ada pesan.</p>
+                  <p style={{ textAlign: 'center', color: '#8a8a99', fontFamily: f, fontSize: '0.82rem' }}>Belum ada pesan.</p>
                 )}
               </div>
 

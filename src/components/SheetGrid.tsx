@@ -52,19 +52,19 @@ function FilterMenu({ header, rect, values, hidden, sortDir, onSort, onApply, on
 
   const W = extra ? 300 : 260;
   const top = Math.max(8, Math.min(rect.bottom + 4, window.innerHeight - 420));
-  const item: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: '8px', width: '100%', padding: '7px 12px', background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.8rem', color: '#191c20', textAlign: 'left' };
+  const item: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: '8px', width: '100%', padding: '7px 12px', background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.8rem', color: '#202124', textAlign: 'left' };
   const link: React.CSSProperties = { background: 'none', border: 'none', color: '#1a73e8', cursor: 'pointer', fontSize: '0.75rem', padding: 0 };
   return (
     <>
       <div onClick={onClose} style={{ position: 'fixed', inset: 0, zIndex: 50 }} />
       <div role="dialog" aria-label={`Filter kolom ${header}`} onKeyDown={(e) => { if (e.key === 'Escape') onClose(); }}
-        style={{ position: 'fixed', top, left: Math.max(8, Math.min(rect.left, window.innerWidth - W - 8)), width: W, maxHeight: `calc(100vh - ${top + 8}px)`, overflowY: 'auto', zIndex: 51, background: 'var(--surface)', borderRadius: '8px', boxShadow: '0 4px 16px rgba(0,0,0,.18)', fontFamily: 'Arial, Helvetica, sans-serif', padding: '6px 0' }}>
+        style={{ position: 'fixed', top, left: Math.max(8, Math.min(rect.left, window.innerWidth - W - 8)), width: W, maxHeight: `calc(100vh - ${top + 8}px)`, overflowY: 'auto', zIndex: 51, background: 'white', borderRadius: '8px', boxShadow: '0 4px 16px rgba(0,0,0,.18)', fontFamily: 'Arial, Helvetica, sans-serif', padding: '6px 0' }}>
         {extra && <>{extra}<div style={{ borderTop: `1px solid ${GRID}`, margin: '6px 0' }} /></>}
         <button type="button" style={{ ...item, fontWeight: sortDir === 1 ? 700 : 400 }} onClick={() => onSort(1)}><ArrowDownAZ size={15} /> Urutkan A → Z</button>
         <button type="button" style={{ ...item, fontWeight: sortDir === -1 ? 700 : 400 }} onClick={() => onSort(-1)}><ArrowDownZA size={15} /> Urutkan Z → A</button>
         <div style={{ borderTop: `1px solid ${GRID}`, margin: '6px 0' }} />
         <div style={{ padding: '0 12px' }}>
-          <p style={{ fontSize: '0.75rem', fontWeight: 700, color: '#464652', marginBottom: '6px' }}>Filter menurut nilai</p>
+          <p style={{ fontSize: '0.75rem', fontWeight: 700, color: '#5f6368', marginBottom: '6px' }}>Filter menurut nilai</p>
           <div style={{ display: 'flex', gap: '10px', marginBottom: '6px' }}>
             <button type="button" style={link} onClick={() => setShown(false)}>Pilih semua</button>
             <button type="button" style={link} onClick={() => setShown(true)}>Hapus</button>
@@ -77,7 +77,7 @@ function FilterMenu({ header, rect, values, hidden, sortDir, onSort, onApply, on
           </label>
           <div style={{ maxHeight: '200px', overflowY: 'auto', margin: '6px 0' }}>
             {shown.length === 0 ? <p style={{ fontSize: '0.75rem', color: '#9a99a6', padding: '8px 0' }}>Tidak ada nilai.</p> : shown.map((v) => (
-              <label key={v.key} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '4px 0', fontSize: '0.78rem', color: '#191c20', cursor: 'pointer' }}>
+              <label key={v.key} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '4px 0', fontSize: '0.78rem', color: '#202124', cursor: 'pointer' }}>
                 <input type="checkbox" checked={!draft.has(v.key)} onChange={() => toggle(v.key)} />
                 <span style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontStyle: v.key ? 'normal' : 'italic' }}>{v.key || '(Kosong)'}</span>
                 <span style={{ color: '#9a99a6', fontSize: '0.7rem' }}>{v.count}</span>
@@ -86,7 +86,7 @@ function FilterMenu({ header, rect, values, hidden, sortDir, onSort, onApply, on
           </div>
         </div>
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', padding: '8px 12px 4px', borderTop: `1px solid ${GRID}` }}>
-          <button type="button" onClick={onClose} style={{ padding: '6px 14px', borderRadius: '6px', border: `1px solid ${GRID}`, background: 'var(--surface)', cursor: 'pointer', fontSize: '0.78rem' }}>Batal</button>
+          <button type="button" onClick={onClose} style={{ padding: '6px 14px', borderRadius: '6px', border: `1px solid ${GRID}`, background: 'white', cursor: 'pointer', fontSize: '0.78rem' }}>Batal</button>
           <button type="button" onClick={() => onApply(draft)} style={{ padding: '6px 14px', borderRadius: '6px', border: 'none', background: '#6728e4', color: 'white', cursor: 'pointer', fontSize: '0.78rem', fontWeight: 700 }}>OK</button>
         </div>
       </div>
@@ -234,11 +234,11 @@ export default function SheetGrid({
 
   const cellBase: React.CSSProperties = {
     borderRight: `1px solid ${GRID}`, borderBottom: `1px solid ${GRID}`, padding: '6px 10px',
-    whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '280px', fontSize: '0.8rem', color: '#191c20',
+    whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '280px', fontSize: '0.8rem', color: '#202124',
   };
   const rowNoStyle: React.CSSProperties = {
     ...cellBase, position: 'sticky', left: 0, zIndex: 1, width: ROW_NO_W, minWidth: ROW_NO_W, textAlign: 'center',
-    background: HEAD_BG, color: '#464652', fontSize: '0.72rem',
+    background: HEAD_BG, color: '#5f6368', fontSize: '0.72rem',
   };
   // Kolom pertama (nama creator) ikut nempel di kiri saat scroll horizontal
   const firstColStyle: React.CSSProperties = { position: 'sticky', left: ROW_NO_W, zIndex: 1 };
@@ -277,7 +277,7 @@ export default function SheetGrid({
           ))}
           {editable && (
             <button type="button" disabled={busy} onClick={(e) => { e.stopPropagation(); pickFiles(row, col); }}
-              style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', border: '1px solid #c9b6f7', background: 'var(--surface)', color: '#6728e4', borderRadius: '6px', padding: '2px 8px', fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer' }}>
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', border: '1px solid #c9b6f7', background: 'white', color: '#6728e4', borderRadius: '6px', padding: '2px 8px', fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer' }}>
               <Upload size={12} /> {busy ? 'Mengunggah…' : kind === 'media' && urls.length ? 'Ganti' : 'Upload'}
             </button>
           )}
@@ -312,7 +312,7 @@ export default function SheetGrid({
       )}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap', marginBottom: '10px' }}>
         <div style={{ color: '#777683', fontSize: '0.8rem', minWidth: 0 }}>{hint}</div>
-        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '0 12px', height: '36px', border: '1.5px solid #e1e0ff', borderRadius: '10px', background: 'var(--surface)', flex: '0 1 280px', minWidth: 0 }}>
+        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '0 12px', height: '36px', border: '1.5px solid #e1e0ff', borderRadius: '10px', background: 'white', flex: '0 1 280px', minWidth: 0 }}>
           <Search size={14} color="#777683" />
           <input value={query} onChange={(e) => { setQuery(e.target.value); setSelected(null); }} placeholder="Cari di tabel ini…" aria-label="Cari di tabel"
             style={{ border: 'none', outline: 'none', fontSize: '0.8rem', fontFamily: 'var(--font-display)', flex: 1, minWidth: 0, background: 'transparent' }} />
@@ -328,13 +328,13 @@ export default function SheetGrid({
 
       <input ref={fileInput} type="file" accept="image/*" multiple hidden onChange={(e) => void onFiles(e.target.files)} />
 
-      <div style={{ background: 'var(--surface)', border: `1px solid ${GRID}`, borderRadius: '10px', overflow: 'auto', maxHeight: maxHeight ?? 'calc(100vh - 300px)', minHeight: '240px' }}>
+      <div style={{ background: 'white', border: `1px solid ${GRID}`, borderRadius: '10px', overflow: 'auto', maxHeight: maxHeight ?? 'calc(100vh - 300px)', minHeight: '240px' }}>
         <table style={{ borderCollapse: 'separate', borderSpacing: 0, minWidth: '100%', fontFamily: 'Arial, Helvetica, sans-serif' }}>
           <thead style={{ position: 'sticky', top: 0, zIndex: 2 }}>
             <tr>
               <th style={{ ...rowNoStyle, zIndex: 3 }} />
               {headers.map((_, ci) => (
-                <th key={ci} style={{ ...cellBase, background: HEAD_BG, color: '#464652', fontWeight: 400, fontSize: '0.72rem', textAlign: 'center', padding: '3px 10px', ...(ci === 0 ? { ...firstColStyle, zIndex: 3 } : {}) }}>
+                <th key={ci} style={{ ...cellBase, background: HEAD_BG, color: '#5f6368', fontWeight: 400, fontSize: '0.72rem', textAlign: 'center', padding: '3px 10px', ...(ci === 0 ? { ...firstColStyle, zIndex: 3 } : {}) }}>
                   {colLetter(ci)}
                 </th>
               ))}
@@ -364,7 +364,7 @@ export default function SheetGrid({
                 <th style={{ ...cellBase, background: '#f3f0ff', padding: '3px 8px' }}>
                   <button type="button" aria-label="Tambah kolom" title="Tambah kolom"
                     onClick={(e) => setAddMenu(e.currentTarget.getBoundingClientRect())}
-                    style={{ width: '24px', height: '24px', borderRadius: '6px', border: '1px dashed #c9b6f7', background: 'var(--surface)', color: '#6728e4', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    style={{ width: '24px', height: '24px', borderRadius: '6px', border: '1px dashed #c9b6f7', background: 'white', color: '#6728e4', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <Plus size={14} />
                   </button>
                 </th>
@@ -412,9 +412,9 @@ export default function SheetGrid({
           {totals && rows.length > 0 && !filtered && (
             <tfoot style={{ position: 'sticky', bottom: 0, zIndex: 2 }}>
               <tr>
-                <td style={{ ...rowNoStyle, borderTop: '2px solid #e1e0ff' }} />
+                <td style={{ ...rowNoStyle, borderTop: '2px solid #c7c8cf' }} />
                 {totals.map((v, ci) => (
-                  <td key={ci} style={{ ...cellBase, borderTop: '2px solid #e1e0ff', background: '#f3f0ff', fontWeight: 700, textAlign: numericCols.has(ci) ? 'right' : 'left', ...(ci === 0 ? firstColStyle : {}) }}>
+                  <td key={ci} style={{ ...cellBase, borderTop: '2px solid #c7c8cf', background: '#f3f0ff', fontWeight: 700, textAlign: numericCols.has(ci) ? 'right' : 'left', ...(ci === 0 ? firstColStyle : {}) }}>
                     {renderCell(v)}
                   </td>
                 ))}
@@ -447,7 +447,7 @@ export default function SheetGrid({
         <>
           <div onClick={() => setAddMenu(null)} style={{ position: 'fixed', inset: 0, zIndex: 50 }} />
           <div role="dialog" aria-label="Tambah kolom" onKeyDown={(e) => { if (e.key === 'Escape') setAddMenu(null); }}
-            style={{ position: 'fixed', top: Math.min(addMenu.bottom + 4, window.innerHeight - 320), left: Math.max(8, Math.min(addMenu.right - 260, window.innerWidth - 268)), width: 260, zIndex: 51, background: 'var(--surface)', borderRadius: '8px', boxShadow: '0 4px 16px rgba(0,0,0,.18)', padding: '6px 0' }}>
+            style={{ position: 'fixed', top: Math.min(addMenu.bottom + 4, window.innerHeight - 320), left: Math.max(8, Math.min(addMenu.right - 260, window.innerWidth - 268)), width: 260, zIndex: 51, background: 'white', borderRadius: '8px', boxShadow: '0 4px 16px rgba(0,0,0,.18)', padding: '6px 0' }}>
             {addColumnMenu(() => setAddMenu(null))}
           </div>
         </>

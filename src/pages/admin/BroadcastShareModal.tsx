@@ -5,7 +5,7 @@ import Creators from './Creators';
 import ChecklistDropdown from '../../components/ui/ChecklistDropdown';
 
 const font = 'var(--font-display)';
-const outlineBtn: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 16px', borderRadius: '10px', border: '1.5px solid #6728e4', background: 'var(--surface)', color: '#6728e4', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer', fontFamily: font };
+const outlineBtn: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 16px', borderRadius: '10px', border: '1.5px solid #6728e4', background: 'white', color: '#6728e4', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer', fontFamily: font };
 interface Creator { _id: string; name: string; phone?: string; source: string }
 interface Group { jid: string; name?: string }
 interface Sender { id: string; status: string; connectedNumber: string | null }
@@ -128,7 +128,7 @@ export function BroadcastSharePanel({ campaignId, text, onTextChange: setText, o
 
   return (
     <div>
-        <textarea value={text} onChange={(e) => setText(e.target.value)} rows={16} style={{ width: '100%', padding: '14px', borderRadius: '12px', border: '1.5px solid #e1e0ff', fontSize: '0.85rem', color: '#191c20', fontFamily: font, resize: 'vertical', outline: 'none' }} />
+        <textarea value={text} onChange={(e) => setText(e.target.value)} rows={16} style={{ width: '100%', padding: '14px', borderRadius: '12px', border: '1.5px solid #c7c8cf', fontSize: '0.85rem', color: '#191c20', fontFamily: font, resize: 'vertical', outline: 'none' }} />
 
         <div style={{ display: 'flex', gap: '8px', margin: '10px 0 18px' }}>
           <button onClick={() => void copy()} style={outlineBtn}>
@@ -142,7 +142,7 @@ export function BroadcastSharePanel({ campaignId, text, onTextChange: setText, o
         </div>
 
         <label style={{ display: 'block', fontWeight: 600, fontSize: '0.8rem', color: '#191c20', marginBottom: '6px', fontFamily: font }}>Kirim pakai WA</label>
-        <select value={bot} onChange={(e) => pickBot(e.target.value)} style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1.5px solid #e1e0ff', fontSize: '0.85rem', fontFamily: font, background: 'var(--surface)', marginBottom: '16px', cursor: 'pointer' }}>
+        <select value={bot} onChange={(e) => pickBot(e.target.value)} style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1.5px solid #c7c8cf', fontSize: '0.85rem', fontFamily: font, background: 'white', marginBottom: '16px', cursor: 'pointer' }}>
           {senders.map((x) => (
             <option key={x.id} value={x.id} disabled={x.status !== 'connected'}>
               {SENDER_LABELS[x.id] ?? x.id}: {x.status === 'connected' ? x.connectedNumber : 'belum terhubung'}
@@ -166,7 +166,7 @@ export function BroadcastSharePanel({ campaignId, text, onTextChange: setText, o
 
         {allCreatorsOpen && (
           <div role="dialog" aria-modal="true" aria-label="Semua creator" style={{ position: 'fixed', inset: 0, background: 'rgba(25,28,32,0.45)', zIndex: 110, padding: '16px', display: 'flex' }}>
-            <div style={{ background: 'var(--surface)', borderRadius: '16px', flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', padding: '20px', overflow: 'auto' }}>
+            <div style={{ background: '#f8f9ff', borderRadius: '16px', flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', padding: '20px', overflow: 'auto' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', marginBottom: '14px' }}>
                 <p style={{ fontFamily: font, fontWeight: 700, fontSize: '1.05rem', color: '#191c20' }}>Pilih Creator <span style={{ fontWeight: 500, color: '#777683', fontSize: '0.85rem' }}>· {creatorIds.length} dipilih</span></p>
                 <button onClick={() => setAllCreatorsOpen(false)} className="btn-primary" style={{ padding: '9px 20px', fontSize: '0.82rem' }}>Selesai</button>
@@ -203,10 +203,10 @@ export default function BroadcastShareModal({ campaignId, initialText, onClose }
 
   return (
     <div role="dialog" aria-modal="true" aria-label="Broadcast Campaign" style={{ position: 'fixed', inset: 0, background: 'rgba(25,28,32,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px', zIndex: 100 }}>
-      <div style={{ background: 'var(--surface)', borderRadius: '16px', width: '100%', maxWidth: '720px', maxHeight: '92vh', overflowY: 'auto', padding: '24px' }}>
+      <div style={{ background: 'white', borderRadius: '16px', width: '100%', maxWidth: '720px', maxHeight: '92vh', overflowY: 'auto', padding: '24px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
           <p style={{ fontFamily: font, fontWeight: 700, fontSize: '1.1rem', color: '#191c20' }}>Campaign dibuat 🎉 Broadcast Campaign</p>
-          <button onClick={() => void close()} title="Tutup" style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#464652', display: 'flex' }}><X size={20} /></button>
+          <button onClick={() => void close()} title="Tutup" style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#5f6368', display: 'flex' }}><X size={20} /></button>
         </div>
         <p style={{ fontSize: '0.8rem', color: '#777683', fontFamily: font, marginBottom: '14px' }}>
           Tergenerate dari kebutuhan campaign, link Daftar = form apply dari tahap 2. Silakan edit sebelum di-share.

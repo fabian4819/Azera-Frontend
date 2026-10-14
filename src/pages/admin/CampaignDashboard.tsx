@@ -70,7 +70,7 @@ export default function CampaignDashboard() {
             type="button"
             onClick={() => void fetchCampaigns()}
             aria-label="Muat ulang daftar campaign"
-            style={{ width: '38px', height: '38px', borderRadius: '10px', border: '1.5px solid #e1e0ff', background: 'var(--surface)', color: '#6728e4', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            style={{ width: '38px', height: '38px', borderRadius: '10px', border: '1.5px solid #c7c8cf', background: 'white', color: '#6728e4', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
           >
             <RefreshCw size={16} />
           </button>
@@ -84,16 +84,16 @@ export default function CampaignDashboard() {
       {loading ? (
         <div style={{ textAlign: 'center', padding: '70px', color: '#777683' }}>Memuat campaign...</div>
       ) : error ? (
-        <div style={{ textAlign: 'center', padding: '48px', color: '#ba1a1a', background: 'var(--surface)', borderRadius: '16px', border: '1px solid #ffdad6' }}>{error}</div>
+        <div style={{ textAlign: 'center', padding: '48px', color: '#ba1a1a', background: 'white', borderRadius: '16px', border: '1px solid #ffdad6' }}>{error}</div>
       ) : campaigns.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '48px', color: '#777683', background: 'var(--surface)', borderRadius: '16px', border: '1px solid #e1e0ff' }}>Belum ada campaign.</div>
+        <div style={{ textAlign: 'center', padding: '48px', color: '#777683', background: 'white', borderRadius: '16px', border: '1px solid #e1e0ff' }}>Belum ada campaign.</div>
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(330px, 1fr))', gap: '14px' }}>
           {campaigns.map((campaign) => {
             const brandName = typeof campaign.brandId === 'object' ? campaign.brandId?.namaBrand : undefined;
             return (
               // Klik di mana saja pada card = buka detail campaign (judul tetap <Link> untuk keyboard/tab baru)
-              <article key={campaign._id} onClick={() => navigate(`/admin/campaigns/${campaign._id}`)} style={{ background: 'var(--surface)', borderRadius: '16px', padding: '20px', border: '1px solid #e1e0ff', boxShadow: '0 2px 12px rgba(107,46,232,0.05)', cursor: 'pointer' }}>
+              <article key={campaign._id} onClick={() => navigate(`/admin/campaigns/${campaign._id}`)} style={{ background: 'white', borderRadius: '16px', padding: '20px', border: '1px solid #e1e0ff', boxShadow: '0 2px 12px rgba(107,46,232,0.05)', cursor: 'pointer' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px' }}>
                   <div style={{ minWidth: 0 }}>
                     <Link to={`/admin/campaigns/${campaign._id}`} onClick={(e) => e.stopPropagation()} style={{ fontFamily: f, fontWeight: 750, fontSize: '0.98rem', color: '#191c20', textDecoration: 'none' }}>

@@ -18,7 +18,7 @@ const inputStyle: React.CSSProperties = {
   width: '100%', padding: '13px 16px', borderRadius: '12px',
   border: '1.5px solid #e1e0ff', fontSize: '0.9rem', outline: 'none',
   fontFamily: f, color: '#191c20',
-  background: 'var(--surface)', transition: 'border-color 0.2s',
+  background: '#f8f9ff', transition: 'border-color 0.2s',
 };
 
 const labelStyle: React.CSSProperties = {
@@ -104,12 +104,12 @@ export default function PortalLogin() {
   const roleLabel = role === 'creator' ? 'Creator / Talent' : 'PIC Campaign';
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--surface-container)', padding: '24px' }}>
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#eef0ff', padding: '24px' }}>
       <div
         className="login-card"
         style={{
           width: 'min(980px, 100%)', minHeight: '660px', borderRadius: '32px', overflow: 'hidden',
-          boxShadow: '0 30px 80px rgba(21,21,125,0.18)', display: 'flex', background: 'var(--surface)', position: 'relative',
+          boxShadow: '0 30px 80px rgba(21,21,125,0.18)', display: 'flex', background: 'white', position: 'relative',
         }}
       >
         <div
@@ -131,7 +131,7 @@ export default function PortalLogin() {
             <div
               className="login-left-logo"
               style={{
-                width: '96px', height: '96px', borderRadius: '50%', background: 'var(--surface)',
+                width: '96px', height: '96px', borderRadius: '50%', background: 'white',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px',
                 boxShadow: '0 12px 28px rgba(21,21,125,0.35)',
               }}
@@ -202,14 +202,14 @@ export default function PortalLogin() {
                       style={inputStyle}
                     />
                     {mode === 'signup' && checkingPhone && (
-                      <p style={{ fontSize: '0.75rem', color: '#777683', fontFamily: f, marginTop: '6px' }}>Mengecek nomor...</p>
+                      <p style={{ fontSize: '0.75rem', color: '#8a8a99', fontFamily: f, marginTop: '6px' }}>Mengecek nomor...</p>
                     )}
                   </div>
                   {mode === 'signup' && creatorHasEmail === false && (
                     <div style={{ marginBottom: '16px' }}>
                       <label style={labelStyle}>Email *</label>
                       <input type="email" value={creatorEmail} onChange={(e) => setCreatorEmail(e.target.value)} placeholder="you@email.com" required style={inputStyle} />
-                      <p style={{ fontSize: '0.75rem', color: '#777683', fontFamily: f, marginTop: '6px' }}>
+                      <p style={{ fontSize: '0.75rem', color: '#8a8a99', fontFamily: f, marginTop: '6px' }}>
                         Belum ada email di data kamu sebelumnya, isi dulu ya.
                       </p>
                     </div>
@@ -223,7 +223,7 @@ export default function PortalLogin() {
                       </button>
                     </div>
                     {mode === 'signup' && (
-                      <p style={{ fontSize: '0.75rem', color: '#777683', fontFamily: f, marginTop: '6px' }}>
+                      <p style={{ fontSize: '0.75rem', color: '#8a8a99', fontFamily: f, marginTop: '6px' }}>
                         Your number must already be registered via the KOL form.
                       </p>
                     )}
@@ -268,7 +268,7 @@ export default function PortalLogin() {
                     </div>
                   </div>
                   {mode === 'signup' && (
-                    <p style={{ fontSize: '0.75rem', color: '#777683', fontFamily: f, marginTop: '-4px', marginBottom: '12px' }}>
+                    <p style={{ fontSize: '0.75rem', color: '#8a8a99', fontFamily: f, marginTop: '-4px', marginBottom: '12px' }}>
                       Your dashboard starts empty. Once the admin assigns you to a campaign, it will show up here automatically.
                     </p>
                   )}

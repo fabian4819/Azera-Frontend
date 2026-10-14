@@ -38,8 +38,8 @@ const WILAYAH_API = 'https://www.emsifa.com/api-wilayah-indonesia/api';
 interface WilayahOption { id: string; name: string }
 
 const inputStyle: React.CSSProperties = {
-  width: '100%', padding: '11px 14px', borderRadius: '12px', border: '1.5px solid #e1e0ff',
-  fontSize: '0.875rem', color: '#191c20', background: 'var(--surface)', outline: 'none',
+  width: '100%', padding: '11px 14px', borderRadius: '12px', border: '1.5px solid #c7c8cf',
+  fontSize: '0.875rem', color: '#191c20', background: 'white', outline: 'none',
   fontFamily: "var(--font-display)",
 };
 
@@ -221,7 +221,7 @@ export default function KOLRegister() {
   if (submitted) {
     return (
       <div className="purple-page" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--form-bg)', padding: '24px', paddingTop: '100px' }}>
-        <div style={{ textAlign: 'center', maxWidth: '480px', background: 'var(--surface)', borderRadius: '24px', padding: 'clamp(28px, 5vw, 40px)', boxShadow: '0 12px 40px rgba(28,10,68,0.25)' }}>
+        <div style={{ textAlign: 'center', maxWidth: '480px', background: 'white', borderRadius: '24px', padding: 'clamp(28px, 5vw, 40px)', boxShadow: '0 12px 40px rgba(28,10,68,0.25)' }}>
           <div className="kinetic-glow" style={{ width: '80px', height: '80px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px' }}>
             <CheckCircle2 size={40} color="white" />
           </div>
@@ -253,7 +253,7 @@ export default function KOLRegister() {
           blurb="Daftar gratis jadi creator AzeraKOL. Tim kami review profil kamu, lalu menghubungi kamu untuk campaign yang cocok."
           points={[PANEL_POINTS.check('Gratis, tanpa biaya pendaftaran'), PANEL_POINTS.whatsapp, PANEL_POINTS.privacy]}
         />
-        <form onSubmit={onSubmit} style={{ minWidth: 0, background: 'var(--surface)', borderRadius: '24px', padding: '40px', boxShadow: '0 4px 24px rgba(0,0,0,0.06)' }}>
+        <form onSubmit={onSubmit} style={{ minWidth: 0, background: 'white', borderRadius: '24px', padding: '40px', boxShadow: '0 4px 24px rgba(0,0,0,0.06)' }}>
           <SectionTitle title="1. Data Diri" />
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }} className="form-2col">
             <div>
@@ -325,7 +325,7 @@ export default function KOLRegister() {
             <p style={{ color: '#777683', fontSize: '0.85rem', marginBottom: '8px', fontFamily: "var(--font-display)" }}>Isi minimal 1 platform. *</p>
             {fieldError?.section === 'socials' && <p style={fieldErrorTextStyle}>{fieldError.message}</p>}
             {socialPlatforms.map(({ value, label, icon: Icon, color, prefix }) => (
-              <div key={value} style={{ background: 'var(--surface)', border: `1px solid ${color}22`, borderRadius: '16px', padding: '20px', marginBottom: '16px' }}>
+              <div key={value} style={{ background: '#f8f9ff', border: `1px solid ${color}22`, borderRadius: '16px', padding: '20px', marginBottom: '16px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
                   <Icon size={18} color={color} />
                   <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, color, fontSize: '0.9rem' }}>{label}</p>
@@ -333,7 +333,7 @@ export default function KOLRegister() {
                 <div style={{ display: 'grid', gridTemplateColumns: '1.7fr 1fr', gap: '10px' }} className="form-2col">
                   <div>
                     <label style={labelStyle}>Username</label>
-                    <div style={{ display: 'flex', alignItems: 'stretch', border: '1.5px solid #e1e0ff', borderRadius: '12px', background: 'var(--surface)', overflow: 'hidden' }}>
+                    <div style={{ display: 'flex', alignItems: 'stretch', border: '1.5px solid #c7c8cf', borderRadius: '12px', background: 'white', overflow: 'hidden' }}>
                       <span style={{ display: 'flex', alignItems: 'center', paddingLeft: '14px', color: '#b7b7c2', fontFamily: "var(--font-display)", fontSize: '0.875rem', whiteSpace: 'nowrap' }}>{prefix}</span>
                       <input
                         value={socials[value]?.username || ''}

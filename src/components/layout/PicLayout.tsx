@@ -54,7 +54,7 @@ export default function PicLayout() {
           title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           style={{
             position: 'absolute', top: '28px', right: '-13px', width: '26px', height: '26px',
-            borderRadius: '50%', background: 'var(--surface)', border: '1.5px solid rgba(255,255,255,0.3)',
+            borderRadius: '50%', background: '#fff', border: '1.5px solid rgba(255,255,255,0.3)',
             display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
             color: 'var(--secondary)', boxShadow: '0 2px 8px rgba(0,0,0,0.25)', zIndex: 10,
           }}
@@ -120,7 +120,7 @@ export default function PicLayout() {
         </div>
       </aside>
 
-      <div style={{ flex: 1, minWidth: 0, background: 'var(--surface)', borderRadius: '24px', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      <div style={{ flex: 1, minWidth: 0, background: '#f8f9ff', borderRadius: '24px', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         <header
           style={{
             padding: '20px 28px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',

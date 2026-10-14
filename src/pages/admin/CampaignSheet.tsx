@@ -53,11 +53,11 @@ function PicConfirmModal({ info, saving, onClose, onSave }: {
   const [ewalletType, setEwalletType] = useState(info?.paymentInfo?.ewalletType || '');
   const [ewalletNumber, setEwalletNumber] = useState(info?.paymentInfo?.ewalletNumber || '');
 
-  const inputStyle: React.CSSProperties = { padding: '9px 12px', borderRadius: '10px', border: '1.5px solid #e1e0ff', fontSize: '0.82rem', fontFamily: f };
+  const inputStyle: React.CSSProperties = { padding: '9px 12px', borderRadius: '10px', border: '1.5px solid #c7c8cf', fontSize: '0.82rem', fontFamily: f };
 
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(25,28,32,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px', zIndex: 100 }}>
-      <div style={{ background: 'var(--surface)', borderRadius: '16px', padding: '24px', width: '100%', maxWidth: '440px', maxHeight: '85vh', overflowY: 'auto' }}>
+      <div style={{ background: '#fff', borderRadius: '16px', padding: '24px', width: '100%', maxWidth: '440px', maxHeight: '85vh', overflowY: 'auto' }}>
         <p style={{ fontFamily: f, fontWeight: 700, fontSize: '1rem', color: '#191c20', marginBottom: '4px' }}>Konfirmasi Info Bank/E-Wallet</p>
         <p style={{ fontSize: '0.78rem', color: '#777683', marginBottom: '14px' }}>{info?.name} · {info?.phone}</p>
 
@@ -80,7 +80,7 @@ function PicConfirmModal({ info, saving, onClose, onSave }: {
         </div>
 
         <div style={{ display: 'flex', gap: '8px', marginTop: '18px', justifyContent: 'flex-end' }}>
-          <button type="button" onClick={onClose} style={{ background: 'none', border: '1.5px solid #e1e0ff', borderRadius: '10px', padding: '9px 16px', color: '#777683', fontFamily: f, fontSize: '0.82rem', fontWeight: 700, cursor: 'pointer' }}>
+          <button type="button" onClick={onClose} style={{ background: 'none', border: '1.5px solid #c7c8cf', borderRadius: '10px', padding: '9px 16px', color: '#777683', fontFamily: f, fontSize: '0.82rem', fontWeight: 700, cursor: 'pointer' }}>
             Batal
           </button>
           <button type="button" disabled={saving} onClick={() => onSave({ bankName, accountNumber, accountName, ewalletType, ewalletNumber })}
@@ -352,12 +352,12 @@ export default function CampaignSheet() {
         </div>
         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
           <button type="button" onClick={refresh} disabled={loading} aria-label="Muat ulang data" title="Muat ulang data"
-            style={{ width: '38px', height: '38px', borderRadius: '10px', border: '1.5px solid #e1e0ff', background: 'var(--surface)', color: '#6728e4', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: loading ? 0.5 : 1 }}>
+            style={{ width: '38px', height: '38px', borderRadius: '10px', border: '1.5px solid #c7c8cf', background: '#fff', color: '#6728e4', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: loading ? 0.5 : 1 }}>
             <RefreshCw size={16} />
           </button>
           {view?.sheetUrl && (
             <a href={view.sheetUrl} target="_blank" rel="noopener noreferrer"
-              style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '0 14px', height: '38px', borderRadius: '10px', border: '1.5px solid #e1e0ff', background: 'var(--surface)', color: '#188038', fontFamily: f, fontSize: '0.78rem', fontWeight: 700, textDecoration: 'none' }}>
+              style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '0 14px', height: '38px', borderRadius: '10px', border: '1.5px solid #c7c8cf', background: '#fff', color: '#188038', fontFamily: f, fontSize: '0.78rem', fontWeight: 700, textDecoration: 'none' }}>
               <ExternalLink size={14} /> Buka di Google Sheets
             </a>
           )}
@@ -399,9 +399,9 @@ export default function CampaignSheet() {
       )}
 
       {error ? (
-        <div style={{ textAlign: 'center', padding: '48px', color: '#ba1a1a', background: 'var(--surface)', borderRadius: '12px', border: '1px solid #ffdad6' }}>{error}</div>
+        <div style={{ textAlign: 'center', padding: '48px', color: '#ba1a1a', background: '#fff', borderRadius: '12px', border: '1px solid #ffdad6' }}>{error}</div>
       ) : !view ? (
-        <div style={{ textAlign: 'center', padding: '70px', color: '#777683', background: 'var(--surface)', borderRadius: '12px', border: `1px solid ${GRID}` }}>Memuat sheet…</div>
+        <div style={{ textAlign: 'center', padding: '70px', color: '#777683', background: '#fff', borderRadius: '12px', border: `1px solid ${GRID}` }}>Memuat sheet…</div>
       ) : (
         <SheetGrid
           key={kind}

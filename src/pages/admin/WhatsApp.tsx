@@ -4,7 +4,7 @@ import api from '../../lib/api';
 
 const f = "var(--font-display)";
 const cardStyle: React.CSSProperties = {
-  background: 'var(--surface)', borderRadius: '16px', padding: '28px', border: '1px solid #e1e0ff',
+  background: 'white', borderRadius: '16px', padding: '28px', border: '1px solid #e1e0ff',
   boxShadow: '0 2px 12px rgba(107,46,232,0.05)', marginBottom: '20px',
 };
 
@@ -113,7 +113,7 @@ function BotPanel({ botId, label, hint }: { botId: string; label: string; hint: 
       >
         <span>
           <span style={{ display: 'block', fontFamily: f, fontWeight: 700, fontSize: '1.05rem', marginBottom: '4px', color: '#191c20' }}>{label}</span>
-          <span style={{ display: 'block', fontFamily: f, fontSize: '0.8rem', color: '#777683' }}>{hint}</span>
+          <span style={{ display: 'block', fontFamily: f, fontSize: '0.8rem', color: '#8a8a99' }}>{hint}</span>
         </span>
         <span style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0, color: '#6728e4', fontFamily: f, fontSize: '0.78rem', fontWeight: 700 }}>
           {status === 'connected' ? 'Terhubung' : status === 'qr' ? 'Scan QR' : status === 'connecting' ? '...' : 'Offline'}
@@ -204,7 +204,7 @@ function BotPanel({ botId, label, hint }: { botId: string; label: string; hint: 
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.78rem', fontFamily: f }}>
             <thead>
-              <tr style={{ background: 'var(--surface)', textAlign: 'left' }}>
+              <tr style={{ background: '#f8f9ff', textAlign: 'left' }}>
                 {['Waktu', 'Trigger', 'Ke', 'Pesan', 'Status'].map((h) => (
                   <th key={h} style={{ padding: '8px 10px', fontWeight: 700 }}>{h}</th>
                 ))}
@@ -221,12 +221,12 @@ function BotPanel({ botId, label, hint }: { botId: string; label: string; hint: 
                     {l.status === 'sent' && <span style={{ color: '#065F46' }}>Terkirim</span>}
                     {l.status === 'queued' && <span style={{ color: '#92400E' }}>Antri</span>}
                     {l.status === 'failed' && <span style={{ color: '#ba1a1a' }} title={l.error}>Gagal</span>}
-                    {l.status === 'skipped' && <span style={{ color: '#777683' }} title={l.error}>Dimatikan</span>}
+                    {l.status === 'skipped' && <span style={{ color: '#8a8a99' }} title={l.error}>Dimatikan</span>}
                   </td>
                 </tr>
               ))}
               {logs.length === 0 && (
-                <tr><td colSpan={5} style={{ padding: '16px', textAlign: 'center', color: '#777683' }}>Belum ada pesan.</td></tr>
+                <tr><td colSpan={5} style={{ padding: '16px', textAlign: 'center', color: '#8a8a99' }}>Belum ada pesan.</td></tr>
               )}
             </tbody>
           </table>

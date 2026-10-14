@@ -38,8 +38,8 @@ const platformOptions = ['Instagram', 'TikTok', 'Threads', 'X'];
 
 const inputStyle = (hasError?: boolean): React.CSSProperties => ({
   width: '100%', padding: '12px 16px', borderRadius: '12px',
-  border: `1.5px solid ${hasError ? '#ba1a1a' : '#e1e0ff'}`,
-  fontSize: '0.9rem', color: '#191c20', background: 'var(--surface)',
+  border: `1.5px solid ${hasError ? '#ba1a1a' : '#c7c8cf'}`,
+  fontSize: '0.9rem', color: '#191c20', background: 'white',
   outline: 'none', fontFamily: "var(--font-display)",
   transition: 'border-color 0.2s, box-shadow 0.2s',
 });
@@ -107,7 +107,7 @@ export default function BrandForm() {
   if (submitted) {
     return (
       <div className="purple-page" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--form-bg)', padding: '24px', paddingTop: '100px' }}>
-        <div style={{ textAlign: 'center', maxWidth: '480px', background: 'var(--surface)', borderRadius: '24px', padding: 'clamp(28px, 5vw, 40px)', boxShadow: '0 12px 40px rgba(28,10,68,0.25)' }}>
+        <div style={{ textAlign: 'center', maxWidth: '480px', background: 'white', borderRadius: '24px', padding: 'clamp(28px, 5vw, 40px)', boxShadow: '0 12px 40px rgba(28,10,68,0.25)' }}>
           <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px' }}>
             <CheckCircle2 size={40} color="white" />
           </div>
@@ -141,7 +141,7 @@ export default function BrandForm() {
             points={[PANEL_POINTS.whatsapp, PANEL_POINTS.privacy, PANEL_POINTS.check('Tidak ada komitmen awal')]}
           />
 
-          <form onSubmit={handleSubmit(onSubmit)} style={{ minWidth: 0, background: 'var(--surface)', borderRadius: '24px', padding: '40px', boxShadow: '0 4px 24px rgba(0,0,0,0.06)' }}>
+          <form onSubmit={handleSubmit(onSubmit)} style={{ minWidth: 0, background: 'white', borderRadius: '24px', padding: '40px', boxShadow: '0 4px 24px rgba(0,0,0,0.06)' }}>
             <p style={sectionTitleStyle}>Informasi Brand</p>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }} className="form-2col">
               <div>
