@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, ChevronDown } from 'lucide-react';
 import { services as serviceList } from '../../data/services';
-import { contactOptions } from '../../lib/contact';
 
 const navLinks = [{ label: 'Home', to: '/' }];
 
@@ -19,8 +18,6 @@ export default function Navbar() {
   const [serviceOpen, setServiceOpen] = useState(false);
   const [mobileServiceOpen, setMobileServiceOpen] = useState(false);
   const [registerOpen, setRegisterOpen] = useState(false);
-  const [contactOpen, setContactOpen] = useState(false);
-  const contactCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [scrolled, setScrolled] = useState(false);
   const serviceCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const registerCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -39,14 +36,6 @@ export default function Navbar() {
   };
   const closeRegisterDelayed = () => {
     registerCloseTimer.current = setTimeout(() => setRegisterOpen(false), 150);
-  };
-
-  const openContact = () => {
-    if (contactCloseTimer.current) clearTimeout(contactCloseTimer.current);
-    setContactOpen(true);
-  };
-  const closeContactDelayed = () => {
-    contactCloseTimer.current = setTimeout(() => setContactOpen(false), 150);
   };
 
   useEffect(() => {
@@ -210,8 +199,8 @@ export default function Navbar() {
             >
               <button
                 onClick={() => setRegisterOpen((v) => !v)}
-                className="btn-ghost"
-                style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.85rem', padding: '9px 16px', color: 'var(--primary)', border: 'none', cursor: 'pointer' }}
+                className="btn-primary"
+                style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.85rem', padding: '9px 20px', boxShadow: 'none', border: 'none', cursor: 'pointer' }}
               >
                 Daftar
                 <ChevronDown size={14} style={{ transform: registerOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s ease' }} />
@@ -238,48 +227,6 @@ export default function Navbar() {
                     >
                       {opt.label}
                     </Link>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            <div
-              style={{ position: 'relative' }}
-              onMouseEnter={openContact}
-              onMouseLeave={closeContactDelayed}
-            >
-              <button
-                onClick={() => setContactOpen((v) => !v)}
-                className="btn-primary"
-                style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.85rem', padding: '9px 20px', boxShadow: 'none', border: 'none', cursor: 'pointer' }}
-              >
-                Contact Us
-                <ChevronDown size={14} style={{ transform: contactOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s ease' }} />
-              </button>
-
-              {contactOpen && (
-                <div
-                  style={{
-                    position: 'absolute', top: 'calc(100% + 10px)', right: 0,
-                    background: '#ffffff', border: '1.5px solid var(--outline-variant)', borderRadius: '16px',
-                    boxShadow: '0 12px 32px rgba(25,28,32,0.12)', padding: '8px', minWidth: '160px',
-                  }}
-                >
-                  {contactOptions.map((opt) => (
-                    <a
-                      key={opt.label}
-                      href={opt.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={() => setContactOpen(false)}
-                      style={{
-                        display: 'block', padding: '10px 14px', borderRadius: '10px',
-                        fontFamily: "var(--font-display)", fontWeight: 600, fontSize: '0.88rem',
-                        textDecoration: 'none', color: 'var(--on-background)', whiteSpace: 'nowrap',
-                      }}
-                    >
-                      Untuk {opt.label}
-                    </a>
                   ))}
                 </div>
               )}
