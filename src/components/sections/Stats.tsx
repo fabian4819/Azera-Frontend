@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useRef } from 'react';
 import { motion, useScroll, useTransform, useInView, type MotionValue } from 'framer-motion';
 
 const heading =
@@ -19,26 +19,29 @@ function Word({ children, progress, range }: { children: string; progress: Motio
   );
 }
 
-function CountUp({ target, suffix, started }: { target: number; suffix: string; started: boolean }) {
-  const [count, setCount] = useState(0);
-  const rafRef = useRef(0);
-
-  useEffect(() => {
-    if (!started) return;
-    const duration = 1400;
-    const start = performance.now();
-    const tick = (now: number) => {
-      const elapsed = now - start;
-      const progress = Math.min(elapsed / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3);
-      setCount(Math.round(eased * target));
-      if (progress < 1) rafRef.current = requestAnimationFrame(tick);
-    };
-    rafRef.current = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(rafRef.current);
-  }, [started, target]);
-
-  return <span>{count}{suffix}</span>;
+// Angka gaya slot (pitch.com): tiap digit kolom 0-9 (x2 supaya putarannya terasa) yang
+// bergeser ke digit target, berurutan kiri ke kanan.
+function RollingNumber({ target, suffix, started }: { target: number; suffix: string; started: boolean }) {
+  const digits = String(target).split('').map(Number);
+  const strip = [...Array(20)].map((_, n) => n % 10);
+  return (
+    <span aria-label={`${target}${suffix}`} style={{ display: 'inline-flex', alignItems: 'flex-start' }}>
+      {digits.map((d, i) => (
+        <span key={i} aria-hidden="true" style={{ display: 'inline-block', height: '1em', overflow: 'hidden' }}>
+          <span
+            style={{
+              display: 'block',
+              transform: `translateY(${started ? -(d + 10) : 0}em)`,
+              transition: `transform 1.6s cubic-bezier(0.22, 1, 0.36, 1) ${i * 0.12}s`,
+            }}
+          >
+            {strip.map((n, k) => <span key={k} style={{ display: 'block', height: '1em' }}>{n}</span>)}
+          </span>
+        </span>
+      ))}
+      <span aria-hidden="true">{suffix}</span>
+    </span>
+  );
 }
 
 export default function Stats() {
@@ -98,7 +101,7 @@ export default function Stats() {
                   transition={{ duration: 0.5, delay: i * 0.1 }}
                 >
                   <p style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 'clamp(2.4rem, 5vw, 3.4rem)', color: 'var(--lime)', lineHeight: 1, marginBottom: '14px' }}>
-                    <CountUp target={s.target} suffix={s.suffix} started={statsInView} />
+                    <RollingNumber target={s.target} suffix={s.suffix} started={statsInView} />
                   </p>
                   <p style={{ color: 'rgba(255,255,255,0.72)', fontSize: '0.95rem', lineHeight: 1.6, maxWidth: '260px' }}>
                     {s.desc}
