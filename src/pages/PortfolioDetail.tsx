@@ -59,7 +59,7 @@ export default function PortfolioDetail() {
 
   if (notFound || !item) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--surface)' }}>
+      <div className="soft-bg" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <p style={{ fontFamily: 'var(--font-display)', color: 'var(--on-surface-variant)' }}>
           {notFound ? 'Portfolio tidak ditemukan.' : 'Memuat...'}
         </p>
@@ -78,7 +78,7 @@ export default function PortfolioDetail() {
   ];
 
   return (
-    <div style={{ background: 'var(--surface)', minHeight: '100vh', padding: '96px 24px 90px' }}>
+    <div className="soft-bg" style={{ minHeight: '100vh', padding: '96px 24px 90px' }}>
       <div style={{ maxWidth: '1160px', margin: '0 auto', background: 'var(--portfolio-bg)', borderRadius: '28px', padding: '36px', color: '#fff' }}>
         <Link to="/portfolio" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', color: 'var(--lime)', fontSize: '0.85rem', textDecoration: 'none', marginBottom: '20px' }}>
           <ArrowLeft size={15} /> Kembali ke Portofolio

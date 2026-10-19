@@ -169,7 +169,7 @@ export default function ServiceDetail() {
       </section>
 
       {/* Scope & Advantages */}
-      <section ref={ref} className="service-scope-section">
+      <section ref={ref} className="service-scope-section flow-soft no-fade-top">
         <div style={{ maxWidth: '1160px', margin: '0 auto' }}>
           <motion.div
             initial={{ opacity: 0, y: 24 }}
@@ -285,7 +285,7 @@ export default function ServiceDetail() {
               position: 'absolute',
               inset: 0,
               background:
-                'linear-gradient(180deg, rgba(28,10,68,0.75) 0%, rgba(44,16,101,0.35) 30%, rgba(44,16,101,0.35) 65%, rgba(15,7,45,0.8) 100%)',
+                'linear-gradient(180deg, var(--flow-seam) 0%, rgba(67,36,154,0.45) 25%, rgba(67,36,154,0.45) 75%, var(--flow-seam) 100%)',
             }}
           />
         </div>
@@ -353,7 +353,7 @@ export default function ServiceDetail() {
       </section>
 
       {/* FAQ */}
-      <section style={{ padding: '100px 24px', background: 'var(--hero-bg)' }}>
+      <section style={{ padding: '100px 24px', background: 'var(--flow-light)' }}>
         <div style={{ maxWidth: '760px', margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: '56px' }}>
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.6)', display: 'inline-block', marginBottom: '18px' }}>
@@ -394,8 +394,11 @@ export default function ServiceDetail() {
           position: absolute;
           inset: 0;
           z-index: 0;
-          /* Gelap di tengah (area teks) supaya kontras ≥4.5:1, memudar ke samping agar kolase tetap terang */
-          background: radial-gradient(ellipse 48% 62% at 50% 52%, rgba(28,10,68,0.5) 0%, rgba(28,10,68,0.34) 55%, rgba(28,10,68,0) 100%);
+          /* Gelap di tengah (area teks) supaya kontras ≥4.5:1, memudar ke samping agar kolase tetap terang.
+             Layer atas: tepi bawah memudar ke lavender section berikutnya (.flow-soft --base) supaya menyatu. */
+          background:
+            linear-gradient(180deg, rgba(239,232,251,0) calc(100% - 180px), rgba(239,232,251,0.85) calc(100% - 50px), #efe8fb 100%),
+            radial-gradient(ellipse 48% 62% at 50% 52%, rgba(28,10,68,0.5) 0%, rgba(28,10,68,0.34) 55%, rgba(28,10,68,0) 100%);
           pointer-events: none;
         }
         .service-hero-copy {
@@ -416,11 +419,9 @@ export default function ServiceDetail() {
           margin-bottom: 28px;
         }
         .service-scope-section {
-          padding: 112px 24px;
+          --pad: 112px;
+          padding-inline: 24px;
           overflow-x: clip;
-          background:
-            radial-gradient(circle at 8% 18%, rgba(196,238,135,0.22), transparent 24%),
-            linear-gradient(180deg, var(--surface) 0%, #f0ecff 100%);
         }
         .service-section-eyebrow {
           display: inline-block;
@@ -544,7 +545,7 @@ export default function ServiceDetail() {
         .service-workflow-section {
           padding: 112px 24px;
           overflow-x: clip;
-          background: var(--hero-bg);
+          background: var(--flow-deep);
         }
         .service-workflow-shell {
           max-width: 1160px;
@@ -638,7 +639,7 @@ export default function ServiceDetail() {
           .service-pricing-grid { grid-template-columns: 1fr !important; }
         }
         @media (max-width: 560px) {
-          .service-scope-section { padding: 80px 18px; }
+          .service-scope-section { --pad: 72px; padding-inline: 18px; }
           .service-scope-grid { grid-template-columns: 1fr; }
           .service-scope-visual { min-height: 370px; }
           .service-scope-visual > img { height: 80%; width: 128%; margin-left: -14%; }

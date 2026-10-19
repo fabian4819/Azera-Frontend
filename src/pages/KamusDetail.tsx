@@ -12,7 +12,7 @@ export default function KamusDetail() {
   const photo = getTermPhoto(term);
 
   return (
-    <div style={{ background: 'var(--surface)', minHeight: '100vh' }}>
+    <div className="soft-bg" style={{ minHeight: '100vh' }}>
       <div style={{ maxWidth: '720px', margin: '0 auto', padding: '96px 24px 100px' }}>
         <Link
           to="/kamus"

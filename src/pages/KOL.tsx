@@ -27,7 +27,7 @@ export default function KOL() {
   const ctaInView = useInView(ctaRef, { once: true, margin: '-80px' });
 
   return (
-    <div>
+    <div className="soft-bg">
       <section style={{ padding: '80px 24px 8px', textAlign: 'center' }}>
         <div style={{ maxWidth: '680px', margin: '0 auto' }}>
           <motion.span className="tag-pill tag-pill-navy" style={{ margin: '0 auto 18px' }}
@@ -66,7 +66,7 @@ export default function KOL() {
         </div>
       </section>
 
-      <section id="benefits" style={{ background: 'var(--surface)', padding: '96px 24px' }} ref={benefitsRef}>
+      <section id="benefits" className="flow-soft no-fade-top" style={{ paddingInline: '24px' }} ref={benefitsRef}>
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
           <motion.div style={{ textAlign: 'center', marginBottom: '56px' }}
             initial={{ opacity: 0, y: 24 }} animate={benefitsInView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6, ease: easeOut }}>
@@ -93,7 +93,7 @@ export default function KOL() {
         </div>
       </section>
 
-      <div style={{ background: 'var(--primary)', padding: '64px 24px', textAlign: 'center' }}>
+      <div style={{ background: 'var(--flow-deep)', padding: '64px 24px', textAlign: 'center' }}>
         <p style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 'clamp(3rem, 8vw, 5rem)', color: '#fff', lineHeight: 1, marginBottom: '8px' }}>
           20.000+
         </p>
@@ -102,7 +102,7 @@ export default function KOL() {
         </p>
       </div>
 
-      <section style={{ background: 'var(--surface-low)', padding: '96px 24px' }} ref={stepsRef}>
+      <section className="flow-soft no-fade-bottom" style={{ paddingInline: '24px' }} ref={stepsRef}>
         <div style={{ maxWidth: '900px', margin: '0 auto' }}>
           <motion.div style={{ textAlign: 'center', marginBottom: '56px' }}
             initial={{ opacity: 0, y: 24 }} animate={stepsInView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6, ease: easeOut }}>
@@ -126,7 +126,7 @@ export default function KOL() {
         </div>
       </section>
 
-      <section style={{ background: 'var(--surface)', padding: '96px 24px' }} ref={ctaRef}>
+      <section style={{ padding: '96px 24px' }} ref={ctaRef}>
         <div style={{ maxWidth: '900px', margin: '0 auto' }}>
           <motion.div initial={{ opacity: 0, y: 24 }} animate={ctaInView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.7, ease: easeOut }}
             className="bento-card-dark" style={{ padding: '60px 40px', textAlign: 'center' }}>

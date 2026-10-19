@@ -15,7 +15,7 @@ const easeOut = [0.16, 1, 0.3, 1] as const;
 
 export default function Brand() {
   return (
-    <div style={{ background: 'var(--surface)', minHeight: '100vh' }}>
+    <div className="soft-bg" style={{ minHeight: '100vh' }}>
       <div style={{ padding: '80px 24px 8px', textAlign: 'center' }}>
         <div style={{ maxWidth: '680px', margin: '0 auto' }}>
           <span className="tag-pill tag-pill-navy" style={{ margin: '0 auto 18px' }}>Untuk Brand</span>

@@ -24,7 +24,7 @@ const listStyle: React.CSSProperties = {
 
 export default function PrivacyPolicy() {
   return (
-    <div style={{ background: 'var(--surface)', minHeight: '100vh' }}>
+    <div className="soft-bg" style={{ minHeight: '100vh' }}>
       <div style={{ padding: '80px 24px 8px', textAlign: 'center' }}>
         <div style={{ maxWidth: '640px', margin: '0 auto' }}>
           <span className="tag-pill tag-pill-navy" style={{ margin: '0 auto 16px' }}>Legal</span>

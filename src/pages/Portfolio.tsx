@@ -74,7 +74,7 @@ export default function Portfolio() {
   }
 
   return (
-    <div className="purple-page" style={{ background: 'var(--hero-bg)', minHeight: '100vh' }}>
+    <div className="purple-page" style={{ background: 'var(--flow-hero)', minHeight: '100vh' }}>
       <div style={{ maxWidth: '1160px', margin: '0 auto', padding: '32px 24px 0' }}>
         <PageHero
           title="Campaign"
