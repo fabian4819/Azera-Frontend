@@ -45,7 +45,10 @@ export default function SocialEmbed({ platform: savedPlatform, url }: { platform
   }, [platform, url]);
 
   return (
-    <div style={{ background: 'var(--surface)', borderRadius: '14px', overflow: 'hidden', minHeight: '260px', minWidth: '326px', display: 'flex', flexDirection: 'column' }}>
+    // Tinggi DIKUNCI (= tinggi akhir embed) + clip-path, dan latar TikTok hitam seperti player-nya: embed.js IG
+    // sempat membuat iframe ±1900px lebar & ±2600px tinggi sebelum merapikan ukurannya, tanpa ini kartu
+    // ikut melar sesaat dan muncul garis putih panjang di luar kartu.
+    <div style={{ background: platform === 'tiktok' ? '#000' : 'var(--surface)', borderRadius: '14px', overflow: 'hidden', clipPath: 'inset(0 round 14px)', height: `${TIKTOK_H}px`, minWidth: '326px', display: 'flex', flexDirection: 'column' }}>
       {platform === 'instagram' ? (
         // Wrapper memotong baris "Add a comment..." di bawah embed IG (lihat .ig-embed-crop di index.css)
         <div className="ig-embed-crop">
