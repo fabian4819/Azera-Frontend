@@ -84,7 +84,8 @@ function PublicLayout() {
   return (
     <>
       <Navbar />
-      <main className="dashboard-main-mobile-pad">
+      {/* Ruang bottom nav mobile disediakan kartu footer, bukan main, supaya tidak ada celah terang di atas footer */}
+      <main>
         <Outlet />
       </main>
       <Footer />
