@@ -24,7 +24,7 @@ export default function CreatorCTA() {
             position: 'absolute',
             inset: 0,
             background:
-              'linear-gradient(180deg, rgba(28,10,68,0.75) 0%, rgba(44,16,101,0.35) 30%, rgba(44,16,101,0.35) 65%, rgba(15,7,45,0.8) 100%)',
+              'linear-gradient(180deg, var(--flow-seam) 0%, rgba(67,36,154,0.45) 25%, rgba(67,36,154,0.45) 75%, var(--flow-seam) 100%)',
           }}
         />
       </div>

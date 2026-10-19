@@ -12,7 +12,7 @@ export default function FAQ() {
   const toggle = (i: number) => setOpenIndex((prev) => (prev === i ? null : i));
 
   return (
-    <section ref={ref} style={{ background: 'var(--hero-bg)', padding: '100px 24px' }}>
+    <section ref={ref} style={{ background: 'var(--flow-deep)', padding: '100px 24px' }}>
       <div style={{ maxWidth: '760px', margin: '0 auto' }}>
         <motion.div
           style={{ textAlign: 'center', marginBottom: '56px' }}

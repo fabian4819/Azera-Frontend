@@ -99,7 +99,7 @@ export default function WhyAzera() {
   // Mobile: tumpuk biasa, tiap poin + visualnya fade mengikuti scroll
   if (!isDesktop) {
     return (
-      <section style={{ background: 'linear-gradient(180deg, var(--surface-container) 0%, var(--surface) 12%)', padding: '48px 0 72px' }}>
+      <section className="flow-soft">
         <div style={{ maxWidth: '560px', margin: '0 auto', padding: '0 24px' }}>
           <div style={{ marginBottom: '48px' }}><HeadingBlock /></div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '48px' }}>
@@ -117,7 +117,7 @@ export default function WhyAzera() {
 
   // Desktop: kolom kiri sticky, visual kanan scroll natural & opacity mengikuti scroll, snap di tengah
   return (
-    <section style={{ position: 'relative', background: 'linear-gradient(180deg, var(--surface-container) 0%, var(--surface) 10%)' }}>
+    <section className="flow-soft">
       <div style={{ maxWidth: '1160px', margin: '0 auto', padding: '0 24px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '56px' }}>
         {/* LEFT, heading + poin aktif, sticky */}
         <div style={{ position: 'sticky', top: 0, height: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>

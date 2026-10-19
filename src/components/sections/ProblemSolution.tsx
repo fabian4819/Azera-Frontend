@@ -32,7 +32,7 @@ export default function ProblemSolution() {
   const isInView = useInView(ref, { once: true, margin: '-80px' });
 
   return (
-    <section ref={ref} style={{ background: 'var(--hero-bg)', padding: '100px 24px' }}>
+    <section ref={ref} style={{ background: 'var(--flow-light)', padding: '100px 24px' }}>
       <div style={{ maxWidth: '1160px', margin: '0 auto' }}>
         <motion.div
           style={{ textAlign: 'center', marginBottom: '48px' }}

@@ -53,7 +53,7 @@ export default function Stats() {
     <section
       style={{
         padding: '120px 24px',
-        background: 'var(--hero-bg)',
+        background: 'var(--flow-light)',
       }}
     >
       <div style={{ maxWidth: '1200px', margin: '0 auto' }}>

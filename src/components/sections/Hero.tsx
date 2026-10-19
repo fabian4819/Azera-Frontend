@@ -36,7 +36,7 @@ export default function Hero() {
         marginTop: '-88px',
         paddingTop: '132px',
         paddingBottom: '80px',
-        background: 'var(--hero-bg)',
+        background: 'var(--flow-hero)',
       }}
     >
       {/* Foto konten tersebar (ghosting) */}

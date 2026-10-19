@@ -124,7 +124,7 @@ export default function HowItWorks() {
   };
 
   return (
-    <section className="section-py" style={{ background: 'var(--surface-low)' }} ref={ref}>
+    <section className="flow-soft" ref={ref}>
       <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 24px' }}>
         <motion.div
           style={{ marginBottom: '56px', maxWidth: '640px' }}

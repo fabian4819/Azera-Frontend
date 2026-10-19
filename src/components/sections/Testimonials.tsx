@@ -94,7 +94,7 @@ export default function Testimonials() {
   const loopItems = Array(6).fill(quoteItems).flat();
 
   return (
-    <section className="section-py" style={{ background: 'var(--surface-low)', overflow: 'hidden' }} ref={ref}>
+    <section className="flow-soft" style={{ overflow: 'hidden' }} ref={ref}>
       <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 24px' }}>
         <motion.div
           style={{ textAlign: 'center', marginBottom: '56px' }}

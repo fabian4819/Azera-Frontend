@@ -49,11 +49,23 @@
   /* Disamakan dengan palet gambar hero service (sampling: #a47dfc atas → #5332b1 bawah) */
   --hero-bg: radial-gradient(70% 55% at 50% -8%, #a47dfc, rgba(164,125,252,0) 62%),
     linear-gradient(180deg, #8b66eb 0%, #7250d2 50%, #5332b1 100%);
-  /* Ungu polos (tanpa gradient) untuk halaman form & Kamus, warna tengah --hero-bg */
-  --form-bg: #7250d2;
+  /* Ungu form & Kamus: dasar #7250d2 (warna tengah --hero-bg) + dua glow lembut.
+     Tepi bawah turun ke --flow-seam supaya menyambung ke panggung footer. */
+  --form-bg: radial-gradient(60% 40% at 12% 8%, rgba(164,125,252,0.55), rgba(164,125,252,0) 70%),
+    radial-gradient(45% 30% at 92% 55%, rgba(67,36,154,0.55), rgba(67,36,154,0) 70%),
+    linear-gradient(180deg, #7250d2 0, #7250d2 calc(100% - 220px), var(--flow-seam) 100%);
   /* Varian ungu tua, khusus kotak showcase di halaman Portfolio & Portfolio Detail */
   --portfolio-bg: radial-gradient(70% 55% at 50% -8%, #5b2fc4, rgba(91,47,196,0) 62%),
     linear-gradient(180deg, #34168a 0%, #25106a 50%, #170a47 100%);
+  /* Landing: semua section ungu, tepi atas & bawah tiap section = --flow-seam
+     supaya sambungan antar section tidak terlihat; variasi hanya di tengah. */
+  --flow-seam: #5e3dc0;
+  --flow-hero: radial-gradient(70% 55% at 50% -8%, #a47dfc, rgba(164,125,252,0) 62%),
+    linear-gradient(180deg, #8b66eb 0%, #7250d2 55%, var(--flow-seam) 100%);
+  --flow-deep: radial-gradient(60% 45% at 85% 50%, rgba(103,40,228,0.45), rgba(103,40,228,0) 70%),
+    linear-gradient(180deg, var(--flow-seam) 0%, #43249a 50%, var(--flow-seam) 100%);
+  --flow-light: radial-gradient(55% 45% at 15% 45%, rgba(164,125,252,0.55), rgba(164,125,252,0) 70%),
+    linear-gradient(180deg, var(--flow-seam) 0%, #7653dc 50%, var(--flow-seam) 100%);
 
   --surface: #e9ddf9;
   --surface-low: #e0d0f5;
@@ -455,6 +467,61 @@ select::-ms-expand {
 @media (max-width: 768px) {
   .section-py { padding: 64px 0; }
 }
+
+/* Latar terang bercorak (bukan putih polos): lavender + blob warna + pola titik.
+   .soft-bg   = latar halaman/section biasa, tanpa transisi.
+   .flow-soft = section terang yang tepi atas/bawahnya memudar dari --edge-top/--edge-bottom
+                (default --flow-seam) supaya menyatu dengan section ungu di sebelahnya.
+                Padding = zona fade + --pad, jadi konten tidak jatuh di area transisi.
+   Modifier .no-fade-top / .no-fade-bottom: sisi itu bertetangga dengan latar terang. */
+.soft-bg, .flow-soft {
+  --base: #efe8fb;
+  --fade-top: 0px;
+  --fade-bottom: 0px;
+  --edge-top: var(--base);
+  --edge-bottom: var(--base);
+  position: relative;
+  isolation: isolate;
+  background:
+    radial-gradient(38% 28% at 10% 32%, rgba(196,238,135,0.35), rgba(196,238,135,0) 70%),
+    radial-gradient(42% 30% at 90% 62%, rgba(255,129,170,0.18), rgba(255,129,170,0) 70%),
+    radial-gradient(50% 32% at 65% 38%, rgba(164,125,252,0.30), rgba(164,125,252,0) 70%),
+    linear-gradient(180deg,
+      var(--edge-top) 0,
+      color-mix(in srgb, var(--edge-top) 60%, var(--base)) calc(var(--fade-top) * 0.35),
+      color-mix(in srgb, var(--edge-top) 15%, var(--base)) calc(var(--fade-top) * 0.75),
+      var(--base) var(--fade-top),
+      var(--base) calc(100% - var(--fade-bottom)),
+      color-mix(in srgb, var(--edge-bottom) 15%, var(--base)) calc(100% - var(--fade-bottom) * 0.75),
+      color-mix(in srgb, var(--edge-bottom) 60%, var(--base)) calc(100% - var(--fade-bottom) * 0.35),
+      var(--edge-bottom) 100%);
+}
+.soft-bg::before, .flow-soft::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image: radial-gradient(rgba(103,40,228,0.14) 1px, transparent 1.5px);
+  background-size: 22px 22px;
+  -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 var(--fade-top), #000 calc(100% - var(--fade-bottom)), transparent 100%);
+  mask-image: linear-gradient(180deg, transparent 0, #000 var(--fade-top), #000 calc(100% - var(--fade-bottom)), transparent 100%);
+}
+.flow-soft {
+  --pad: 60px;
+  --fade-top: 180px;
+  --fade-bottom: 180px;
+  --edge-top: var(--flow-seam);
+  --edge-bottom: var(--flow-seam);
+  padding-top: calc(var(--fade-top) + var(--pad));
+  padding-bottom: calc(var(--fade-bottom) + var(--pad));
+}
+@media (max-width: 768px) {
+  .flow-soft { --pad: 40px; --fade-top: 120px; --fade-bottom: 120px; }
+}
+.flow-soft.no-fade-top { --fade-top: 0px; --edge-top: var(--base); }
+.flow-soft.no-fade-bottom { --fade-bottom: 0px; --edge-bottom: var(--base); }
+
 
 /* ─── Input Fields ──────────────────────────────── */
 .form-input {

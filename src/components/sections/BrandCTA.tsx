@@ -10,7 +10,7 @@ export default function BrandCTA() {
   const isInView = useInView(ref, { once: true, margin: '-80px' });
 
   return (
-    <section ref={ref} style={{ background: 'var(--hero-bg)', padding: '90px 24px' }}>
+    <section ref={ref} style={{ background: 'var(--flow-light)', padding: '90px 24px' }}>
       <div style={{ maxWidth: '1160px', margin: '0 auto', textAlign: 'center' }}>
         <motion.div
           initial={{ opacity: 0, y: 24 }}
