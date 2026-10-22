@@ -5,7 +5,7 @@ import { ArrowLeft, Copy, Check, MessageCircle, LayoutDashboard, Building2, Exte
 import { SiInstagram, SiTiktok, SiThreads, SiX } from 'react-icons/si';
 import type { IconType } from 'react-icons';
 import api from '../../lib/api';
-import { useAuth } from '../../hooks/useAuth';
+import { useAuth, hasOwnerAccess } from '../../hooks/useAuth';
 import CampaignAnalyticsFinance from './CampaignAnalyticsFinance';
 import WorkflowTracker from './WorkflowTracker';
 import { BroadcastSharePanel } from './BroadcastShareModal';
@@ -88,7 +88,7 @@ export default function CampaignDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   // Tab Finance = data uang, khusus owner (API finance juga menolak role lain)
-  const isOwner = useAuth().admin?.role === 'owner';
+  const isOwner = hasOwnerAccess(useAuth().admin?.role);
   const [campaign, setCampaign] = useState<Campaign | null>(null);
   const [loading, setLoading] = useState(true);
   const [briefDraft, setBriefDraft] = useState('');

@@ -27,6 +27,7 @@ import CampaignApply from './pages/CampaignApply';
 import InvoicePayment from './pages/InvoicePayment';
 import CampaignDashboard from './pages/CampaignDashboard';
 import PortalLogin from './pages/PortalLogin';
+import { hasOwnerAccess } from './hooks/useAuth';
 
 // Admin pages are not SEO targets, so keep them out of the initial public bundle.
 const AdminLayout = lazy(() => import('./components/layout/AdminLayout'));
@@ -96,18 +97,18 @@ function PublicLayout() {
   );
 }
 
-/** Role developer & admin = akses admin, tapi Inbox WhatsApp (chat pribadi) ditutup, API-nya juga menolak. */
+/** Role developer (setara owner) & admin: Inbox WhatsApp (chat pribadi) ditutup, API-nya juga menolak. */
 function NoDeveloper({ children }: { children: React.ReactElement }) {
   let role: string | undefined;
   try { role = JSON.parse(localStorage.getItem('azera_admin') || '{}').role; } catch { role = undefined; }
   return role === 'developer' || role === 'admin' ? <Navigate to="/admin" replace /> : children;
 }
 
-/** Data keuangan (Rekap Keuangan; Invoice dicek di Documents) khusus owner, API-nya juga menolak role lain. */
+/** Data keuangan (Rekap Keuangan; Invoice dicek di Documents) khusus owner & developer, API-nya juga menolak role lain. */
 function OwnerOnly({ children }: { children: React.ReactElement }) {
   let role: string | undefined;
   try { role = JSON.parse(localStorage.getItem('azera_admin') || '{}').role; } catch { role = undefined; }
-  return role === 'owner' ? children : <Navigate to="/admin" replace />;
+  return hasOwnerAccess(role) ? children : <Navigate to="/admin" replace />;
 }
 
 function ProtectedRoute() {

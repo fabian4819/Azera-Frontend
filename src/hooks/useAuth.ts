@@ -8,6 +8,9 @@ export interface AdminUser {
   role?: string;
 }
 
+/** Akses setara owner (termasuk data keuangan): owner & developer. Inbox WA tetap ditutup untuk developer. */
+export const hasOwnerAccess = (role?: string) => role === 'owner' || role === 'developer';
+
 export function useAuth() {
   const navigate = useNavigate();
 

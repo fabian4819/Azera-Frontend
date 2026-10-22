@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Megaphone, Users, Building2, ChevronRight, Wallet, AlertCircle, Trophy } from 'lucide-react';
 import api from '../../lib/api';
-import { useAuth } from '../../hooks/useAuth';
+import { useAuth, hasOwnerAccess } from '../../hooks/useAuth';
 import { stageLabel } from '../../lib/stages';
 
 const f = "var(--font-display)";
@@ -145,7 +145,7 @@ function timeAgo(dateStr: string) {
 
 export default function Dashboard() {
   const { admin } = useAuth();
-  const isOwner = admin?.role === 'owner';
+  const isOwner = hasOwnerAccess(admin?.role);
   const navigate = useNavigate();
   const [stats, setStats] = useState<DashboardStats | null>(null);
 

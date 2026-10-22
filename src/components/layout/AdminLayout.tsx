@@ -1,7 +1,7 @@
 import { Fragment, useState } from 'react';
 import { Link, useLocation, Outlet } from 'react-router-dom';
 import { LayoutDashboard, Building2, Users, Contact, UserCheck, ImageIcon, Megaphone, Upload, MessageCircle, Inbox, MessageSquareText, Bot, Plug, LogOut, ChevronsLeft, ChevronsRight, FolderOpen, FileText, Receipt, FileSignature, ChevronDown, Wallet } from 'lucide-react';
-import { useAuth } from '../../hooks/useAuth';
+import { useAuth, hasOwnerAccess } from '../../hooks/useAuth';
 import BottomNav from './BottomNav';
 
 /** 4 tab utama di bottom nav mobile; sisanya (termasuk docItems) masuk sheet "Lainnya". */
@@ -31,7 +31,7 @@ const allDocItems = [
   { label: 'SPK', to: '/admin/documents/spk', icon: FileSignature },
   { label: 'Rekap Keuangan', to: '/admin/finance-recap', icon: Wallet },
 ];
-/** Invoice & Rekap Keuangan = data uang, khusus owner (API juga menolak role lain) */
+/** Invoice & Rekap Keuangan = data uang, khusus owner & developer (API juga menolak role lain) */
 const OWNER_ONLY = ['/admin/documents/invoice', '/admin/finance-recap'];
 
 const pageTitles: Record<string, string> = {
@@ -95,7 +95,7 @@ export default function AdminLayout() {
     .filter((item) => location.pathname === item.to || location.pathname.startsWith(item.to + '/'))
     .sort((a, b) => b.to.length - a.to.length)[0]?.to;
 
-  const docItems = allDocItems.filter((item) => admin?.role === 'owner' || !OWNER_ONLY.includes(item.to));
+  const docItems = allDocItems.filter((item) => hasOwnerAccess(admin?.role) || !OWNER_ONLY.includes(item.to));
   const visibleNavItems = navItems.filter((item) => !((admin?.role === 'developer' || admin?.role === 'admin') && item.to === '/admin/whatsapp/inbox'));
   const bottomPrimary = BOTTOM_NAV_PRIMARY.map((to) => visibleNavItems.find((i) => i.to === to)).filter((i): i is typeof visibleNavItems[number] => !!i);
   const bottomMore = [...visibleNavItems.filter((i) => !BOTTOM_NAV_PRIMARY.includes(i.to)), ...docItems];

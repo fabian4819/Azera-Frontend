@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Navigate, useParams } from 'react-router-dom';
 import { Plus, FileDown, Pencil, Trash2, ArrowLeft, Save, AlertTriangle, ZoomIn, ZoomOut } from 'lucide-react';
 import api from '../../lib/api';
-import { useAuth } from '../../hooks/useAuth';
+import { useAuth, hasOwnerAccess } from '../../hooks/useAuth';
 import InvoiceRecapPanel from './InvoiceRecapPanel';
 
 /**
@@ -318,7 +318,7 @@ export default function Documents() {
 
   if (!config) return <p style={{ fontFamily: f }}>Jenis dokumen tidak dikenal.</p>;
   // Invoice = data keuangan, khusus owner (API juga menolak)
-  if (config.apiType === 'invoice' && admin?.role !== 'owner') return <Navigate to="/admin" replace />;
+  if (config.apiType === 'invoice' && !hasOwnerAccess(admin?.role)) return <Navigate to="/admin" replace />;
 
   if (editing) {
     return (
