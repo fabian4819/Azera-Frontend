@@ -1,6 +1,6 @@
 import { Fragment, useState } from 'react';
 import { Link, useLocation, Outlet } from 'react-router-dom';
-import { LayoutDashboard, Building2, Users, Contact, UserCheck, ImageIcon, Megaphone, Upload, MessageCircle, Inbox, MessageSquareText, Bot, Plug, LogOut, ChevronsLeft, ChevronsRight, FolderOpen, FileText, Receipt, FileSignature, ChevronDown } from 'lucide-react';
+import { LayoutDashboard, Building2, Users, Contact, UserCheck, ImageIcon, Megaphone, Upload, MessageCircle, Inbox, MessageSquareText, Bot, Plug, LogOut, ChevronsLeft, ChevronsRight, FolderOpen, FileText, Receipt, FileSignature, ChevronDown, Wallet } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import BottomNav from './BottomNav';
 
@@ -25,11 +25,14 @@ const navItems = [
 
 /** Grup "Document" (bisa dibuka/tutup), dirender tepat setelah item DOCS_AFTER */
 const DOCS_AFTER = '/admin/import';
-const docItems = [
+const allDocItems = [
   { label: 'Quotation', to: '/admin/documents/quotation', icon: FileText },
   { label: 'Invoice', to: '/admin/documents/invoice', icon: Receipt },
   { label: 'SPK', to: '/admin/documents/spk', icon: FileSignature },
+  { label: 'Rekap Keuangan', to: '/admin/finance-recap', icon: Wallet },
 ];
+/** Invoice & Rekap Keuangan = data uang, khusus owner (API juga menolak role lain) */
+const OWNER_ONLY = ['/admin/documents/invoice', '/admin/finance-recap'];
 
 const pageTitles: Record<string, string> = {
   '/admin/dashboard': 'Dashboard',
@@ -48,6 +51,7 @@ const pageTitles: Record<string, string> = {
   '/admin/documents/quotation': 'Document: Quotation',
   '/admin/documents/invoice': 'Document: Invoice',
   '/admin/documents/spk': 'Document: SPK',
+  '/admin/finance-recap': 'Rekap Keuangan',
 };
 
 const COLLAPSE_KEY = 'azera_admin_sidebar_collapsed';
@@ -87,10 +91,11 @@ export default function AdminLayout() {
     Object.entries(pageTitles).find(([key]) => location.pathname.startsWith(key))?.[1] ||
     'Admin Panel';
 
-  const activeTo = [...navItems, ...docItems]
+  const activeTo = [...navItems, ...allDocItems]
     .filter((item) => location.pathname === item.to || location.pathname.startsWith(item.to + '/'))
     .sort((a, b) => b.to.length - a.to.length)[0]?.to;
 
+  const docItems = allDocItems.filter((item) => admin?.role === 'owner' || !OWNER_ONLY.includes(item.to));
   const visibleNavItems = navItems.filter((item) => !((admin?.role === 'developer' || admin?.role === 'admin') && item.to === '/admin/whatsapp/inbox'));
   const bottomPrimary = BOTTOM_NAV_PRIMARY.map((to) => visibleNavItems.find((i) => i.to === to)).filter((i): i is typeof visibleNavItems[number] => !!i);
   const bottomMore = [...visibleNavItems.filter((i) => !BOTTOM_NAV_PRIMARY.includes(i.to)), ...docItems];

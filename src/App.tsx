@@ -41,6 +41,7 @@ const CampaignDetail = lazy(() => import('./pages/admin/CampaignDetail'));
 const CampaignSheet = lazy(() => import('./pages/admin/CampaignSheet'));
 const Import = lazy(() => import('./pages/admin/Import'));
 const Documents = lazy(() => import('./pages/admin/Documents'));
+const FinanceRecap = lazy(() => import('./pages/admin/FinanceRecap'));
 const WhatsApp = lazy(() => import('./pages/admin/WhatsApp'));
 const WhatsAppInbox = lazy(() => import('./pages/admin/WhatsAppInbox'));
 const WaTemplates = lazy(() => import('./pages/admin/WaTemplates'));
@@ -100,6 +101,13 @@ function NoDeveloper({ children }: { children: React.ReactElement }) {
   let role: string | undefined;
   try { role = JSON.parse(localStorage.getItem('azera_admin') || '{}').role; } catch { role = undefined; }
   return role === 'developer' || role === 'admin' ? <Navigate to="/admin" replace /> : children;
+}
+
+/** Data keuangan (Rekap Keuangan; Invoice dicek di Documents) khusus owner, API-nya juga menolak role lain. */
+function OwnerOnly({ children }: { children: React.ReactElement }) {
+  let role: string | undefined;
+  try { role = JSON.parse(localStorage.getItem('azera_admin') || '{}').role; } catch { role = undefined; }
+  return role === 'owner' ? children : <Navigate to="/admin" replace />;
 }
 
 function ProtectedRoute() {
@@ -167,6 +175,7 @@ export default function App() {
             <Route path="campaigns/:id/sheet" element={<CampaignSheet />} />
             <Route path="import" element={<Import />} />
             <Route path="documents/:type" element={<Documents />} />
+            <Route path="finance-recap" element={<OwnerOnly><FinanceRecap /></OwnerOnly>} />
             <Route path="whatsapp" element={<WhatsApp />} />
             <Route path="whatsapp/inbox" element={<NoDeveloper><WhatsAppInbox /></NoDeveloper>} />
             <Route path="wa-templates" element={<WaTemplates />} />
