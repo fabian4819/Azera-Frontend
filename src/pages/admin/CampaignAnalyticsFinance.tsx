@@ -101,7 +101,8 @@ export default function CampaignAnalyticsFinance({ campaignId, view, stage, onSt
     try {
       const [aRes, fRes, dRes, cRes] = await Promise.all([
         api.get(`/admin/campaigns/${campaignId}/analytics`),
-        api.get(`/admin/campaigns/${campaignId}/finance`),
+        // Finance khusus owner, tab Report tidak butuh (dan admin akan ditolak 403)
+        view === 'finance' ? api.get(`/admin/campaigns/${campaignId}/finance`) : Promise.resolve({ data: null }),
         api.get(`/admin/campaigns/${campaignId}/documents`),
         api.get(`/admin/campaigns/${campaignId}`),
       ]);

@@ -5,6 +5,7 @@ import { ArrowLeft, Copy, Check, MessageCircle, LayoutDashboard, Building2, Exte
 import { SiInstagram, SiTiktok, SiThreads, SiX } from 'react-icons/si';
 import type { IconType } from 'react-icons';
 import api from '../../lib/api';
+import { useAuth } from '../../hooks/useAuth';
 import CampaignAnalyticsFinance from './CampaignAnalyticsFinance';
 import WorkflowTracker from './WorkflowTracker';
 import { BroadcastSharePanel } from './BroadcastShareModal';
@@ -86,6 +87,8 @@ type TabKey = (typeof TABS)[number]['key'];
 export default function CampaignDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  // Tab Finance = data uang, khusus owner (API finance juga menolak role lain)
+  const isOwner = useAuth().admin?.role === 'owner';
   const [campaign, setCampaign] = useState<Campaign | null>(null);
   const [loading, setLoading] = useState(true);
   const [briefDraft, setBriefDraft] = useState('');
@@ -272,7 +275,7 @@ export default function CampaignDetail() {
       )}
 
       <div style={{ display: 'flex', gap: '4px', borderBottom: '1.5px solid #e1e0ff', marginBottom: '24px', overflowX: 'auto' }}>
-        {TABS.map((t) => (
+        {TABS.filter((t) => t.key !== 'finance' || isOwner).map((t) => (
           <button
             key={t.key}
             onClick={() => setActiveTab(t.key)}
@@ -465,7 +468,7 @@ export default function CampaignDetail() {
         </div>
       )}
 
-      {(activeTab === 'report' || activeTab === 'finance') && (
+      {(activeTab === 'report' || (activeTab === 'finance' && isOwner)) && (
         <CampaignAnalyticsFinance
           key={activeTab}
           campaignId={campaign._id}
