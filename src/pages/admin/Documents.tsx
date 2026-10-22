@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { Navigate, useParams } from 'react-router-dom';
 import { Plus, FileDown, Pencil, Trash2, ArrowLeft, Save, AlertTriangle, ZoomIn, ZoomOut } from 'lucide-react';
 import api from '../../lib/api';
+import { useAuth } from '../../hooks/useAuth';
+import InvoiceRecapPanel from './InvoiceRecapPanel';
 
 /**
  * Menu Document (AD-34..36): Quotation, Invoice, SPK dari template Google Docs klien.
@@ -134,6 +136,8 @@ function DocEditor({ config, initialId, initialData, onBack, onSaved }: {
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const [confirmLeave, setConfirmLeave] = useState(false);
+  // Salinan dataRef untuk panel Data Rekap (ref tidak boleh dibaca saat render), disinkron tiap data berubah
+  const [panelData, setPanelData] = useState<Data>(initialData);
 
   const render = useCallback(() => {
     scrollRef.current = iframeRef.current?.contentWindow?.scrollY ?? 0;
@@ -161,6 +165,7 @@ function DocEditor({ config, initialId, initialData, onBack, onSaved }: {
       const v = calcs[el.dataset.calc!];
       if (v !== undefined) el.textContent = rupiah(v);
     });
+    setPanelData(dataRef.current);
   };
 
   // Tiap render = dokumen iframe baru, jadi listener dipasang ulang di sini (tidak dobel)
@@ -192,6 +197,7 @@ function DocEditor({ config, initialId, initialData, onBack, onSaved }: {
       if (verb === 'del') list.splice(Number(button.dataset.i), 1);
       dataRef.current = { ...dataRef.current, [key]: list };
       dirtyRef.current = true;
+      setPanelData(dataRef.current);
       render();
     });
   };
@@ -205,6 +211,7 @@ function DocEditor({ config, initialId, initialData, onBack, onSaved }: {
         : await api.post('/admin/documents', { type: config.apiType, data: dataRef.current });
       idRef.current = res.data._id;
       dataRef.current = res.data.data;
+      setPanelData(dataRef.current);
       dirtyRef.current = false;
       setNotice(`Tersimpan, nomor ${String(res.data.data.number)}`);
       onSaved();
@@ -255,6 +262,13 @@ function DocEditor({ config, initialId, initialData, onBack, onSaved }: {
       )}
       {notice && <div style={{ ...cardStyle, background: '#d1fae5', borderColor: '#a7f3d0', padding: '12px 16px', color: '#065F46', fontFamily: f, fontSize: '0.82rem' }}>{notice}</div>}
 
+      {config.apiType === 'invoice' && (
+        <InvoiceRecapPanel
+          data={panelData}
+          onChange={(update) => { dataRef.current = update(dataRef.current); dirtyRef.current = true; setPanelData(dataRef.current); }}
+        />
+      )}
+
       <p style={{ fontFamily: f, fontSize: '0.78rem', color: '#464652', marginBottom: '8px' }}>
         Klik kotak kuning untuk mengisi. Pemisah halaman final (header, footer, nomor halaman) mengikuti PDF.
       </p>
@@ -269,7 +283,7 @@ function DocEditor({ config, initialId, initialData, onBack, onSaved }: {
   );
 }
 
-interface ListRow { _id: string; number: string; client: string; mastersheetUrl?: string; updatedAt: string }
+interface ListRow { _id: string; number: string; client: string; mastersheetUrl?: string; updatedAt: string; total?: number; paid?: boolean }
 /** Link Mastersheet dari bot WA (/invoice), hanya link Google Sheets yang dijadikan tautan */
 const isSheetUrl = (u?: string) => !!u && /^https:\/\/docs\.google\.com\/spreadsheets\//.test(u);
 
@@ -279,6 +293,7 @@ const fetchRows = (apiType: string): Promise<ListRow[]> =>
 export default function Documents() {
   const { type = 'quotation' } = useParams();
   const config = CONFIGS[type];
+  const { admin } = useAuth();
   const [rows, setRows] = useState<ListRow[]>([]);
   const [editing, setEditing] = useState<{ id: string | null; data: Data } | null>(null);
   const [error, setError] = useState('');
@@ -302,6 +317,8 @@ export default function Documents() {
   useEffect(() => load(), [load]);
 
   if (!config) return <p style={{ fontFamily: f }}>Jenis dokumen tidak dikenal.</p>;
+  // Invoice = data keuangan, khusus owner (API juga menolak)
+  if (config.apiType === 'invoice' && admin?.role !== 'owner') return <Navigate to="/admin" replace />;
 
   if (editing) {
     return (
@@ -360,7 +377,7 @@ export default function Documents() {
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem', fontFamily: f }}>
               <thead>
                 <tr style={{ background: '#f8f9ff', textAlign: 'left' }}>
-                  {['Nomor', 'Klien', ...(config.apiType === 'invoice' ? ['Mastersheet'] : []), 'Terakhir Diubah', ''].map((h) => <th key={h} style={{ padding: '9px 10px', fontWeight: 700 }}>{h}</th>)}
+                  {['Nomor', 'Klien', ...(config.apiType === 'invoice' ? ['Mastersheet', 'Total', 'Status'] : []), 'Terakhir Diubah', ''].map((h) => <th key={h} style={{ padding: '9px 10px', fontWeight: 700 }}>{h}</th>)}
                 </tr>
               </thead>
               <tbody>
@@ -374,6 +391,16 @@ export default function Documents() {
                           ? <a href={r.mastersheetUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#4b2fc4', fontWeight: 600 }}>Buka Sheet ↗</a>
                           : '-'}
                       </td>
+                    )}
+                    {config.apiType === 'invoice' && (
+                      <>
+                        <td style={{ padding: '9px 10px', whiteSpace: 'nowrap' }}>{rupiah(r.total ?? 0)}</td>
+                        <td style={{ padding: '9px 10px', whiteSpace: 'nowrap' }}>
+                          <span style={{ padding: '3px 10px', borderRadius: '999px', fontSize: '0.72rem', fontWeight: 700, background: r.paid ? '#d1fae5' : '#fef3c7', color: r.paid ? '#065F46' : '#92400E' }}>
+                            {r.paid ? 'Lunas' : 'Belum Lunas'}
+                          </span>
+                        </td>
+                      </>
                     )}
                     <td style={{ padding: '9px 10px', whiteSpace: 'nowrap' }}>{new Date(r.updatedAt).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' })}</td>
                     <td style={{ padding: '9px 10px', whiteSpace: 'nowrap', textAlign: 'right' }}>
