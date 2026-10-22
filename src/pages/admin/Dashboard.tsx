@@ -20,11 +20,12 @@ interface DashboardStats {
   dailyCampaigns: { date: string; count: number }[];
   recentActivity: { type: 'brand' | 'creator'; id: string; name: string; subtitle: string; status: string; createdAt: string }[];
   workflowFunnel: { stage: string; count: number }[];
-  pendingPayments: { client: { count: number; total: number }; creator: { count: number } };
+  /** client, totalDistributedFees & monthlyDistributedFees hanya dikirim untuk owner */
+  pendingPayments: { client?: { count: number; total: number }; creator: { count: number } };
   actionItems: { label: string; count: number; to: string }[];
-  monthlyDistributedFees: { month: string; total: number }[];
+  monthlyDistributedFees?: { month: string; total: number }[];
   topCreators: { id: string; name: string; avgEngagementRate: number | null; totalFollowers: number }[];
-  totalDistributedFees: number;
+  totalDistributedFees?: number;
 }
 
 const rupiah = (n: number) => `Rp${n.toLocaleString('id-ID')}`;
@@ -144,6 +145,7 @@ function timeAgo(dateStr: string) {
 
 export default function Dashboard() {
   const { admin } = useAuth();
+  const isOwner = admin?.role === 'owner';
   const navigate = useNavigate();
   const [stats, setStats] = useState<DashboardStats | null>(null);
 
@@ -170,12 +172,12 @@ export default function Dashboard() {
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: '20px' }} className="dashboard-grid">
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', minWidth: 0 }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '16px' }} className="dashboard-kpi-grid">
+          <div style={{ display: 'grid', gridTemplateColumns: `repeat(${isOwner ? 5 : 4}, 1fr)`, gap: '16px' }} className="dashboard-kpi-grid">
             <KpiCard icon={Megaphone} label="Campaign Aktif" value={stats?.activeCampaigns ?? 0} hint="sedang berjalan" />
             <KpiCard icon={Users} label="Total Creator" value={stats?.totalCreators ?? 0} hint="terdaftar di sistem" />
             <KpiCard icon={Building2} label="Lead Brand Baru" value={stats?.newBrandLeads ?? 0} hint="belum ditindaklanjuti" />
             <KpiCard icon={Megaphone} label="Total Campaign" value={stats?.totalCampaigns ?? 0} hint="semua status" />
-            <KpiCard icon={Wallet} label="Fee Terdistribusi" value={rupiah(stats?.totalDistributedFees ?? 0)} hint="creator + PIC + MG, semua campaign" />
+            {isOwner && <KpiCard icon={Wallet} label="Fee Terdistribusi" value={rupiah(stats?.totalDistributedFees ?? 0)} hint="creator + PIC + MG, semua campaign" />}
           </div>
 
           <div style={cardStyle}>
@@ -246,18 +248,18 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginTop: '20px' }} className="dashboard-grid">
+      <div style={{ display: 'grid', gridTemplateColumns: isOwner ? '1fr 1fr' : '1fr', gap: '20px', marginTop: '20px' }} className="dashboard-grid">
         <div style={cardStyle}>
           <p style={{ fontFamily: f, fontWeight: 700, fontSize: '0.95rem', color: '#191c20', marginBottom: '16px' }}>Campaign Funnel</p>
           <BarChart data={(stats?.workflowFunnel || []).map((w) => ({ label: stageLabel(w.stage), value: w.count }))} />
         </div>
-        <div style={cardStyle}>
+        {isOwner && <div style={cardStyle}>
           <p style={{ fontFamily: f, fontWeight: 700, fontSize: '0.95rem', color: '#191c20', marginBottom: '16px' }}>Fee Terdistribusi per Bulan</p>
           <BarChart
             data={(stats?.monthlyDistributedFees || []).map((m) => ({ label: new Date(`${m.month}-01`).toLocaleDateString('id-ID', { month: 'short', year: '2-digit' }), value: m.total }))}
             formatValue={rupiah}
           />
-        </div>
+        </div>}
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px', marginTop: '20px' }} className="dashboard-kpi-grid">
@@ -293,11 +295,13 @@ export default function Dashboard() {
             <p style={{ fontFamily: f, fontWeight: 700, fontSize: '0.95rem', color: '#191c20' }}>Pembayaran Tertunda</p>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-            <div>
-              <p style={{ fontSize: '0.78rem', color: '#8a8a99' }}>Client (invoice belum lunas)</p>
-              <p style={{ fontFamily: f, fontWeight: 800, fontSize: '1.3rem', color: '#191c20' }}>{rupiah(stats?.pendingPayments.client.total ?? 0)}</p>
-              <p style={{ fontSize: '0.75rem', color: '#8a8a99' }}>{stats?.pendingPayments.client.count ?? 0} invoice</p>
-            </div>
+            {isOwner && (
+              <div>
+                <p style={{ fontSize: '0.78rem', color: '#8a8a99' }}>Client (invoice belum lunas)</p>
+                <p style={{ fontFamily: f, fontWeight: 800, fontSize: '1.3rem', color: '#191c20' }}>{rupiah(stats?.pendingPayments.client?.total ?? 0)}</p>
+                <p style={{ fontSize: '0.75rem', color: '#8a8a99' }}>{stats?.pendingPayments.client?.count ?? 0} invoice</p>
+              </div>
+            )}
             <div>
               <p style={{ fontSize: '0.78rem', color: '#8a8a99' }}>Creator (info pembayaran belum dikonfirmasi)</p>
               <p style={{ fontFamily: f, fontWeight: 800, fontSize: '1.3rem', color: '#191c20' }}>{stats?.pendingPayments.creator.count ?? 0} PIC</p>
