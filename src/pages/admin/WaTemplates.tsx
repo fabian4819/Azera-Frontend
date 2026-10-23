@@ -31,11 +31,13 @@ const TRIGGER_LABELS: Record<string, string> = {
   daily_progress_report: 'Daily Progress Report',
   broadcast_campaign: 'Broadcast Campaign',
   pic_bank_info_request: 'Minta Info Bank/E-Wallet (PIC)',
+  creator_bank_info_request: 'Minta Info Bank/E-Wallet (Creator)',
 };
 
 /** Placeholder khusus per trigger, ditampilkan di bawah judul template */
 const TRIGGER_HINTS: Record<string, string> = {
   pic_bank_info_request: 'Dikirim dari Recap Payment → Rekap per PIC (per PIC atau semua). Placeholder: {{nama}} (nama PIC), {{campaign}}, {{jumlah_creator}}, {{fee}} (total fee PIC). Baris isian di bawah biarkan kosong supaya PIC tinggal isi lalu kirim balik.',
+  creator_bank_info_request: 'Dikirim dari Recap Payment → tab Creator (per creator atau semua). Placeholder: {{nama}} (nama creator), {{campaign}}, {{fee}} (fee creator). Baris isian di bawah biarkan kosong supaya creator tinggal isi lalu kirim balik.',
 };
 
 export default function WaTemplates() {
@@ -113,7 +115,7 @@ export default function WaTemplates() {
           <textarea
             value={drafts[t.trigger] ?? ''}
             onChange={(e) => setDrafts((prev) => ({ ...prev, [t.trigger]: e.target.value }))}
-            rows={t.trigger === 'pic_bank_info_request' ? 10 : 4}
+            rows={t.trigger.endsWith('_bank_info_request') ? 10 : 4}
             style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1.5px solid #c7c8cf', fontSize: '0.82rem', fontFamily: f, resize: 'vertical', outline: 'none', marginBottom: '10px', boxSizing: 'border-box' }}
           />
           <button

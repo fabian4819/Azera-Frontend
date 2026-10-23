@@ -204,14 +204,16 @@ export default function CampaignSheet() {
     }
   };
 
-  // AD-adjustment-6: admin minta info bank/e-wallet via WA ke semua PIC campaign ini, atau satu PIC (picUserId).
-  // Pesan = template "Minta Info Bank/E-Wallet (PIC)" di menu Template Pesan.
-  const requestBankInfo = async (picUserId?: string, picName?: string) => {
-    setRequestingBankInfo(picUserId ?? 'all');
+  // AD-adjustment-6: admin minta info bank/e-wallet via WA ke PIC / creator campaign ini, semua atau satu orang.
+  // Pesan = template "Minta Info Bank/E-Wallet (PIC)" / "(Creator)" di menu Template Pesan.
+  const requestBankInfo = async (target: 'pic' | 'creator', targetId?: string, name?: string) => {
+    setRequestingBankInfo(targetId ?? 'all');
     setActionError(''); setActionNotice('');
     try {
-      const res = await api.post(`/admin/campaigns/${id}/recap/request-bank-info`, picUserId ? { picUserId } : {});
-      setActionNotice(picName ? `Pesan WA permintaan info bank/e-wallet terkirim ke ${picName}.` : `Pesan WA terkirim ke ${res.data.count} PIC.`);
+      const res = target === 'pic'
+        ? await api.post(`/admin/campaigns/${id}/recap/request-bank-info`, targetId ? { picUserId: targetId } : {})
+        : await api.post(`/admin/campaigns/${id}/recap/request-creator-bank-info`, targetId ? { applicationId: targetId } : {});
+      setActionNotice(name ? `Pesan WA permintaan info bank/e-wallet terkirim ke ${name}.` : `Pesan WA terkirim ke ${res.data.count} ${target === 'pic' ? 'PIC' : 'creator'}.`);
       await reloadCurrent();
     } catch (err) {
       const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
@@ -230,13 +232,61 @@ export default function CampaignSheet() {
   const togglePicPaid = async (picId: string, paid: boolean) => {
     setTogglingPaidId(picId);
     try {
-      await api.patch(`/admin/campaigns/${id}/sheet/recap-pic-paid`, { picUserId: picId, paid });
+      const res = await api.patch(`/admin/campaigns/${id}/sheet/recap-pic-paid`, { picUserId: picId, paid });
+      setActionNotice(res.data.creatorsMarkedPaid ? `PIC ditandai Lunas, ${res.data.creatorsMarkedPaid} creator di bawahnya ikut ditandai Lunas.` : '');
       await reloadCurrent();
     } catch {
       setActionError('Gagal mengubah status pembayaran. Coba lagi.');
     } finally {
       setTogglingPaidId(null);
     }
+  };
+
+  // Status bayar per creator (Recap Payment tab Creator); Lunas → WA "Pembayaran Creator Selesai" ke creator
+  const toggleCreatorPaid = async (applicationId: string, paid: boolean) => {
+    setTogglingPaidId(applicationId);
+    try {
+      await api.patch(`/admin/applications/${applicationId}/payment`, { creatorPaymentStatus: paid ? 'paid' : 'unpaid' });
+      await reloadCurrent();
+    } catch {
+      setActionError('Gagal mengubah status pembayaran. Coba lagi.');
+    } finally {
+      setTogglingPaidId(null);
+    }
+  };
+
+  /** Tombol Minta Info + Tandai Lunas, dipakai tab Creator & Rekap per PIC */
+  const paymentActions = (opts: { id: string; name: string; paid: boolean; onRequest: () => void; onToggle: () => void }) => {
+    const busy = togglingPaidId === opts.id;
+    return (
+      <span style={{ display: 'inline-flex', gap: '6px' }}>
+        <button type="button" disabled={!!requestingBankInfo} onClick={opts.onRequest}
+          title={`Kirim WA minta info bank/e-wallet ke ${opts.name}`}
+          style={{
+            display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '4px 10px', borderRadius: '6px', border: 'none', whiteSpace: 'nowrap',
+            background: '#dcf8e5', color: '#128c3e', fontSize: '0.72rem', fontWeight: 700, cursor: requestingBankInfo ? 'wait' : 'pointer', opacity: requestingBankInfo && requestingBankInfo !== opts.id ? 0.6 : 1,
+          }}>
+          <MessageCircle size={12} /> {requestingBankInfo === opts.id ? 'Mengirim...' : 'Minta Info'}
+        </button>
+        <button type="button" disabled={busy} onClick={opts.onToggle}
+          style={{
+            display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '4px 10px', borderRadius: '6px', border: 'none', whiteSpace: 'nowrap',
+            background: opts.paid ? '#d7f5e3' : '#f0eeff', color: opts.paid ? '#146c2e' : '#6728e4',
+            fontSize: '0.72rem', fontWeight: 700, cursor: busy ? 'wait' : 'pointer', opacity: busy ? 0.6 : 1,
+          }}>
+          {opts.paid ? '✓ Lunas' : 'Tandai Lunas'}
+        </button>
+      </span>
+    );
+  };
+
+  const creatorRecapAction = (row: number) => {
+    const appId = view?.rowIds?.[row];
+    if (!appId || !view) return null;
+    const statusCol = view.headers.indexOf('Status Pembayaran');
+    const paid = statusCol >= 0 && view.rows[row]?.[statusCol] === 'Lunas';
+    const name = String(view.rows[row]?.[0] ?? 'creator');
+    return paymentActions({ id: appId, name, paid, onRequest: () => void requestBankInfo('creator', appId, name), onToggle: () => void toggleCreatorPaid(appId, !paid) });
   };
 
   const applicantAction = (row: number) => {
@@ -295,10 +345,10 @@ export default function CampaignSheet() {
             </a>
           )}
           {isRecap && (
-            <button type="button" onClick={() => void requestBankInfo()} disabled={!!requestingBankInfo}
-              title="Kirim WA ke semua PIC campaign ini. Per PIC: tombol di tab Rekap per PIC. Isi pesan diatur di menu Template Pesan."
+            <button type="button" onClick={() => void requestBankInfo(recapSubTab)} disabled={!!requestingBankInfo}
+              title={`Kirim WA ke semua ${recapSubTab === 'pic' ? 'PIC' : 'creator'} campaign ini. Per orang: tombol Minta Info di tiap baris. Isi pesan diatur di menu Template Pesan.`}
               style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '0 14px', height: '38px', borderRadius: '10px', border: 'none', background: '#25d366', color: 'white', fontFamily: f, fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer', opacity: requestingBankInfo ? 0.6 : 1 }}>
-              <MessageCircle size={14} /> {requestingBankInfo === 'all' ? 'Mengirim...' : 'Minta Info ke Semua PIC'}
+              <MessageCircle size={14} /> {requestingBankInfo === 'all' ? 'Mengirim...' : `Minta Info ke Semua ${recapSubTab === 'pic' ? 'PIC' : 'Creator'}`}
             </button>
           )}
         </div>
@@ -372,28 +422,8 @@ export default function CampaignSheet() {
             const statusCol = view.byPic?.headers.indexOf('Status Pembayaran') ?? -1;
             const paid = statusCol >= 0 && view.byPic?.rows[row]?.[statusCol] === 'Lunas';
             if (!picId) return null;
-            const busy = togglingPaidId === picId;
             const picName = String(view.byPic?.rows[row]?.[0] ?? 'PIC');
-            return (
-              <span style={{ display: 'inline-flex', gap: '6px' }}>
-              <button type="button" disabled={!!requestingBankInfo} onClick={() => void requestBankInfo(picId, picName)}
-                title={`Kirim WA minta info bank/e-wallet ke ${picName}`}
-                style={{
-                  display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '4px 10px', borderRadius: '6px', border: 'none', whiteSpace: 'nowrap',
-                  background: '#dcf8e5', color: '#128c3e', fontSize: '0.72rem', fontWeight: 700, cursor: requestingBankInfo ? 'wait' : 'pointer', opacity: requestingBankInfo && requestingBankInfo !== picId ? 0.6 : 1,
-                }}>
-                <MessageCircle size={12} /> {requestingBankInfo === picId ? 'Mengirim...' : 'Minta Info'}
-              </button>
-              <button type="button" disabled={busy} onClick={() => void togglePicPaid(picId, !paid)}
-                style={{
-                  display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '4px 10px', borderRadius: '6px', border: 'none',
-                  background: paid ? '#d7f5e3' : '#f0eeff', color: paid ? '#146c2e' : '#6728e4',
-                  fontSize: '0.72rem', fontWeight: 700, cursor: busy ? 'wait' : 'pointer', opacity: busy ? 0.6 : 1,
-                }}>
-                {paid ? '✓ Lunas' : 'Tandai Lunas'}
-              </button>
-              </span>
-            );
+            return paymentActions({ id: picId, name: picName, paid, onRequest: () => void requestBankInfo('pic', picId, picName), onToggle: () => void togglePicPaid(picId, !paid) });
           }}
         />
       ) : (
@@ -411,8 +441,8 @@ export default function CampaignSheet() {
           kindOf={(col) => view.columns?.[col]?.kind}
           onEdit={editCell}
           onUpload={uploadCell}
-          actionHeader="Status"
-          rowAction={kind === 'applicants' ? applicantAction : undefined}
+          actionHeader={isRecap ? 'Aksi' : 'Status'}
+          rowAction={kind === 'applicants' ? applicantAction : isRecap ? creatorRecapAction : undefined}
           columnMenu={isMaster ? columnMenu : undefined}
           headerIcon={isMaster ? (col) => (view.columns?.[col] ? <AccessIcon access={view.columns[col].access} /> : null) : undefined}
           addColumnMenu={isMaster ? (close) => <AddColumnMenu onAdd={(cols) => { close(); void saveColumns([...progressCols, ...cols]); }} /> : undefined}
