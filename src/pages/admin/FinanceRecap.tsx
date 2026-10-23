@@ -26,6 +26,7 @@ const td: React.CSSProperties = { padding: '8px 10px', borderBottom: '1px solid 
 
 const rupiah = (v: number) => `Rp${Math.round(v).toLocaleString('id-ID')}`;
 const ymd = (d: Date) => d.toLocaleDateString('en-CA');
+const shortDate = (ymdStr: string) => new Date(`${ymdStr}T00:00:00`).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
 const monthLabel = (ym: string) => (ym ? new Date(`${ym}-01T00:00:00`).toLocaleDateString('id-ID', { month: 'long', year: 'numeric' }) : '-');
 
 type Mode = 'week' | 'month' | 'year' | 'custom' | 'all';
@@ -70,6 +71,15 @@ function TierPill({ tier }: { tier: string }) {
   if (!tier) return <span style={{ color: '#c7c8cf' }}>-</span>;
   const [bg, fg] = TIER_COLORS[tier.toLowerCase()] ?? ['#ede9fe', '#4c1d95'];
   return <span style={{ padding: '3px 12px', borderRadius: '999px', fontSize: '0.72rem', fontWeight: 700, background: bg, color: fg, whiteSpace: 'nowrap' }}>{tier}</span>;
+}
+
+/** Daftar per invoice dalam satu sel grup; tinggi baris tetap supaya kolom Invoice/Status/Jatuh Tempo sejajar */
+function invoiceList(g: Group, render: (inv: Group['invoices'][number]) => React.ReactNode) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+      {g.invoices.map((inv) => <div key={inv._id} style={{ minHeight: '26px', display: 'flex', alignItems: 'center', whiteSpace: 'nowrap' }}>{render(inv)}</div>)}
+    </div>
+  );
 }
 
 function SummaryCard({ icon: Icon, label, value, hint, color }: { icon: typeof TrendingUp; label: string; value: string; hint: string; color: string }) {
@@ -164,6 +174,19 @@ export default function FinanceRecap() {
     }
   };
 
+  // PDF butuh token, jadi diambil sebagai blob; tab dibuka sinkron dulu supaya tidak diblokir popup blocker
+  const openPdf = async (id: string) => {
+    const tab = window.open('', '_blank');
+    try {
+      const res = await api.get(`/admin/documents/${id}/pdf`, { responseType: 'blob' });
+      const url = URL.createObjectURL(res.data);
+      if (tab) tab.location.href = url; else window.location.assign(url);
+    } catch {
+      tab?.close();
+      setError('Gagal membuka PDF invoice.');
+    }
+  };
+
   const exportExcel = async () => {
     setExporting(true);
     try {
@@ -187,7 +210,7 @@ export default function FinanceRecap() {
     ? `${from ? new Date(`${from}T00:00:00`).toLocaleDateString('id-ID', { dateStyle: 'medium' }) : '…'} – ${to ? new Date(`${to}T00:00:00`).toLocaleDateString('id-ID', { dateStyle: 'medium' }) : '…'}`
     : 'Semua periode';
   const headers = ['Campaign', 'Perusahaan', 'Contact', 'Bulan Running', 'Master Sheet', 'SOW', 'Tier', 'Jumlah Talent', 'Fee/Talent', 'Total',
-    'Total Payment', 'Invoice', ...columns.map((c) => c.label), 'Uang Keluar', 'Profit', 'Margin'];
+    'Total Payment', 'Invoice', 'Status', 'Jatuh Tempo', ...columns.map((c) => c.label), 'Uang Keluar', 'Profit', 'Margin'];
 
   return (
     <div>
@@ -293,26 +316,28 @@ export default function FinanceRecap() {
                           {i === 0 && (
                             <>
                               {groupCell(<strong>{rupiah(g.totalInvoice)}</strong>, { background: '#fef9e7', whiteSpace: 'nowrap' })}
-                              {groupCell(
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                                  {g.invoices.map((inv) => (
-                                    <div key={inv._id} style={{ display: 'flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap' }}>
-                                      <span style={{ fontSize: '0.74rem' }} title={`${rupiah(inv.total)} · ${inv.issueDate}`}>{inv.number || '-'}</span>
-                                      <button
-                                        onClick={() => togglePaid(inv._id, inv.paid)}
-                                        disabled={busyInvoice === inv._id}
-                                        title={inv.paid ? `Lunas ${inv.paidAt}. Klik untuk tandai belum lunas` : 'Klik untuk tandai lunas'}
-                                        style={{ border: 'none', cursor: 'pointer', padding: '3px 10px', borderRadius: '999px', fontSize: '0.7rem', fontWeight: 700, fontFamily: f, background: inv.paid ? '#d1fae5' : '#fef3c7', color: inv.paid ? '#065F46' : '#92400E', opacity: busyInvoice === inv._id ? 0.5 : 1 }}
-                                      >{inv.paid ? 'Lunas' : 'Belum Lunas'}</button>
-                                      {inv.overdue && (
-                                        <span title={`Jatuh tempo ${inv.dueDate}`} style={{ padding: '3px 8px', borderRadius: '999px', fontSize: '0.68rem', fontWeight: 700, background: '#fee2e2', color: '#b91c1c' }}>
-                                          Lewat {new Date(`${inv.dueDate}T00:00:00`).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}
-                                        </span>
-                                      )}
-                                    </div>
-                                  ))}
-                                </div>,
-                              )}
+                              {/* Invoice, Status, Jatuh Tempo: 1 baris per invoice, tinggi baris sama supaya sejajar antar kolom */}
+                              {groupCell(invoiceList(g, (inv) => (
+                                <button onClick={() => openPdf(inv._id)} title={`Buka PDF · ${rupiah(inv.total)} · ${inv.issueDate}`}
+                                  style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontFamily: f, fontSize: '0.76rem', fontWeight: 600, color: '#4b2fc4', textDecoration: 'underline', textUnderlineOffset: '2px' }}>
+                                  {inv.number || '-'} ↗
+                                </button>
+                              )))}
+                              {groupCell(invoiceList(g, (inv) => (
+                                <button
+                                  onClick={() => togglePaid(inv._id, inv.paid)}
+                                  disabled={busyInvoice === inv._id}
+                                  title={inv.paid ? `Lunas ${inv.paidAt}. Klik untuk tandai belum lunas` : 'Klik untuk tandai lunas'}
+                                  style={{ border: 'none', cursor: 'pointer', padding: '3px 10px', borderRadius: '999px', fontSize: '0.7rem', fontWeight: 700, fontFamily: f, background: inv.paid ? '#d1fae5' : '#fef3c7', color: inv.paid ? '#065F46' : '#92400E', opacity: busyInvoice === inv._id ? 0.5 : 1 }}
+                                >{inv.paid ? 'Lunas' : 'Belum Lunas'}</button>
+                              )))}
+                              {groupCell(invoiceList(g, (inv) => !inv.dueDate ? <span style={{ color: '#c7c8cf' }}>-</span> : inv.overdue ? (
+                                <span title="Belum lunas & sudah lewat jatuh tempo" style={{ padding: '3px 8px', borderRadius: '999px', fontSize: '0.7rem', fontWeight: 700, background: '#fee2e2', color: '#b91c1c' }}>
+                                  Lewat {shortDate(inv.dueDate)}
+                                </span>
+                              ) : (
+                                <span style={{ fontSize: '0.76rem', color: inv.paid ? '#8a8a99' : '#191c20' }}>{shortDate(inv.dueDate)}</span>
+                              )))}
                               {columns.map((c) => {
                                 const v = g.custom[c.key];
                                 return <Fragment key={c.key}>{groupCell(v === undefined ? '-' : c.type === 'text' ? String(v) : rupiah(Number(v)), { whiteSpace: c.type === 'text' ? 'normal' : 'nowrap' })}</Fragment>;

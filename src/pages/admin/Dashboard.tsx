@@ -32,14 +32,14 @@ const rupiah = (n: number) => `Rp${n.toLocaleString('id-ID')}`;
 
 function KpiCard({ icon: Icon, label, value, hint }: { icon: React.ComponentType<{ size?: number }>; label: string; value: number | string; hint: string }) {
   return (
-    <div style={cardStyle}>
+    <div style={{ ...cardStyle, minWidth: 0 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
-        <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(103,40,228,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#6728e4' }}>
+        <div style={{ width: '36px', height: '36px', flexShrink: 0, borderRadius: '10px', background: 'rgba(103,40,228,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#6728e4' }}>
           <Icon size={17} />
         </div>
         <p style={{ fontFamily: f, fontWeight: 700, fontSize: '0.85rem', color: '#464652' }}>{label}</p>
       </div>
-      <p style={{ fontFamily: f, fontWeight: 800, fontSize: typeof value === 'string' ? '1.4rem' : '2rem', color: '#191c20', lineHeight: 1.1 }}>{value}</p>
+      <p style={{ fontFamily: f, fontWeight: 800, fontSize: typeof value === 'string' ? '1.4rem' : '2rem', color: '#191c20', lineHeight: 1.1, overflowWrap: 'anywhere' }}>{value}</p>
       <p style={{ fontSize: '0.78rem', color: '#8a8a99', marginTop: '6px' }}>{hint}</p>
     </div>
   );
@@ -172,7 +172,8 @@ export default function Dashboard() {
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: '20px' }} className="dashboard-grid">
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', minWidth: 0 }}>
-          <div style={{ display: 'grid', gridTemplateColumns: `repeat(${isOwner ? 5 : 4}, 1fr)`, gap: '16px' }} className="dashboard-kpi-grid">
+          {/* auto-fit: kartu turun baris kalau tidak muat (5 kartu owner bisa meluber ke kolom Aktivitas Terbaru) */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: '16px' }} className="dashboard-kpi-grid">
             <KpiCard icon={Megaphone} label="Campaign Aktif" value={stats?.activeCampaigns ?? 0} hint="sedang berjalan" />
             <KpiCard icon={Users} label="Total Creator" value={stats?.totalCreators ?? 0} hint="terdaftar di sistem" />
             <KpiCard icon={Building2} label="Lead Brand Baru" value={stats?.newBrandLeads ?? 0} hint="belum ditindaklanjuti" />
