@@ -170,17 +170,17 @@ export default function Dashboard() {
         </p>
       </div>
 
+      {/* KPI satu baris selebar halaman; Aktivitas Terbaru mulai di bawahnya */}
+      <div style={{ display: 'grid', gridTemplateColumns: `repeat(${isOwner ? 5 : 4}, minmax(0, 1fr))`, gap: '16px', marginBottom: '20px' }} className="dashboard-kpi-grid dashboard-kpi-row">
+        <KpiCard icon={Megaphone} label="Campaign Aktif" value={stats?.activeCampaigns ?? 0} hint="sedang berjalan" />
+        <KpiCard icon={Users} label="Total Creator" value={stats?.totalCreators ?? 0} hint="terdaftar di sistem" />
+        <KpiCard icon={Building2} label="Lead Brand Baru" value={stats?.newBrandLeads ?? 0} hint="belum ditindaklanjuti" />
+        <KpiCard icon={Megaphone} label="Total Campaign" value={stats?.totalCampaigns ?? 0} hint="semua status" />
+        {isOwner && <KpiCard icon={Wallet} label="Fee Terdistribusi" value={rupiah(stats?.totalDistributedFees ?? 0)} hint="creator + PIC + MG, semua campaign" />}
+      </div>
+
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: '20px' }} className="dashboard-grid">
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', minWidth: 0 }}>
-          {/* auto-fit: kartu turun baris kalau tidak muat (5 kartu owner bisa meluber ke kolom Aktivitas Terbaru) */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: '16px' }} className="dashboard-kpi-grid">
-            <KpiCard icon={Megaphone} label="Campaign Aktif" value={stats?.activeCampaigns ?? 0} hint="sedang berjalan" />
-            <KpiCard icon={Users} label="Total Creator" value={stats?.totalCreators ?? 0} hint="terdaftar di sistem" />
-            <KpiCard icon={Building2} label="Lead Brand Baru" value={stats?.newBrandLeads ?? 0} hint="belum ditindaklanjuti" />
-            <KpiCard icon={Megaphone} label="Total Campaign" value={stats?.totalCampaigns ?? 0} hint="semua status" />
-            {isOwner && <KpiCard icon={Wallet} label="Fee Terdistribusi" value={rupiah(stats?.totalDistributedFees ?? 0)} hint="creator + PIC + MG, semua campaign" />}
-          </div>
-
           <div style={cardStyle}>
             <p style={{ fontFamily: f, fontWeight: 700, fontSize: '0.95rem', color: '#191c20', marginBottom: '4px' }}>Campaign Baru</p>
             <p style={{ fontSize: '0.78rem', color: '#8a8a99', marginBottom: '16px' }}>30 hari terakhir</p>
@@ -336,6 +336,9 @@ export default function Dashboard() {
       </div>
 
       <style>{`
+        @media (max-width: 1100px) {
+          .dashboard-kpi-row { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+        }
         @media (max-width: 900px) {
           .dashboard-grid { grid-template-columns: 1fr !important; }
         }

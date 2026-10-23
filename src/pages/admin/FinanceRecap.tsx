@@ -1,6 +1,6 @@
 import { Fragment, useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { AlertTriangle, ArrowDownCircle, ArrowUpCircle, Columns3, Plus, Trash2, TrendingUp, Clock, FileSpreadsheet } from 'lucide-react';
+import { AlertTriangle, ArrowDownCircle, ArrowUpCircle, Columns3, Plus, Trash2, TrendingUp, Clock, FileSpreadsheet, ChevronDown, Pencil, X, EyeOff, RotateCcw } from 'lucide-react';
 import api from '../../lib/api';
 import type { RecapColumn } from './InvoiceRecapPanel';
 
@@ -21,12 +21,17 @@ const btn = (primary = true): React.CSSProperties => ({
   background: primary ? 'var(--secondary)' : 'white', color: primary ? 'white' : '#191c20',
 });
 const input: React.CSSProperties = { padding: '7px 10px', borderRadius: '10px', border: '1.5px solid #e1e0ff', fontFamily: f, fontSize: '0.8rem', background: 'white' };
-const th: React.CSSProperties = { padding: '9px 10px', fontWeight: 700, whiteSpace: 'nowrap', background: '#f8f9ff', textAlign: 'left', borderBottom: '1.5px solid #e1e0ff' };
+// Header sticky di dalam kontainer tabel yang scroll sendiri (box-shadow ganti border, border hilang saat sticky)
+const th: React.CSSProperties = { padding: '9px 10px', fontWeight: 700, whiteSpace: 'nowrap', background: '#f8f9ff', textAlign: 'left', position: 'sticky', top: 0, zIndex: 2, boxShadow: 'inset 0 -1.5px 0 #e1e0ff' };
+/** Sel angka yang bisa diklik untuk diedit */
+const editableCell = (color: string): React.CSSProperties => ({
+  display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '4px 8px', margin: '-4px -8px', borderRadius: '8px', cursor: 'pointer',
+  background: 'none', border: '1.5px dashed transparent', fontFamily: f, fontSize: '0.8rem', fontWeight: 600, color,
+});
 const td: React.CSSProperties = { padding: '8px 10px', borderBottom: '1px solid #f0f0f0', verticalAlign: 'middle' };
 
 const rupiah = (v: number) => `Rp${Math.round(v).toLocaleString('id-ID')}`;
 const ymd = (d: Date) => d.toLocaleDateString('en-CA');
-const shortDate = (ymdStr: string) => new Date(`${ymdStr}T00:00:00`).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
 const monthLabel = (ym: string) => (ym ? new Date(`${ym}-01T00:00:00`).toLocaleDateString('id-ID', { month: 'long', year: 'numeric' }) : '-');
 
 type Mode = 'week' | 'month' | 'year' | 'custom' | 'all';
@@ -57,10 +62,12 @@ interface Group {
   expense: { feeCreator: number; feePic: number; feeMg: number; reimburse: number; ads: number; opex: number; custom: number; total: number };
   profit: number; margin: number | null;
   approvedCreators: number | null; talentWarning: string;
+  /** Disembunyikan dari rekap: tidak ikut total & export, bisa dipulihkan */
+  hidden: boolean;
 }
 interface Recap {
   columns: RecapColumn[]; groups: Group[];
-  totals: { income: number; expense: number; profit: number; margin: number | null; receivable: number; overdue: number; invoiceCount: number; paidCount: number };
+  totals: { income: number; expense: number; profit: number; margin: number | null; receivable: number; overdue: number; invoiceCount: number; paidCount: number; hiddenCount: number };
 }
 
 const TIER_COLORS: Record<string, [string, string]> = {
@@ -143,6 +150,184 @@ function ColumnManager({ columns, onSaved, onClose }: { columns: RecapColumn[]; 
   );
 }
 
+const STATUS_STYLE = { paid: { bg: '#d1fae5', fg: '#065F46', border: '#6ee7b7' }, unpaid: { bg: '#fef3c7', fg: '#92400E', border: '#fcd34d' } };
+
+/** Dropdown status ala sheet (pill + ▾), jelas bisa diganti. */
+function StatusSelect({ paid, paidAt, busy, onChange }: { paid: boolean; paidAt: string; busy: boolean; onChange: (paid: boolean) => void }) {
+  const st = STATUS_STYLE[paid ? 'paid' : 'unpaid'];
+  return (
+    <span style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }} title={paid && paidAt ? `Lunas ${paidAt}` : 'Ganti status pembayaran'}>
+      <select
+        value={paid ? 'paid' : 'unpaid'}
+        disabled={busy}
+        onChange={(e) => onChange(e.target.value === 'paid')}
+        aria-label="Status pembayaran"
+        style={{
+          appearance: 'none', WebkitAppearance: 'none', cursor: 'pointer', fontFamily: f, fontSize: '0.72rem', fontWeight: 700,
+          padding: '4px 26px 4px 12px', borderRadius: '999px', border: `1.5px solid ${st.border}`, background: st.bg, color: st.fg, opacity: busy ? 0.5 : 1,
+        }}
+      >
+        <option value="unpaid">Belum Lunas</option>
+        <option value="paid">Lunas</option>
+      </select>
+      <ChevronDown size={13} color={st.fg} style={{ position: 'absolute', right: '9px', pointerEvents: 'none' }} />
+    </span>
+  );
+}
+
+/** Jatuh tempo bisa diubah langsung; merah kalau belum lunas & sudah lewat. */
+function DueDateInput({ value, overdue, paid, busy, onChange }: { value: string; overdue: boolean; paid: boolean; busy: boolean; onChange: (v: string) => void }) {
+  return (
+    <input
+      type="date"
+      value={value}
+      disabled={busy}
+      onChange={(e) => onChange(e.target.value)}
+      title={overdue ? 'Belum lunas & sudah lewat jatuh tempo' : 'Ubah jatuh tempo'}
+      style={{
+        ...input, padding: '3px 8px', fontSize: '0.74rem', cursor: 'pointer', opacity: busy ? 0.5 : 1,
+        ...(overdue ? { background: '#fee2e2', borderColor: '#fca5a5', color: '#b91c1c', fontWeight: 700 } : paid ? { color: '#8a8a99' } : {}),
+      }}
+    />
+  );
+}
+
+type AutoFee = 'feeCreator' | 'feePic' | 'feeMg';
+type FeeField = AutoFee | 'reimburse' | 'ads' | 'opex';
+const FEE_FIELDS: { key: FeeField; label: string }[] = [
+  { key: 'feeCreator', label: 'Fee Creator' }, { key: 'feePic', label: 'Fee PIC' }, { key: 'feeMg', label: 'Fee MG' },
+  { key: 'reimburse', label: 'Reimburse' }, { key: 'ads', label: 'Ads' }, { key: 'opex', label: 'Opex' },
+];
+const AUTO_FEES: FeeField[] = ['feeCreator', 'feePic', 'feeMg'];
+interface FinanceRecord extends Record<FeeField, number> {
+  feeManual: AutoFee[];
+  auto: { acceptedCount: number; perCreator: Record<AutoFee, number>; totals: Record<AutoFee, number> };
+}
+
+/**
+ * Editor uang keluar satu campaign (= tab Finance campaign, PATCH /campaigns/:id/finance) + preview profit.
+ * Profit = uang masuk − uang keluar, jadi diubah lewat rincian ini, bukan diketik langsung.
+ * Grup tanpa campaign: pilih campaign dulu (uang keluar diambil dari campaign itu).
+ */
+function ExpenseEditor({ group, campaigns, onClose, onSaved }: {
+  group: Group; campaigns: { _id: string; name: string }[]; onClose: () => void; onSaved: () => void;
+}) {
+  const [record, setRecord] = useState<FinanceRecord | null>(null);
+  const [draft, setDraft] = useState<Partial<Record<FeeField, number | null>>>({});
+  const [linkTo, setLinkTo] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (!group.campaignId) return;
+    api.get(`/admin/campaigns/${group.campaignId}/finance`).then((res) => setRecord(res.data)).catch(() => setError('Gagal memuat data biaya campaign.'));
+  }, [group.campaignId]);
+
+  // Nilai tampil: draft (null = kembali otomatis) > record
+  const valueOf = (k: FeeField) => {
+    const d = draft[k];
+    if (d === null) return record?.auto.totals[k as AutoFee] ?? 0;
+    return d ?? record?.[k] ?? 0;
+  };
+  const isManual = (k: FeeField) => AUTO_FEES.includes(k) && (draft[k] === null ? false : draft[k] !== undefined || !!record?.feeManual.includes(k as AutoFee));
+  const total = FEE_FIELDS.reduce((sum, { key }) => sum + valueOf(key), 0) + group.expense.custom;
+  const profit = group.income - total;
+
+  const save = async () => {
+    setBusy(true); setError('');
+    try {
+      if (!group.campaignId) {
+        await Promise.all(group.invoices.map((inv) => api.patch(`/admin/finance-recap/invoices/${inv._id}`, { campaignId: linkTo })));
+      } else if (Object.keys(draft).length) {
+        await api.patch(`/admin/campaigns/${group.campaignId}/finance`, draft);
+      }
+      onSaved();
+    } catch {
+      setError('Gagal menyimpan.');
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div role="dialog" aria-modal="true" onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(25,28,32,0.45)', zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
+      <div onClick={(e) => e.stopPropagation()} style={{ ...cardStyle, marginBottom: 0, width: 'min(560px, 100%)', maxHeight: '90vh', overflowY: 'auto' }}>
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', marginBottom: '4px' }}>
+          <p style={{ fontFamily: f, fontWeight: 800, fontSize: '1rem', flex: 1 }}>Uang Keluar · {group.campaign}</p>
+          <button onClick={onClose} aria-label="Tutup" style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#464652' }}><X size={18} /></button>
+        </div>
+
+        {!group.campaignId ? (
+          <>
+            <p style={{ fontFamily: f, fontSize: '0.78rem', color: '#464652', margin: '8px 0 12px' }}>
+              Invoice ini belum dihubungkan ke campaign, jadi belum ada data biaya. Pilih campaign-nya: uang keluar diambil dari fee creator/PIC/MG di Recap Payment + reimburse/ads/opex campaign itu.
+            </p>
+            <select style={{ ...input, width: '100%' }} value={linkTo} onChange={(e) => setLinkTo(e.target.value)}>
+              <option value="">— Pilih campaign —</option>
+              {campaigns.map((c) => <option key={c._id} value={c._id}>{c.name}</option>)}
+            </select>
+          </>
+        ) : !record ? (
+          <p style={{ fontFamily: f, fontSize: '0.82rem', color: '#464652', marginTop: '12px' }}>{error || 'Memuat...'}</p>
+        ) : (
+          <>
+            <p style={{ fontFamily: f, fontSize: '0.74rem', color: '#8a8a99', marginBottom: '14px' }}>
+              Sama dengan tab Finance di halaman campaign. Fee otomatis = fee per creator × {record.auto.acceptedCount} creator di-approve; ketik angka untuk mengganti manual.
+            </p>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '12px' }}>
+              {FEE_FIELDS.map(({ key, label }) => {
+                const auto = AUTO_FEES.includes(key);
+                const manual = isManual(key);
+                return (
+                  <label key={key} style={{ display: 'block' }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontFamily: f, fontSize: '0.72rem', fontWeight: 700, color: '#464652', marginBottom: '4px' }}>
+                      {label}
+                      {auto && (
+                        <span style={{ fontSize: '0.62rem', padding: '1px 7px', borderRadius: '999px', background: manual ? '#fef3c7' : '#eefad8', color: manual ? '#92400E' : '#3d6b00' }}>
+                          {manual ? 'Manual' : 'Otomatis'}
+                        </span>
+                      )}
+                    </span>
+                    <input type="number" style={{ ...input, width: '100%' }} value={valueOf(key)}
+                      onChange={(e) => setDraft((d) => ({ ...d, [key]: Number(e.target.value) || 0 }))} />
+                    {auto && manual && (
+                      <button type="button" onClick={() => setDraft((d) => ({ ...d, [key]: null }))}
+                        style={{ background: 'none', border: 'none', padding: 0, marginTop: '4px', cursor: 'pointer', fontFamily: f, fontSize: '0.68rem', fontWeight: 700, color: '#6728e4' }}>
+                        Pakai otomatis ({rupiah(record.auto.totals[key as AutoFee])})
+                      </button>
+                    )}
+                  </label>
+                );
+              })}
+            </div>
+            {group.expense.custom > 0 && (
+              <p style={{ fontFamily: f, fontSize: '0.72rem', color: '#8a8a99', marginTop: '10px' }}>
+                + {rupiah(group.expense.custom)} dari kolom tambahan uang keluar (diubah di panel Data Rekap invoice).
+              </p>
+            )}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', marginTop: '16px', padding: '12px', borderRadius: '12px', background: '#f8f9ff' }}>
+              {[['Uang Masuk', group.income, '#047857'], ['Uang Keluar', total, '#b91c1c'], ['Profit', profit, profit < 0 ? '#b91c1c' : '#4b2fc4']].map(([l, v, c]) => (
+                <div key={l as string}>
+                  <p style={{ fontFamily: f, fontSize: '0.7rem', color: '#8a8a99' }}>{l}</p>
+                  <p style={{ fontFamily: f, fontWeight: 800, fontSize: '0.95rem', color: c as string }}>{rupiah(v as number)}</p>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+
+        {error && record && <p style={{ color: '#ba1a1a', fontFamily: f, fontSize: '0.78rem', marginTop: '10px' }}>{error}</p>}
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '16px' }}>
+          <button onClick={onClose} style={btn(false)}>Batal</button>
+          <button onClick={save} disabled={busy || (!group.campaignId ? !linkTo : !record || !Object.keys(draft).length)}
+            style={{ ...btn(), opacity: busy || (!group.campaignId ? !linkTo : !record || !Object.keys(draft).length) ? 0.6 : 1 }}>
+            {busy ? 'Menyimpan...' : group.campaignId ? 'Simpan' : 'Hubungkan'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function FinanceRecap() {
   const [mode, setMode] = useState<Mode>('month');
   const [ref, setRef] = useState(() => ymd(new Date()));
@@ -153,22 +338,39 @@ export default function FinanceRecap() {
   const [managing, setManaging] = useState(false);
   const [busyInvoice, setBusyInvoice] = useState<string | null>(null);
   const [exporting, setExporting] = useState(false);
+  const [editingGroup, setEditingGroup] = useState<Group | null>(null);
+  const [showHidden, setShowHidden] = useState(false);
+  const [confirmHide, setConfirmHide] = useState<string | null>(null);
+  const [campaigns, setCampaigns] = useState<{ _id: string; name: string }[]>([]);
+  useEffect(() => { api.get('/admin/campaigns').then((res) => setCampaigns(res.data)).catch(() => {}); }, []);
 
   const { from, to } = rangeOf(mode, ref, customFrom, customTo);
   const load = useCallback(() => {
-    api.get('/admin/finance-recap', { params: { from, to } })
+    api.get('/admin/finance-recap', { params: { from, to, showHidden: showHidden ? '1' : undefined } })
       .then((res) => { setData(res.data); setError(''); })
       .catch(() => setError('Gagal memuat rekap keuangan.'));
-  }, [from, to]);
+  }, [from, to, showHidden]);
   useEffect(() => { load(); }, [load]);
 
-  const togglePaid = async (id: string, paid: boolean) => {
-    setBusyInvoice(id);
+  /** Sembunyikan / pulihkan semua invoice di satu baris rekap (invoice-nya sendiri tidak dihapus) */
+  const setHidden = async (g: Group, hidden: boolean) => {
+    setConfirmHide(null);
     try {
-      await api.patch(`/admin/finance-recap/invoices/${id}`, { status: paid ? 'unpaid' : 'paid' });
+      await Promise.all(g.invoices.map((inv) => api.patch(`/admin/finance-recap/invoices/${inv._id}`, { hidden })));
       load();
     } catch {
-      setError('Gagal mengubah status invoice.');
+      setError(hidden ? 'Gagal menghapus baris dari rekap.' : 'Gagal memulihkan baris.');
+    }
+  };
+
+  /** Ubah field rekap satu invoice (status / jatuh tempo) lalu muat ulang total */
+  const patchInvoice = async (id: string, body: Record<string, unknown>) => {
+    setBusyInvoice(id);
+    try {
+      await api.patch(`/admin/finance-recap/invoices/${id}`, body);
+      load();
+    } catch {
+      setError('Gagal menyimpan perubahan invoice.');
     } finally {
       setBusyInvoice(null);
     }
@@ -210,7 +412,7 @@ export default function FinanceRecap() {
     ? `${from ? new Date(`${from}T00:00:00`).toLocaleDateString('id-ID', { dateStyle: 'medium' }) : '…'} – ${to ? new Date(`${to}T00:00:00`).toLocaleDateString('id-ID', { dateStyle: 'medium' }) : '…'}`
     : 'Semua periode';
   const headers = ['Campaign', 'Perusahaan', 'Contact', 'Bulan Running', 'Master Sheet', 'SOW', 'Tier', 'Jumlah Talent', 'Fee/Talent', 'Total',
-    'Total Payment', 'Invoice', 'Status', 'Jatuh Tempo', ...columns.map((c) => c.label), 'Uang Keluar', 'Profit', 'Margin'];
+    'Total Payment', 'Invoice', 'Status', 'Jatuh Tempo', ...columns.map((c) => c.label), 'Uang Keluar', 'Profit', 'Margin', ''];
 
   return (
     <div>
@@ -239,11 +441,21 @@ export default function FinanceRecap() {
         )}
         <span style={{ fontFamily: f, fontSize: '0.78rem', color: '#8a8a99' }}>{periodLabel} · berdasarkan tanggal invoice</span>
         <span style={{ flex: 1 }} />
+        {(showHidden || !!t?.hiddenCount) && (
+          <button onClick={() => setShowHidden((v) => !v)} style={{ ...btn(false), ...(showHidden && { background: '#f4f3ff', borderColor: '#c4b5fd' }) }}>
+            <EyeOff size={13} /> {showHidden ? 'Sembunyikan yang dihapus' : `Lihat yang dihapus (${t?.hiddenCount})`}
+          </button>
+        )}
         <button onClick={() => setManaging((v) => !v)} style={btn(false)}><Columns3 size={13} /> Kolom Tambahan</button>
         <button onClick={exportExcel} disabled={exporting || !data?.groups.length} style={{ ...btn(), opacity: exporting || !data?.groups.length ? 0.6 : 1 }}>
           <FileSpreadsheet size={13} /> {exporting ? 'Menyiapkan...' : 'Export Excel'}
         </button>
       </div>
+
+      {editingGroup && (
+        <ExpenseEditor group={editingGroup} campaigns={campaigns} onClose={() => setEditingGroup(null)} onSaved={() => { setEditingGroup(null); load(); }} />
+      )}
+      <style>{`.recap-table-scroll button:hover { border-color: #c4b5fd !important; background: #f4f3ff !important; }`}</style>
 
       {managing && data && <ColumnManager columns={columns} onClose={() => setManaging(false)} onSaved={() => { setManaging(false); load(); }} />}
 
@@ -270,7 +482,7 @@ export default function FinanceRecap() {
             Belum ada invoice di periode ini. Buat di menu <Link to="/admin/documents/invoice" style={{ color: '#4b2fc4', fontWeight: 600 }}>Invoice</Link>.
           </p>
         ) : (
-          <div style={{ overflowX: 'auto' }}>
+          <div style={{ overflow: 'auto', maxHeight: 'calc(100vh - 220px)' }} className="recap-table-scroll">
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.8rem', fontFamily: f }}>
               <thead><tr>{headers.map((h) => <th key={h} style={th}>{h}</th>)}</tr></thead>
               <tbody>
@@ -284,7 +496,7 @@ export default function FinanceRecap() {
                   return (
                     <Fragment key={g.key}>
                       {items.map((it, i) => (
-                        <tr key={i}>
+                        <tr key={i} style={g.hidden ? { opacity: 0.5, background: '#fafafa' } : undefined} title={g.hidden ? 'Dihapus dari rekap, tidak ikut dihitung' : undefined}>
                           {i === 0 && (
                             <>
                               {groupCell(
@@ -324,27 +536,41 @@ export default function FinanceRecap() {
                                 </button>
                               )))}
                               {groupCell(invoiceList(g, (inv) => (
-                                <button
-                                  onClick={() => togglePaid(inv._id, inv.paid)}
-                                  disabled={busyInvoice === inv._id}
-                                  title={inv.paid ? `Lunas ${inv.paidAt}. Klik untuk tandai belum lunas` : 'Klik untuk tandai lunas'}
-                                  style={{ border: 'none', cursor: 'pointer', padding: '3px 10px', borderRadius: '999px', fontSize: '0.7rem', fontWeight: 700, fontFamily: f, background: inv.paid ? '#d1fae5' : '#fef3c7', color: inv.paid ? '#065F46' : '#92400E', opacity: busyInvoice === inv._id ? 0.5 : 1 }}
-                                >{inv.paid ? 'Lunas' : 'Belum Lunas'}</button>
+                                <StatusSelect paid={inv.paid} paidAt={inv.paidAt} busy={busyInvoice === inv._id}
+                                  onChange={(paid) => patchInvoice(inv._id, { status: paid ? 'paid' : 'unpaid' })} />
                               )))}
-                              {groupCell(invoiceList(g, (inv) => !inv.dueDate ? <span style={{ color: '#c7c8cf' }}>-</span> : inv.overdue ? (
-                                <span title="Belum lunas & sudah lewat jatuh tempo" style={{ padding: '3px 8px', borderRadius: '999px', fontSize: '0.7rem', fontWeight: 700, background: '#fee2e2', color: '#b91c1c' }}>
-                                  Lewat {shortDate(inv.dueDate)}
-                                </span>
-                              ) : (
-                                <span style={{ fontSize: '0.76rem', color: inv.paid ? '#8a8a99' : '#191c20' }}>{shortDate(inv.dueDate)}</span>
+                              {groupCell(invoiceList(g, (inv) => (
+                                <DueDateInput value={inv.dueDate} overdue={inv.overdue} paid={inv.paid} busy={busyInvoice === inv._id}
+                                  onChange={(v) => patchInvoice(inv._id, { dueDate: v })} />
                               )))}
                               {columns.map((c) => {
                                 const v = g.custom[c.key];
                                 return <Fragment key={c.key}>{groupCell(v === undefined ? '-' : c.type === 'text' ? String(v) : rupiah(Number(v)), { whiteSpace: c.type === 'text' ? 'normal' : 'nowrap' })}</Fragment>;
                               })}
-                              {groupCell(<span title={breakdown || 'Belum ada biaya'} style={{ cursor: 'help', borderBottom: '1px dotted #c7c8cf' }}>{rupiah(e.total)}</span>, { whiteSpace: 'nowrap', color: '#b91c1c' })}
-                              {groupCell(<strong>{rupiah(g.profit)}</strong>, { whiteSpace: 'nowrap', color: g.profit < 0 ? '#b91c1c' : '#047857' })}
+                              {/* Uang keluar & profit: klik → editor rincian biaya (profit = masuk − keluar) */}
+                              {groupCell(
+                                <button onClick={() => setEditingGroup(g)} title={`${breakdown || 'Belum ada biaya'}\n\nKlik untuk ubah`} style={editableCell('#b91c1c')}>
+                                  {rupiah(e.total)} <Pencil size={11} />
+                                </button>, { whiteSpace: 'nowrap' })}
+                              {groupCell(
+                                <button onClick={() => setEditingGroup(g)} title="Profit = uang masuk − uang keluar. Klik untuk ubah rincian uang keluar" style={{ ...editableCell(g.profit < 0 ? '#b91c1c' : '#047857'), fontWeight: 800 }}>
+                                  {rupiah(g.profit)} <Pencil size={11} />
+                                </button>, { whiteSpace: 'nowrap' })}
                               {groupCell(g.margin != null ? `${g.margin}%` : '-', { whiteSpace: 'nowrap' })}
+                              {groupCell(g.hidden ? (
+                                <button onClick={() => setHidden(g, false)} title="Kembalikan ke rekap" style={{ ...btn(false), padding: '5px 10px', whiteSpace: 'nowrap' }}><RotateCcw size={12} /> Pulihkan</button>
+                              ) : confirmHide === g.key ? (
+                                <span style={{ display: 'inline-flex', flexDirection: 'column', gap: '6px', fontSize: '0.72rem', color: '#ba1a1a', whiteSpace: 'nowrap' }}>
+                                  Hapus dari rekap?
+                                  <span style={{ display: 'inline-flex', gap: '4px' }}>
+                                    <button onClick={() => setHidden(g, true)} style={{ ...btn(), background: '#ba1a1a', padding: '5px 10px' }}>Ya, hapus</button>
+                                    <button onClick={() => setConfirmHide(null)} style={{ ...btn(false), padding: '5px 10px' }}>Batal</button>
+                                  </span>
+                                </span>
+                              ) : (
+                                <button onClick={() => setConfirmHide(g.key)} aria-label="Hapus dari rekap" title="Hapus dari rekap (invoice tetap ada di menu Invoice, bisa dipulihkan)"
+                                  style={{ ...btn(false), padding: '6px 9px' }}><Trash2 size={13} /></button>
+                              ))}
                             </>
                           )}
                         </tr>
