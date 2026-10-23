@@ -21,7 +21,11 @@ interface DashboardStats {
   recentActivity: { type: 'brand' | 'creator'; id: string; name: string; subtitle: string; status: string; createdAt: string }[];
   workflowFunnel: { stage: string; count: number }[];
   /** client, totalDistributedFees & monthlyDistributedFees hanya dikirim untuk owner */
-  pendingPayments: { client?: { count: number; total: number }; creator: { count: number } };
+  pendingPayments: {
+    client?: { count: number; total: number }; creator: { count: number };
+    /** Fee belum ditandai Lunas di Recap Payment; total hanya dikirim untuk owner */
+    creatorPayout?: { count: number; total?: number }; picPayout?: { count: number; total?: number };
+  };
   actionItems: { label: string; count: number; to: string }[];
   monthlyDistributedFees?: { month: string; total: number }[];
   topCreators: { id: string; name: string; avgEngagementRate: number | null; totalFollowers: number }[];
@@ -303,10 +307,18 @@ export default function Dashboard() {
                 <p style={{ fontSize: '0.75rem', color: '#8a8a99' }}>{stats?.pendingPayments.client?.count ?? 0} invoice</p>
               </div>
             )}
-            <div>
-              <p style={{ fontSize: '0.78rem', color: '#8a8a99' }}>Creator (info pembayaran belum dikonfirmasi)</p>
-              <p style={{ fontFamily: f, fontWeight: 800, fontSize: '1.3rem', color: '#191c20' }}>{stats?.pendingPayments.creator.count ?? 0} PIC</p>
-            </div>
+            {[
+              { label: 'PIC (fee belum dibayar)', data: stats?.pendingPayments.picPayout, unit: 'PIC' },
+              { label: 'Creator under PIC (fee belum dibayar)', data: stats?.pendingPayments.creatorPayout, unit: 'creator' },
+            ].map(({ label, data, unit }) => (
+              <div key={unit}>
+                <p style={{ fontSize: '0.78rem', color: '#8a8a99' }}>{label}</p>
+                <p style={{ fontFamily: f, fontWeight: 800, fontSize: '1.3rem', color: '#191c20' }}>
+                  {isOwner && data?.total !== undefined ? rupiah(data.total) : `${data?.count ?? 0} ${unit}`}
+                </p>
+                {isOwner && data?.total !== undefined && <p style={{ fontSize: '0.75rem', color: '#8a8a99' }}>{data.count} {unit}</p>}
+              </div>
+            ))}
           </div>
         </div>
 
