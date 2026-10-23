@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import api from '../lib/api';
-import CampaignBoard, { BoardMessage, type ApplicantsView, type BoardView } from '../components/CampaignBoard';
+import CampaignBoard, { BoardMessage, type ApplicantsView, type BoardView, type BriefBlock } from '../components/CampaignBoard';
 
 /**
  * Dashboard campaign via link + kode (tanpa login), kolom sama dengan dashboard creator.
@@ -54,24 +54,18 @@ export default function CampaignDashboard({ audience = 'pic' }: { audience?: 'pi
     loadApplicants();
   };
 
-  const saveBrief = async (kind: 'text' | 'link', content: string) => {
-    await api.post(`/campaigns/${id}/client/brief/blocks`, { code, kind, content });
-    await load();
-  };
+  // Brief Campaign ala Notion (BriefEditor): autosave seluruh isi tanpa reload board (ketikan tidak terganggu)
+  const saveBrief = useCallback(async (blocks: BriefBlock[]) => {
+    await api.put(`/campaigns/${id}/client/brief`, { code, blocks });
+  }, [id, code]);
 
-  const uploadBrief = async (kind: 'file' | 'image' | 'video', file: File) => {
+  const uploadBrief = useCallback(async (file: File) => {
     const fd = new FormData();
     fd.append('code', code);
-    fd.append('kind', kind);
     fd.append('file', file);
-    await api.post(`/campaigns/${id}/client/brief/blocks/upload`, fd, { headers: { 'Content-Type': 'multipart/form-data' } });
-    await load();
-  };
-
-  const removeBrief = async (index: number) => {
-    await api.delete(`/campaigns/${id}/client/brief/blocks/${index}`, { data: { code } });
-    await load();
-  };
+    const res = await api.post(`/campaigns/${id}/client/brief/upload`, fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+    return res.data as { url: string; kind: BriefBlock['kind'] };
+  }, [id, code]);
 
   if (error && !view) return <BoardMessage text={error} />;
   if (!view) return <BoardMessage text="Memuat…" />;
@@ -87,7 +81,6 @@ export default function CampaignDashboard({ audience = 'pic' }: { audience?: 'pi
       onDecideApplicant={audience === 'client' ? decideApplicant : undefined}
       onSaveBrief={audience === 'client' ? saveBrief : undefined}
       onUploadBrief={audience === 'client' ? uploadBrief : undefined}
-      onRemoveBrief={audience === 'client' ? removeBrief : undefined}
     />
   );
 }
