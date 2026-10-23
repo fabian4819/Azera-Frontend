@@ -58,13 +58,7 @@ export default function Hero() {
             marginBottom: '26px',
           }}
         >
-          Scale Your Brand with{' '}
-          <span className="underline-accent">
-            Nano&ndash;Micro Creators
-            <svg viewBox="0 0 300 20" preserveAspectRatio="none" fill="none">
-              <path d="M2 14C60 4 160 2 298 12" stroke="var(--lime)" strokeWidth="5" strokeLinecap="round" />
-            </svg>
-          </span>
+          Scale Your Brand with Nano&ndash;Micro Creators
         </motion.h1>
 
         <motion.p
