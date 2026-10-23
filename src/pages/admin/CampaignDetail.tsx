@@ -344,9 +344,7 @@ export default function CampaignDetail() {
           <div style={cardStyle}>
             <p style={shareTitle}>Brief Campaign</p>
             <p style={shareDesc}>
-              Brief kreatif yang tampil di dashboard creator/PIC/client (beda dari Broadcast Campaign yang dikirim
-              lewat WA). Ketik langsung seperti di Notion; sisipkan gambar, video, file, atau link lewat tombol + di
-              samping baris atau ketik "/". Gambar bisa di-paste / drop. Tersimpan otomatis, client juga bisa edit.
+              Tampil di dashboard creator, PIC & client. Ketik "/" untuk sisipkan gambar, video, file, atau link.
             </p>
 
             <div style={{ marginTop: '16px', padding: '18px 20px', borderRadius: '14px', border: '1px solid #ecebf5', background: '#fff' }}>
