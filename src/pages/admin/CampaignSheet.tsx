@@ -48,7 +48,9 @@ export default function CampaignSheet() {
   const [deciding, setDeciding] = useState<string | null>(null);
   const [actionError, setActionError] = useState('');
   const [copied, setCopied] = useState<string | null>(null);
-  const [requestingBankInfo, setRequestingBankInfo] = useState(false);
+  // 'all' = kirim ke semua PIC, id PIC = kirim ke satu PIC; null = tidak sedang mengirim
+  const [requestingBankInfo, setRequestingBankInfo] = useState<string | null>(null);
+  const [actionNotice, setActionNotice] = useState('');
   const [togglingPaidId, setTogglingPaidId] = useState<string | null>(null);
   const [recapSubTab, setRecapSubTab] = useState<'creator' | 'pic'>('creator');
   const view = cache[kind];
@@ -202,20 +204,20 @@ export default function CampaignSheet() {
     }
   };
 
-  // AD-adjustment-6: admin minta info bank/e-wallet via WA ke semua PIC campaign ini
-  const requestBankInfo = async () => {
-    setRequestingBankInfo(true);
-    setActionError('');
+  // AD-adjustment-6: admin minta info bank/e-wallet via WA ke semua PIC campaign ini, atau satu PIC (picUserId).
+  // Pesan = template "Minta Info Bank/E-Wallet (PIC)" di menu Template Pesan.
+  const requestBankInfo = async (picUserId?: string, picName?: string) => {
+    setRequestingBankInfo(picUserId ?? 'all');
+    setActionError(''); setActionNotice('');
     try {
-      const res = await api.post(`/admin/campaigns/${id}/recap/request-bank-info`);
-      setActionError('');
-      window.alert(`Pesan WA terkirim ke ${res.data.count} PIC.`);
+      const res = await api.post(`/admin/campaigns/${id}/recap/request-bank-info`, picUserId ? { picUserId } : {});
+      setActionNotice(picName ? `Pesan WA permintaan info bank/e-wallet terkirim ke ${picName}.` : `Pesan WA terkirim ke ${res.data.count} PIC.`);
       await reloadCurrent();
     } catch (err) {
       const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
       setActionError(msg || 'Gagal mengirim pesan WA.');
     } finally {
-      setRequestingBankInfo(false);
+      setRequestingBankInfo(null);
     }
   };
 
@@ -293,9 +295,10 @@ export default function CampaignSheet() {
             </a>
           )}
           {isRecap && (
-            <button type="button" onClick={() => void requestBankInfo()} disabled={requestingBankInfo}
+            <button type="button" onClick={() => void requestBankInfo()} disabled={!!requestingBankInfo}
+              title="Kirim WA ke semua PIC campaign ini. Per PIC: tombol di tab Rekap per PIC. Isi pesan diatur di menu Template Pesan."
               style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '0 14px', height: '38px', borderRadius: '10px', border: 'none', background: '#25d366', color: 'white', fontFamily: f, fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer', opacity: requestingBankInfo ? 0.6 : 1 }}>
-              <MessageCircle size={14} /> {requestingBankInfo ? 'Mengirim...' : 'Minta Info Bank/E-Wallet'}
+              <MessageCircle size={14} /> {requestingBankInfo === 'all' ? 'Mengirim...' : 'Minta Info ke Semua PIC'}
             </button>
           )}
         </div>
@@ -322,6 +325,12 @@ export default function CampaignSheet() {
         })}
       </div>
 
+      {actionNotice && (
+        <div role="status" style={{ display: 'flex', justifyContent: 'space-between', gap: '10px', padding: '10px 14px', marginBottom: '10px', borderRadius: '10px', background: '#d7f5e3', color: '#146c2e', fontSize: '0.8rem' }}>
+          {actionNotice}
+          <button type="button" onClick={() => setActionNotice('')} aria-label="Tutup pesan" style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#146c2e', display: 'flex' }}><X size={14} /></button>
+        </div>
+      )}
       {actionError && (
         <div role="alert" style={{ display: 'flex', justifyContent: 'space-between', gap: '10px', padding: '10px 14px', marginBottom: '10px', borderRadius: '10px', background: '#ffdad6', color: '#93000a', fontSize: '0.8rem' }}>
           {actionError}
@@ -357,14 +366,24 @@ export default function CampaignSheet() {
           emptyText="Belum ada PIC yang pegang creator di campaign ini."
           canEdit={(_row, col) => view.byPic?.columns?.[col]?.access === 'edit'}
           onEdit={editPicCell}
-          actionHeader="Status"
+          actionHeader="Aksi"
           rowAction={(row) => {
             const picId = view.byPic?.rowIds?.[row];
             const statusCol = view.byPic?.headers.indexOf('Status Pembayaran') ?? -1;
             const paid = statusCol >= 0 && view.byPic?.rows[row]?.[statusCol] === 'Lunas';
             if (!picId) return null;
             const busy = togglingPaidId === picId;
+            const picName = String(view.byPic?.rows[row]?.[0] ?? 'PIC');
             return (
+              <span style={{ display: 'inline-flex', gap: '6px' }}>
+              <button type="button" disabled={!!requestingBankInfo} onClick={() => void requestBankInfo(picId, picName)}
+                title={`Kirim WA minta info bank/e-wallet ke ${picName}`}
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '4px 10px', borderRadius: '6px', border: 'none', whiteSpace: 'nowrap',
+                  background: '#dcf8e5', color: '#128c3e', fontSize: '0.72rem', fontWeight: 700, cursor: requestingBankInfo ? 'wait' : 'pointer', opacity: requestingBankInfo && requestingBankInfo !== picId ? 0.6 : 1,
+                }}>
+                <MessageCircle size={12} /> {requestingBankInfo === picId ? 'Mengirim...' : 'Minta Info'}
+              </button>
               <button type="button" disabled={busy} onClick={() => void togglePicPaid(picId, !paid)}
                 style={{
                   display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '4px 10px', borderRadius: '6px', border: 'none',
@@ -373,6 +392,7 @@ export default function CampaignSheet() {
                 }}>
                 {paid ? '✓ Lunas' : 'Tandai Lunas'}
               </button>
+              </span>
             );
           }}
         />

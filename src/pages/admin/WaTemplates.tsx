@@ -30,6 +30,12 @@ const TRIGGER_LABELS: Record<string, string> = {
   campaign_completed: 'Campaign Selesai',
   daily_progress_report: 'Daily Progress Report',
   broadcast_campaign: 'Broadcast Campaign',
+  pic_bank_info_request: 'Minta Info Bank/E-Wallet (PIC)',
+};
+
+/** Placeholder khusus per trigger, ditampilkan di bawah judul template */
+const TRIGGER_HINTS: Record<string, string> = {
+  pic_bank_info_request: 'Dikirim dari Recap Payment → Rekap per PIC (per PIC atau semua). Placeholder: {{nama}} (nama PIC), {{campaign}}, {{jumlah_creator}}, {{fee}} (total fee PIC). Baris isian di bawah biarkan kosong supaya PIC tinggal isi lalu kirim balik.',
 };
 
 export default function WaTemplates() {
@@ -96,6 +102,7 @@ export default function WaTemplates() {
             <p style={{ fontFamily: f, fontWeight: 700, fontSize: '0.88rem', color: '#191c20' }}>
               {TRIGGER_LABELS[t.trigger] || t.trigger}
             </p>
+            {TRIGGER_HINTS[t.trigger] && <span style={{ flex: 1, fontFamily: f, fontSize: '0.72rem', color: '#8a8a99' }}>{TRIGGER_HINTS[t.trigger]}</span>}
             <Switch
               checked={t.enabled !== false}
               onChange={(v) => void toggle(t.trigger, v)}
@@ -106,7 +113,7 @@ export default function WaTemplates() {
           <textarea
             value={drafts[t.trigger] ?? ''}
             onChange={(e) => setDrafts((prev) => ({ ...prev, [t.trigger]: e.target.value }))}
-            rows={4}
+            rows={t.trigger === 'pic_bank_info_request' ? 10 : 4}
             style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1.5px solid #c7c8cf', fontSize: '0.82rem', fontFamily: f, resize: 'vertical', outline: 'none', marginBottom: '10px', boxSizing: 'border-box' }}
           />
           <button
