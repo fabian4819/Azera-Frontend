@@ -20,7 +20,7 @@ export default function FAQ() {
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6, ease }}
         >
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.6)', display: 'inline-block', marginBottom: '18px' }}>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', fontWeight: 700, color: 'rgba(255,255,255,0.6)', display: 'inline-block', marginBottom: '18px' }}>
             FAQs
           </span>
           <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 'clamp(2rem, 4.8vw, 3.2rem)', color: '#ffffff', lineHeight: 1.1, letterSpacing: '-0.03em' }}>

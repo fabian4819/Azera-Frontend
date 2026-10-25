@@ -139,7 +139,7 @@ export function scopeText(item: PortfolioItem) {
 
 export const isVideo = (url: string) => /\.(mp4|mov|webm|m4v)(\?|$)/i.test(url) || url.includes('/video/upload/');
 
-export const sectionLabel: CSSProperties = { fontFamily: 'var(--font-mono)', fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--lime)', marginBottom: '8px' };
+export const sectionLabel: CSSProperties = { fontFamily: 'var(--font-mono)', fontSize: '0.78rem', fontWeight: 700, color: 'var(--lime)', marginBottom: '8px' };
 
 /** Kotak 9:16 untuk foto/video upload. */
 export const videoTile: CSSProperties = {

@@ -27,7 +27,7 @@ function renderVisual(i: number) {
 function HeadingBlock() {
   return (
     <div>
-      <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--secondary)', display: 'inline-block', marginBottom: '16px' }}>
+      <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', fontWeight: 700, color: 'var(--secondary)', display: 'inline-block', marginBottom: '16px' }}>
         Why AzeraKOL
       </span>
       <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 'clamp(2rem, 4.5vw, 3.2rem)', lineHeight: 1.05, letterSpacing: '-0.03em', color: 'var(--on-background)', marginBottom: '18px' }}>

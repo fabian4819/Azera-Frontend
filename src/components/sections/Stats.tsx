@@ -62,7 +62,7 @@ export default function Stats() {
       <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
         <div style={{ display: 'grid', gridTemplateColumns: '200px 1fr', gap: '24px' }} className="payoff-grid">
           <div>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--lime)' }}>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', fontWeight: 700, color: 'var(--lime)' }}>
               The Payoff
             </span>
           </div>

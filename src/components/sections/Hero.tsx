@@ -132,7 +132,7 @@ export default function Hero() {
 
         {/* Kartu aksen lime */}
         <div style={{ gridArea: 'b', padding: '28px', borderRadius: 'var(--radius-lg)', background: 'var(--lime)', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(21,21,125,0.7)', marginBottom: '10px' }}>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.76rem', fontWeight: 700, color: 'rgba(21,21,125,0.7)', marginBottom: '10px' }}>
             Brand Partner
           </span>
           <p style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '2.8rem', color: 'var(--on-lime)', lineHeight: 1 }}>100+</p>

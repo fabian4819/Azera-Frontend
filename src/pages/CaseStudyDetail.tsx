@@ -67,20 +67,20 @@ export default function CaseStudyDetail() {
         <div style={{ background: '#fff', borderRadius: '24px', padding: '32px', boxShadow: '0 8px 32px rgba(0,0,0,0.08)', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '24px', textAlign: 'center' }}>
           <div>
             <p style={{ fontFamily: f, fontWeight: 800, fontSize: '2.2rem', color: '#6728e4' }}>{formatNumber(data.highlightStats.views)}</p>
-            <p style={{ fontFamily: f, fontSize: '0.78rem', color: '#777683', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Total Views</p>
+            <p style={{ fontFamily: f, fontSize: '0.78rem', color: '#777683', fontWeight: 700 }}>Total Views</p>
           </div>
           <div>
             <p style={{ fontFamily: f, fontWeight: 800, fontSize: '2.2rem', color: '#6728e4' }}>{data.highlightStats.engagementRate}%</p>
-            <p style={{ fontFamily: f, fontSize: '0.78rem', color: '#777683', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Engagement Rate</p>
+            <p style={{ fontFamily: f, fontSize: '0.78rem', color: '#777683', fontWeight: 700 }}>Engagement Rate</p>
           </div>
           <div>
             <p style={{ fontFamily: f, fontWeight: 800, fontSize: '2.2rem', color: '#6728e4' }}>{data.highlightStats.totalPosts}</p>
-            <p style={{ fontFamily: f, fontSize: '0.78rem', color: '#777683', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Total Posts</p>
+            <p style={{ fontFamily: f, fontSize: '0.78rem', color: '#777683', fontWeight: 700 }}>Total Posts</p>
           </div>
           {data.highlightStats.reach !== null && (
             <div>
               <p style={{ fontFamily: f, fontWeight: 800, fontSize: '2.2rem', color: '#6728e4' }}>{formatNumber(data.highlightStats.reach)}</p>
-              <p style={{ fontFamily: f, fontSize: '0.78rem', color: '#777683', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Reach</p>
+              <p style={{ fontFamily: f, fontSize: '0.78rem', color: '#777683', fontWeight: 700 }}>Reach</p>
             </div>
           )}
         </div>

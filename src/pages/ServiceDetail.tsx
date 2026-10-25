@@ -296,7 +296,7 @@ export default function ServiceDetail() {
             animate={isPricingInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.6, ease }}
           >
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.6)', display: 'inline-block', marginBottom: '18px' }}>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', fontWeight: 700, color: 'rgba(255,255,255,0.6)', display: 'inline-block', marginBottom: '18px' }}>
               Paket Campaign
             </span>
             <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 'clamp(2rem, 5vw, 3.4rem)', color: '#fff', lineHeight: 1.1, letterSpacing: '-0.03em', marginBottom: '18px' }}>
@@ -317,7 +317,7 @@ export default function ServiceDetail() {
             {service.pricing.map((tier, ti) => (
               <div key={tier.badge}>
                 <div style={{ padding: '0 8px 14px' }}>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--lime)' }}>{tier.badge}</span>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.76rem', fontWeight: 700, color: 'var(--lime)' }}>{tier.badge}</span>
                   <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.2rem', color: '#fff', marginTop: '4px' }}>{tier.name}</h3>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -356,7 +356,7 @@ export default function ServiceDetail() {
       <section style={{ padding: '100px 24px', background: 'var(--flow-light)' }}>
         <div style={{ maxWidth: '760px', margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: '56px' }}>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.6)', display: 'inline-block', marginBottom: '18px' }}>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', fontWeight: 700, color: 'rgba(255,255,255,0.6)', display: 'inline-block', marginBottom: '18px' }}>
               FAQs
             </span>
             <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 'clamp(2rem, 4.8vw, 3.2rem)', color: '#fff', lineHeight: 1.1, letterSpacing: '-0.03em' }}>
@@ -430,8 +430,6 @@ export default function ServiceDetail() {
           font-family: var(--font-mono);
           font-size: 0.72rem;
           font-weight: 700;
-          letter-spacing: 0.14em;
-          text-transform: uppercase;
         }
         .service-section-title {
           max-width: 700px;
@@ -614,8 +612,6 @@ export default function ServiceDetail() {
           font-family: var(--font-mono);
           font-size: 0.65rem;
           font-weight: 700;
-          letter-spacing: 0.08em;
-          text-transform: uppercase;
         }
         .service-workflow-card h3 {
           margin-bottom: 9px;
