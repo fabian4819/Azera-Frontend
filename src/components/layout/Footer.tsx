@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useLayoutEffect, useRef, useState } from 'react';
 import type { CSSProperties, ReactNode } from 'react';
-import { motion, useInView, useReducedMotion, useScroll, useTransform } from 'framer-motion';
+import { motion, useInView, useReducedMotion } from 'framer-motion';
 import { ArrowRight, Mail } from 'lucide-react';
 import { SiInstagram } from 'react-icons/si';
 import { FaWhatsapp } from 'react-icons/fa';
@@ -18,10 +18,8 @@ const linkStyle: CSSProperties = {
 const headingStyle: CSSProperties = {
   fontFamily: "var(--font-display)",
   fontWeight: 800,
-  fontSize: '0.75rem',
+  fontSize: '0.85rem',
   color: 'var(--secondary)',
-  letterSpacing: '0.08em',
-  textTransform: 'uppercase',
   marginBottom: '22px',
 };
 
@@ -82,14 +80,9 @@ function SocialIcon({ href, label, children }: { href: string; label: string; ch
 }
 
 export default function Footer() {
-  // Gaya footer pitch.com: panggung ungu dengan wordmark raksasa yang naik mengikuti scroll,
-  // kartu footer bercorak menimpa wordmark, dan panel CTA yang awalnya menutupi seluruh grid
-  // lalu menyusut ke kolomnya saat masuk layar.
+  // Gaya footer pitch.com: panggung ungu, kartu footer bercorak, dan panel CTA yang awalnya menutupi
+  // seluruh grid lalu menyusut ke kolomnya saat masuk layar.
   const reduceMotion = useReducedMotion();
-  const stageRef = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({ target: stageRef, offset: ['start end', 'end end'] });
-  const wordY = useTransform(scrollYProgress, [0, 1], ['45%', '0%']);
-  const wordOpacity = useTransform(scrollYProgress, [0, 0.7], [0, 1]);
 
   const gridRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
@@ -113,10 +106,7 @@ export default function Footer() {
   });
 
   return (
-    <div ref={stageRef} className="footer-stage">
-    <motion.p aria-hidden="true" className="footer-wordmark" style={reduceMotion ? undefined : { y: wordY, opacity: wordOpacity }}>
-      AzeraKOL
-    </motion.p>
+    <div className="footer-stage">
     <footer className="dashboard-main-mobile-pad soft-bg footer-card">
       <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '32px 24px 0' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px', paddingBottom: '28px', borderBottom: '1px solid var(--outline-variant)' }}>
@@ -133,7 +123,7 @@ export default function Footer() {
           </div>
         </div>
         <p style={{ color: 'var(--on-surface-variant)', fontSize: '0.88rem', lineHeight: 1.7, maxWidth: '640px', margin: '20px 0 0' }}>
-          AZERAKOL.ID is a nano&ndash;micro creator campaign specialist operated by PT Azera Creator Network. We help brands execute scalable KOL, KOC, affiliate, and event creator campaigns&mdash;from dozens to thousands of creators.
+          AZERAKOL.ID is a nano&ndash;micro creator campaign specialist operated by PT Azera Creator Network. We help brands execute scalable KOL, KOC, affiliate, and event creator campaigns, from dozens to thousands of creators.
         </p>
       </div>
 
