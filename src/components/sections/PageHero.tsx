@@ -27,13 +27,8 @@ export default function PageHero({ title, accent, after, subtitle, illustration,
         style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 'clamp(2.1rem, 5vw, 3.6rem)', color: light ? 'var(--on-background)' : '#fff', lineHeight: 1.02, letterSpacing: '-0.045em', marginBottom: '20px' }}
       >
         {title}{title ? ' ' : null}
-        {/* Kata kunci pendek dijaga 1 baris supaya garis lime pas di bawahnya; yang panjang (nama campaign) boleh pecah */}
-        <span className="underline-accent" style={accent.length <= 24 ? { whiteSpace: 'nowrap' } : undefined}>
-          {accent}
-          <svg viewBox="0 0 300 20" preserveAspectRatio="none" fill="none">
-            <path d="M2 14C60 4 160 2 298 12" stroke={light ? 'var(--secondary)' : 'var(--lime)'} strokeWidth="5" strokeLinecap="round" />
-          </svg>
-        </span>
+        {/* Kata kunci pendek dijaga 1 baris; yang panjang (nama campaign) boleh pecah. Tanpa garis aksen (seperti hero landing). */}
+        <span style={accent.length <= 24 ? { whiteSpace: 'nowrap' } : undefined}>{accent}</span>
         {after ? <> {after}</> : null}
       </motion.h1>
       {subtitle && (
