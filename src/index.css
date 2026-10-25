@@ -106,8 +106,8 @@
   --font-display: 'Mark Pro', system-ui, -apple-system, sans-serif;
   --font-body: 'Eina 03', system-ui, -apple-system, sans-serif;
   /* Eyebrow/label kecil (UPPERCASE, letter-spaced). Dulu Space Mono, diganti karena terlalu mirip gaya Claude;
-     nama variabel dipertahankan supaya semua pemakai ikut berubah. */
-  --font-mono: var(--font-display);
+     sekarang font body (sama dengan teks lain). Nama variabel dipertahankan supaya semua pemakai ikut berubah. */
+  --font-mono: var(--font-body);
 
   /* ─── Aksen lime + colored-glow (mengikuti pitch.com) ───────────
      Lime jadi "pop accent" di atas basis ungu-navy, dipakai hemat
