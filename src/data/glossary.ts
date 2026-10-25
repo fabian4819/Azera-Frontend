@@ -721,12 +721,30 @@ const rawTerms: Array<Omit<GlossaryTerm, 'slug'>> = [
     ],
   },
   {
-    term: 'Code Boost',
+    term: 'Boost Code',
     category: 'commerce',
     summary: 'Kode otorisasi dari KOL (misalnya TikTok Spark Ads code) yang memungkinkan brand nge-boost postingan KOL tersebut sebagai iklan.',
     sections: [
       { heading: 'Cara Kerjanya', body: 'KOL membuat kode otorisasi dari postingannya dengan durasi tertentu (misalnya 30 atau 60 hari), lalu brand memasukkan kode itu di Ads Manager untuk menjalankan postingan sebagai iklan.' },
       { heading: 'Yang Perlu Disepakati', body: 'Durasi kode, biaya tambahan (kalau ada), dan apakah ini termasuk usage rights di SOW. Pastikan kode dikirim sebelum kedaluwarsa sesuai jadwal ads brand.' },
+    ],
+  },
+  {
+    term: 'Owning',
+    category: 'commerce',
+    summary: 'Hak kepemilikan penuh brand atas konten yang dibuat KOL, termasuk file mentah dan izin memakainya tanpa batas waktu.',
+    sections: [
+      { heading: 'Bedanya dengan Usage Rights', body: 'Usage rights biasanya terbatas waktu dan channel, misalnya boleh dipakai untuk ads selama 3 bulan. Owning berarti brand memegang konten sepenuhnya: boleh diunggah ulang di akun brand, diedit, dan dipakai untuk materi promosi kapan saja.' },
+      { heading: 'Yang Perlu Disepakati', body: 'Owning hampir selalu dikenakan biaya tambahan di atas rate posting. Tulis jelas di SOW apa yang diserahkan (file mentah, versi tanpa watermark, caption) dan sampai kapan KOL tetap boleh menampilkan konten itu di akunnya sendiri.' },
+    ],
+  },
+  {
+    term: "Do and Don'ts",
+    category: 'content',
+    summary: 'Daftar hal yang wajib dilakukan dan yang dilarang dalam konten campaign, biasanya ditulis di brief untuk KOL.',
+    sections: [
+      { heading: 'Contoh Isi', body: "Do: sebut nama produk dengan jelas, tampilkan kemasan di 3 detik pertama, cantumkan tagar campaign. Don'ts: menyebut merek kompetitor, membuat klaim kesehatan yang tidak resmi, atau memakai lagu tanpa lisensi." },
+      { heading: 'Kenapa Penting', body: 'Membantu KOL membuat konten yang sesuai keinginan brand sejak draft pertama, sehingga revisi lebih sedikit dan risiko konten melanggar aturan brand atau platform berkurang.' },
     ],
   },
   {
