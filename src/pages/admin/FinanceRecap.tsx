@@ -262,7 +262,7 @@ function ExpenseEditor({ group, campaigns, onClose, onSaved }: {
               Invoice ini belum dihubungkan ke campaign, jadi belum ada data biaya. Pilih campaign-nya: uang keluar diambil dari fee creator/PIC/MG di Recap Payment + reimburse/ads/opex campaign itu.
             </p>
             <select style={{ ...input, width: '100%' }} value={linkTo} onChange={(e) => setLinkTo(e.target.value)}>
-              <option value="">— Pilih campaign —</option>
+              <option value="">Pilih campaign</option>
               {campaigns.map((c) => <option key={c._id} value={c._id}>{c.name}</option>)}
             </select>
           </>

@@ -54,7 +54,7 @@ export default function InvoiceRecapPanel({ data, onChange }: { data: Data; onCh
         <label>
           <span style={label}>Campaign (sumber uang keluar)</span>
           <select style={input} value={recap.campaignId ?? ''} onChange={(e) => setRecap({ campaignId: e.target.value || undefined })}>
-            <option value="">— Belum dihubungkan —</option>
+            <option value="">Belum dihubungkan</option>
             {campaigns.map((c) => <option key={c._id} value={c._id}>{c.name}</option>)}
           </select>
         </label>
