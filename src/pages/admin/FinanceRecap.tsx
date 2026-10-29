@@ -194,6 +194,11 @@ function DueDateInput({ value, overdue, paid, busy, onChange }: { value: string;
   );
 }
 
+const EXPENSE_COLS: [keyof Omit<Group['expense'], 'total' | 'custom'>, string][] = [
+  ['feeCreator', 'Fee Creator'], ['feePic', 'Fee PIC'], ['feeMg', 'Fee MG'], ['feeHandle', 'Fee Handle by'],
+  ['adminInternal', 'Gaji Admin'], ['reimburse', 'Reimburse'], ['ads', 'Ads'], ['opex', 'Opex'],
+];
+
 type AutoFee = 'feeCreator' | 'feePic' | 'feeMg';
 type FeeField = AutoFee | 'reimburse' | 'ads' | 'opex';
 const FEE_FIELDS: { key: FeeField; label: string }[] = [
@@ -420,8 +425,10 @@ export default function FinanceRecap() {
   const periodLabel = from || to
     ? `${from ? new Date(`${from}T00:00:00`).toLocaleDateString('id-ID', { dateStyle: 'medium' }) : '…'} – ${to ? new Date(`${to}T00:00:00`).toLocaleDateString('id-ID', { dateStyle: 'medium' }) : '…'}`
     : 'Semua periode';
+  // Rincian uang keluar per kolom; kolom yang nol di semua baris disembunyikan supaya tabel tidak terlalu lebar
+  const expenseCols = EXPENSE_COLS.filter(([k]) => data?.groups.some((g) => g.expense[k]));
   const headers = ['Campaign', 'Perusahaan', 'Contact', 'Bulan Running', 'Master Sheet', 'SOW', 'Tier', 'Jumlah Talent', 'Fee/Talent', 'Total',
-    'Total Payment', 'Invoice', 'Status', 'Jatuh Tempo', ...columns.map((c) => c.label), 'Uang Keluar', 'Profit', 'Margin', ''];
+    'Total Payment', 'Invoice', 'Status', 'Jatuh Tempo', ...columns.map((c) => c.label), ...expenseCols.map(([, l]) => l), 'Uang Keluar', 'Profit', 'Margin', ''];
 
   return (
     <div>
@@ -501,7 +508,7 @@ export default function FinanceRecap() {
                   const e = g.expense;
                   const breakdown = [['Fee creator', e.feeCreator], ['Fee PIC', e.feePic], ['Fee MG', e.feeMg], ['Fee Handle by', e.feeHandle], ['Gaji Admin internal', e.adminInternal], ['Reimburse', e.reimburse], ['Ads', e.ads], ['Opex', e.opex], ['Kolom tambahan', e.custom]]
                     .filter(([, v]) => v).map(([k, v]) => `${k}: ${rupiah(v as number)}`).concat(g.adminNote ? [`(${g.adminNote})`] : []).join('\n');
-                  const groupCell = (content: React.ReactNode, extra: React.CSSProperties = {}) => <td rowSpan={span} style={{ ...td, borderRight: '1px solid #f0f0f0', ...extra }}>{content}</td>;
+                  const groupCell = (content: React.ReactNode, extra: React.CSSProperties = {}, title?: string) => <td rowSpan={span} title={title} style={{ ...td, borderRight: '1px solid #f0f0f0', ...extra }}>{content}</td>;
                   return (
                     <Fragment key={g.key}>
                       {items.map((it, i) => (
@@ -556,6 +563,10 @@ export default function FinanceRecap() {
                                 const v = g.custom[c.key];
                                 return <Fragment key={c.key}>{groupCell(v === undefined ? '-' : c.type === 'text' ? String(v) : rupiah(Number(v)), { whiteSpace: c.type === 'text' ? 'normal' : 'nowrap' })}</Fragment>;
                               })}
+                              {expenseCols.map(([k]) => (
+                                <Fragment key={k}>{groupCell(e[k] ? rupiah(e[k]) : '-', { whiteSpace: 'nowrap', color: '#464652' },
+                                  k === 'adminInternal' && g.adminNote ? g.adminNote : undefined)}</Fragment>
+                              ))}
                               {/* Uang keluar & profit: klik → editor rincian biaya (profit = masuk − keluar) */}
                               {groupCell(
                                 <button onClick={() => setEditingGroup(g)} title={`${breakdown || 'Belum ada biaya'}\n\nKlik untuk ubah`} style={editableCell('#b91c1c')}>
