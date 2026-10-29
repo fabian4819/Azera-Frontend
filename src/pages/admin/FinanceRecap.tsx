@@ -59,7 +59,9 @@ interface Group {
   items: { sow: string; tier: string; qty: number; unitFee: number; amount: number }[];
   invoices: { _id: string; number: string; issueDate: string; dueDate: string; total: number; paid: boolean; paidAt: string; overdue: boolean }[];
   custom: Record<string, string | number>; totalInvoice: number; income: number; receivable: number;
-  expense: { feeCreator: number; feePic: number; feeMg: number; reimburse: number; ads: number; opex: number; custom: number; total: number };
+  expense: { feeCreator: number; feePic: number; feeMg: number; feeHandle: number; adminInternal: number; reimburse: number; ads: number; opex: number; custom: number; total: number };
+  /** Keterangan Gaji Admin dari invoice WA */
+  adminNote: string;
   profit: number; margin: number | null;
   approvedCreators: number | null; talentWarning: string;
   /** Disembunyikan dari rekap: tidak ikut total & export, bisa dipulihkan */
@@ -230,7 +232,9 @@ function ExpenseEditor({ group, campaigns, onClose, onSaved }: {
     return d ?? record?.[k] ?? 0;
   };
   const isManual = (k: FeeField) => AUTO_FEES.includes(k) && (draft[k] === null ? false : draft[k] !== undefined || !!record?.feeManual.includes(k as AutoFee));
-  const total = FEE_FIELDS.reduce((sum, { key }) => sum + valueOf(key), 0) + group.expense.custom;
+  // Fee Handle & Gaji Admin datang dari invoice WA (/invoice), bukan dari campaign → tidak diedit di sini
+  const fromInvoice = group.expense.feeHandle + group.expense.adminInternal;
+  const total = FEE_FIELDS.reduce((sum, { key }) => sum + valueOf(key), 0) + group.expense.custom + fromInvoice;
   const profit = group.income - total;
 
   const save = async () => {
@@ -302,6 +306,11 @@ function ExpenseEditor({ group, campaigns, onClose, onSaved }: {
             {group.expense.custom > 0 && (
               <p style={{ fontFamily: f, fontSize: '0.72rem', color: '#8a8a99', marginTop: '10px' }}>
                 + {rupiah(group.expense.custom)} dari kolom tambahan uang keluar (diubah di panel Data Rekap invoice).
+              </p>
+            )}
+            {fromInvoice > 0 && (
+              <p style={{ fontFamily: f, fontSize: '0.72rem', color: '#8a8a99', marginTop: '10px' }}>
+                + {rupiah(fromInvoice)} dari invoice WA (Fee Handle by {rupiah(group.expense.feeHandle)}, Gaji Admin {rupiah(group.expense.adminInternal)}{group.adminNote ? `: ${group.adminNote}` : ''}).
               </p>
             )}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', marginTop: '16px', padding: '12px', borderRadius: '12px', background: '#f8f9ff' }}>
@@ -469,7 +478,7 @@ export default function FinanceRecap() {
       {/* Ringkasan */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px', marginBottom: '20px' }}>
         <SummaryCard icon={ArrowDownCircle} color="#047857" label="Total Uang Masuk" value={rupiah(t?.income ?? 0)} hint={`${t?.paidCount ?? 0} dari ${t?.invoiceCount ?? 0} invoice lunas`} />
-        <SummaryCard icon={ArrowUpCircle} color="#b91c1c" label="Total Uang Keluar" value={rupiah(t?.expense ?? 0)} hint="fee creator/PIC/MG + reimburse/ads/opex" />
+        <SummaryCard icon={ArrowUpCircle} color="#b91c1c" label="Total Uang Keluar" value={rupiah(t?.expense ?? 0)} hint="fee creator/PIC/MG/handle + gaji admin + reimburse/ads/opex" />
         <SummaryCard icon={TrendingUp} color="#4b2fc4" label="Profit" value={rupiah(t?.profit ?? 0)} hint={t?.margin != null ? `margin ${t.margin}%` : 'belum ada uang masuk'} />
         <SummaryCard icon={Clock} color="#b45309" label="Piutang (Belum Lunas)" value={rupiah(t?.receivable ?? 0)} hint={t?.overdue ? `${rupiah(t.overdue)} sudah lewat jatuh tempo` : 'total invoice yang belum dibayar'} />
       </div>
@@ -490,8 +499,8 @@ export default function FinanceRecap() {
                   const items = g.items.length ? g.items : [null];
                   const span = items.length;
                   const e = g.expense;
-                  const breakdown = [['Fee creator', e.feeCreator], ['Fee PIC', e.feePic], ['Fee MG', e.feeMg], ['Reimburse', e.reimburse], ['Ads', e.ads], ['Opex', e.opex], ['Kolom tambahan', e.custom]]
-                    .filter(([, v]) => v).map(([k, v]) => `${k}: ${rupiah(v as number)}`).join('\n');
+                  const breakdown = [['Fee creator', e.feeCreator], ['Fee PIC', e.feePic], ['Fee MG', e.feeMg], ['Fee Handle by', e.feeHandle], ['Gaji Admin internal', e.adminInternal], ['Reimburse', e.reimburse], ['Ads', e.ads], ['Opex', e.opex], ['Kolom tambahan', e.custom]]
+                    .filter(([, v]) => v).map(([k, v]) => `${k}: ${rupiah(v as number)}`).concat(g.adminNote ? [`(${g.adminNote})`] : []).join('\n');
                   const groupCell = (content: React.ReactNode, extra: React.CSSProperties = {}) => <td rowSpan={span} style={{ ...td, borderRight: '1px solid #f0f0f0', ...extra }}>{content}</td>;
                   return (
                     <Fragment key={g.key}>
