@@ -74,7 +74,9 @@ export default function CampaignNew() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
-  const [brandId, setBrandId] = useState('');
+  // Nama brand diketik/dipilih; cocok dengan brand yang ada → pakai id-nya, kalau tidak server buat brand baru
+  const [brandName, setBrandName] = useState('');
+  const brandId = brands.find((b) => b.namaBrand.trim().toLowerCase() === brandName.trim().toLowerCase())?._id;
   const [name, setName] = useState('');
   const [objective, setObjective] = useState('');
   const [budget, setBudget] = useState('');
@@ -142,7 +144,7 @@ export default function CampaignNew() {
   const next = (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    if (!brandId || !name || !objective || !budget) {
+    if (!brandName.trim() || !name || !objective || !budget) {
       setError('Brand, nama, tujuan, dan budget wajib diisi.');
       return;
     }
@@ -155,7 +157,7 @@ export default function CampaignNew() {
     setSaving(true);
     try {
       const res = await api.post('/admin/campaigns', {
-        brandId, name, objective,
+        ...(brandId ? { brandId } : { brandName: brandName.trim() }), name, objective,
         budget: Number(budget),
         deliverables: lines(sow),
         fee: { creatorFee: num(creatorFee), picFee: num(picFee), mgFee: num(mgFee) },
@@ -203,10 +205,13 @@ export default function CampaignNew() {
           <SectionTitle title="Informasi Dasar" />
           <div style={{ marginBottom: '14px' }}>
             <label style={labelStyle}>Brand *</label>
-            <select value={brandId} onChange={(e) => setBrandId(e.target.value)} style={{ ...inputStyle, cursor: 'pointer' }}>
-              <option value="">Pilih brand</option>
-              {brands.map((b) => <option key={b._id} value={b._id}>{b.namaBrand}</option>)}
-            </select>
+            <input list="brand-options" value={brandName} onChange={(e) => setBrandName(e.target.value)} placeholder="Pilih atau ketik nama brand" autoComplete="off" style={inputStyle} />
+            <datalist id="brand-options">
+              {brands.map((b) => <option key={b._id} value={b.namaBrand} />)}
+            </datalist>
+            {brandName.trim() && !brandId && (
+              <p style={{ fontSize: '0.75rem', color: '#777683', marginTop: '4px', fontFamily: "var(--font-display)" }}>Brand baru, otomatis ditambahkan saat campaign disimpan.</p>
+            )}
           </div>
           <div style={{ marginBottom: '14px' }}>
             <label style={labelStyle}>Nama Campaign *</label>
