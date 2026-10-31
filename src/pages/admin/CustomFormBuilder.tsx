@@ -5,8 +5,9 @@ import { NICHES } from '../../lib/niches';
 import { PLATFORM_LABELS, applyOrder, defaultApplyKeys } from '../../lib/applyForm';
 import ApplySocialField from '../../components/ApplySocialField';
 
-export type CustomFieldType = 'text' | 'textarea' | 'number' | 'select' | 'checkbox';
-export interface CustomField { id: string; label: string; type: CustomFieldType; required: boolean; options?: string[] }
+export type CustomFieldType = 'text' | 'textarea' | 'number' | 'select' | 'checkbox' | 'file';
+/** description = keterangan opsional dari admin, tampil di bawah judul pertanyaan di form apply */
+export interface CustomField { id: string; label: string; description?: string; type: CustomFieldType; required: boolean; options?: string[] }
 /** Field default form Apply: Nama/WA/Email selalu ada; PIC & Handle by bisa dihapus admin.
  * order = urutan semua field (default + custom id) hasil drag, lihat lib/applyForm.ts */
 export interface ApplyFields { pic: boolean; handleBy: boolean; handleByRequired: boolean; order?: string[] }
@@ -14,10 +15,10 @@ const DEFAULT_APPLY_FIELDS: ApplyFields = { pic: true, handleBy: true, handleByR
 
 const TYPE_LABELS: Record<CustomFieldType, string> = {
   text: 'Jawaban Singkat', textarea: 'Paragraf', number: 'Angka',
-  select: 'Pilihan Ganda', checkbox: 'Kotak Centang',
+  select: 'Pilihan Ganda', checkbox: 'Kotak Centang', file: 'Upload File/Gambar',
 };
 const ANSWER_PLACEHOLDER: Partial<Record<CustomFieldType, string>> = {
-  text: 'Teks jawaban singkat', textarea: 'Teks jawaban panjang', number: 'Jawaban angka',
+  text: 'Teks jawaban singkat', textarea: 'Teks jawaban panjang', number: 'Jawaban angka', file: '⤒ Upload file / gambar',
 };
 const isChoice = (t: CustomFieldType) => t === 'select' || t === 'checkbox';
 const font = "var(--font-display)";
@@ -33,6 +34,7 @@ export const cleanFields = (fields: CustomField[]): CustomField[] =>
     .map((f) => ({
       ...f,
       label: f.label.trim(),
+      description: f.description?.trim() || undefined,
       options: isChoice(f.type) ? (f.options || []).map((o) => o.trim()).filter(Boolean) : [],
     }));
 
@@ -321,12 +323,22 @@ export default function CustomFormBuilder({ campaignId, onChange, initial, initi
                 >
                   {(Object.keys(TYPE_LABELS) as CustomFieldType[]).map((t) => <option key={t} value={t}>{TYPE_LABELS[t]}</option>)}
                 </select>
+                <textarea
+                  value={f.description ?? ''}
+                  onChange={(e) => update(f.id, { description: e.target.value })}
+                  placeholder="Keterangan (opsional), tampil di bawah judul pertanyaan"
+                  rows={2}
+                  style={{ flex: '1 1 100%', padding: '8px 2px', border: 'none', borderBottom: '1px solid #e1e0ff', fontSize: '0.82rem', fontFamily: font, color: '#464652', outline: 'none', resize: 'vertical' }}
+                />
               </div>
             ) : (
-              <p style={{ fontFamily: font, fontSize: '0.95rem', color: f.label ? '#191c20' : '#9a99a6', marginBottom: '14px' }}>
-                {f.label || 'Pertanyaan tanpa judul'}
-                {f.required && <span style={{ color: '#d93025' }}> *</span>}
-              </p>
+              <div style={{ marginBottom: '14px' }}>
+                <p style={{ fontFamily: font, fontSize: '0.95rem', color: f.label ? '#191c20' : '#9a99a6' }}>
+                  {f.label || 'Pertanyaan tanpa judul'}
+                  {f.required && <span style={{ color: '#d93025' }}> *</span>}
+                </p>
+                {f.description && <p style={{ fontFamily: font, fontSize: '0.8rem', color: '#777683', marginTop: '4px', whiteSpace: 'pre-wrap' }}>{f.description}</p>}
+              </div>
             )}
 
             {isChoice(f.type) ? (

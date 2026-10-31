@@ -9,8 +9,8 @@ import { WILAYAH_API, type WilayahOption } from '../lib/wilayah';
 import { PLATFORM_LABELS, applyOrder, defaultApplyKeys } from '../lib/applyForm';
 import ApplySocialField from '../components/ApplySocialField';
 
-type CustomFieldType = 'text' | 'textarea' | 'number' | 'select' | 'checkbox';
-interface CustomField { id: string; label: string; type: CustomFieldType; required: boolean; options?: string[] }
+type CustomFieldType = 'text' | 'textarea' | 'number' | 'select' | 'checkbox' | 'file';
+interface CustomField { id: string; label: string; description?: string; type: CustomFieldType; required: boolean; options?: string[] }
 interface PicOption { _id: string; name: string }
 interface ApplyFields { pic: boolean; handleBy: boolean; handleByRequired: boolean; order?: string[] }
 
@@ -97,6 +97,9 @@ export default function CampaignApply() {
   const [found, setFound] = useState<{ phoneExists: boolean; emailExists: boolean; sameCreator: boolean; name?: string } | null>(null);
   const [nameChoice, setNameChoice] = useState<{ saved: string; typed: string } | null>(null);
   const [updateName, setUpdateName] = useState(false);
+  // Pertanyaan tipe file: id field yang sedang di-upload + error upload per field
+  const [uploading, setUploading] = useState<string | null>(null);
+  const [uploadError, setUploadError] = useState<Record<string, string>>({});
   const [socials, setSocials] = useState<Record<string, { username: string; followers: string }>>({});
 
   useEffect(() => {
@@ -177,6 +180,23 @@ export default function CampaignApply() {
     setCustomValues((prev) => ({ ...prev, [fieldId]: value }));
   };
 
+  const uploadCustomFile = async (fieldId: string, file?: File) => {
+    if (!file) return;
+    setUploading(fieldId);
+    setUploadError((e) => ({ ...e, [fieldId]: '' }));
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      const res = await api.post(`/campaigns/${slug}/upload`, fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+      setCustomValue(fieldId, res.data.url);
+    } catch (err) {
+      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      setUploadError((e) => ({ ...e, [fieldId]: message || 'Gagal upload, coba lagi.' }));
+    } finally {
+      setUploading(null);
+    }
+  };
+
   const toggleCustomCheckbox = (fieldId: string, option: string) => {
     const current = (customValues[fieldId] as string[] | undefined) || [];
     setCustomValue(fieldId, current.includes(option) ? current.filter((v) => v !== option) : [...current, option]);
@@ -217,6 +237,10 @@ export default function CampaignApply() {
     });
     if (missingCustom.length > 0) {
       setSubmitError(`Wajib diisi: ${missingCustom.map((f) => f.label).join(', ')}`);
+      return;
+    }
+    if (uploading) {
+      setSubmitError('Tunggu upload file selesai dulu ya.');
       return;
     }
     setLoading(true);
@@ -406,6 +430,15 @@ export default function CampaignApply() {
               return (
             <div key={f.id} style={{ marginBottom: '18px' }}>
               <label style={labelStyle}>{f.label}{f.required && ' *'}</label>
+              {f.description && <p style={{ fontSize: '0.78rem', color: '#777683', margin: '-2px 0 8px', lineHeight: 1.5, whiteSpace: 'pre-wrap', fontFamily: "var(--font-display)" }}>{f.description}</p>}
+              {f.type === 'file' && (
+                <div>
+                  <input type="file" accept="image/*,video/*,application/pdf,.doc,.docx" disabled={uploading === f.id} onChange={(e) => void uploadCustomFile(f.id, e.target.files?.[0])} style={{ ...inputStyle, padding: '10px 14px' }} />
+                  <p style={{ fontSize: '0.75rem', marginTop: '4px', fontFamily: "var(--font-display)", color: uploadError[f.id] ? '#ba1a1a' : '#777683' }}>
+                    {uploading === f.id ? 'Mengupload...' : uploadError[f.id] || (customValues[f.id] ? <>File terupload. <a href={customValues[f.id] as string} target="_blank" rel="noreferrer" style={{ color: '#6728e4' }}>Lihat file</a></> : 'Gambar, video, PDF, atau dokumen, maks. 25MB.')}
+                  </p>
+                </div>
+              )}
               {f.type === 'text' && (
                 <input value={(customValues[f.id] as string) || ''} onChange={(e) => setCustomValue(f.id, e.target.value)} style={inputStyle} />
               )}
