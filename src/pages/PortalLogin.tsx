@@ -315,12 +315,12 @@ export default function PortalLogin() {
                         />
                       </div>
                       <div style={{ marginBottom: '16px' }}>
-                        <label style={labelStyle}>Link Sosial Media Aktif Management/Agency</label>
-                        <input type="text" value={picSocial} onChange={(e) => setPicSocial(e.target.value)} placeholder="Jika ada, mis. instagram.com/namaagency" style={inputStyle} />
+                        <label style={labelStyle}>Link Sosial Media Aktif Management/Agency (Jika Ada)</label>
+                        <input type="text" value={picSocial} onChange={(e) => setPicSocial(e.target.value)} placeholder="mis. instagram.com/namaagency" style={inputStyle} />
                       </div>
                       <div style={{ marginBottom: '16px' }}>
-                        <label style={labelStyle}>Link Portofolio Management/Agency</label>
-                        <input type="text" value={picPortfolio} onChange={(e) => setPicPortfolio(e.target.value)} placeholder="Jika ada (Drive, website, dll.)" style={inputStyle} />
+                        <label style={labelStyle}>Link Portofolio Management/Agency (Jika Ada)</label>
+                        <input type="text" value={picPortfolio} onChange={(e) => setPicPortfolio(e.target.value)} placeholder="Drive, website, dll." style={inputStyle} />
                       </div>
                       <div style={{ marginBottom: '16px' }}>
                         <label style={labelStyle}>Upload KTP PIC/Owner * <span style={{ fontWeight: 400, color: '#8a8a99' }}>(foto/PDF, maks. 5MB)</span></label>
