@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Plus, Trash2, Copy, ArrowUp, ArrowDown, X, Circle, Square, GripHorizontal, Lock, Undo2, Pencil } from 'lucide-react';
 import api from '../../lib/api';
 import { NICHES } from '../../lib/niches';
@@ -236,26 +236,43 @@ export default function CustomFormBuilder({ campaignId, onChange, initial, initi
   const removeOption = (f: CustomField, idx: number) =>
     update(f.id, { options: (f.options || []).filter((_, i) => i !== idx) });
 
-  const save = async () => {
-    setSaving(true);
-    setStatus(null);
-    try {
-      const cleaned = cleanFields(fields);
-      const res = await api.patch(`/admin/campaigns/${campaignId}`, { customFields: cleaned, applyFields });
-      const next: CustomField[] = res.data.customFields || [];
-      const nextApply: ApplyFields = res.data.applyFields ?? applyFields;
-      setFields(next);
-      setApplyFields(nextApply);
-      setSaved(JSON.stringify([next, nextApply]));
-      onSaved?.(next, nextApply);
-      setStatus({ ok: true, text: 'Form kustom disimpan.' });
-      setTimeout(() => setStatus(null), 2500);
-    } catch {
-      setStatus({ ok: false, text: 'Gagal menyimpan form kustom.' });
-    } finally {
-      setSaving(false);
-    }
+  // Autosave (mode campaign): simpan otomatis 800ms setelah berhenti mengedit. State lokal tidak ditimpa
+  // hasil server, supaya ketikan yang sedang berjalan & pertanyaan yang belum berjudul tidak hilang.
+  // Simpan berantai (satu per satu) lewat saveChain, isi diambil dari latest saat giliran jalan.
+  const latest = useRef({ fields, applyFields });
+  useEffect(() => { latest.current = { fields, applyFields }; }, [fields, applyFields]);
+  const saveChain = useRef<Promise<void>>(Promise.resolve());
+  const save = () => {
+    saveChain.current = saveChain.current.then(async () => {
+      const { fields: f, applyFields: a } = latest.current;
+      const snapshot = JSON.stringify([f, a]);
+      setSaving(true);
+      try {
+        const cleaned = cleanFields(f);
+        const res = await api.patch(`/admin/campaigns/${campaignId}`, { customFields: cleaned, applyFields: a });
+        setSaved(snapshot);
+        setStatus(null);
+        onSaved?.(res.data.customFields || cleaned, res.data.applyFields ?? a);
+      } catch {
+        setStatus({ ok: false, text: 'Gagal menyimpan otomatis.' });
+      } finally {
+        setSaving(false);
+      }
+    });
+    return saveChain.current;
   };
+  const snapshotNow = JSON.stringify([fields, applyFields]);
+  useEffect(() => {
+    if (!campaignId || snapshotNow === saved) return;
+    const t = window.setTimeout(() => void save(), 800);
+    return () => window.clearTimeout(t);
+  }, [snapshotNow]); // eslint-disable-line react-hooks/exhaustive-deps
+  // Pindah tab/halaman sebelum 800ms lewat: perubahan terakhir tetap dikirim
+  const savedRef = useRef(saved);
+  useEffect(() => { savedRef.current = saved; }, [saved]);
+  useEffect(() => () => {
+    if (campaignId && JSON.stringify([latest.current.fields, latest.current.applyFields]) !== savedRef.current) void save();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="fb-wrap" style={{ maxWidth: '820px', margin: '0 auto', display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
@@ -465,12 +482,14 @@ export default function CustomFormBuilder({ campaignId, onChange, initial, initi
       )}
 
       {campaignId && <div style={{ position: 'sticky', bottom: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', background: 'white', border: '1px solid #e1e0ff', borderRadius: '12px', padding: '12px 16px', boxShadow: '0 4px 20px rgba(107,46,232,0.12)' }}>
-        <span style={{ fontSize: '0.8rem', fontFamily: font, color: status ? (status.ok ? '#1e7e34' : '#ba1a1a') : dirty ? '#b26a00' : '#777683' }}>
-          {status?.text ?? (dirty ? 'Ada perubahan yang belum disimpan' : 'Semua perubahan tersimpan')}
+        <span role="status" style={{ fontSize: '0.8rem', fontFamily: font, color: status ? '#ba1a1a' : '#777683' }}>
+          {status?.text ?? (saving || dirty ? 'Menyimpan...' : 'Semua perubahan tersimpan otomatis')}
         </span>
-        <button onClick={save} disabled={saving || !dirty} className="btn-primary" style={{ padding: '9px 20px', fontSize: '0.82rem', opacity: saving || !dirty ? 0.6 : 1 }}>
-          {saving ? 'Menyimpan...' : 'Simpan Form'}
-        </button>
+        {status && (
+          <button onClick={() => void save()} disabled={saving} className="btn-primary" style={{ padding: '9px 20px', fontSize: '0.82rem', opacity: saving ? 0.6 : 1 }}>
+            Coba lagi
+          </button>
+        )}
       </div>}
       </div>
 
