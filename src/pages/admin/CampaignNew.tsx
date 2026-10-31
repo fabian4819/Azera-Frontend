@@ -401,6 +401,7 @@ export default function CampaignNew() {
             platforms={selectedPlatforms}
             minFollowers={minFollowers}
             askDomicile={provinceIds.length + cityIds.length > 0}
+            niches={selectedNiches}
             onChange={(f, a) => { setCustomFields(f); setApplyFields(a); }}
             pics={allPics}
             assignedPicIds={picIds}

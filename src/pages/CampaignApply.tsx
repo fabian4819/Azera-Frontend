@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { CheckCircle2 } from 'lucide-react';
 import api from '../lib/api';
@@ -6,13 +6,13 @@ import { NICHES } from '../lib/niches';
 import PageHero from '../components/sections/PageHero';
 import { ApplyIllustration } from '../components/illustrations';
 import { WILAYAH_API, type WilayahOption } from '../lib/wilayah';
-
-const PLATFORM_LABELS: Record<string, string> = { instagram: 'Instagram', tiktok: 'TikTok', threads: 'Threads', x: 'X' };
+import { PLATFORM_LABELS, applyOrder, defaultApplyKeys } from '../lib/applyForm';
+import ApplySocialField from '../components/ApplySocialField';
 
 type CustomFieldType = 'text' | 'textarea' | 'number' | 'select' | 'checkbox';
 interface CustomField { id: string; label: string; type: CustomFieldType; required: boolean; options?: string[] }
 interface PicOption { _id: string; name: string }
-interface ApplyFields { pic: boolean; handleBy: boolean; handleByRequired: boolean }
+interface ApplyFields { pic: boolean; handleBy: boolean; handleByRequired: boolean; order?: string[] }
 
 interface CampaignInfo {
   name: string;
@@ -167,6 +167,12 @@ export default function CampaignApply() {
   const fields: ApplyFields = campaign?.applyFields ?? { pic: true, handleBy: true, handleByRequired: false };
   const showPic = fields.pic && (campaign?.picOptions?.length ?? 0) > 0;
 
+  // Urutan field dari builder admin (drag), field default + custom dalam satu daftar
+  const customById = new Map((campaign?.customFields || []).map((f) => [f.id, f]));
+  const orderedKeys = applyOrder(fields.order, defaultApplyKeys({ askDomicile, platforms, customIds: [...customById.keys()] }));
+  // Info "nomor/email sudah terdaftar" tampil di bawah field kontak yang posisinya paling bawah
+  const lastContactKey = orderedKeys.indexOf('phone') > orderedKeys.indexOf('email') ? 'phone' : 'email';
+
   const setCustomValue = (fieldId: string, value: string | string[]) => {
     setCustomValues((prev) => ({ ...prev, [fieldId]: value }));
   };
@@ -302,26 +308,6 @@ export default function CampaignApply() {
         )}
 
         <form onSubmit={onSubmit} style={{ background: 'white', borderRadius: '24px', padding: 'clamp(24px, 5vw, 40px)', boxShadow: '0 4px 24px rgba(0,0,0,0.06)', minWidth: 0 }}>
-          <div style={{ marginBottom: '18px' }}>
-            <label style={labelStyle}>Nama Lengkap *</label>
-            <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Nama lengkap" autoComplete="name" style={inputStyle} />
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '18px' }} className="form-2col">
-            <div>
-              <label style={labelStyle}>Nomor WhatsApp *</label>
-              <input value={phone} onChange={(e) => setPhone(e.target.value)} onBlur={() => void lookup()} placeholder="08xxxxxxxxxx" inputMode="tel" autoComplete="tel" style={inputStyle} />
-            </div>
-            <div>
-              <label style={labelStyle}>Email *</label>
-              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} onBlur={() => void lookup()} placeholder="you@email.com" autoComplete="email" style={inputStyle} />
-            </div>
-          </div>
-          {foundNote && (
-            <p role="status" style={{ marginTop: '-8px', marginBottom: '18px', padding: '10px 14px', borderRadius: '10px', fontSize: '0.8rem', lineHeight: 1.5, fontFamily: "var(--font-display)", background: foundNote.warn ? '#ffdad6' : '#f0eeff', color: foundNote.warn ? '#93000a' : '#4a2a9e' }}>
-              {foundNote.text}
-            </p>
-          )}
-
           {nameChoice && (
             <div role="dialog" aria-modal="true" aria-label="Pilih nama" style={{ position: 'fixed', inset: 0, background: 'rgba(25,28,32,0.45)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
               <div style={{ background: 'white', borderRadius: '20px', padding: '24px', maxWidth: '420px', width: '100%', fontFamily: "var(--font-display)" }}>
@@ -341,6 +327,29 @@ export default function CampaignApply() {
             </div>
           )}
 
+          {orderedKeys.map((key) => {
+            const custom = customById.get(key);
+            const block = (() => {
+              switch (key) {
+                case 'name': return (
+          <div style={{ marginBottom: '18px' }}>
+            <label style={labelStyle}>Nama Lengkap *</label>
+            <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Nama lengkap" autoComplete="name" style={inputStyle} />
+          </div>
+                );
+                case 'phone': return (
+          <div style={{ marginBottom: '18px' }}>
+            <label style={labelStyle}>Nomor WhatsApp *</label>
+            <input value={phone} onChange={(e) => setPhone(e.target.value)} onBlur={() => void lookup()} placeholder="08xxxxxxxxxx" inputMode="tel" autoComplete="tel" style={inputStyle} />
+          </div>
+                );
+                case 'email': return (
+          <div style={{ marginBottom: '18px' }}>
+            <label style={labelStyle}>Email *</label>
+            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} onBlur={() => void lookup()} placeholder="you@email.com" autoComplete="email" style={inputStyle} />
+          </div>
+                );
+                case 'niches': return (
           <div style={{ marginBottom: '18px' }}>
             <label style={labelStyle}>Niche * <span style={{ fontWeight: 400, color: '#777683' }}>(boleh lebih dari satu)</span></label>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
@@ -349,8 +358,9 @@ export default function CampaignApply() {
               ))}
             </div>
           </div>
-
-          {askDomicile && <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '18px' }} className="form-2col">
+                );
+                case 'domicile': return askDomicile && (
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '18px' }} className="form-2col">
             <div>
               <label style={labelStyle}>Provinsi Domisili *</label>
               <select value={province} onChange={(e) => onProvinceChange(e.target.value)} style={inputStyle}>
@@ -365,25 +375,9 @@ export default function CampaignApply() {
                 {cities.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
               </select>
             </div>
-          </div>}
-
-          {platforms.map((p) => (
-            <div key={p} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '18px' }} className="form-2col">
-              <div>
-                <label style={labelStyle}>Username {PLATFORM_LABELS[p] ?? p} *</label>
-                <input value={socials[p]?.username ?? ''} onChange={(e) => setSocial(p, { username: e.target.value })} placeholder="@username" style={inputStyle} />
-              </div>
-              <div>
-                <label style={labelStyle}>
-                  Followers {PLATFORM_LABELS[p] ?? p} *
-                  {minFollowers(p) ? <span style={{ fontWeight: 400, color: '#777683' }}> (min. {minFollowers(p)!.toLocaleString('id-ID')})</span> : null}
-                </label>
-                <input type="number" min={0} inputMode="numeric" value={socials[p]?.followers ?? ''} onChange={(e) => setSocial(p, { followers: e.target.value })} placeholder={minFollowers(p) ? String(minFollowers(p)) : '1000'} style={inputStyle} />
-              </div>
-            </div>
-          ))}
-
-          {showPic && (
+          </div>
+                );
+                case 'pic': return showPic && (
             <div style={{ marginBottom: '18px' }}>
               <label style={labelStyle}>PIC *</label>
               <select value={picUserId} onChange={(e) => setPicUserId(e.target.value)} style={inputStyle}>
@@ -391,16 +385,25 @@ export default function CampaignApply() {
                 {campaign.picOptions!.map((p) => <option key={p._id} value={p._id}>{p.name}</option>)}
               </select>
             </div>
-          )}
-
-          {fields.handleBy && (
+                );
+                case 'handleBy': return fields.handleBy && (
             <div style={{ marginBottom: '18px' }}>
               <label style={labelStyle}>Handle by{fields.handleByRequired && ' *'}</label>
               <input value={handleBy} onChange={(e) => setHandleBy(e.target.value)} placeholder="Nama HB + nomor WA (mis. Rina 081234567890)" style={inputStyle} />
             </div>
-          )}
-
-          {(campaign.customFields || []).map((f) => (
+                );
+              }
+              if (key.startsWith('social:')) {
+                const p = key.slice(7);
+                return (
+                  <div style={{ marginBottom: '18px' }}>
+                    <ApplySocialField platform={p} minFollowers={minFollowers(p)} username={socials[p]?.username} followers={socials[p]?.followers} onChange={(patch) => setSocial(p, patch)} />
+                  </div>
+                );
+              }
+              if (!custom) return null;
+              const f = custom;
+              return (
             <div key={f.id} style={{ marginBottom: '18px' }}>
               <label style={labelStyle}>{f.label}{f.required && ' *'}</label>
               {f.type === 'text' && (
@@ -426,7 +429,19 @@ export default function CampaignApply() {
                 </div>
               )}
             </div>
-          ))}
+              );
+            })();
+            return (
+              <Fragment key={key}>
+                {block}
+                {key === lastContactKey && foundNote && (
+                <p role="status" style={{ marginTop: '-8px', marginBottom: '18px', padding: '10px 14px', borderRadius: '10px', fontSize: '0.8rem', lineHeight: 1.5, fontFamily: "var(--font-display)", background: foundNote.warn ? '#ffdad6' : '#f0eeff', color: foundNote.warn ? '#93000a' : '#4a2a9e' }}>
+                  {foundNote.text}
+                </p>
+                )}
+              </Fragment>
+            );
+          })}
 
           {submitError && <p role="alert" style={{ color: '#ba1a1a', fontSize: '0.85rem', marginBottom: '16px', fontFamily: "var(--font-display)" }}>{submitError}</p>}
 

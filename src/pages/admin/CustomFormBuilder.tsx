@@ -1,11 +1,15 @@
 import { useEffect, useState } from 'react';
 import { Plus, Trash2, Copy, ArrowUp, ArrowDown, X, Circle, Square, GripHorizontal, Lock, Undo2 } from 'lucide-react';
 import api from '../../lib/api';
+import { NICHES } from '../../lib/niches';
+import { PLATFORM_LABELS, applyOrder, defaultApplyKeys } from '../../lib/applyForm';
+import ApplySocialField from '../../components/ApplySocialField';
 
 export type CustomFieldType = 'text' | 'textarea' | 'number' | 'select' | 'checkbox';
 export interface CustomField { id: string; label: string; type: CustomFieldType; required: boolean; options?: string[] }
-/** Field default form Apply: Nama/WA/Email selalu ada; PIC & Handle by bisa dihapus admin. */
-export interface ApplyFields { pic: boolean; handleBy: boolean; handleByRequired: boolean }
+/** Field default form Apply: Nama/WA/Email selalu ada; PIC & Handle by bisa dihapus admin.
+ * order = urutan semua field (default + custom id) hasil drag, lihat lib/applyForm.ts */
+export interface ApplyFields { pic: boolean; handleBy: boolean; handleByRequired: boolean; order?: string[] }
 const DEFAULT_APPLY_FIELDS: ApplyFields = { pic: true, handleBy: true, handleByRequired: false };
 
 const TYPE_LABELS: Record<CustomFieldType, string> = {
@@ -15,7 +19,6 @@ const TYPE_LABELS: Record<CustomFieldType, string> = {
 const ANSWER_PLACEHOLDER: Partial<Record<CustomFieldType, string>> = {
   text: 'Teks jawaban singkat', textarea: 'Teks jawaban panjang', number: 'Jawaban angka',
 };
-const PLATFORM_LABELS: Record<string, string> = { instagram: 'Instagram', tiktok: 'TikTok', threads: 'Threads', x: 'X' };
 const isChoice = (t: CustomFieldType) => t === 'select' || t === 'checkbox';
 const font = "var(--font-display)";
 const iconBtn: React.CSSProperties = {
@@ -45,6 +48,8 @@ interface Props {
   minFollowers?: Record<string, number | string | undefined>;
   /** Kriteria provinsi/kota terisi → field Provinsi & Kota muncul (wajib) di form apply */
   askDomicile?: boolean;
+  /** Niche yang dipilih di kriteria campaign, jadi opsi Niche di form apply */
+  niches?: string[];
   /** Semua akun PIC terdaftar + yang dicentang untuk campaign ini (jadi opsi dropdown PIC di form) */
   pics: { _id: string; name: string; email: string }[];
   assignedPicIds: string[];
@@ -68,7 +73,7 @@ const answerLine = (w: string, text: string) => (
 );
 
 /** Builder pertanyaan tambahan form Apply, pengalaman ala Google Forms (AD-47). */
-export default function CustomFormBuilder({ campaignId, onChange, initial, initialApplyFields, platforms = [], minFollowers = {}, askDomicile = false, pics, assignedPicIds, onTogglePic, onSaved }: Props) {
+export default function CustomFormBuilder({ campaignId, onChange, initial, initialApplyFields, platforms = [], minFollowers = {}, askDomicile = false, niches = [], pics, assignedPicIds, onTogglePic, onSaved }: Props) {
   const [fields, setFields] = useState<CustomField[]>(initial);
   const [applyFields, setApplyFields] = useState<ApplyFields>(initialApplyFields ?? DEFAULT_APPLY_FIELDS);
   const [saved, setSaved] = useState(JSON.stringify([initial, initialApplyFields ?? DEFAULT_APPLY_FIELDS]));
@@ -77,6 +82,7 @@ export default function CustomFormBuilder({ campaignId, onChange, initial, initi
   // Drag cuma aktif kalau mulai dari handle, supaya select teks di input tetap normal
   const [handleId, setHandleId] = useState<string | null>(null);
   const [dragId, setDragId] = useState<string | null>(null);
+  const nicheOptions = niches.length ? niches : NICHES;
   const [saving, setSaving] = useState(false);
   const [status, setStatus] = useState<{ ok: boolean; text: string } | null>(null);
   const [picBusy, setPicBusy] = useState<string | null>(null);
@@ -119,26 +125,54 @@ export default function CustomFormBuilder({ campaignId, onChange, initial, initi
     setActiveId(null);
   };
 
-  const move = (id: string, dir: -1 | 1) =>
-    setFields((prev) => {
-      const i = prev.findIndex((f) => f.id === id);
-      const j = i + dir;
-      if (j < 0 || j >= prev.length) return prev;
-      const next = [...prev];
-      [next[i], next[j]] = [next[j], next[i]];
-      return next;
-    });
-
+  // Urutan semua kartu (default + custom); PIC/Handle by yang dihapus tidak ikut, balik ke posisi default kalau dikembalikan
+  const keys = applyOrder(applyFields.order, defaultApplyKeys({ askDomicile, platforms, customIds: fields.map((f) => f.id) }))
+    .filter((k) => (k !== 'pic' || applyFields.pic) && (k !== 'handleBy' || applyFields.handleBy));
+  const reorder = (from: number, to: number) => {
+    if (from === -1 || to < 0 || to >= keys.length || from === to) return;
+    const next = [...keys];
+    next.splice(to, 0, next.splice(from, 1)[0]);
+    setApply({ order: next });
+  };
+  const move = (key: string, dir: -1 | 1) => reorder(keys.indexOf(key), keys.indexOf(key) + dir);
   // Reorder live saat kartu yang di-drag melewati kartu lain
-  const dragOver = (overId: string) =>
-    setFields((prev) => {
-      const from = prev.findIndex((f) => f.id === dragId);
-      const to = prev.findIndex((f) => f.id === overId);
-      if (from === -1 || to === -1 || from === to) return prev;
-      const next = [...prev];
-      next.splice(to, 0, next.splice(from, 1)[0]);
-      return next;
-    });
+  const dragOver = (overKey: string) => reorder(keys.indexOf(dragId ?? ''), keys.indexOf(overKey));
+
+  // Kartu bisa di-drag, tapi drag cuma mulai dari handle supaya select teks di input tetap normal
+  const dragProps = (key: string) => ({
+    draggable: handleId === key,
+    onDragStart: (e: React.DragEvent) => { e.dataTransfer.effectAllowed = 'move'; setDragId(key); },
+    onDragOver: (e: React.DragEvent) => { if (!dragId) return; e.preventDefault(); dragOver(key); },
+    onDragEnd: () => { setDragId(null); setHandleId(null); },
+  });
+  const grip = (key: string) => (
+    <div
+      title="Geser untuk mengubah urutan"
+      onMouseDown={() => setHandleId(key)}
+      onMouseUp={() => setHandleId(null)}
+      style={{ display: 'flex', justifyContent: 'center', color: '#b0afba', cursor: dragId ? 'grabbing' : 'grab', padding: '2px 0 6px', margin: '-12px 0 0' }}
+    >
+      <GripHorizontal size={18} />
+    </div>
+  );
+  const lockedTag = (
+    <span title="Field default, tidak bisa dihapus" style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.74rem', color: '#777683', fontFamily: font, whiteSpace: 'nowrap' }}>
+      <Lock size={13} /> Wajib
+    </span>
+  );
+  const fieldTitle = (text: string, required = true) => (
+    <p style={{ fontFamily: font, fontSize: '0.95rem', color: '#191c20' }}>{text}{required && <span style={{ color: '#d93025' }}> *</span>}</p>
+  );
+  const fixedCard = (key: string, title: string, body: React.ReactNode) => (
+    <div key={key} {...dragProps(key)} style={{ ...defaultCard, opacity: dragId === key ? 0.5 : 1 }}>
+      {grip(key)}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', marginBottom: '10px' }}>
+        {fieldTitle(title)}
+        {lockedTag}
+      </div>
+      {body}
+    </div>
+  );
 
   const changeType = (f: CustomField, type: CustomFieldType) =>
     update(f.id, { type, options: isChoice(type) && !(f.options || []).length ? ['Opsi 1'] : f.options });
@@ -190,20 +224,27 @@ export default function CustomFormBuilder({ campaignId, onChange, initial, initi
         </p>
       </div>
 
-      {['Nama Lengkap', 'WhatsApp', 'Email', 'Niche', ...(askDomicile ? ['Provinsi', 'Kota / Kabupaten'] : []), ...platforms.map((p) => `Username & Followers ${PLATFORM_LABELS[p] ?? p}${minFollowers[p] ? ` (min. ${Number(minFollowers[p]).toLocaleString('id-ID')})` : ''}`)].map((label) => (
-        <div key={label} style={{ ...defaultCard, display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '12px' }}>
-          <div style={{ flex: 1 }}>
-            <p style={{ fontFamily: font, fontSize: '0.95rem', color: '#191c20' }}>{label}<span style={{ color: '#d93025' }}> *</span></p>
-            {answerLine('50%', 'Teks jawaban singkat')}
-          </div>
-          <span title="Field default, tidak bisa dihapus" style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.74rem', color: '#777683', fontFamily: font, whiteSpace: 'nowrap' }}>
-            <Lock size={13} /> Wajib
-          </span>
-        </div>
-      ))}
-
-      {applyFields.pic && (
-        <div style={defaultCard}>
+      {keys.map((key, i) => {
+        switch (key) {
+          case 'name': return fixedCard(key, 'Nama Lengkap', answerLine('50%', 'Teks jawaban singkat'));
+          case 'phone': return fixedCard(key, 'Nomor WhatsApp', answerLine('50%', '08xxxxxxxxxx'));
+          case 'email': return fixedCard(key, 'Email', answerLine('50%', 'you@email.com'));
+          case 'niches': return fixedCard(key, 'Niche', (
+            <>
+              <p style={{ fontSize: '0.76rem', color: '#777683', fontFamily: font, margin: '-4px 0 10px' }}>Opsi dari niche di kriteria campaign (tahap 1), boleh pilih lebih dari satu.</p>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                {nicheOptions.map((n) => (
+                  <span key={n} style={{ padding: '7px 14px', borderRadius: '999px', background: '#e1e0ff', color: '#6728e4', fontSize: '0.78rem', fontWeight: 600, fontFamily: font }}>{n}</span>
+                ))}
+              </div>
+            </>
+          ));
+          case 'domicile': return fixedCard(key, 'Provinsi & Kota / Kabupaten Domisili', (
+            <div style={{ display: 'flex', gap: '16px' }}>{answerLine('40%', 'Pilih provinsi ▾')}{answerLine('40%', 'Pilih kota / kabupaten ▾')}</div>
+          ));
+          case 'pic': return (
+        <div key="pic" {...dragProps('pic')} style={{ ...defaultCard, opacity: dragId === 'pic' ? 0.5 : 1 }}>
+          {grip('pic')}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px' }}>
             <p style={{ fontFamily: font, fontSize: '0.95rem', color: '#191c20' }}>PIC{assignedPicIds.length > 0 && <span style={{ color: '#d93025' }}> *</span>}</p>
             <button onClick={() => setApply({ pic: false })} title="Hapus field PIC dari form" style={iconBtn}><Trash2 size={18} /></button>
@@ -229,10 +270,10 @@ export default function CustomFormBuilder({ campaignId, onChange, initial, initi
           )}
           {picError && <p role="alert" style={{ color: '#ba1a1a', fontSize: '0.78rem', fontFamily: font, marginTop: '6px' }}>{picError}</p>}
         </div>
-      )}
-
-      {applyFields.handleBy && (
-        <div style={defaultCard}>
+          );
+          case 'handleBy': return (
+        <div key="handleBy" {...dragProps('handleBy')} style={{ ...defaultCard, opacity: dragId === 'handleBy' ? 0.5 : 1 }}>
+          {grip('handleBy')}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px' }}>
             <p style={{ fontFamily: font, fontSize: '0.95rem', color: '#191c20' }}>Handle by{applyFields.handleByRequired && <span style={{ color: '#d93025' }}> *</span>}</p>
             <button onClick={() => setApply({ handleBy: false })} title="Hapus field Handle by dari form" style={iconBtn}><Trash2 size={18} /></button>
@@ -242,33 +283,20 @@ export default function CustomFormBuilder({ campaignId, onChange, initial, initi
             <Toggle label="Wajib diisi" checked={applyFields.handleByRequired} onChange={(v) => setApply({ handleByRequired: v })} />
           </div>
         </div>
-      )}
-
-      {(!applyFields.pic || !applyFields.handleBy) && (
-        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '12px' }}>
-          {!applyFields.pic && (
-            <button onClick={() => setApply({ pic: true })} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '7px 14px', borderRadius: '999px', border: '1px solid #c9b6f7', background: 'white', color: '#6728e4', fontSize: '0.78rem', fontWeight: 700, fontFamily: font, cursor: 'pointer' }}>
-              <Undo2 size={14} /> Kembalikan field PIC
-            </button>
-          )}
-          {!applyFields.handleBy && (
-            <button onClick={() => setApply({ handleBy: true })} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '7px 14px', borderRadius: '999px', border: '1px solid #c9b6f7', background: 'white', color: '#6728e4', fontSize: '0.78rem', fontWeight: 700, fontFamily: font, cursor: 'pointer' }}>
-              <Undo2 size={14} /> Kembalikan field Handle by
-            </button>
-          )}
-        </div>
-      )}
-
-      {fields.map((f, i) => {
+          );
+        }
+        if (key.startsWith('social:')) {
+          const p = key.slice(7);
+          return fixedCard(key, `Username & Followers ${PLATFORM_LABELS[p] ?? p}`, <ApplySocialField platform={p} minFollowers={minFollowers[p]} />);
+        }
+        const f = fields.find((x) => x.id === key);
+        if (!f) return null;
         const active = f.id === activeId;
         return (
           <div
             key={f.id}
             onClick={() => setActiveId(f.id)}
-            draggable={handleId === f.id}
-            onDragStart={(e) => { e.dataTransfer.effectAllowed = 'move'; setDragId(f.id); }}
-            onDragOver={(e) => { if (!dragId) return; e.preventDefault(); dragOver(f.id); }}
-            onDragEnd={() => { setDragId(null); setHandleId(null); }}
+            {...dragProps(f.id)}
             style={{
               opacity: dragId === f.id ? 0.5 : 1,
               background: 'white', borderRadius: '12px', border: '1px solid #e1e0ff', marginBottom: '12px', cursor: active ? 'default' : 'pointer',
@@ -276,14 +304,7 @@ export default function CustomFormBuilder({ campaignId, onChange, initial, initi
               padding: '4px 24px 8px',
             }}
           >
-            <div
-              title="Geser untuk mengubah urutan"
-              onMouseDown={() => setHandleId(f.id)}
-              onMouseUp={() => setHandleId(null)}
-              style={{ display: 'flex', justifyContent: 'center', color: '#b0afba', cursor: dragId ? 'grabbing' : 'grab', padding: '2px 0 6px' }}
-            >
-              <GripHorizontal size={18} />
-            </div>
+            <div style={{ marginTop: '12px' }}>{grip(f.id)}</div>
             {active ? (
               <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start', flexWrap: 'wrap', marginBottom: '16px' }}>
                 <input
@@ -352,7 +373,7 @@ export default function CustomFormBuilder({ campaignId, onChange, initial, initi
             {active && (
               <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '2px', borderTop: '1px solid #e1e0ff', paddingTop: '6px' }}>
                 <button onClick={() => move(f.id, -1)} disabled={i === 0} title="Pindah ke atas" style={{ ...iconBtn, opacity: i === 0 ? 0.3 : 1 }}><ArrowUp size={18} /></button>
-                <button onClick={() => move(f.id, 1)} disabled={i === fields.length - 1} title="Pindah ke bawah" style={{ ...iconBtn, opacity: i === fields.length - 1 ? 0.3 : 1 }}><ArrowDown size={18} /></button>
+                <button onClick={() => move(f.id, 1)} disabled={i === keys.length - 1} title="Pindah ke bawah" style={{ ...iconBtn, opacity: i === keys.length - 1 ? 0.3 : 1 }}><ArrowDown size={18} /></button>
                 <button onClick={(e) => { e.stopPropagation(); duplicate(f); }} title="Duplikat" style={iconBtn}><Copy size={18} /></button>
                 <button onClick={(e) => { e.stopPropagation(); remove(f.id); }} title="Hapus" style={iconBtn}><Trash2 size={18} /></button>
                 <span style={{ width: '1px', height: '28px', background: '#e1e0ff', margin: '0 10px' }} />
@@ -362,6 +383,21 @@ export default function CustomFormBuilder({ campaignId, onChange, initial, initi
           </div>
         );
       })}
+
+      {(!applyFields.pic || !applyFields.handleBy) && (
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '12px' }}>
+          {!applyFields.pic && (
+            <button onClick={() => setApply({ pic: true })} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '7px 14px', borderRadius: '999px', border: '1px solid #c9b6f7', background: 'white', color: '#6728e4', fontSize: '0.78rem', fontWeight: 700, fontFamily: font, cursor: 'pointer' }}>
+              <Undo2 size={14} /> Kembalikan field PIC
+            </button>
+          )}
+          {!applyFields.handleBy && (
+            <button onClick={() => setApply({ handleBy: true })} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '7px 14px', borderRadius: '999px', border: '1px solid #c9b6f7', background: 'white', color: '#6728e4', fontSize: '0.78rem', fontWeight: 700, fontFamily: font, cursor: 'pointer' }}>
+              <Undo2 size={14} /> Kembalikan field Handle by
+            </button>
+          )}
+        </div>
+      )}
 
       <button
         onClick={addField}

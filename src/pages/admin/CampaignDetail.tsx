@@ -294,6 +294,7 @@ export default function CampaignDetail() {
           platforms={campaign.criteria.platforms}
           minFollowers={campaign.criteria.minFollowersByPlatform}
           askDomicile={campaign.criteria.provinces.length + (campaign.criteria.cities?.length ?? 0) > 0}
+          niches={campaign.criteria.niches}
           pics={allPics}
           assignedPicIds={picUsers.map((p) => p._id)}
           onTogglePic={togglePic}
