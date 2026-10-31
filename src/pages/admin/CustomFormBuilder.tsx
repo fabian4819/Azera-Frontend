@@ -215,7 +215,8 @@ export default function CustomFormBuilder({ campaignId, onChange, initial, initi
   };
 
   return (
-    <div style={{ maxWidth: '760px', margin: '0 auto' }}>
+    <div className="fb-wrap" style={{ maxWidth: '820px', margin: '0 auto', display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+      <div style={{ flex: 1, minWidth: 0 }}>
       <div style={{ background: 'white', borderRadius: '12px', border: '1px solid #e1e0ff', borderTop: '10px solid #6728e4', padding: '22px 24px', marginBottom: '12px' }}>
         <p style={{ fontFamily: font, fontWeight: 700, fontSize: '1.4rem', color: '#191c20', marginBottom: '6px' }}>Form Kustom Pendaftaran</p>
         <p style={{ fontSize: '0.82rem', color: '#777683' }}>
@@ -411,13 +412,6 @@ export default function CustomFormBuilder({ campaignId, onChange, initial, initi
         </div>
       )}
 
-      <button
-        onClick={addField}
-        style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '16px', marginBottom: '16px', background: 'white', border: '1.5px dashed #c9b6f7', borderRadius: '12px', color: '#6728e4', fontWeight: 700, fontSize: '0.85rem', fontFamily: font, cursor: 'pointer' }}
-      >
-        <Plus size={16} /> Tambah Pertanyaan
-      </button>
-
       {campaignId && <div style={{ position: 'sticky', bottom: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', background: 'white', border: '1px solid #e1e0ff', borderRadius: '12px', padding: '12px 16px', boxShadow: '0 4px 20px rgba(107,46,232,0.12)' }}>
         <span style={{ fontSize: '0.8rem', fontFamily: font, color: status ? (status.ok ? '#1e7e34' : '#ba1a1a') : dirty ? '#b26a00' : '#777683' }}>
           {status?.text ?? (dirty ? 'Ada perubahan yang belum disimpan' : 'Semua perubahan tersimpan')}
@@ -426,6 +420,20 @@ export default function CustomFormBuilder({ campaignId, onChange, initial, initi
           {saving ? 'Menyimpan...' : 'Simpan Form'}
         </button>
       </div>}
+      </div>
+
+      {/* Tombol tambah ikut scroll di samping (ala Google Forms), pertanyaan baru masuk di bawah kartu yang aktif */}
+      <div className="fb-side" style={{ position: 'sticky', top: '120px', flexShrink: 0 }}>
+        <button
+          onClick={addField}
+          title="Tambah pertanyaan"
+          aria-label="Tambah pertanyaan"
+          style={{ width: '48px', height: '48px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#6728e4', border: 'none', borderRadius: '50%', color: 'white', cursor: 'pointer', boxShadow: '0 6px 18px rgba(103,40,228,0.35)' }}
+        >
+          <Plus size={22} />
+        </button>
+      </div>
+      <style>{`@media (max-width: 860px) { .fb-side { position: fixed !important; top: auto !important; right: 20px; bottom: 96px; z-index: 30; } }`}</style>
     </div>
   );
 }
