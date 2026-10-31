@@ -7,6 +7,7 @@ import { useTalentAuth } from '../hooks/useTalentAuth';
 import { usePicAuth } from '../hooks/usePicAuth';
 
 const f = "var(--font-display)";
+const PIC_POSITIONS = ['Owner/Pemilik', 'Founder', 'Direktur', 'KOL Specialist', 'Admin', 'Lainnya'];
 const heroGradient =
   'radial-gradient(85% 65% at 50% -8%, #5a3a94, rgba(90,58,148,0) 58%),' +
   'linear-gradient(180deg, #452a80 0%, #3f2378 52%, #331d64 100%)';
@@ -43,6 +44,16 @@ export default function PortalLogin() {
   const [picPhone, setPicPhone] = useState('');
   const [picEmail, setPicEmail] = useState('');
   const [picPassword, setPicPassword] = useState('');
+  const [picOwnerName, setPicOwnerName] = useState('');
+  const [picSocial, setPicSocial] = useState('');
+  const [picPortfolio, setPicPortfolio] = useState('');
+  const [picKtp, setPicKtp] = useState<File | null>(null);
+  const [picCity, setPicCity] = useState('');
+  const [picPosition, setPicPosition] = useState('');
+  const [picPositionOther, setPicPositionOther] = useState('');
+  const [picBackupPhone, setPicBackupPhone] = useState('');
+  const [picAuthorized, setPicAuthorized] = useState(false);
+  const [picConsent, setPicConsent] = useState(false);
 
   const [showPass, setShowPass] = useState(false);
   const [error, setError] = useState('');
@@ -89,7 +100,15 @@ export default function PortalLogin() {
         loginPic(res.data.token, res.data.pic);
         navigate('/pic/campaigns');
       } else {
-        const res = await picApi.post('/pic/register', { name: picName, phone: picPhone, email: picEmail, password: picPassword });
+        const fd = new FormData();
+        Object.entries({
+          name: picName, city: picCity, ownerName: picOwnerName, position: picPosition === 'Lainnya' ? picPositionOther : picPosition,
+          email: picEmail, phone: picPhone, backupPhone: picBackupPhone, socialMedia: picSocial, portfolio: picPortfolio, password: picPassword,
+          authorized: String(picAuthorized), dataConsent: String(picConsent),
+        })
+          .forEach(([k, v]) => fd.append(k, v));
+        if (picKtp) fd.append('ktp', picKtp);
+        const res = await picApi.post('/pic/register', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
         loginPic(res.data.token, res.data.pic);
         navigate('/pic/campaigns');
       }
@@ -102,20 +121,22 @@ export default function PortalLogin() {
   };
 
   const roleLabel = role === 'creator' ? 'Creator / Talent' : 'PIC Campaign';
+  // Sign up PIC fieldnya banyak: panel kanan dilebarkan & field dibuat 2 kolom supaya tidak memanjang ke bawah
+  const wide = role === 'pic' && mode === 'signup';
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#eef0ff', padding: '24px' }}>
       <div
         className="login-card"
         style={{
-          width: 'min(980px, 100%)', minHeight: '660px', borderRadius: '32px', overflow: 'hidden',
+          width: wide ? 'min(1240px, 100%)' : 'min(980px, 100%)', minHeight: '660px', borderRadius: '32px', overflow: 'hidden',
           boxShadow: '0 30px 80px rgba(21,21,125,0.18)', display: 'flex', background: 'white', position: 'relative',
         }}
       >
         <div
           className="login-left"
           style={{
-            flex: '0 0 44%', position: 'relative', overflow: 'hidden', background: heroGradient,
+            flex: wide ? '0 0 24%' : '0 0 44%', position: 'relative', overflow: 'hidden', background: heroGradient,
             display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
             padding: '56px 44px', textAlign: 'center',
             borderTopRightRadius: '64px', borderBottomRightRadius: '64px',
@@ -149,10 +170,10 @@ export default function PortalLogin() {
 
         <div
           className="login-right"
-          style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '60px 64px', position: 'relative' }}
+          style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: wide ? '48px 44px' : '60px 64px', position: 'relative' }}
         >
 
-          <div style={{ width: '100%', maxWidth: '380px' }}>
+          <div style={{ width: '100%', maxWidth: wide ? '820px' : '380px' }}>
             <div style={{ display: 'flex', background: '#f0eeff', borderRadius: '999px', padding: '4px', marginBottom: '28px' }}>
               {(['creator', 'pic'] as Role[]).map((r) => (
                 <button
@@ -230,15 +251,41 @@ export default function PortalLogin() {
                   </div>
                 </>
               ) : (
-                <>
+                <div className={wide ? 'pic-grid form-2col' : undefined} style={{ display: 'grid', gridTemplateColumns: wide ? undefined : '1fr', columnGap: '14px', alignItems: 'end' }}>
                   {mode === 'signup' && (
                     <>
                       <div style={{ marginBottom: '16px' }}>
-                        <label style={labelStyle}>Nama MG *</label>
-                        <input type="text" value={picName} onChange={(e) => setPicName(e.target.value)} placeholder="Enter name" required style={inputStyle} />
+                        <label style={labelStyle}>Nama Management/Agency *</label>
+                        <input type="text" value={picName} onChange={(e) => setPicName(e.target.value)} placeholder="Nama management/agency" required style={inputStyle} />
                       </div>
                       <div style={{ marginBottom: '16px' }}>
-                        <label style={labelStyle}>WhatsApp Number *</label>
+                        <label style={labelStyle}>Kota Domisili Management/Agency *</label>
+                        <input type="text" value={picCity} onChange={(e) => setPicCity(e.target.value)} placeholder="mis. Bandung" required style={inputStyle} />
+                      </div>
+                      <div style={{ marginBottom: '16px' }}>
+                        <label style={labelStyle}>Nama Lengkap PIC *</label>
+                        <input type="text" value={picOwnerName} onChange={(e) => setPicOwnerName(e.target.value)} placeholder="Nama lengkap" autoComplete="name" required style={inputStyle} />
+                      </div>
+                      <div style={{ marginBottom: '16px' }}>
+                        <label style={labelStyle}>Jabatan/Posisi PIC di Agency/Management *</label>
+                        <select value={picPosition} onChange={(e) => setPicPosition(e.target.value)} required style={inputStyle}>
+                          <option value="">Pilih jabatan</option>
+                          {PIC_POSITIONS.map((p) => <option key={p} value={p}>{p}</option>)}
+                        </select>
+                        {picPosition === 'Lainnya' && (
+                          <input type="text" value={picPositionOther} onChange={(e) => setPicPositionOther(e.target.value)} placeholder="Tuliskan jabatan" required style={{ ...inputStyle, marginTop: '8px' }} />
+                        )}
+                      </div>
+                    </>
+                  )}
+                  <div style={{ marginBottom: '16px' }}>
+                    <label style={labelStyle}>{mode === 'signup' ? 'Email Aktif PIC *' : 'Email *'}</label>
+                    <input type="email" value={picEmail} onChange={(e) => setPicEmail(e.target.value)} placeholder="you@brand.com" required style={inputStyle} />
+                  </div>
+                  {mode === 'signup' && (
+                    <>
+                      <div style={{ marginBottom: '16px' }}>
+                        <label style={labelStyle}>Nomor WhatsApp Aktif PIC *</label>
                         <input
                           type="tel"
                           value={picPhone}
@@ -252,13 +299,36 @@ export default function PortalLogin() {
                           style={inputStyle}
                         />
                       </div>
+                      <div style={{ marginBottom: '16px' }}>
+                        <label style={labelStyle}>Nomor WhatsApp Back Up</label>
+                        <input
+                          type="tel"
+                          value={picBackupPhone}
+                          onChange={(e) => setPicBackupPhone(e.target.value.replace(/[^0-9]/g, ''))}
+                          placeholder="Jika nomor utama tak bisa dihubungi"
+                          
+                          pattern="08[0-9]{8,11}"
+                          title="Nomor harus diawali 08, hanya angka, tanpa spasi atau tanda hubung (contoh: 08123456789)"
+                          inputMode="numeric"
+                          maxLength={13}
+                          style={inputStyle}
+                        />
+                      </div>
+                      <div style={{ marginBottom: '16px' }}>
+                        <label style={labelStyle}>Link Sosial Media Aktif Management/Agency</label>
+                        <input type="text" value={picSocial} onChange={(e) => setPicSocial(e.target.value)} placeholder="Jika ada, mis. instagram.com/namaagency" style={inputStyle} />
+                      </div>
+                      <div style={{ marginBottom: '16px' }}>
+                        <label style={labelStyle}>Link Portofolio Management/Agency</label>
+                        <input type="text" value={picPortfolio} onChange={(e) => setPicPortfolio(e.target.value)} placeholder="Jika ada (Drive, website, dll.)" style={inputStyle} />
+                      </div>
+                      <div style={{ marginBottom: '16px' }}>
+                        <label style={labelStyle}>Upload KTP PIC/Owner * <span style={{ fontWeight: 400, color: '#8a8a99' }}>(foto/PDF, maks. 5MB)</span></label>
+                        <input type="file" accept="image/*,application/pdf" onChange={(e) => setPicKtp(e.target.files?.[0] ?? null)} required style={{ ...inputStyle, padding: '10px 14px' }} />
+                      </div>
                     </>
                   )}
-                  <div style={{ marginBottom: '16px' }}>
-                    <label style={labelStyle}>Email *</label>
-                    <input type="email" value={picEmail} onChange={(e) => setPicEmail(e.target.value)} placeholder="you@brand.com" required style={inputStyle} />
-                  </div>
-                  <div style={{ marginBottom: '12px' }}>
+                  <div style={{ marginBottom: wide ? '16px' : '12px' }}>
                     <label style={labelStyle}>Password *</label>
                     <div style={{ position: 'relative' }}>
                       <input type={showPass ? 'text' : 'password'} value={picPassword} onChange={(e) => setPicPassword(e.target.value)} placeholder="••••••••" required minLength={mode === 'signup' ? 6 : undefined} style={{ ...inputStyle, paddingRight: '44px' }} />
@@ -268,11 +338,24 @@ export default function PortalLogin() {
                     </div>
                   </div>
                   {mode === 'signup' && (
-                    <p style={{ fontSize: '0.75rem', color: '#8a8a99', fontFamily: f, marginTop: '-4px', marginBottom: '12px' }}>
+                    <div style={{ gridColumn: '1 / -1', display: 'flex', flexDirection: 'column', gap: '10px', margin: '4px 0 14px' }}>
+                      {[
+                        { checked: picAuthorized, set: setPicAuthorized, title: 'Pernyataan Kewenangan PIC', text: 'Saya menyatakan bahwa saya berwenang mewakili Management/Agency yang didaftarkan dan bertanggung jawab atas kebenaran data yang saya isi.' },
+                        { checked: picConsent, set: setPicConsent, title: 'Persetujuan Penggunaan Data', text: 'Saya menyetujui penggunaan data yang saya berikan untuk keperluan pendaftaran dan verifikasi Management/Agency oleh AZERA.' },
+                      ].map((c) => (
+                        <label key={c.title} style={{ display: 'flex', gap: '10px', alignItems: 'flex-start', cursor: 'pointer', fontFamily: f }}>
+                          <input type="checkbox" checked={c.checked} onChange={(e) => c.set(e.target.checked)} required style={{ width: '18px', height: '18px', marginTop: '2px', accentColor: '#6728e4', flexShrink: 0 }} />
+                          <span style={{ fontSize: '0.78rem', color: '#464652', lineHeight: 1.5 }}><b style={{ color: '#191c20' }}>{c.title} *</b><br />{c.text}</span>
+                        </label>
+                      ))}
+                    </div>
+                  )}
+                  {mode === 'signup' && (
+                    <p style={{ gridColumn: '1 / -1', fontSize: '0.75rem', color: '#8a8a99', fontFamily: f, marginTop: '-4px', marginBottom: '12px' }}>
                       Your dashboard starts empty. Once the admin assigns you to a campaign, it will show up here automatically.
                     </p>
                   )}
-                </>
+                </div>
               )}
 
               <button type="submit" disabled={loading} className="btn-primary" style={{ width: '100%', justifyContent: 'center', fontSize: '1rem', padding: '14px', opacity: loading ? 0.7 : 1, marginTop: '8px' }}>
@@ -295,6 +378,8 @@ export default function PortalLogin() {
       </div>
 
       <style>{`
+        .pic-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        @media (max-width: 1100px) { .pic-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
         @media (max-width: 768px) {
           .login-card { min-height: unset !important; flex-direction: column; border-radius: 28px !important; }
           .login-left { flex: none !important; padding: 36px 28px 40px !important; border-radius: 0 0 48px 48px !important; }

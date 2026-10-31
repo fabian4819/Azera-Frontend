@@ -14,6 +14,7 @@ const tdStyle: React.CSSProperties = {
 interface PicCampaignRef { _id: string; name: string }
 interface PicUserItem {
   _id: string; name: string; email: string; phone: string;
+  city?: string; ownerName?: string; position?: string; backupPhone?: string; socialMedia?: string; portfolio?: string; ktpUrl?: string;
   campaignIds: PicCampaignRef[]; createdAt: string;
 }
 
@@ -38,6 +39,11 @@ export default function PicUsers() {
     return () => window.clearTimeout(timeoutId);
   }, []);
 
+  // Isian bebas dari PIC: jadi link cuma kalau http(s), selain itu teks biasa (cegah javascript: dsb.)
+  const linkOrText = (v?: string) => !v ? <span style={{ color: '#8a8a99' }}>-</span>
+    : /^https?:\/\//i.test(v) ? <a href={v} target="_blank" rel="noreferrer" style={{ color: '#6728e4', wordBreak: 'break-all' }}>{v}</a>
+      : <span style={{ wordBreak: 'break-all' }}>{v}</span>;
+
   const formatDate = (d: string) => new Date(d).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
 
   return (
@@ -53,24 +59,31 @@ export default function PicUsers() {
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem' }}>
             <thead>
               <tr style={{ background: '#f8f9ff', borderBottom: '1px solid #e1e0ff' }}>
-                {['Nama MG', 'WhatsApp', 'Email', 'Campaign', 'Tanggal Daftar'].map((h) => (
+                {['Management/Agency', 'Kota', 'PIC', 'Jabatan', 'WhatsApp', 'WA Back Up', 'Email', 'Sosial Media', 'Portfolio', 'KTP', 'Campaign', 'Tanggal Daftar'].map((h) => (
                   <th key={h} style={thStyle}>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {loading ? (
-                <tr><td colSpan={5} style={{ ...tdStyle, textAlign: 'center', padding: '48px' }}>Memuat...</td></tr>
+                <tr><td colSpan={12} style={{ ...tdStyle, textAlign: 'center', padding: '48px' }}>Memuat...</td></tr>
               ) : picUsers.length === 0 ? (
-                <tr><td colSpan={5} style={{ ...tdStyle, textAlign: 'center', padding: '48px' }}>Belum ada akun PIC yang sign up.</td></tr>
+                <tr><td colSpan={12} style={{ ...tdStyle, textAlign: 'center', padding: '48px' }}>Belum ada akun PIC yang sign up.</td></tr>
               ) : picUsers.map((p, i) => (
                 <tr
                   key={p._id}
                   style={{ borderBottom: '1px solid #e1e0ff', background: i % 2 === 0 ? 'white' : '#fcfcff' }}
                 >
                   <td style={{ ...tdStyle, fontWeight: 600, color: '#191c20' }}>{p.name}</td>
+                  <td style={tdStyle}>{p.city || <span style={{ color: '#8a8a99' }}>-</span>}</td>
+                  <td style={tdStyle}>{p.ownerName || <span style={{ color: '#8a8a99' }}>-</span>}</td>
+                  <td style={tdStyle}>{p.position || <span style={{ color: '#8a8a99' }}>-</span>}</td>
                   <td style={tdStyle}>{p.phone}</td>
+                  <td style={tdStyle}>{p.backupPhone || <span style={{ color: '#8a8a99' }}>-</span>}</td>
                   <td style={tdStyle}>{p.email}</td>
+                  <td style={tdStyle}>{linkOrText(p.socialMedia)}</td>
+                  <td style={tdStyle}>{linkOrText(p.portfolio)}</td>
+                  <td style={tdStyle}>{p.ktpUrl ? <a href={p.ktpUrl} target="_blank" rel="noreferrer" style={{ color: '#6728e4', fontWeight: 600 }}>Lihat KTP</a> : <span style={{ color: '#8a8a99' }}>-</span>}</td>
                   <td style={tdStyle}>
                     {p.campaignIds.length === 0 ? (
                       <span style={{ color: '#8a8a99' }}>Belum ada campaign</span>
