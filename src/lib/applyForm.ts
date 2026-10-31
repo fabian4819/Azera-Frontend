@@ -25,3 +25,6 @@ export function applyOrder(order: string[] | undefined, keys: string[]): string[
   });
   return out;
 }
+
+/** Link apply pendek /apply/<kode>, kode = 6 hex terakhir applySlug (server terima slug lengkap maupun kode). */
+export const shortApplyCode = (applySlug: string) => applySlug.split('-').pop() || applySlug;

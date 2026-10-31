@@ -5,6 +5,7 @@ import { ArrowLeft, Copy, Check, MessageCircle, LayoutDashboard, Building2, Exte
 import { SiInstagram, SiTiktok, SiThreads, SiX } from 'react-icons/si';
 import type { IconType } from 'react-icons';
 import api from '../../lib/api';
+import { shortApplyCode } from '../../lib/applyForm';
 import { useAuth, hasOwnerAccess } from '../../hooks/useAuth';
 import CampaignAnalyticsFinance from './CampaignAnalyticsFinance';
 import BriefEditor, { type BriefBlock } from '../../components/BriefEditor';
@@ -273,7 +274,7 @@ export default function CampaignDetail() {
         {/* Link form + kolom kanan: toggle buka/tutup di atas tombol Lihat Pendaftar (lebar sama) */}
         <div style={{ maxWidth: '760px', margin: '0 auto 12px', display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'stretch' }}>
           <div style={{ flex: '1 1 380px', minWidth: 0 }}>
-            <ShareLink title="Link Form Pendaftaran" url={`${window.location.origin}/apply/${campaign.applySlug}`}
+            <ShareLink title="Link Form Pendaftaran" url={`${window.location.origin}/apply/${shortApplyCode(campaign.applySlug)}`}
               description={campaign.applyOpen ? undefined : 'Pendaftaran ditutup: link ini menampilkan info "pendaftaran sudah ditutup".'}
               copied={copiedKey === 'apply'} onCopy={(url) => void copyLink('apply', url)} compact />
           </div>

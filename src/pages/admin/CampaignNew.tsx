@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import api from '../../lib/api';
+import { shortApplyCode } from '../../lib/applyForm';
 import { buildBroadcast } from '../../lib/broadcast';
 import { NICHES as niches } from '../../lib/niches';
 import { WILAYAH_API, type WilayahOption } from '../../lib/wilayah';
@@ -177,7 +178,7 @@ export default function CampaignNew() {
       });
       // PIC yang dicentang di tahap 2, best-effort, campaign sudah terbuat
       await Promise.all(allPics.filter((p) => picIds.includes(p._id)).map((p) => api.post(`/admin/campaigns/${res.data._id}/pic`, { email: p.email }).catch(() => undefined)));
-      setCreated({ id: res.data._id, broadcast: buildBroadcast(res.data, `${window.location.origin}/apply/${res.data.applySlug}`) });
+      setCreated({ id: res.data._id, broadcast: buildBroadcast(res.data, `${window.location.origin}/apply/${shortApplyCode(res.data.applySlug)}`) });
     } catch {
       setError('Gagal membuat campaign. Coba lagi.');
     } finally {
