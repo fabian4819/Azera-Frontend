@@ -441,7 +441,7 @@ export default function CampaignApply() {
               const f = custom;
               return (
             <div key={f.id} style={{ marginBottom: '18px' }}>
-              <label style={labelStyle}>{f.label}{f.required && ' *'}</label>
+              <label style={{ ...labelStyle, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{f.label}{f.required && ' *'}</label>
               {f.description && <p style={{ fontSize: '0.78rem', color: '#777683', margin: '-2px 0 8px', lineHeight: 1.5, whiteSpace: 'pre-wrap', fontFamily: "var(--font-display)" }}>{f.description}</p>}
               {f.type === 'file' && (
                 <div>

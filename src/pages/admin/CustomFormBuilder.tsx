@@ -70,6 +70,11 @@ const Toggle = ({ checked, onChange, label }: { checked: boolean; onChange: (v: 
 );
 
 const defaultCard: React.CSSProperties = { background: 'white', borderRadius: '12px', border: '1px solid #e1e0ff', marginBottom: '12px', padding: '16px 24px' };
+const autoGrow = (el: HTMLTextAreaElement | null) => {
+  if (!el) return;
+  el.style.height = 'auto';
+  el.style.height = `${el.scrollHeight}px`;
+};
 const answerLine = (w: string, text: string) => (
   <p style={{ fontSize: '0.85rem', color: '#9a99a6', borderBottom: '1px dotted #c7c8cf', paddingBottom: '6px', width: w, marginTop: '10px', fontFamily: font }}>{text}</p>
 );
@@ -336,12 +341,15 @@ export default function CustomFormBuilder({ campaignId, onChange, initial, initi
             <div style={{ marginTop: '12px' }}>{grip(f.id)}</div>
             {active ? (
               <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start', flexWrap: 'wrap', marginBottom: '16px' }}>
-                <input
+                {/* Textarea yang tinggi-nya ikut isi: judul panjang turun ke baris berikut, Enter = baris baru */}
+                <textarea
                   autoFocus={!f.label}
+                  rows={1}
+                  ref={autoGrow}
                   value={f.label}
-                  onChange={(e) => update(f.id, { label: e.target.value })}
+                  onChange={(e) => { autoGrow(e.target); update(f.id, { label: e.target.value }); }}
                   placeholder="Pertanyaan"
-                  style={{ flex: '1 1 280px', padding: '14px', background: '#f6f5ff', border: 'none', borderBottom: '2px solid #6728e4', borderRadius: '4px 4px 0 0', fontSize: '0.95rem', fontFamily: font, outline: 'none' }}
+                  style={{ flex: '1 1 280px', padding: '14px', background: '#f6f5ff', border: 'none', borderBottom: '2px solid #6728e4', borderRadius: '4px 4px 0 0', fontSize: '0.95rem', fontFamily: font, outline: 'none', resize: 'none', overflow: 'hidden', lineHeight: 1.4 }}
                 />
                 <select
                   value={f.type}
@@ -360,7 +368,7 @@ export default function CustomFormBuilder({ campaignId, onChange, initial, initi
               </div>
             ) : (
               <div style={{ marginBottom: '14px' }}>
-                <p style={{ fontFamily: font, fontSize: '0.95rem', color: f.label ? '#191c20' : '#9a99a6' }}>
+                <p style={{ fontFamily: font, fontSize: '0.95rem', color: f.label ? '#191c20' : '#9a99a6', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
                   {f.label || 'Pertanyaan tanpa judul'}
                   {f.required && <span style={{ color: '#d93025' }}> *</span>}
                 </p>
