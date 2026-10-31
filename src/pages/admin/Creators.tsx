@@ -8,6 +8,7 @@ import {
 import { Search, Eye, RefreshCw, ChevronUp, ChevronDown, ChevronsUpDown, Filter, X as XIcon, ExternalLink } from 'lucide-react';
 import StatusBadge from '../../components/ui/StatusBadge';
 import api from '../../lib/api';
+import WaLink from '../../components/WaLink';
 
 interface ExtensionMetric { followers?: number; engagementRate?: number; avgViews?: number; avgLikes?: number }
 interface Social { platform: string; username: string; profileUrl?: string; followers: number }
@@ -195,7 +196,7 @@ export default function Creators({ scope = 'general', selected, onSelectedChange
       },
       textCol('name', 'Nama', (c) => c.name, ({ getValue }) => <span style={{ fontWeight: 600, color: '#191c20' }}>{getValue<string>()}</span>),
       ...(scope !== 'general' ? [arrayCol('campaigns', 'Campaign', (c) => c.campaigns || [])] : []),
-      textCol('phone', 'WhatsApp', (c) => c.phone),
+      textCol('phone', 'WhatsApp', (c) => c.phone, ({ getValue }) => <WaLink phone={getValue<string>()} />),
       textCol('email', 'Email', (c) => c.email || ''),
       numCol('age', 'Usia', (c) => c.age ?? null),
       textCol('gender', 'Jenis Kelamin', (c) => (c.gender ? GENDER_LABELS[c.gender] || c.gender : '')),

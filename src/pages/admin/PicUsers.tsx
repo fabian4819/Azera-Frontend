@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { RefreshCw } from 'lucide-react';
 import api from '../../lib/api';
+import WaLink from '../../components/WaLink';
 
 const f = "var(--font-display)";
 const thStyle: React.CSSProperties = {
@@ -78,8 +79,8 @@ export default function PicUsers() {
                   <td style={tdStyle}>{p.city || <span style={{ color: '#8a8a99' }}>-</span>}</td>
                   <td style={tdStyle}>{p.ownerName || <span style={{ color: '#8a8a99' }}>-</span>}</td>
                   <td style={tdStyle}>{p.position || <span style={{ color: '#8a8a99' }}>-</span>}</td>
-                  <td style={tdStyle}>{p.phone}</td>
-                  <td style={tdStyle}>{p.backupPhone || <span style={{ color: '#8a8a99' }}>-</span>}</td>
+                  <td style={tdStyle}><WaLink phone={p.phone} /></td>
+                  <td style={tdStyle}>{p.backupPhone ? <WaLink phone={p.backupPhone} /> : <span style={{ color: '#8a8a99' }}>-</span>}</td>
                   <td style={tdStyle}>{p.email}</td>
                   <td style={tdStyle}>{linkOrText(p.socialMedia)}</td>
                   <td style={tdStyle}>{linkOrText(p.portfolio)}</td>

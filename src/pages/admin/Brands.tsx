@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Search, Eye, RefreshCw } from 'lucide-react';
 import StatusBadge from '../../components/ui/StatusBadge';
 import api from '../../lib/api';
+import WaLink from '../../components/WaLink';
 
 interface Brand {
   _id: string;
@@ -192,7 +193,7 @@ export default function Brands() {
                   >
                     <td style={{ ...tdStyle, fontWeight: 600, color: '#191c20' }}>{b.namaBrand}</td>
                     <td style={tdStyle}>{b.namaPIC}</td>
-                    <td style={tdStyle}>{b.whatsapp}</td>
+                    <td style={tdStyle}><WaLink phone={b.whatsapp} /></td>
                     <td style={tdStyle}>{b.kategori || (b.jasa && JASA_LABELS[b.jasa]) || '-'}</td>
                     <td style={tdStyle}>
                       {b.paket ? (

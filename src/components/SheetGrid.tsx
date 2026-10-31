@@ -1,5 +1,6 @@
 import { useMemo, useRef, useState, type ReactNode } from 'react';
 import { ArrowDownAZ, ArrowDownZA, ListFilter, Pencil, Plus, Search, Upload, X } from 'lucide-react';
+import WaLink from './WaLink';
 
 export type Cell = string | number;
 /** 'file' = upload gambar (screenshot), 'media' = upload foto/video (draft) */
@@ -13,8 +14,12 @@ const ROW_NO_W = 46;
 /** A, B, …, Z, AA, AB …, label kolom ala spreadsheet */
 const colLetter = (i: number): string => (i < 26 ? String.fromCharCode(65 + i) : colLetter(Math.floor(i / 26) - 1) + colLetter(i % 26));
 
-function renderCell(v: Cell) {
+// Kolom nomor WhatsApp (bukan "Balasan WA"): sel jadi link chat wa.me
+const isWaHeader = (h?: string) => !!h && /^(no\.? ?)?(whatsapp|wa)\b|wa back ?up/i.test(h.trim()) && !/balasan/i.test(h);
+
+function renderCell(v: Cell, header?: string) {
   if (typeof v === 'number') return v.toLocaleString('id-ID');
+  if (isWaHeader(header)) return <WaLink phone={v} />;
   if (/^https?:\/\//.test(v)) {
     return <a href={v} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} style={{ color: '#1a73e8' }}>{v}</a>;
   }
@@ -287,7 +292,7 @@ export default function SheetGrid({
     return (
       <span style={{ display: 'flex', alignItems: 'center', gap: '6px', opacity: busy ? 0.5 : 1 }}>
         <span style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>
-          {busy ? 'Menyimpan…' : v === '' && editable ? <span style={{ color: '#9a99a6' }}>Klik untuk isi</span> : renderCell(v)}
+          {busy ? 'Menyimpan…' : v === '' && editable ? <span style={{ color: '#9a99a6' }}>Klik untuk isi</span> : renderCell(v, headers[col])}
         </span>
         {editable && !busy && <Pencil size={11} color="#9a99a6" style={{ flexShrink: 0 }} />}
       </span>
@@ -397,7 +402,7 @@ export default function SheetGrid({
                         onMouseLeave={() => setTip(null)}
                         onClick={editable ? (e) => { e.stopPropagation(); startEdit(i, ci); } : undefined}
                         style={{ ...cellBase, background: editable && !isSel ? '#fffdf2' : bg, cursor: editable ? 'text' : 'default', textAlign: numericCols.has(ci) ? 'right' : 'left', ...(ci === 0 ? firstColStyle : {}) }}>
-                        {custom ?? (canEdit ? renderEditableCell(i, ci, v) : renderCell(v))}
+                        {custom ?? (canEdit ? renderEditableCell(i, ci, v) : renderCell(v, headers[ci]))}
                       </td>
                     );
                   })}

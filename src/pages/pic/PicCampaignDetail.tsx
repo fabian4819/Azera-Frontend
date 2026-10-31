@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { ExternalLink } from 'lucide-react';
 import picApi from '../../lib/picApi';
+import WaLink from '../../components/WaLink';
 
 const f = "var(--font-display)";
 
@@ -147,7 +148,7 @@ export default function PicCampaignDetail() {
                 return (
                   <tr key={a._id}>
                     <td style={{ ...td, fontWeight: 600 }}>{a.creatorId?.name || 'Creator deleted'}</td>
-                    <td style={td}>{a.creatorId?.phone || '-'}</td>
+                    <td style={td}>{a.creatorId?.phone ? <WaLink phone={a.creatorId.phone} /> : '-'}</td>
                     <td style={td}>{a.creatorId?.domicile?.province || '-'}</td>
                     <td style={td}>{a.creatorId?.performanceScore?.overall ?? '-'}</td>
                     <td style={td}><span style={{ background: cc.bg, color: cc.color, borderRadius: '999px', padding: '3px 10px', fontSize: '0.7rem', fontWeight: 700 }}>{cc.label}</span></td>
