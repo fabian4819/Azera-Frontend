@@ -595,6 +595,22 @@ body:has(.page-pitch) .footer-stage { --stage-top: var(--pitch-seam); }
   body.bottomnav-popup-open .floating-wa { bottom: calc(96px + var(--bottomnav-popup-h, 100px) + 12px) !important; }
 }
 
+/* ─── Link nomor WhatsApp di tabel (components/WaLink.tsx) ──────────────────── */
+.wa-link {
+  display: inline-flex; align-items: center; gap: 5px; max-width: 100%;
+  padding: 2px 8px 2px 7px; border-radius: 999px;
+  background: #e7f8ee; border: 1px solid #c3ecd3; color: #128c4a;
+  font-size: 0.8rem; font-weight: 600; line-height: 1.5; white-space: nowrap; text-decoration: none;
+  font-variant-numeric: tabular-nums; vertical-align: middle;
+  transition: background .15s, border-color .15s, color .15s;
+}
+.wa-link span { overflow: hidden; text-overflow: ellipsis; }
+.wa-link svg { flex-shrink: 0; }
+.wa-link-arrow { opacity: .55; transition: opacity .15s, transform .15s; }
+.wa-link:hover { background: #25d366; border-color: #25d366; color: #fff; }
+.wa-link:hover .wa-link-arrow { opacity: 1; transform: translate(1px, -1px); }
+.wa-link:focus-visible { outline: 2px solid #25d366; outline-offset: 2px; }
+
 /* ─── Form responsive helpers ──────────────────── */
 @media (max-width: 640px) {
   .form-2col { grid-template-columns: 1fr !important; }

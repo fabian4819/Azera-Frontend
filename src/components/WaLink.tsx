@@ -1,4 +1,5 @@
 import { ArrowUpRight } from 'lucide-react';
+import { FaWhatsapp } from 'react-icons/fa';
 
 /** "0812-3456 789" / "+62812..." → "62812..." (format wa.me wajib kode negara, tanpa + dan spasi). */
 const waNumber = (phone: string) => {
@@ -18,10 +19,11 @@ export default function WaLink({ phone }: { phone: string }) {
       rel="noopener noreferrer"
       onClick={(e) => e.stopPropagation()}
       title="Chat di WhatsApp"
-      style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', color: '#128c4a', fontWeight: 600, textDecoration: 'none', whiteSpace: 'nowrap' }}
+      className="wa-link"
     >
-      {phone}
-      <ArrowUpRight size={13} strokeWidth={2.5} />
+      <FaWhatsapp size={13} aria-hidden />
+      <span>{phone}</span>
+      <ArrowUpRight size={12} strokeWidth={2.5} aria-hidden className="wa-link-arrow" />
     </a>
   );
 }
