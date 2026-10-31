@@ -10,7 +10,7 @@ export type CustomFieldType = 'text' | 'textarea' | 'number' | 'select' | 'check
 export interface CustomField { id: string; label: string; description?: string; type: CustomFieldType; required: boolean; options?: string[] }
 /** Field default form Apply: Nama/WA/Email selalu ada; PIC & Handle by bisa dihapus admin.
  * order = urutan semua field (default + custom id) hasil drag, lihat lib/applyForm.ts */
-export interface ApplyFields { pic: boolean; handleBy: boolean; handleByRequired: boolean; order?: string[] }
+export interface ApplyFields { pic: boolean; handleBy: boolean; handleByRequired: boolean; order?: string[]; descriptions?: Record<string, string> }
 const DEFAULT_APPLY_FIELDS: ApplyFields = { pic: true, handleBy: true, handleByRequired: false };
 
 const TYPE_LABELS: Record<CustomFieldType, string> = {
@@ -165,13 +165,37 @@ export default function CustomFormBuilder({ campaignId, onChange, initial, initi
   const fieldTitle = (text: string, required = true) => (
     <p style={{ fontFamily: font, fontSize: '0.95rem', color: '#191c20' }}>{text}{required && <span style={{ color: '#d93025' }}> *</span>}</p>
   );
+  // Keterangan opsional field default: klik kartu → muncul kolom isian, kartu tidak aktif cukup tampilkan teksnya
+  const setDesc = (key: string, value: string) => setApply({ descriptions: { ...applyFields.descriptions, [key]: value } });
+  const descBlock = (key: string) => activeId === key ? (
+    <textarea
+      autoFocus
+      value={applyFields.descriptions?.[key] ?? ''}
+      onChange={(e) => setDesc(key, e.target.value)}
+      placeholder="Keterangan (opsional), tampil di bawah judul field"
+      rows={2}
+      style={{ width: '100%', margin: '0 0 10px', padding: '8px 2px', border: 'none', borderBottom: '1px solid #e1e0ff', fontSize: '0.82rem', fontFamily: font, color: '#464652', outline: 'none', resize: 'vertical' }}
+    />
+  ) : applyFields.descriptions?.[key] ? (
+    <p style={{ fontFamily: font, fontSize: '0.8rem', color: '#777683', margin: '-4px 0 10px', whiteSpace: 'pre-wrap' }}>{applyFields.descriptions[key]}</p>
+  ) : null;
+  const cardProps = (key: string) => ({
+    ...dragProps(key),
+    onClick: () => setActiveId(key),
+    style: {
+      ...defaultCard, opacity: dragId === key ? 0.5 : 1, cursor: activeId === key ? 'default' : 'pointer',
+      borderLeft: activeId === key ? '6px solid #6728e4' : '1px solid #e1e0ff', boxShadow: activeId === key ? '0 4px 16px rgba(107,46,232,0.12)' : 'none',
+    } as React.CSSProperties,
+  });
+
   const fixedCard = (key: string, title: string, body: React.ReactNode) => (
-    <div key={key} {...dragProps(key)} style={{ ...defaultCard, opacity: dragId === key ? 0.5 : 1 }}>
+    <div key={key} {...cardProps(key)}>
       {grip(key)}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', marginBottom: '10px' }}>
         {fieldTitle(title)}
         {lockedTag}
       </div>
+      {descBlock(key)}
       {body}
     </div>
   );
@@ -246,12 +270,13 @@ export default function CustomFormBuilder({ campaignId, onChange, initial, initi
             <div style={{ display: 'flex', gap: '16px' }}>{answerLine('40%', 'Pilih provinsi ▾')}{answerLine('40%', 'Pilih kota / kabupaten ▾')}</div>
           ));
           case 'pic': return (
-        <div key="pic" {...dragProps('pic')} style={{ ...defaultCard, opacity: dragId === 'pic' ? 0.5 : 1 }}>
+        <div key="pic" {...cardProps('pic')}>
           {grip('pic')}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px' }}>
             <p style={{ fontFamily: font, fontSize: '0.95rem', color: '#191c20' }}>PIC{assignedPicIds.length > 0 && <span style={{ color: '#d93025' }}> *</span>}</p>
             <button onClick={() => setApply({ pic: false })} title="Hapus field PIC dari form" style={iconBtn}><Trash2 size={18} /></button>
           </div>
+          {descBlock('pic')}
           <p style={{ fontSize: '0.78rem', color: '#777683', fontFamily: font, margin: '4px 0 8px' }}>
             Centang PIC yang jadi pilihan di form campaign ini (tersimpan otomatis). Tanpa PIC tercentang, field ini tidak tampil di form.
           </p>
@@ -275,12 +300,13 @@ export default function CustomFormBuilder({ campaignId, onChange, initial, initi
         </div>
           );
           case 'handleBy': return (
-        <div key="handleBy" {...dragProps('handleBy')} style={{ ...defaultCard, opacity: dragId === 'handleBy' ? 0.5 : 1 }}>
+        <div key="handleBy" {...cardProps('handleBy')}>
           {grip('handleBy')}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px' }}>
             <p style={{ fontFamily: font, fontSize: '0.95rem', color: '#191c20' }}>Handle by{applyFields.handleByRequired && <span style={{ color: '#d93025' }}> *</span>}</p>
             <button onClick={() => setApply({ handleBy: false })} title="Hapus field Handle by dari form" style={iconBtn}><Trash2 size={18} /></button>
           </div>
+          {descBlock('handleBy')}
           {answerLine('50%', 'Nama HB + nomor WA')}
           <div style={{ display: 'flex', justifyContent: 'flex-end', borderTop: '1px solid #e1e0ff', paddingTop: '8px', marginTop: '12px' }}>
             <Toggle label="Wajib diisi" checked={applyFields.handleByRequired} onChange={(v) => setApply({ handleByRequired: v })} />

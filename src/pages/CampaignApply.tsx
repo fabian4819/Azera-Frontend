@@ -12,7 +12,7 @@ import ApplySocialField from '../components/ApplySocialField';
 type CustomFieldType = 'text' | 'textarea' | 'number' | 'select' | 'checkbox' | 'file';
 interface CustomField { id: string; label: string; description?: string; type: CustomFieldType; required: boolean; options?: string[] }
 interface PicOption { _id: string; name: string }
-interface ApplyFields { pic: boolean; handleBy: boolean; handleByRequired: boolean; order?: string[] }
+interface ApplyFields { pic: boolean; handleBy: boolean; handleByRequired: boolean; order?: string[]; descriptions?: Record<string, string> }
 
 interface CampaignInfo {
   name: string;
@@ -173,6 +173,8 @@ export default function CampaignApply() {
   // Urutan field dari builder admin (drag), field default + custom dalam satu daftar
   const customById = new Map((campaign?.customFields || []).map((f) => [f.id, f]));
   const orderedKeys = applyOrder(fields.order, defaultApplyKeys({ askDomicile, platforms, customIds: [...customById.keys()] }));
+  const descStyle: React.CSSProperties = { fontSize: '0.78rem', color: '#777683', margin: '-2px 0 8px', lineHeight: 1.5, whiteSpace: 'pre-wrap', fontFamily: "var(--font-display)" };
+  const fieldDesc = (key: string) => fields.descriptions?.[key] ? <p style={descStyle}>{fields.descriptions[key]}</p> : null;
   // Info "nomor/email sudah terdaftar" tampil di bawah field kontak yang posisinya paling bawah
   const lastContactKey = orderedKeys.indexOf('phone') > orderedKeys.indexOf('email') ? 'phone' : 'email';
 
@@ -358,24 +360,28 @@ export default function CampaignApply() {
                 case 'name': return (
           <div style={{ marginBottom: '18px' }}>
             <label style={labelStyle}>Nama Lengkap *</label>
+            {fieldDesc('name')}
             <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Nama lengkap" autoComplete="name" style={inputStyle} />
           </div>
                 );
                 case 'phone': return (
           <div style={{ marginBottom: '18px' }}>
             <label style={labelStyle}>Nomor WhatsApp *</label>
+            {fieldDesc('phone')}
             <input value={phone} onChange={(e) => setPhone(e.target.value)} onBlur={() => void lookup()} placeholder="08xxxxxxxxxx" inputMode="tel" autoComplete="tel" style={inputStyle} />
           </div>
                 );
                 case 'email': return (
           <div style={{ marginBottom: '18px' }}>
             <label style={labelStyle}>Email *</label>
+            {fieldDesc('email')}
             <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} onBlur={() => void lookup()} placeholder="you@email.com" autoComplete="email" style={inputStyle} />
           </div>
                 );
                 case 'niches': return (
           <div style={{ marginBottom: '18px' }}>
             <label style={labelStyle}>Niche * <span style={{ fontWeight: 400, color: '#777683' }}>(boleh lebih dari satu)</span></label>
+            {fieldDesc('niches')}
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
               {nicheOptions.map((n) => (
                 <Pill key={n} label={n} selected={niches.includes(n)} onClick={() => setNiches((prev) => (prev.includes(n) ? prev.filter((x) => x !== n) : [...prev, n]))} />
@@ -384,6 +390,8 @@ export default function CampaignApply() {
           </div>
                 );
                 case 'domicile': return askDomicile && (
+          <div>
+          {fieldDesc('domicile')}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '18px' }} className="form-2col">
             <div>
               <label style={labelStyle}>Provinsi Domisili *</label>
@@ -400,10 +408,12 @@ export default function CampaignApply() {
               </select>
             </div>
           </div>
+          </div>
                 );
                 case 'pic': return showPic && (
             <div style={{ marginBottom: '18px' }}>
               <label style={labelStyle}>PIC *</label>
+            {fieldDesc('pic')}
               <select value={picUserId} onChange={(e) => setPicUserId(e.target.value)} style={inputStyle}>
                 <option value="">Pilih PIC kamu</option>
                 {campaign.picOptions!.map((p) => <option key={p._id} value={p._id}>{p.name}</option>)}
@@ -413,6 +423,7 @@ export default function CampaignApply() {
                 case 'handleBy': return fields.handleBy && (
             <div style={{ marginBottom: '18px' }}>
               <label style={labelStyle}>Handle by{fields.handleByRequired && ' *'}</label>
+              {fieldDesc('handleBy')}
               <input value={handleBy} onChange={(e) => setHandleBy(e.target.value)} placeholder="Nama HB + nomor WA (mis. Rina 081234567890)" style={inputStyle} />
             </div>
                 );
@@ -421,6 +432,7 @@ export default function CampaignApply() {
                 const p = key.slice(7);
                 return (
                   <div style={{ marginBottom: '18px' }}>
+                    {fieldDesc(key)}
                     <ApplySocialField platform={p} minFollowers={minFollowers(p)} username={socials[p]?.username} followers={socials[p]?.followers} onChange={(patch) => setSocial(p, patch)} />
                   </div>
                 );
