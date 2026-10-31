@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Plus, Trash2, Copy, ArrowUp, ArrowDown, X, Circle, Square, GripHorizontal, Lock, Undo2 } from 'lucide-react';
+import { Plus, Trash2, Copy, ArrowUp, ArrowDown, X, Circle, Square, GripHorizontal, Lock, Undo2, Pencil } from 'lucide-react';
 import api from '../../lib/api';
 import { NICHES } from '../../lib/niches';
 import { PLATFORM_LABELS, applyOrder, defaultApplyKeys } from '../../lib/applyForm';
@@ -106,6 +106,13 @@ export default function CustomFormBuilder({ campaignId, onChange, initial, initi
       setPicBusy(null);
     }
   };
+  // Lepas mouse di mana pun (bukan cuma di atas grip) mematikan mode drag; kalau tidak, kartu tetap
+  // draggable dan input judul/keterangan di dalamnya tidak bisa diklik/diseleksi.
+  useEffect(() => {
+    const release = () => setHandleId(null);
+    window.addEventListener('mouseup', release);
+    return () => window.removeEventListener('mouseup', release);
+  }, []);
   useEffect(() => { onChange?.(fields, applyFields); }, [fields, applyFields]); // eslint-disable-line react-hooks/exhaustive-deps
   const dirty = JSON.stringify([fields, applyFields]) !== saved;
   const setApply = (patch: Partial<ApplyFields>) => setApplyFields((a) => ({ ...a, ...patch }));
@@ -167,6 +174,13 @@ export default function CustomFormBuilder({ campaignId, onChange, initial, initi
       <Lock size={13} /> Wajib
     </span>
   );
+  // Penanda kartu bisa diedit (klik kartu mana pun juga bisa), tampil saat kartu tidak aktif
+  const editBtn = (key: string, what: string) => activeId === key ? null : (
+    <button type="button" onClick={(e) => { e.stopPropagation(); setActiveId(key); }} title={`Edit ${what}`}
+      style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '5px 10px', borderRadius: '999px', border: '1px solid #e1e0ff', background: 'white', color: '#6728e4', fontSize: '0.74rem', fontWeight: 700, fontFamily: font, cursor: 'pointer', whiteSpace: 'nowrap' }}>
+      <Pencil size={13} /> Edit
+    </button>
+  );
   const fieldTitle = (text: string, required = true) => (
     <p style={{ fontFamily: font, fontSize: '0.95rem', color: '#191c20' }}>{text}{required && <span style={{ color: '#d93025' }}> *</span>}</p>
   );
@@ -198,7 +212,7 @@ export default function CustomFormBuilder({ campaignId, onChange, initial, initi
       {grip(key)}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', marginBottom: '10px' }}>
         {fieldTitle(title)}
-        {lockedTag}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>{editBtn(key, 'keterangan')}{lockedTag}</div>
       </div>
       {descBlock(key)}
       {body}
@@ -359,20 +373,24 @@ export default function CustomFormBuilder({ campaignId, onChange, initial, initi
                   {(Object.keys(TYPE_LABELS) as CustomFieldType[]).map((t) => <option key={t} value={t}>{TYPE_LABELS[t]}</option>)}
                 </select>
                 <textarea
+                  ref={autoGrow}
                   value={f.description ?? ''}
-                  onChange={(e) => update(f.id, { description: e.target.value })}
+                  onChange={(e) => { autoGrow(e.target); update(f.id, { description: e.target.value }); }}
                   placeholder="Keterangan (opsional), tampil di bawah judul pertanyaan"
-                  rows={2}
-                  style={{ flex: '1 1 100%', padding: '8px 2px', border: 'none', borderBottom: '1px solid #e1e0ff', fontSize: '0.82rem', fontFamily: font, color: '#464652', outline: 'none', resize: 'vertical' }}
+                  rows={1}
+                  style={{ flex: '1 1 100%', padding: '8px 2px', border: 'none', borderBottom: '1px solid #e1e0ff', fontSize: '0.82rem', fontFamily: font, color: '#464652', outline: 'none', resize: 'none', overflow: 'hidden', lineHeight: 1.5 }}
                 />
               </div>
             ) : (
-              <div style={{ marginBottom: '14px' }}>
-                <p style={{ fontFamily: font, fontSize: '0.95rem', color: f.label ? '#191c20' : '#9a99a6', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
-                  {f.label || 'Pertanyaan tanpa judul'}
-                  {f.required && <span style={{ color: '#d93025' }}> *</span>}
-                </p>
-                {f.description && <p style={{ fontFamily: font, fontSize: '0.8rem', color: '#777683', marginTop: '4px', whiteSpace: 'pre-wrap' }}>{f.description}</p>}
+              <div style={{ marginBottom: '14px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px' }}>
+                <div style={{ minWidth: 0 }}>
+                  <p style={{ fontFamily: font, fontSize: '0.95rem', color: f.label ? '#191c20' : '#9a99a6', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+                    {f.label || 'Pertanyaan tanpa judul'}
+                    {f.required && <span style={{ color: '#d93025' }}> *</span>}
+                  </p>
+                  {f.description && <p style={{ fontFamily: font, fontSize: '0.8rem', color: '#777683', marginTop: '4px', whiteSpace: 'pre-wrap' }}>{f.description}</p>}
+                </div>
+                {editBtn(f.id, 'judul & keterangan')}
               </div>
             )}
 
