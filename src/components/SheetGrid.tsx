@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { ArrowDownAZ, ArrowDownZA, ListFilter, Pencil, Plus, Search, Upload, X } from 'lucide-react';
 import WaLink from './WaLink';
 
@@ -138,6 +138,14 @@ export default function SheetGrid({
   columnMenu, headerIcon, addColumnMenu, customCell,
 }: SheetGridProps) {
   const [addMenu, setAddMenu] = useState<DOMRect | null>(null);
+  // Di HP, kolom nama + aksi yang sticky menutup hampir seluruh layar → cuma sticky di layar lebar
+  const [wide, setWide] = useState(() => window.matchMedia('(min-width: 768px)').matches);
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 768px)');
+    const on = () => setWide(mq.matches);
+    mq.addEventListener('change', on);
+    return () => mq.removeEventListener('change', on);
+  }, []);
   const [query, setQuery] = useState('');
   const [selected, setSelected] = useState<number | null>(null);
   // Popup isi lengkap sel yang terpotong (ellipsis) saat hover
@@ -246,7 +254,8 @@ export default function SheetGrid({
     background: HEAD_BG, color: '#5f6368', fontSize: '0.72rem',
   };
   // Kolom pertama (nama creator) ikut nempel di kiri saat scroll horizontal
-  const firstColStyle: React.CSSProperties = { position: 'sticky', left: ROW_NO_W, zIndex: 1 };
+  const firstColStyle: React.CSSProperties = wide ? { position: 'sticky', left: ROW_NO_W, zIndex: 1 } : {};
+  const stickyRight: React.CSSProperties = wide ? { position: 'sticky', right: 0 } : {};
   const inputType = (k?: CellKind) => (k === 'number' ? 'text' : k === 'date' ? 'date' : k === 'link' ? 'url' : 'text');
 
   const renderEditableCell = (row: number, col: number, v: Cell) => {
@@ -374,7 +383,7 @@ export default function SheetGrid({
                   </button>
                 </th>
               )}
-              {rowAction && <th style={{ ...cellBase, background: '#f3f0ff', fontWeight: 700, textAlign: 'left', position: 'sticky', right: 0, zIndex: 3 }}>{actionHeader ?? 'Aksi'}</th>}
+              {rowAction && <th style={{ ...cellBase, background: '#f3f0ff', fontWeight: 700, textAlign: 'left', ...stickyRight, zIndex: 3 }}>{actionHeader ?? 'Aksi'}</th>}
             </tr>
           </thead>
           <tbody>
@@ -408,7 +417,7 @@ export default function SheetGrid({
                   })}
                   {addColumnMenu && <td style={{ ...cellBase, background: bg }} />}
                   {rowAction && (
-                    <td onClick={(e) => e.stopPropagation()} style={{ ...cellBase, background: bg, position: 'sticky', right: 0, overflow: 'visible' }}>{rowAction(i)}</td>
+                    <td onClick={(e) => e.stopPropagation()} style={{ ...cellBase, background: bg, ...stickyRight, overflow: 'visible' }}>{rowAction(i)}</td>
                   )}
                 </tr>
               );
