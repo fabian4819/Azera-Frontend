@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, Copy, Check, MessageCircle, LayoutDashboard, Building2, ExternalLink, UserCheck, MapPin, CalendarDays, Clock, Pencil } from 'lucide-react';
 import { NICHES } from '../../lib/niches';
+import { buildBroadcast } from '../../lib/broadcast';
 import { SiInstagram, SiTiktok, SiThreads, SiX } from 'react-icons/si';
 import type { IconType } from 'react-icons';
 import api from '../../lib/api';
@@ -95,6 +96,7 @@ export default function CampaignDetail() {
   const [campaign, setCampaign] = useState<Campaign | null>(null);
   const [loading, setLoading] = useState(true);
   const [briefDraft, setBriefDraft] = useState('');
+  const [broadcastStale, setBroadcastStale] = useState(false);
   // Brief Campaign ala Notion (BriefEditor): autosave seluruh isi, upload cuma balikin URL
   const saveBrief = useCallback(async (blocks: BriefBlock[]) => {
     const res = await api.put(`/admin/campaigns/${id}/brief`, { blocks });
@@ -261,10 +263,26 @@ export default function CampaignDetail() {
       {activeTab === 'overview' && (
         <div>
           <WorkflowTracker campaignId={campaign._id} stage={campaign.workflowStage} decide={campaign.workflowStage === 'listing' && !campaign.applyOpen} onChanged={(workflowStage) => setCampaign((c) => (c ? { ...c, workflowStage } : c))} />
-          <CampaignInfo campaign={campaign} onSaved={(patch) => setCampaign((c) => (c ? { ...c, ...patch } : c))} />
+          <CampaignInfo campaign={campaign} onSaved={({ broadcastStale, ...patch }) => {
+            setCampaign((c) => (c ? { ...c, ...patch } : c));
+            if (patch.briefContent !== undefined) setBriefDraft(patch.briefContent);
+            setBroadcastStale(Boolean(broadcastStale));
+          }} />
 
           <div style={cardStyle}>
-            <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: '1rem', color: '#191c20', marginBottom: '16px' }}>Broadcast Campaign</p>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '16px' }}>
+              <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: '1rem', color: '#191c20' }}>Broadcast Campaign</p>
+              {/* Ganti teks di editor dengan susunan terbaru dari info campaign (belum tersimpan sampai klik Simpan/Share) */}
+              <button type="button" onClick={() => { setBriefDraft(buildBroadcast(campaign, applyUrlOf(campaign))); setBroadcastStale(false); }}
+                style={{ padding: '7px 14px', borderRadius: '999px', border: '1.5px solid #c9b6f7', background: 'white', color: '#6728e4', fontFamily: "var(--font-display)", fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer' }}>
+                Susun ulang dari info campaign
+              </button>
+            </div>
+            {broadcastStale && (
+              <p role="status" style={{ marginBottom: '12px', padding: '10px 14px', borderRadius: '10px', background: '#fff4e5', color: '#8a5300', fontSize: '0.8rem', lineHeight: 1.5, fontFamily: "var(--font-display)" }}>
+                Info campaign baru diubah, tapi teks broadcast ini pernah diedit manual jadi tidak diganti otomatis. Klik "Susun ulang dari info campaign" kalau mau diperbarui.
+              </p>
+            )}
             <BroadcastSharePanel
               campaignId={campaign._id}
               text={briefDraft}
@@ -395,6 +413,8 @@ const PLATFORM_META: Record<string, { name: string; icon: IconType; color: strin
   threads: { name: 'Threads', icon: SiThreads, color: '#000000' },
   x: { name: 'X', icon: SiX, color: '#000000' },
 };
+/** Link apply pendek yang dipakai di teks broadcast */
+const applyUrlOf = (c: { applySlug: string }) => `${window.location.origin}/apply/${shortApplyCode(c.applySlug)}`;
 const fmtDate = (d?: string) => (d ? new Date(d).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Asia/Jakarta' }) : '');
 const rp = (n?: number) => (n ? `Rp${n.toLocaleString('id-ID')}` : '');
 const font = "var(--font-display)";
@@ -416,7 +436,9 @@ const Checklist = ({ items }: { items: string[] }) => (
 );
 
 /** Keterangan campaign lengkap (isi tahap 1 pembuatan campaign). Field kosong disembunyikan. Bisa diedit. */
-function CampaignInfo({ campaign: c, onSaved }: { campaign: Campaign; onSaved: (patch: Partial<Campaign>) => void }) {
+/** broadcastStale = info berubah tapi teks broadcast (sudah diedit manual) sengaja tidak ditimpa */
+type InfoPatch = Partial<Campaign> & { broadcastStale?: boolean };
+function CampaignInfo({ campaign: c, onSaved }: { campaign: Campaign; onSaved: (patch: InfoPatch) => void }) {
   const [editing, setEditing] = useState(false);
   if (editing) return <CampaignInfoEdit campaign={c} onCancel={() => setEditing(false)} onSaved={(patch) => { onSaved(patch); setEditing(false); }} />;
   const ev = c.eventDetails;
@@ -528,7 +550,7 @@ const numOrUndef = (v: string) => (v.trim() === '' ? undefined : Number(v));
 
 /** Mode edit info campaign (isi tahap 1): tujuan, fee, benefit/syarat/SOW, visit, link, platform & niche.
  * Domisili creator & budget tidak diedit di sini. */
-function CampaignInfoEdit({ campaign: c, onCancel, onSaved }: { campaign: Campaign; onCancel: () => void; onSaved: (patch: Partial<Campaign>) => void }) {
+function CampaignInfoEdit({ campaign: c, onCancel, onSaved }: { campaign: Campaign; onCancel: () => void; onSaved: (patch: InfoPatch) => void }) {
   const [objective, setObjective] = useState(c.objective || '');
   const [benefits, setBenefits] = useState((c.benefits || []).join('\n'));
   const [requirements, setRequirements] = useState((c.requirements || []).join('\n'));
@@ -566,8 +588,14 @@ function CampaignInfoEdit({ campaign: c, onCancel, onSaved }: { campaign: Campai
           minFollowersByPlatform: Object.fromEntries(platforms.map((p) => [p, numOrUndef(minFollowers[p] || '')])),
         },
       };
-      const res = await api.patch(`/admin/campaigns/${c._id}`, payload);
+      // Broadcast ikut diperbarui KALAU teksnya masih persis hasil susunan otomatis dari info lama (belum
+      // diedit manual / bukan hasil AI); kalau sudah diedit, dibiarkan (ada tombol "Susun ulang" di kartu broadcast).
+      const oldAuto = [applyUrlOf(c), `${window.location.origin}/apply/${c.applySlug}`].map((u) => buildBroadcast(c, u).trim());
+      const untouched = !c.briefContent?.trim() || oldAuto.includes(c.briefContent.trim());
+      const briefContent = untouched ? buildBroadcast({ ...c, ...payload, eventDetails: { ...payload.eventDetails, date: payload.eventDetails.date ?? undefined } }, applyUrlOf(c)) : undefined;
+      const res = await api.patch(`/admin/campaigns/${c._id}`, { ...payload, ...(briefContent !== undefined ? { briefContent } : {}) });
       onSaved({
+        ...(briefContent !== undefined ? { briefContent: res.data.briefContent } : { broadcastStale: true }),
         objective: res.data.objective, benefits: res.data.benefits, requirements: res.data.requirements, deliverables: res.data.deliverables,
         fee: res.data.fee, feeNote: res.data.feeNote, infoLink: res.data.infoLink, eventDetails: res.data.eventDetails, criteria: res.data.criteria,
       });
