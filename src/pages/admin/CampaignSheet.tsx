@@ -74,18 +74,53 @@ export default function CampaignSheet() {
     return () => window.clearTimeout(t);
   }, [kind, cache, error, load]);
 
-  // Pendaftar baru masuk tanpa refresh manual (seperti respons Google Form): tab Pendaftar dimuat ulang
-  // diam-diam tiap 15 detik selama tab browser aktif; dilewati saat admin sedang approve/reject.
+  // Realtime tab Pendaftar: server mengirim sinyal (SSE) tiap ada pendaftar baru / approve / approve client,
+  // tabel dimuat ulang diam-diam. fetch (bukan EventSource) supaya header Authorization ikut. Putus =
+  // sambung lagi 3 dtk; cadangan muat ulang tiap 60 dtk kalau stream bermasalah di jaringan tertentu.
+  const [live, setLive] = useState(false);
   useEffect(() => {
     if (kind !== 'applicants') return;
-    const timer = window.setInterval(() => {
-      if (document.visibilityState !== 'visible' || deciding) return;
+    const ctrl = new AbortController();
+    let debounce: number | undefined;
+    let retry: number | undefined;
+    const reloadQuiet = () => {
       api.get(`/admin/campaigns/${id}/sheet/applicants`, { params: { auto: 1 } })
         .then((res) => setCache((c) => ({ ...c, applicants: res.data })))
-        .catch(() => { /* diam, dicoba lagi di putaran berikutnya */ });
-    }, 15000);
-    return () => window.clearInterval(timer);
-  }, [kind, id, deciding]);
+        .catch(() => { /* diam, sinyal berikutnya / cadangan 60 dtk akan mencoba lagi */ });
+    };
+    const connect = async () => {
+      try {
+        const res = await fetch(`/api/admin/campaigns/${id}/events`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem('azera_token') ?? ''}` },
+          signal: ctrl.signal,
+        });
+        if (!res.ok || !res.body) throw new Error(`SSE ${res.status}`);
+        setLive(true);
+        const reader = res.body.pipeThrough(new TextDecoderStream()).getReader();
+        for (;;) {
+          const { value, done } = await reader.read();
+          if (done) break;
+          if (value.includes('data: change')) {
+            window.clearTimeout(debounce);
+            debounce = window.setTimeout(reloadQuiet, 400); // perubahan beruntun = sekali muat ulang
+          }
+        }
+      } catch {
+        if (ctrl.signal.aborted) return;
+      }
+      setLive(false);
+      if (!ctrl.signal.aborted) retry = window.setTimeout(() => void connect(), 3000);
+    };
+    void connect();
+    const poll = window.setInterval(() => { if (document.visibilityState === 'visible') reloadQuiet(); }, 60000);
+    return () => {
+      ctrl.abort();
+      window.clearTimeout(debounce);
+      window.clearTimeout(retry);
+      window.clearInterval(poll);
+      setLive(false);
+    };
+  }, [kind, id]);
 
   const switchTab = (k: SheetKind) => {
     setParams({ tab: k }, { replace: true });
@@ -348,8 +383,8 @@ export default function CampaignSheet() {
         </div>
         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
           {kind === 'applicants' && (
-            <span title="Pendaftar baru muncul otomatis, diperbarui tiap 15 detik" style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '0 10px', height: '38px', fontFamily: f, fontSize: '0.75rem', fontWeight: 700, color: '#188038' }}>
-              <span className="live-dot" aria-hidden /> Live
+            <span title={live ? 'Realtime: pendaftar baru & perubahan status langsung muncul' : 'Menyambung ulang ke server…'} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '0 10px', height: '38px', fontFamily: f, fontSize: '0.75rem', fontWeight: 700, color: live ? '#188038' : '#9a99a6' }}>
+              <span className={live ? 'live-dot' : undefined} aria-hidden style={live ? undefined : { width: 8, height: 8, borderRadius: '50%', background: '#c7c8cf' }} /> {live ? 'Live' : 'Menyambung…'}
             </span>
           )}
           <button type="button" onClick={refresh} disabled={loading} aria-label="Muat ulang data" title="Muat ulang data"
