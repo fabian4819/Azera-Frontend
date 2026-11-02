@@ -5,7 +5,7 @@ import {
   useReactTable, getCoreRowModel, getSortedRowModel, getFilteredRowModel, getFacetedRowModel,
   flexRender, type ColumnDef, type SortingState, type ColumnFiltersState, type Column, type Table as ReactTableInstance,
 } from '@tanstack/react-table';
-import { Search, Eye, RefreshCw, ChevronUp, ChevronDown, ChevronsUpDown, Filter, X as XIcon, ExternalLink } from 'lucide-react';
+import { Search, RefreshCw, ChevronUp, ChevronDown, ChevronsUpDown, Filter, X as XIcon, ExternalLink } from 'lucide-react';
 import StatusBadge from '../../components/ui/StatusBadge';
 import api from '../../lib/api';
 import WaLink from '../../components/WaLink';
@@ -184,7 +184,7 @@ export default function Creators({ scope = 'general', selected, onSelectedChange
           const id = row.original._id;
           const on = Boolean(selected?.includes(id));
           return (
-            <input type="checkbox" aria-label={`Pilih ${row.original.name}`} checked={on} style={{ width: '16px', height: '16px', accentColor: '#6728e4', cursor: 'pointer' }}
+            <input type="checkbox" aria-label={`Pilih ${row.original.name}`} checked={on} onClick={(e) => e.stopPropagation()} style={{ width: '16px', height: '16px', accentColor: '#6728e4', cursor: 'pointer' }}
               onChange={() => onSelectedChange(on ? (selected || []).filter((x) => x !== id) : [...(selected || []), id])} />
           );
         },
@@ -214,7 +214,7 @@ export default function Creators({ scope = 'general', selected, onSelectedChange
       textCol('npwp', 'NPWP', (c) => c.npwp || ''),
       textCol('portfolio', 'Portfolio', (c) => c.portfolioLink || '', ({ getValue }) => {
         const v = getValue<string>();
-        return v ? <a href={v} target="_blank" rel="noopener noreferrer" style={{ color: '#6728e4', textDecoration: 'none' }}>Buka link</a> : <span style={{ color: '#c7c8cf' }}>-</span>;
+        return v ? <a href={v} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} style={{ color: '#6728e4', textDecoration: 'none' }}>Buka link</a> : <span style={{ color: '#c7c8cf' }}>-</span>;
       }),
       numCol('performanceScore', 'Skor', (c) => c.performanceScore?.overall ?? 0, ({ getValue }) => <span style={{ fontWeight: 700, color: '#6728e4' }}>{getValue<number>()}</span>),
       numCol('cancelCount', 'Jumlah Cancel', (c) => c.cancelCount ?? 0),
@@ -224,19 +224,18 @@ export default function Creators({ scope = 'general', selected, onSelectedChange
       }),
       textCol('source', 'Sumber', (c) => SOURCE_LABELS[c.source] || c.source),
       textCol('status', 'Status', (c) => STATUS_LABELS[c.status] || c.status, ({ row }) => <StatusBadge status={row.original.status} />),
-      ...(onSelectedChange ? [] : [{
-        id: 'action', header: 'Aksi', enableSorting: false, enableColumnFilter: false,
-        cell: ({ row }) => (
-          <button
-            onClick={() => navigate(`/admin/creators/${row.original._id}`)}
-            style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '7px 14px', background: '#e1e0ff', color: '#6728e4', borderRadius: '8px', border: 'none', cursor: 'pointer', fontSize: '0.78rem', fontFamily: "var(--font-display)", fontWeight: 700, whiteSpace: 'nowrap' }}
-          >
-            <Eye size={14} />View
-          </button>
-        ),
-      } as ColumnDef<CreatorItem>]),
     ];
-  }, [navigate, scope, selected, onSelectedChange]);
+  }, [scope, selected, onSelectedChange]);
+
+  const openRow = (e: React.MouseEvent | React.KeyboardEvent, id: string) => {
+    if (onSelectedChange) {
+      const on = Boolean(selected?.includes(id));
+      onSelectedChange(on ? (selected || []).filter((x) => x !== id) : [...(selected || []), id]);
+      return;
+    }
+    const url = `/admin/creators/${id}`;
+    if (e.metaKey || e.ctrlKey) window.open(url, '_blank'); else navigate(url);
+  };
 
   // Lebar kolom pilih tetap supaya kolom Nama tahu offset kirinya; bayangan cuma di kolom terkunci terakhir (Nama)
   const SELECT_W = 44;
@@ -332,7 +331,11 @@ export default function Creators({ scope = 'general', selected, onSelectedChange
               ) : table.getRowModel().rows.map((row, i) => (
                 <tr
                   key={row.id}
-                  style={{ borderBottom: '1px solid #e1e0ff', background: i % 2 === 0 ? 'white' : '#fcfcff' }}
+                  // Klik baris = buka detail creator (Ctrl/⌘ = tab baru); mode pilih (share) = centang
+                  onClick={(e) => openRow(e, row.original._id)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') openRow(e, row.original._id); }}
+                  tabIndex={0}
+                  style={{ borderBottom: '1px solid #e1e0ff', background: i % 2 === 0 ? 'white' : '#fcfcff', cursor: 'pointer' }}
                   onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.background = '#F8F6FF')}
                   onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.background = i % 2 === 0 ? 'white' : '#fcfcff')}
                 >

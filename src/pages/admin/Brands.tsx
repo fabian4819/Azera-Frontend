@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Eye, RefreshCw } from 'lucide-react';
+import { Search, RefreshCw } from 'lucide-react';
 import StatusBadge from '../../components/ui/StatusBadge';
 import api from '../../lib/api';
 import WaLink from '../../components/WaLink';
@@ -164,7 +164,7 @@ export default function Brands() {
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem' }}>
             <thead>
               <tr style={{ background: '#f8f9ff', borderBottom: '1px solid #e1e0ff' }}>
-                {['Brand', 'PIC', 'WhatsApp', 'Kategori', 'Paket', 'Sumber', 'Budget', 'Status', 'Tanggal', 'Aksi'].map((h, i) => (
+                {['Brand', 'PIC', 'WhatsApp', 'Kategori', 'Paket', 'Sumber', 'Budget', 'Status', 'Tanggal'].map((h, i) => (
                   <th key={h} style={i === 0 ? { ...thStyle, ...frozenTh } : thStyle}>{h}</th>
                 ))}
               </tr>
@@ -172,13 +172,13 @@ export default function Brands() {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={10} style={{ ...tdStyle, textAlign: 'center', padding: '48px' }}>
+                  <td colSpan={9} style={{ ...tdStyle, textAlign: 'center', padding: '48px' }}>
                     Memuat...
                   </td>
                 </tr>
               ) : brands.length === 0 ? (
                 <tr>
-                  <td colSpan={10} style={{ ...tdStyle, textAlign: 'center', padding: '48px' }}>
+                  <td colSpan={9} style={{ ...tdStyle, textAlign: 'center', padding: '48px' }}>
                     Belum ada data brand.
                   </td>
                 </tr>
@@ -186,10 +186,15 @@ export default function Brands() {
                 brands.map((b, i) => (
                   <tr
                     key={b._id}
+                    // Klik baris = buka detail brand (Ctrl/⌘ = tab baru)
+                    onClick={(e) => (e.metaKey || e.ctrlKey ? window.open(`/admin/brands/${b._id}`, '_blank') : navigate(`/admin/brands/${b._id}`))}
+                    onKeyDown={(e) => { if (e.key === 'Enter') navigate(`/admin/brands/${b._id}`); }}
+                    tabIndex={0}
                     style={{
                       borderBottom: '1px solid #e1e0ff',
                       background: i % 2 === 0 ? 'white' : '#fcfcff',
                       transition: 'background 0.15s',
+                      cursor: 'pointer',
                     }}
                     onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.background = '#F8F6FF')}
                     onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.background = i % 2 === 0 ? 'white' : '#fcfcff')}
@@ -234,28 +239,6 @@ export default function Brands() {
                     <td style={tdStyle}>{b.budget}</td>
                     <td style={tdStyle}><StatusBadge status={b.status} /></td>
                     <td style={tdStyle}>{formatDate(b.createdAt)}</td>
-                    <td style={tdStyle}>
-                      <button
-                        onClick={() => navigate(`/admin/brands/${b._id}`)}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '6px',
-                          padding: '7px 14px',
-                          background: '#e1e0ff',
-                          color: '#6728e4',
-                          borderRadius: '8px',
-                          border: 'none',
-                          cursor: 'pointer',
-                          fontSize: '0.78rem',
-                          fontFamily: "var(--font-display)",
-                          fontWeight: 700,
-                        }}
-                      >
-                        <Eye size={14} />
-                        View
-                      </button>
-                    </td>
                   </tr>
                 ))
               )}
