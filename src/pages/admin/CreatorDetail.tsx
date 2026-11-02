@@ -417,8 +417,8 @@ export default function CreatorDetail() {
                   <>
                     <p style={{ fontSize: '0.78rem', color: '#464652', lineHeight: 1.5 }}>
                       {creator.status === 'approved'
-                        ? 'Ubah jadi Ditolak? Creator tidak ikut broadcast "semua creator disetujui" lagi. Tidak ada pesan yang dikirim ke creator.'
-                        : 'Ubah jadi Disetujui? Creator ikut menerima broadcast "semua creator disetujui". Tidak ada pesan yang dikirim ke creator.'}
+                        ? 'Ubah jadi Ditolak? Creator menerima pesan WhatsApp & email penolakan, dan tidak ikut broadcast "semua creator disetujui" lagi.'
+                        : 'Ubah jadi Disetujui? Creator menerima pesan WhatsApp & email berisi link Komunitas WhatsApp, dan ikut broadcast "semua creator disetujui".'}
                     </p>
                     <div style={{ display: 'flex', gap: '8px' }}>
                       <button

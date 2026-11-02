@@ -15,7 +15,9 @@ interface WaTemplate {
 
 const TRIGGER_LABELS: Record<string, string> = {
   creator_accepted: 'Creator Diterima',
-  creator_rejected: 'Creator Ditolak',
+  creator_rejected: 'Creator Ditolak (tidak dipakai)',
+  creator_profile_approved: 'Profil Creator Disetujui',
+  creator_profile_rejected: 'Profil Creator Ditolak',
   brief_campaign: 'Broadcast Campaign',
   reminder_draft: 'Reminder Draft',
   reminder_upload: 'Reminder Upload',
@@ -36,6 +38,9 @@ const TRIGGER_LABELS: Record<string, string> = {
 
 /** Placeholder khusus per trigger, ditampilkan di bawah judul template */
 const TRIGGER_HINTS: Record<string, string> = {
+  creator_rejected: 'Sudah tidak dikirim: pendaftar campaign yang di-reject tidak menerima pesan apa pun.',
+  creator_profile_approved: 'Dikirim saat creator disetujui di menu Creator (juga lewat Ubah keputusan), plus email. Placeholder: {{nama}}, {{community_link}} (link Komunitas WhatsApp AzeraKOL).',
+  creator_profile_rejected: 'Dikirim saat creator ditolak di menu Creator (juga lewat Ubah keputusan), plus email. Placeholder: {{nama}}.',
   pic_bank_info_request: 'Dikirim dari Recap Payment → Rekap per PIC (per PIC atau semua). Placeholder: {{nama}} (nama PIC), {{campaign}}, {{jumlah_creator}}, {{fee}} (total fee PIC). Baris isian di bawah biarkan kosong supaya PIC tinggal isi lalu kirim balik.',
   creator_bank_info_request: 'Dikirim dari Recap Payment → tab Creator (per creator atau semua). Placeholder: {{nama}} (nama creator), {{campaign}}, {{fee}} (fee creator). Baris isian di bawah biarkan kosong supaya creator tinggal isi lalu kirim balik.',
 };
