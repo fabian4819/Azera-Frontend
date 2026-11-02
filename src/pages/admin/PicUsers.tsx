@@ -4,6 +4,9 @@ import api from '../../lib/api';
 import WaLink from '../../components/WaLink';
 
 const f = "var(--font-display)";
+// Kolom pertama terkunci di kiri saat tabel digeser horizontal (sama seperti tabel Creators)
+const frozenTh: React.CSSProperties = { position: 'sticky', left: 0, zIndex: 2, background: '#f8f9ff', boxShadow: '6px 0 8px -6px rgba(0,0,0,0.12)' };
+const frozenTd: React.CSSProperties = { position: 'sticky', left: 0, zIndex: 1, background: 'inherit', boxShadow: '6px 0 8px -6px rgba(0,0,0,0.12)' };
 const thStyle: React.CSSProperties = {
   padding: '14px 16px', textAlign: 'left', fontFamily: f,
   fontWeight: 700, color: '#191c20', fontSize: '0.78rem', whiteSpace: 'nowrap', letterSpacing: '0.04em',
@@ -60,8 +63,8 @@ export default function PicUsers() {
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem' }}>
             <thead>
               <tr style={{ background: '#f8f9ff', borderBottom: '1px solid #e1e0ff' }}>
-                {['Management/Agency', 'Kota', 'PIC', 'Jabatan', 'WhatsApp', 'WA Back Up', 'Email', 'Sosial Media', 'Portfolio', 'KTP', 'Campaign', 'Tanggal Daftar'].map((h) => (
-                  <th key={h} style={thStyle}>{h}</th>
+                {['Management/Agency', 'Kota', 'PIC', 'Jabatan', 'WhatsApp', 'WA Back Up', 'Email', 'Sosial Media', 'Portfolio', 'KTP', 'Campaign', 'Tanggal Daftar'].map((h, i) => (
+                  <th key={h} style={i === 0 ? { ...thStyle, ...frozenTh } : thStyle}>{h}</th>
                 ))}
               </tr>
             </thead>
@@ -75,7 +78,7 @@ export default function PicUsers() {
                   key={p._id}
                   style={{ borderBottom: '1px solid #e1e0ff', background: i % 2 === 0 ? 'white' : '#fcfcff' }}
                 >
-                  <td style={{ ...tdStyle, fontWeight: 600, color: '#191c20' }}>{p.name}</td>
+                  <td style={{ ...tdStyle, ...frozenTd, fontWeight: 600, color: '#191c20' }}>{p.name}</td>
                   <td style={tdStyle}>{p.city || <span style={{ color: '#8a8a99' }}>-</span>}</td>
                   <td style={tdStyle}>{p.ownerName || <span style={{ color: '#8a8a99' }}>-</span>}</td>
                   <td style={tdStyle}>{p.position || <span style={{ color: '#8a8a99' }}>-</span>}</td>

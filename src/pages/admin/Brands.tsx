@@ -28,6 +28,9 @@ const JASA_LABELS: Record<string, string> = {
   event_creator_activation: 'Event Creator Activation',
 };
 
+// Kolom pertama terkunci di kiri saat tabel digeser horizontal (sama seperti tabel Creators)
+const frozenTh: React.CSSProperties = { position: 'sticky', left: 0, zIndex: 2, background: '#f8f9ff', boxShadow: '6px 0 8px -6px rgba(0,0,0,0.12)' };
+const frozenTd: React.CSSProperties = { position: 'sticky', left: 0, zIndex: 1, background: 'inherit', boxShadow: '6px 0 8px -6px rgba(0,0,0,0.12)' };
 const thStyle: React.CSSProperties = {
   padding: '14px 16px',
   textAlign: 'left',
@@ -161,8 +164,8 @@ export default function Brands() {
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem' }}>
             <thead>
               <tr style={{ background: '#f8f9ff', borderBottom: '1px solid #e1e0ff' }}>
-                {['Brand', 'PIC', 'WhatsApp', 'Kategori', 'Paket', 'Sumber', 'Budget', 'Status', 'Tanggal', 'Aksi'].map((h) => (
-                  <th key={h} style={thStyle}>{h}</th>
+                {['Brand', 'PIC', 'WhatsApp', 'Kategori', 'Paket', 'Sumber', 'Budget', 'Status', 'Tanggal', 'Aksi'].map((h, i) => (
+                  <th key={h} style={i === 0 ? { ...thStyle, ...frozenTh } : thStyle}>{h}</th>
                 ))}
               </tr>
             </thead>
@@ -191,7 +194,7 @@ export default function Brands() {
                     onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.background = '#F8F6FF')}
                     onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.background = i % 2 === 0 ? 'white' : '#fcfcff')}
                   >
-                    <td style={{ ...tdStyle, fontWeight: 600, color: '#191c20' }}>{b.namaBrand}</td>
+                    <td style={{ ...tdStyle, ...frozenTd, fontWeight: 600, color: '#191c20' }}>{b.namaBrand}</td>
                     <td style={tdStyle}>{b.namaPIC}</td>
                     <td style={tdStyle}><WaLink phone={b.whatsapp} /></td>
                     <td style={tdStyle}>{b.kategori || (b.jasa && JASA_LABELS[b.jasa]) || '-'}</td>

@@ -189,12 +189,12 @@ export default function Creators({ scope = 'general', selected, onSelectedChange
           );
         },
       } as ColumnDef<CreatorItem>] : []),
+      textCol('name', 'Nama', (c) => c.name, ({ getValue }) => <span style={{ fontWeight: 600, color: '#191c20' }}>{getValue<string>()}</span>),
       {
         id: 'createdAt', header: 'Tanggal Daftar', accessorFn: (c) => c.createdAt, filterFn: multiTokenFilter,
         sortingFn: (a, b) => +new Date(a.original.createdAt) - +new Date(b.original.createdAt),
         cell: ({ getValue }) => formatDate(getValue<string>()),
       },
-      textCol('name', 'Nama', (c) => c.name, ({ getValue }) => <span style={{ fontWeight: 600, color: '#191c20' }}>{getValue<string>()}</span>),
       ...(scope !== 'general' ? [arrayCol('campaigns', 'Campaign', (c) => c.campaigns || [])] : []),
       textCol('phone', 'WhatsApp', (c) => c.phone, ({ getValue }) => <WaLink phone={getValue<string>()} />),
       textCol('email', 'Email', (c) => c.email || ''),
@@ -237,6 +237,17 @@ export default function Creators({ scope = 'general', selected, onSelectedChange
       } as ColumnDef<CreatorItem>]),
     ];
   }, [navigate, scope, selected, onSelectedChange]);
+
+  // Lebar kolom pilih tetap supaya kolom Nama tahu offset kirinya; bayangan cuma di kolom terkunci terakhir (Nama)
+  const SELECT_W = 44;
+  const stickyCol = (id: string, head: boolean): React.CSSProperties => {
+    if (id !== 'select' && id !== 'name') return {};
+    const left = id === 'name' && onSelectedChange ? SELECT_W : 0;
+    return {
+      position: 'sticky', left, zIndex: head ? 3 : 1, background: head ? '#f8f9ff' : 'inherit',
+      ...(id === 'select' ? { width: SELECT_W, minWidth: SELECT_W, maxWidth: SELECT_W, padding: head ? 0 : '12px 0' } : { boxShadow: '6px 0 8px -6px rgba(0,0,0,0.12)' }),
+    };
+  };
 
   const table = useReactTable({
     data: creators,
@@ -291,13 +302,14 @@ export default function Creators({ scope = 'general', selected, onSelectedChange
       </div>
 
       <div style={{ background: 'white', borderRadius: '16px', border: '1px solid #e1e0ff', overflow: 'hidden', boxShadow: '0 2px 12px rgba(107,46,232,0.06)' }}>
+        {/* Kolom pilih (mode share) + Nama terkunci di kiri saat tabel digeser horizontal */}
         <div style={{ overflow: 'auto', maxHeight: '75vh' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
             <thead>
               {table.getHeaderGroups().map((hg) => (
                 <tr key={hg.id} style={{ background: '#f8f9ff', borderBottom: '1px solid #e1e0ff' }}>
                   {hg.headers.map((header) => (
-                    <th key={header.id} style={{ padding: 0, position: 'sticky', top: 0, background: '#f8f9ff', zIndex: 1, ...(header.column.id === 'select' ? { left: 0, zIndex: 2, boxShadow: '6px 0 8px -6px rgba(0,0,0,0.12)' } : {}) }}>
+                    <th key={header.id} style={{ padding: 0, position: 'sticky', top: 0, background: '#f8f9ff', zIndex: 1, ...stickyCol(header.column.id, true) }}>
                       {header.column.getCanFilter() ? (
                         <ColumnHeaderCell column={header.column} table={table}>
                           {flexRender(header.column.columnDef.header, header.getContext())}
@@ -325,7 +337,7 @@ export default function Creators({ scope = 'general', selected, onSelectedChange
                   onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.background = i % 2 === 0 ? 'white' : '#fcfcff')}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <td key={cell.id} style={{ padding: '12px 14px', color: '#464652', whiteSpace: 'nowrap', fontFamily: 'var(--font-display)', ...(cell.column.id === 'select' ? { position: 'sticky', left: 0, zIndex: 1, background: 'inherit', textAlign: 'center', boxShadow: '6px 0 8px -6px rgba(0,0,0,0.12)' } : {}) }}>
+                    <td key={cell.id} style={{ padding: '12px 14px', color: '#464652', whiteSpace: 'nowrap', fontFamily: 'var(--font-display)', ...stickyCol(cell.column.id, false), ...(cell.column.id === 'select' ? { textAlign: 'center' } : {}) }}>
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </td>
                   ))}
