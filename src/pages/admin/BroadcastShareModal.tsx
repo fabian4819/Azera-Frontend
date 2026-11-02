@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Copy, Check, Send, X, Users, UserRound, Table2, Save } from 'lucide-react';
+import { Copy, Check, Send, X, Users, UserRound, Table2, Save, Briefcase } from 'lucide-react';
 import api from '../../lib/api';
 import Creators from './Creators';
 import ChecklistDropdown from '../../components/ui/ChecklistDropdown';
@@ -8,6 +8,7 @@ const font = 'var(--font-display)';
 const outlineBtn: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 16px', borderRadius: '10px', border: '1.5px solid #6728e4', background: 'white', color: '#6728e4', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer', fontFamily: font };
 interface Creator { _id: string; name: string; phone?: string; source: string }
 interface Group { jid: string; name?: string }
+interface Pic { _id: string; name: string; ownerName?: string; phone?: string }
 interface Sender { id: string; status: string; connectedNumber: string | null }
 const SENDER_LABELS: Record<string, string> = { partnership: 'Partnership / Brand', creator: 'Creator / KOL', developer: 'Developer (lokal)' };
 
@@ -38,7 +39,9 @@ export function BroadcastSharePanel({ campaignId, text, onTextChange: setText, o
   const [creators, setCreators] = useState<Creator[]>([]);
   const [groupIds, setGroupIds] = useState<string[]>([]);
   const [creatorIds, setCreatorIds] = useState<string[]>([]);
-  const [busy, setBusy] = useState<'group' | 'creator' | null>(null);
+  const [pics, setPics] = useState<Pic[]>([]);
+  const [picIds, setPicIds] = useState<string[]>([]);
+  const [busy, setBusy] = useState<'group' | 'creator' | 'pic' | null>(null);
   const [status, setStatus] = useState<{ ok: boolean; text: string } | null>(null);
   const [allCreatorsOpen, setAllCreatorsOpen] = useState(false);
   const [senders, setSenders] = useState<Sender[]>([]);
@@ -46,6 +49,7 @@ export function BroadcastSharePanel({ campaignId, text, onTextChange: setText, o
 
   useEffect(() => {
     api.get('/admin/creators').then((r) => setCreators(r.data)).catch(() => setCreators([]));
+    api.get('/admin/pic').then((r) => setPics(r.data)).catch(() => setPics([]));
     // Default: partnership kalau terhubung, selain itu WA pertama yang terhubung (di lokal = developer)
     api.get('/admin/campaigns/wa-senders').then((r) => {
       const list: Sender[] = r.data;
@@ -76,6 +80,11 @@ export function BroadcastSharePanel({ campaignId, text, onTextChange: setText, o
     () => creators.filter((c) => c.source !== 'extension' && c.phone).map((c) => ({ id: c._id, label: c.name, sub: c.phone })),
     [creators]
   );
+  // DM ke PIC: label nama management/agency + nama PIC, nomor WA dari sign up PIC
+  const picOptions = useMemo(
+    () => pics.filter((p) => p.phone).map((p) => ({ id: p._id, label: p.ownerName ? `${p.name} · ${p.ownerName}` : p.name, sub: p.phone })),
+    [pics]
+  );
 
   const copy = async () => {
     await navigator.clipboard.writeText(text);
@@ -102,14 +111,15 @@ export function BroadcastSharePanel({ campaignId, text, onTextChange: setText, o
     }
   };
 
-  const share = async (kind: 'group' | 'creator') => {
-    const ids = kind === 'group' ? groupIds : creatorIds;
+  const share = async (kind: 'group' | 'creator' | 'pic') => {
+    const ids = kind === 'group' ? groupIds : kind === 'creator' ? creatorIds : picIds;
     if (!ids.length) return;
     setBusy(kind);
     setStatus(null);
     try {
       await persist();
-      const res = await api.post(`/admin/campaigns/${campaignId}/share`, kind === 'group' ? { message: text, groupJids: ids, bot } : { message: text, creatorIds: ids, bot });
+      const target = kind === 'group' ? { groupJids: ids } : kind === 'creator' ? { creatorIds: ids } : { picIds: ids };
+      const res = await api.post(`/admin/campaigns/${campaignId}/share`, { message: text, bot, ...target });
       const failed: string[] = res.data.failed || [];
       setStatus({ ok: !failed.length, text: `${res.data.sent} pesan masuk antrian kirim (WA ${SENDER_LABELS[bot] ?? bot})${failed.length ? `, ${failed.length} gagal (nomor tidak valid)` : ''}.` });
     } catch (err: unknown) {
@@ -120,7 +130,7 @@ export function BroadcastSharePanel({ campaignId, text, onTextChange: setText, o
     }
   };
 
-  const shareBtn = (kind: 'group' | 'creator', label: string, Icon: typeof Users, count: number) => (
+  const shareBtn = (kind: 'group' | 'creator' | 'pic', label: string, Icon: typeof Users, count: number) => (
     <button onClick={() => void share(kind)} disabled={busy !== null || !count} className="btn-primary" style={{ width: '100%', justifyContent: 'center', padding: '10px', fontSize: '0.82rem', opacity: busy !== null || !count ? 0.6 : 1 }}>
       <Icon size={15} /> {busy === kind ? 'Mengirim...' : `${label}${count ? ` (${count})` : ''}`}
     </button>
@@ -161,6 +171,10 @@ export function BroadcastSharePanel({ campaignId, text, onTextChange: setText, o
             <button onClick={() => setAllCreatorsOpen(true)} style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '8px', padding: '6px 0', background: 'none', border: 'none', color: '#6728e4', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer', fontFamily: font }}>
               <Table2 size={14} /> See all creator
             </button>
+          </div>
+          <div>
+            {shareBtn('pic', 'Share ke PIC', Briefcase, picIds.length)}
+            <ChecklistDropdown placeholder="Pilih PIC" options={picOptions} selected={picIds} onChange={setPicIds} />
           </div>
         </div>
 
