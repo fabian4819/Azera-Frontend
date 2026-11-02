@@ -7,5 +7,5 @@ export const SHEET_TABS: { kind: SheetKind; label: string; hint: string; empty: 
   { kind: 'master', label: 'Master Sheet', icon: Table2, hint: 'Sel kuning bisa diedit langsung. Atur/hapus kolom lewat ikon di header, tambah kolom lewat tombol + di ujung kanan.', empty: 'Belum ada creator yang di-approve. Approve pendaftar di tab Pendaftar supaya masuk ke sini.' },
   { kind: 'report', label: 'Report', icon: BarChart3, hint: 'Performa tiap konten yang sudah tayang. Total ada di baris paling bawah.', empty: 'Belum ada konten tayang (submission tipe post).' },
   { kind: 'recap', label: 'Recap Payment', icon: Wallet, hint: 'Creator yang diterima, data rekening, fee, dan status pembayaran.', empty: 'Belum ada creator yang diterima.' },
-  { kind: 'applicants', label: 'Pendaftar', icon: UserCheck, hint: 'Approve = creator dapat link dashboard campaign lewat WhatsApp & email.', empty: 'Belum ada yang mendaftar.' },
+  { kind: 'applicants', label: 'Pendaftar', icon: UserCheck, hint: 'Approve = lolos tahap 1, diteruskan ke dashboard client. Creator baru dikabari (WhatsApp & email + link dashboard & grup) setelah client juga approve.', empty: 'Belum ada yang mendaftar.' },
 ];
