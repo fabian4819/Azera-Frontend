@@ -130,6 +130,8 @@ export default function CreatorDetail() {
   const [expandedSocials, setExpandedSocials] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [deciding, setDeciding] = useState(false);
+  // Ubah keputusan yang sudah final: klik "Ubah keputusan" dulu (konfirmasi), baru tombol kebalikannya muncul
+  const [changing, setChanging] = useState(false);
   const [actionError, setActionError] = useState('');
 
   const load = async () => {
@@ -173,6 +175,7 @@ export default function CreatorDetail() {
     try {
       const res = await api.patch(`/admin/creators/${id}`, { status });
       setCreator(res.data);
+      setChanging(false);
     } catch (err: unknown) {
       const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
       setActionError(message || 'Gagal menyimpan keputusan.');
@@ -401,7 +404,42 @@ export default function CreatorDetail() {
                 </button>
               </div>
             ) : (
-              <p style={{ fontSize: '0.85rem', color: '#777683' }}>Status sudah final: <StatusBadge status={creator.status} /></p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <p style={{ fontSize: '0.85rem', color: '#777683' }}>Status saat ini: <StatusBadge status={creator.status} /></p>
+                {!changing ? (
+                  <button
+                    onClick={() => setChanging(true)}
+                    style={{ padding: '9px', background: 'white', color: '#6728e4', borderRadius: '10px', border: '1.5px solid #c9b6f7', cursor: 'pointer', fontSize: '0.82rem', fontWeight: 700, fontFamily: f }}
+                  >
+                    Ubah keputusan
+                  </button>
+                ) : (
+                  <>
+                    <p style={{ fontSize: '0.78rem', color: '#464652', lineHeight: 1.5 }}>
+                      {creator.status === 'approved'
+                        ? 'Ubah jadi Ditolak? Creator tidak ikut broadcast "semua creator disetujui" lagi. Tidak ada pesan yang dikirim ke creator.'
+                        : 'Ubah jadi Disetujui? Creator ikut menerima broadcast "semua creator disetujui". Tidak ada pesan yang dikirim ke creator.'}
+                    </p>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <button
+                        onClick={() => decide(creator.status === 'approved' ? 'rejected' : 'approved')}
+                        disabled={deciding}
+                        style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '10px', borderRadius: '10px', border: 'none', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 700, fontFamily: f, opacity: deciding ? 0.6 : 1,
+                          ...(creator.status === 'approved' ? { background: '#ffdad6', color: '#ba1a1a' } : { background: '#d1fae5', color: '#065F46' }) }}
+                      >
+                        {creator.status === 'approved' ? <><ThumbsDown size={15} /> Tolak</> : <><ThumbsUp size={15} /> Setujui</>}
+                      </button>
+                      <button
+                        onClick={() => setChanging(false)}
+                        disabled={deciding}
+                        style={{ padding: '10px 14px', background: 'white', color: '#464652', borderRadius: '10px', border: '1.5px solid #e1e0ff', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600, fontFamily: f }}
+                      >
+                        Batal
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
             )}
           </div>
 
