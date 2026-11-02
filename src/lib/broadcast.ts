@@ -21,7 +21,7 @@ const list = (xs: string[] = []) =>
 export function buildBroadcast(c: BroadcastInput, applyUrl: string): string {
   const sections: string[] = [`*${c.name} | AZERA* ✨`];
 
-  const ev = c.type === 'offline' ? c.eventDetails : undefined;
+  const ev = c.eventDetails;
   const when = ev?.date
     ? new Date(ev.date).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Jakarta' })
     : '';

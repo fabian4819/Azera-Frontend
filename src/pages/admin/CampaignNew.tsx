@@ -176,7 +176,8 @@ export default function CampaignNew() {
           platforms: selectedPlatforms,
         },
         type,
-        eventDetails: type === 'offline' ? { location: eventLocation, date: eventDate, timeWindow: eventTimeWindow } : undefined,
+        // Visit opsional untuk semua tipe campaign (bukan cuma offline/event)
+        eventDetails: eventLocation.trim() || eventDate || eventTimeWindow.trim() ? { location: eventLocation.trim(), date: eventDate || undefined, timeWindow: eventTimeWindow.trim() } : undefined,
       });
       // PIC yang dicentang di tahap 2, best-effort, campaign sudah terbuat
       await Promise.all(allPics.filter((p) => picIds.includes(p._id)).map((p) => api.post(`/admin/campaigns/${res.data._id}/pic`, { email: p.email }).catch(() => undefined)));
@@ -245,25 +246,23 @@ export default function CampaignNew() {
             </div>
           </div>
 
-          {type === 'offline' && (
-            <div style={{ marginTop: '14px', background: '#f8f9ff', borderRadius: '12px', padding: '16px' }}>
-              <p style={{ ...labelStyle, marginBottom: '10px' }}>Detail Event</p>
-              <div style={{ marginBottom: '10px' }}>
-                <label style={labelStyle}>Lokasi</label>
-                <input value={eventLocation} onChange={(e) => setEventLocation(e.target.value)} placeholder="Dome Senayan Park" style={inputStyle} />
+          <div style={{ marginTop: '14px', background: '#f8f9ff', borderRadius: '12px', padding: '16px' }}>
+            <p style={{ ...labelStyle, marginBottom: '10px' }}>Visit <span style={{ fontWeight: 400, color: '#777683' }}>(opsional, tampil di bawah nama campaign)</span></p>
+            <div style={{ marginBottom: '10px' }}>
+              <label style={labelStyle}>Lokasi Visit</label>
+              <input value={eventLocation} onChange={(e) => setEventLocation(e.target.value)} placeholder="Dome Senayan Park" style={inputStyle} />
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }} className="form-2col">
+              <div>
+                <label style={labelStyle}>Tanggal Visit</label>
+                <input value={eventDate} onChange={(e) => setEventDate(e.target.value)} type="date" style={inputStyle} />
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }} className="form-2col">
-                <div>
-                  <label style={labelStyle}>Tanggal</label>
-                  <input value={eventDate} onChange={(e) => setEventDate(e.target.value)} type="date" style={inputStyle} />
-                </div>
-                <div>
-                  <label style={labelStyle}>Jam</label>
-                  <input value={eventTimeWindow} onChange={(e) => setEventTimeWindow(e.target.value)} placeholder="09.00–12.30 WIB" style={inputStyle} />
-                </div>
+              <div>
+                <label style={labelStyle}>Jam</label>
+                <input value={eventTimeWindow} onChange={(e) => setEventTimeWindow(e.target.value)} placeholder="09.00–12.30 WIB" style={inputStyle} />
               </div>
             </div>
-          )}
+          </div>
         </div>
 
         <div style={cardStyle}>

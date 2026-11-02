@@ -1,7 +1,8 @@
 import { stageLabel } from '../../lib/stages';
 import { useCallback, useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, Copy, Check, MessageCircle, LayoutDashboard, Building2, ExternalLink, UserCheck } from 'lucide-react';
+import { ArrowLeft, Copy, Check, MessageCircle, LayoutDashboard, Building2, ExternalLink, UserCheck, MapPin, CalendarDays, Clock, Pencil } from 'lucide-react';
+import { NICHES } from '../../lib/niches';
 import { SiInstagram, SiTiktok, SiThreads, SiX } from 'react-icons/si';
 import type { IconType } from 'react-icons';
 import api from '../../lib/api';
@@ -212,6 +213,13 @@ export default function CampaignDetail() {
             <p style={{ fontFamily: "var(--font-display)", fontSize: '0.78rem', fontWeight: 700, color: '#6728e4', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '4px' }}>{campaign.brandName}</p>
           )}
           <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: '1.4rem', color: '#191c20' }}>{campaign.name}</h2>
+          {(campaign.eventDetails?.location || campaign.eventDetails?.date || campaign.eventDetails?.timeWindow) && (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px 16px', marginTop: '8px', fontFamily: "var(--font-display)", fontSize: '0.84rem', color: '#464652' }}>
+              {campaign.eventDetails.date && <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><CalendarDays size={15} color="#6728e4" /> Visit {fmtDate(campaign.eventDetails.date)}</span>}
+              {campaign.eventDetails.timeWindow && <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Clock size={15} color="#6728e4" /> {campaign.eventDetails.timeWindow}</span>}
+              {campaign.eventDetails.location && <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><MapPin size={15} color="#6728e4" /> {campaign.eventDetails.location}</span>}
+            </div>
+          )}
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
           <span style={{ background: '#e1e0ff', color: '#6728e4', borderRadius: '999px', padding: '4px 12px', fontSize: '0.75rem', fontWeight: 700 }}>
@@ -253,7 +261,7 @@ export default function CampaignDetail() {
       {activeTab === 'overview' && (
         <div>
           <WorkflowTracker campaignId={campaign._id} stage={campaign.workflowStage} decide={campaign.workflowStage === 'listing' && !campaign.applyOpen} onChanged={(workflowStage) => setCampaign((c) => (c ? { ...c, workflowStage } : c))} />
-          <CampaignInfo campaign={campaign} />
+          <CampaignInfo campaign={campaign} onSaved={(patch) => setCampaign((c) => (c ? { ...c, ...patch } : c))} />
 
           <div style={cardStyle}>
             <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: '1rem', color: '#191c20', marginBottom: '16px' }}>Broadcast Campaign</p>
@@ -407,9 +415,11 @@ const Checklist = ({ items }: { items: string[] }) => (
   </ul>
 );
 
-/** Keterangan campaign lengkap (isi tahap 1 pembuatan campaign). Field kosong disembunyikan. */
-function CampaignInfo({ campaign: c }: { campaign: Campaign }) {
-  const ev = c.type === 'offline' ? c.eventDetails : undefined;
+/** Keterangan campaign lengkap (isi tahap 1 pembuatan campaign). Field kosong disembunyikan. Bisa diedit. */
+function CampaignInfo({ campaign: c, onSaved }: { campaign: Campaign; onSaved: (patch: Partial<Campaign>) => void }) {
+  const [editing, setEditing] = useState(false);
+  if (editing) return <CampaignInfoEdit campaign={c} onCancel={() => setEditing(false)} onSaved={(patch) => { onSaved(patch); setEditing(false); }} />;
+  const ev = c.eventDetails;
   const stats = [
     { label: 'Budget', value: rp(c.budget), bg: 'linear-gradient(135deg, #6728e4, #8b66eb)', fg: 'white' },
     { label: 'Fee Talent', value: rp(c.fee?.creatorFee), sub: c.feeNote, bg: '#eefad8', fg: '#2c4d00' },
@@ -428,6 +438,12 @@ function CampaignInfo({ campaign: c }: { campaign: Campaign }) {
     <div style={{ ...cardStyle, padding: 0, overflow: 'hidden' }}>
       {/* Header */}
       <div style={{ padding: '24px 28px' }}>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '12px' }}>
+          <button type="button" onClick={() => setEditing(true)}
+            style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '7px 14px', borderRadius: '999px', border: '1.5px solid #c9b6f7', background: 'white', color: '#6728e4', fontFamily: font, fontSize: '0.8rem', fontWeight: 700, cursor: 'pointer' }}>
+            <Pencil size={14} /> Edit info campaign
+          </button>
+        </div>
         {/* Angka */}
         {stats.length > 0 && (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '12px', marginBottom: '22px' }}>
@@ -451,7 +467,7 @@ function CampaignInfo({ campaign: c }: { campaign: Campaign }) {
           <div style={{ minWidth: 0 }}>
             {lists.map((l) => <Block key={l.title} title={l.title}><Checklist items={l.items!} /></Block>)}
             {ev && (ev.location || ev.date || ev.timeWindow) && (
-              <Block title="Detail Event">
+              <Block title="Visit">
                 <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                   {ev.location && <Chip tone="gray">{ev.location}</Chip>}
                   {ev.date && <Chip tone="gray">{fmtDate(ev.date)}</Chip>}
@@ -499,6 +515,131 @@ function CampaignInfo({ campaign: c }: { campaign: Campaign }) {
             )}
           </div>
         </div>
+      </div>
+    </div>
+  );
+}
+
+const editInput: React.CSSProperties = { width: '100%', padding: '10px 12px', borderRadius: '10px', border: '1.5px solid #c7c8cf', fontSize: '0.85rem', fontFamily: 'var(--font-display)', color: '#191c20', background: 'white', outline: 'none' };
+const editLabel: React.CSSProperties = { display: 'block', fontWeight: 700, fontSize: '0.78rem', color: '#191c20', marginBottom: '5px', fontFamily: 'var(--font-display)' };
+const EDIT_PLATFORMS = ['instagram', 'tiktok', 'threads', 'x'];
+const lines = (v: string) => v.split('\n').map((x) => x.trim()).filter(Boolean);
+const numOrUndef = (v: string) => (v.trim() === '' ? undefined : Number(v));
+
+/** Mode edit info campaign (isi tahap 1): tujuan, fee, benefit/syarat/SOW, visit, link, platform & niche.
+ * Domisili creator & budget tidak diedit di sini. */
+function CampaignInfoEdit({ campaign: c, onCancel, onSaved }: { campaign: Campaign; onCancel: () => void; onSaved: (patch: Partial<Campaign>) => void }) {
+  const [objective, setObjective] = useState(c.objective || '');
+  const [benefits, setBenefits] = useState((c.benefits || []).join('\n'));
+  const [requirements, setRequirements] = useState((c.requirements || []).join('\n'));
+  const [deliverables, setDeliverables] = useState((c.deliverables || []).join('\n'));
+  const [creatorFee, setCreatorFee] = useState(c.fee?.creatorFee?.toString() ?? '');
+  const [picFee, setPicFee] = useState(c.fee?.picFee?.toString() ?? '');
+  const [mgFee, setMgFee] = useState(c.fee?.mgFee?.toString() ?? '');
+  const [feeNote, setFeeNote] = useState(c.feeNote || '');
+  const [infoLink, setInfoLink] = useState(c.infoLink || '');
+  const [visitLocation, setVisitLocation] = useState(c.eventDetails?.location || '');
+  const [visitDate, setVisitDate] = useState(c.eventDetails?.date ? c.eventDetails.date.slice(0, 10) : '');
+  const [visitTime, setVisitTime] = useState(c.eventDetails?.timeWindow || '');
+  const [platforms, setPlatforms] = useState<string[]>(c.criteria.platforms || []);
+  const [minFollowers, setMinFollowers] = useState<Record<string, string>>(
+    Object.fromEntries(Object.entries(c.criteria.minFollowersByPlatform || {}).map(([k, v]) => [k, v != null ? String(v) : ''])),
+  );
+  const [niches, setNiches] = useState<string[]>(c.criteria.niches || []);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+  const nicheOptions = [...NICHES, ...niches.filter((n) => !NICHES.includes(n))];
+
+  const save = async () => {
+    if (!objective.trim()) { setError('Tujuan wajib diisi.'); return; }
+    setSaving(true);
+    setError('');
+    try {
+      const payload = {
+        objective: objective.trim(),
+        benefits: lines(benefits), requirements: lines(requirements), deliverables: lines(deliverables),
+        fee: { creatorFee: numOrUndef(creatorFee), picFee: numOrUndef(picFee), mgFee: numOrUndef(mgFee) },
+        feeNote: feeNote.trim(), infoLink: infoLink.trim(),
+        eventDetails: { location: visitLocation.trim(), date: visitDate || null, timeWindow: visitTime.trim() },
+        criteria: {
+          ...c.criteria, platforms, niches,
+          minFollowersByPlatform: Object.fromEntries(platforms.map((p) => [p, numOrUndef(minFollowers[p] || '')])),
+        },
+      };
+      const res = await api.patch(`/admin/campaigns/${c._id}`, payload);
+      onSaved({
+        objective: res.data.objective, benefits: res.data.benefits, requirements: res.data.requirements, deliverables: res.data.deliverables,
+        fee: res.data.fee, feeNote: res.data.feeNote, infoLink: res.data.infoLink, eventDetails: res.data.eventDetails, criteria: res.data.criteria,
+      });
+    } catch (err) {
+      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      setError(message || 'Gagal menyimpan info campaign.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const field = (label: string, node: React.ReactNode) => <div style={{ marginBottom: '14px' }}><label style={editLabel}>{label}</label>{node}</div>;
+  const area = (value: string, set: (v: string) => void, placeholder: string) => (
+    <textarea value={value} onChange={(e) => set(e.target.value)} rows={3} placeholder={placeholder} style={{ ...editInput, resize: 'vertical' }} />
+  );
+
+  return (
+    <div style={{ ...cardStyle, padding: '24px 28px' }}>
+      <p style={{ fontFamily: font, fontWeight: 800, fontSize: '1rem', color: '#191c20', marginBottom: '16px' }}>Edit info campaign</p>
+      {field('Tujuan *', area(objective, setObjective, 'Tujuan campaign'))}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '0 12px' }}>
+        {field('Fee Talent (Rp)', <input type="number" min={0} value={creatorFee} onChange={(e) => setCreatorFee(e.target.value)} style={editInput} />)}
+        {field('Fee PIC (Rp)', <input type="number" min={0} value={picFee} onChange={(e) => setPicFee(e.target.value)} style={editInput} />)}
+        {field('Fee MG (Rp)', <input type="number" min={0} value={mgFee} onChange={(e) => setMgFee(e.target.value)} style={editInput} />)}
+      </div>
+      {field('Catatan Fee', <input value={feeNote} onChange={(e) => setFeeNote(e.target.value)} placeholder="mis. include beli produk 5k" style={editInput} />)}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '0 12px' }}>
+        {field('Benefit (1 baris = 1 poin)', area(benefits, setBenefits, 'Free produk'))}
+        {field('Syarat (1 baris = 1 poin)', area(requirements, setRequirements, 'Niche: Lifestyle'))}
+        {field('SOW (1 baris = 1 poin)', area(deliverables, setDeliverables, '1x TikTok Video'))}
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0 12px' }}>
+        {field('Lokasi Visit', <input value={visitLocation} onChange={(e) => setVisitLocation(e.target.value)} placeholder="Opsional" style={editInput} />)}
+        {field('Tanggal Visit', <input type="date" value={visitDate} onChange={(e) => setVisitDate(e.target.value)} style={editInput} />)}
+        {field('Jam Visit', <input value={visitTime} onChange={(e) => setVisitTime(e.target.value)} placeholder="09.00–12.00 WIB" style={editInput} />)}
+      </div>
+      {field('Link Info', <input value={infoLink} onChange={(e) => setInfoLink(e.target.value)} placeholder="https://..." style={editInput} />)}
+      {field('Platform & Min. Followers', (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          {EDIT_PLATFORMS.map((p) => {
+            const on = platforms.includes(p);
+            const m = PLATFORM_META[p];
+            return (
+              <div key={p} style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: '130px', fontFamily: font, fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer' }}>
+                  <input type="checkbox" checked={on} onChange={(e) => setPlatforms((prev) => (e.target.checked ? [...prev, p] : prev.filter((x) => x !== p)))} style={{ accentColor: '#6728e4', width: '16px', height: '16px' }} />
+                  {m?.name ?? p}
+                </label>
+                {on && <input type="number" min={0} value={minFollowers[p] ?? ''} onChange={(e) => setMinFollowers((prev) => ({ ...prev, [p]: e.target.value }))} placeholder="Min. followers (kosong = tanpa minimum)" style={{ ...editInput, flex: 1, minWidth: '200px' }} />}
+              </div>
+            );
+          })}
+        </div>
+      ))}
+      {field('Niche', (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+          {nicheOptions.map((n) => {
+            const on = niches.includes(n);
+            return (
+              <button key={n} type="button" onClick={() => setNiches((prev) => (on ? prev.filter((x) => x !== n) : [...prev, n]))}
+                style={{ padding: '6px 12px', borderRadius: '999px', border: 'none', cursor: 'pointer', fontFamily: font, fontSize: '0.78rem', fontWeight: 600, background: on ? '#6728e4' : '#e1e0ff', color: on ? 'white' : '#6728e4' }}>
+                {n}
+              </button>
+            );
+          })}
+        </div>
+      ))}
+      <p style={{ fontSize: '0.74rem', color: '#777683', marginBottom: '14px', fontFamily: font }}>Domisili creator & budget tidak diubah di sini.</p>
+      {error && <p role="alert" style={{ color: '#ba1a1a', fontSize: '0.82rem', marginBottom: '10px' }}>{error}</p>}
+      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+        <button type="button" onClick={onCancel} disabled={saving} style={{ padding: '10px 16px', borderRadius: '10px', border: '1.5px solid #e1e0ff', background: 'white', color: '#464652', cursor: 'pointer', fontFamily: font, fontSize: '0.85rem', fontWeight: 600 }}>Batal</button>
+        <button type="button" onClick={() => void save()} disabled={saving} className="btn-primary" style={{ padding: '10px 18px', fontSize: '0.85rem', opacity: saving ? 0.6 : 1 }}>{saving ? 'Menyimpan...' : 'Simpan'}</button>
       </div>
     </div>
   );
