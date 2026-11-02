@@ -74,6 +74,19 @@ export default function CampaignSheet() {
     return () => window.clearTimeout(t);
   }, [kind, cache, error, load]);
 
+  // Pendaftar baru masuk tanpa refresh manual (seperti respons Google Form): tab Pendaftar dimuat ulang
+  // diam-diam tiap 15 detik selama tab browser aktif; dilewati saat admin sedang approve/reject.
+  useEffect(() => {
+    if (kind !== 'applicants') return;
+    const timer = window.setInterval(() => {
+      if (document.visibilityState !== 'visible' || deciding) return;
+      api.get(`/admin/campaigns/${id}/sheet/applicants`, { params: { auto: 1 } })
+        .then((res) => setCache((c) => ({ ...c, applicants: res.data })))
+        .catch(() => { /* diam, dicoba lagi di putaran berikutnya */ });
+    }, 15000);
+    return () => window.clearInterval(timer);
+  }, [kind, id, deciding]);
+
   const switchTab = (k: SheetKind) => {
     setParams({ tab: k }, { replace: true });
     setError('');
@@ -334,6 +347,11 @@ export default function CampaignSheet() {
           {campaign && <p style={{ marginTop: '4px', color: '#777683', fontSize: '0.82rem' }}>{campaign.brandName || 'Tanpa brand'}</p>}
         </div>
         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+          {kind === 'applicants' && (
+            <span title="Pendaftar baru muncul otomatis, diperbarui tiap 15 detik" style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '0 10px', height: '38px', fontFamily: f, fontSize: '0.75rem', fontWeight: 700, color: '#188038' }}>
+              <span className="live-dot" aria-hidden /> Live
+            </span>
+          )}
           <button type="button" onClick={refresh} disabled={loading} aria-label="Muat ulang data" title="Muat ulang data"
             style={{ width: '38px', height: '38px', borderRadius: '10px', border: '1.5px solid #c7c8cf', background: '#fff', color: '#6728e4', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: loading ? 0.5 : 1 }}>
             <RefreshCw size={16} />
