@@ -28,7 +28,7 @@ export interface BoardView {
   rows: { id: string; mine: boolean; cells: Cell[]; notes?: { draft?: string; post?: string } }[];
 }
 
-/** Tab "Pendaftar" di dashboard client (stage 2): kolom identik tab Pendaftar admin. */
+/** Tab "Listing" di dashboard client (stage 2): kolom tab Pendaftar admin minus data internal (WA, email, PIC, handle by). */
 export interface ApplicantsView {
   headers: string[];
   rows: Cell[][];
@@ -121,7 +121,7 @@ function ApplicantsTab({ view, onDecide }: { view: ApplicantsView | null; onDeci
           <button type="button" onClick={() => setError('')} aria-label="Tutup pesan" style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#93000a', display: 'flex' }}><X size={14} /></button>
         </div>
       )}
-      <SheetGrid headers={view.headers} rows={view.rows} emptyText="Belum ada pendaftar yang di-approve admin." actionHeader="Status" rowAction={rowAction} maxHeight="calc(100vh - 200px)" />
+      <SheetGrid headers={view.headers} rows={view.rows} emptyText="Belum ada kandidat yang lolos kurasi admin." actionHeader="Status" rowAction={rowAction} maxHeight="calc(100vh - 200px)" />
     </section>
   );
 }
@@ -163,7 +163,7 @@ interface Props {
   onEdit?: (row: number, col: number, value: string) => Promise<void>;
   onUpload?: (row: number, col: number, files: File[]) => Promise<void>;
   onReview?: (row: number, type: 'draft' | 'post', status: 'approved' | 'revision_requested', notes?: string) => Promise<void>;
-  /** Client-only (stage 2): tab "Pendaftar" */
+  /** Client-only (stage 2): tab "Listing" */
   applicants?: ApplicantsView | null;
   onLoadApplicants?: () => void;
   onDecideApplicant?: (appId: string, status: 'accepted' | 'rejected') => Promise<void>;
@@ -244,7 +244,7 @@ export default function CampaignBoard({ audience, view, loading, onReload, onEdi
 
       {showTabs && (
         <div role="tablist" style={{ display: 'flex', gap: '4px', marginBottom: '14px' }}>
-          {([['pendaftar', 'Pendaftar'], ['tracker', 'Campaign Tracker']] as const).map(([key, label]) => (
+          {([['pendaftar', 'Listing'], ['tracker', 'Campaign Tracker']] as const).map(([key, label]) => (
             <button key={key} role="tab" aria-selected={tab === key} onClick={() => setTab(key)}
               style={{
                 padding: '10px 18px', borderRadius: '999px', border: 'none', cursor: 'pointer',
