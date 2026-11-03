@@ -3,9 +3,11 @@ import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import {
   useReactTable, getCoreRowModel, getSortedRowModel, getFilteredRowModel, getFacetedRowModel,
-  flexRender, type ColumnDef, type SortingState, type ColumnFiltersState, type Column, type Table as ReactTableInstance,
+  flexRender, type ColumnDef, type SortingState, type ColumnFiltersState, type VisibilityState, type Updater, type Column, type Table as ReactTableInstance,
 } from '@tanstack/react-table';
-import { Search, RefreshCw, ChevronUp, ChevronDown, ChevronsUpDown, Filter, X as XIcon, ExternalLink } from 'lucide-react';
+import { Search, RefreshCw, ChevronUp, ChevronDown, ChevronsUpDown, Filter, X as XIcon, ExternalLink, ArrowDownAZ, ArrowDownZA, EyeOff } from 'lucide-react';
+import ViewToolbar from '../../components/ViewToolbar';
+import { useViewHistory } from '../../hooks/useViewHistory';
 import StatusBadge from '../../components/ui/StatusBadge';
 import api from '../../lib/api';
 import WaLink from '../../components/WaLink';
@@ -97,6 +99,9 @@ interface Props {
   onSelectedChange?: (ids: string[]) => void;
 }
 
+interface CreatorsView { sorting: SortingState; columnFilters: ColumnFiltersState; columnVisibility: VisibilityState }
+const DEFAULT_VIEW: CreatorsView = { sorting: [{ id: 'createdAt', desc: true }], columnFilters: [], columnVisibility: {} };
+
 export default function Creators({ scope = 'general', selected, onSelectedChange }: Props) {
   const [creators, setCreators] = useState<CreatorItem[]>([]);
   const [statusChange, setStatusChange] = useState<{ id: string; name: string; to: EditableStatus } | null>(null);
@@ -118,8 +123,11 @@ export default function Creators({ scope = 'general', selected, onSelectedChange
   };
   const [loading, setLoading] = useState(true);
   const [globalFilter, setGlobalFilter] = useState('');
-  const [sorting, setSorting] = useState<SortingState>([{ id: 'createdAt', desc: true }]);
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  // Urutan, filter kolom & kolom tersembunyi lewat riwayat supaya bisa Undo / Reset tampilan
+  const [view, setView, undoView, canUndo] = useViewHistory<CreatorsView>(DEFAULT_VIEW);
+  const { sorting, columnFilters, columnVisibility } = view;
+  const viewSetter = <K extends keyof CreatorsView>(key: K) => (u: Updater<CreatorsView[K]>) =>
+    setView((v) => ({ ...v, [key]: typeof u === 'function' ? (u as (old: CreatorsView[K]) => CreatorsView[K])(v[key]) : u }));
   const [sheetUrl, setSheetUrl] = useState<string | null>(null);
   const navigate = useNavigate();
 
@@ -297,9 +305,10 @@ export default function Creators({ scope = 'general', selected, onSelectedChange
   const table = useReactTable({
     data: creators,
     columns,
-    state: { sorting, columnFilters, globalFilter },
-    onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
+    state: { sorting, columnFilters, columnVisibility, globalFilter },
+    onSortingChange: viewSetter('sorting'),
+    onColumnFiltersChange: viewSetter('columnFilters'),
+    onColumnVisibilityChange: viewSetter('columnVisibility'),
     onGlobalFilterChange: setGlobalFilter,
     globalFilterFn: (row, _id, filterValue: string) => {
       const q = filterValue.toLowerCase();
@@ -311,7 +320,8 @@ export default function Creators({ scope = 'general', selected, onSelectedChange
     getFacetedRowModel: getFacetedRowModel(),
   });
 
-  const activeFilterCount = columnFilters.length;
+  const hideable = table.getAllLeafColumns().filter((c) => c.id !== 'select');
+  const visibleCount = table.getVisibleLeafColumns().length;
 
   return (
     <div>
@@ -340,15 +350,13 @@ export default function Creators({ scope = 'general', selected, onSelectedChange
             style={{ padding: '10px 14px 10px 36px', borderRadius: '10px', border: '1.5px solid #c7c8cf', fontSize: '0.875rem', outline: 'none', fontFamily: 'var(--font-display)', background: 'white', width: '100%' }}
           />
         </div>
-        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-          {activeFilterCount > 0 && (
-            <button
-              onClick={() => setColumnFilters([])}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6728e4', fontSize: '0.8rem', fontWeight: 700, fontFamily: "var(--font-display)" }}
-            >
-              Hapus {activeFilterCount} filter kolom
-            </button>
-          )}
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+          <ViewToolbar
+            columns={hideable.map((c) => ({ id: c.id, label: typeof c.columnDef.header === 'string' ? c.columnDef.header : c.id, visible: c.getIsVisible() }))}
+            onToggleColumn={(id) => table.getColumn(id)?.toggleVisibility()}
+            onShowAll={() => setView((v) => ({ ...v, columnVisibility: {} }))}
+            canUndo={canUndo} onUndo={undoView}
+            canReset={view !== DEFAULT_VIEW} onReset={() => setView(DEFAULT_VIEW)} />
           <button onClick={fetchCreators} style={{ padding: '10px', borderRadius: '10px', border: '1.5px solid #c7c8cf', background: 'white', cursor: 'pointer', color: '#777683', display: 'flex' }}>
             <RefreshCw size={16} />
           </button>
@@ -388,9 +396,9 @@ export default function Creators({ scope = 'general', selected, onSelectedChange
             </thead>
             <tbody>
               {loading ? (
-                <tr><td colSpan={columns.length} style={{ textAlign: 'center', padding: '48px', color: '#777683' }}>Memuat...</td></tr>
+                <tr><td colSpan={visibleCount} style={{ textAlign: 'center', padding: '48px', color: '#777683' }}>Memuat...</td></tr>
               ) : table.getRowModel().rows.length === 0 ? (
-                <tr><td colSpan={columns.length} style={{ textAlign: 'center', padding: '48px', color: '#777683' }}>Belum ada creator yang cocok.</td></tr>
+                <tr><td colSpan={visibleCount} style={{ textAlign: 'center', padding: '48px', color: '#777683' }}>Belum ada creator yang cocok.</td></tr>
               ) : table.getRowModel().rows.map((row, i) => (
                 <tr
                   key={row.id}
@@ -419,6 +427,8 @@ export default function Creators({ scope = 'general', selected, onSelectedChange
     </div>
   );
 }
+
+const menuItem: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: '8px', width: '100%', padding: '6px 8px', background: 'none', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '0.78rem', color: '#191c20', textAlign: 'left', fontFamily: 'var(--font-display)' };
 
 // Header sel: klik label buat sort (klik lagi buat balik arah / lepas sort), klik ikon corong
 // buka daftar checkbox nilai unik kolom itu, persis pola filter default Sheets/Excel, dipakai
@@ -489,6 +499,13 @@ function ColumnHeaderCell({ column, table, children }: { column: Column<CreatorI
                 style={{ border: 'none', outline: 'none', fontSize: '0.78rem', flex: 1, fontFamily: 'var(--font-display)' }}
               />
               <button onClick={() => setOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#777683', display: 'flex' }}><XIcon size={13} /></button>
+            </div>
+            <div style={{ padding: '4px', borderBottom: '1px solid #eee' }}>
+              {column.getCanSort() && ([[false, ArrowDownAZ, 'Urutkan A → Z'], [true, ArrowDownZA, 'Urutkan Z → A']] as const).map(([desc, Icon, label]) => (
+                <button key={label} type="button" onClick={() => { column.toggleSorting(desc); setOpen(false); }}
+                  style={{ ...menuItem, fontWeight: sort === (desc ? 'desc' : 'asc') ? 700 : 500 }}><Icon size={14} /> {label}</button>
+              ))}
+              <button type="button" onClick={() => { column.toggleVisibility(false); setOpen(false); }} style={menuItem}><EyeOff size={14} /> Sembunyikan kolom</button>
             </div>
             <div style={{ display: 'flex', gap: '10px', padding: '6px 10px', fontSize: '0.72rem' }}>
               <button onClick={() => column.setFilterValue(undefined)} style={{ background: 'none', border: 'none', color: '#6728e4', cursor: 'pointer', fontWeight: 700, fontFamily: 'var(--font-display)' }}>Pilih Semua</button>

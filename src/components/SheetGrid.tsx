@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { ArrowDownAZ, ArrowDownZA, ListFilter, Pencil, Plus, Search, Upload, X } from 'lucide-react';
+import { ArrowDownAZ, ArrowDownZA, EyeOff, ListFilter, Pencil, Plus, Search, Upload, X } from 'lucide-react';
 import WaLink from './WaLink';
+import ViewToolbar from './ViewToolbar';
+import { useViewHistory } from '../hooks/useViewHistory';
 import { profileUrlFor, toUrl } from '../lib/links';
 
 export type Cell = string | number;
@@ -51,13 +53,14 @@ interface FilterMenuProps {
   sortDir: 1 | -1 | null;
   onSort: (dir: 1 | -1) => void;
   onApply: (hidden: Set<string>) => void;
+  onHideColumn: () => void;
   onClose: () => void;
   /** Pengaturan kolom (admin), tampil di atas opsi urut/filter */
   extra?: ReactNode;
 }
 
 /** Dropdown filter kolom ala Google Sheets: urutkan A→Z / Z→A + filter berdasarkan nilai. */
-function FilterMenu({ header, rect, values, hidden, sortDir, onSort, onApply, onClose, extra }: FilterMenuProps) {
+function FilterMenu({ header, rect, values, hidden, sortDir, onSort, onApply, onHideColumn, onClose, extra }: FilterMenuProps) {
   const [draft, setDraft] = useState(() => new Set(hidden));
   const [search, setSearch] = useState('');
   const shown = values.filter((v) => v.key.toLowerCase().includes(search.trim().toLowerCase()));
@@ -76,6 +79,7 @@ function FilterMenu({ header, rect, values, hidden, sortDir, onSort, onApply, on
         {extra && <>{extra}<div style={{ borderTop: `1px solid ${GRID}`, margin: '6px 0' }} /></>}
         <button type="button" style={{ ...item, fontWeight: sortDir === 1 ? 700 : 400 }} onClick={() => onSort(1)}><ArrowDownAZ size={15} /> Urutkan A → Z</button>
         <button type="button" style={{ ...item, fontWeight: sortDir === -1 ? 700 : 400 }} onClick={() => onSort(-1)}><ArrowDownZA size={15} /> Urutkan Z → A</button>
+        <button type="button" style={item} onClick={onHideColumn}><EyeOff size={15} /> Sembunyikan kolom</button>
         <div style={{ borderTop: `1px solid ${GRID}`, margin: '6px 0' }} />
         <div style={{ padding: '0 12px' }}>
           <p style={{ fontSize: '0.75rem', fontWeight: 700, color: '#5f6368', marginBottom: '6px' }}>Filter menurut nilai</p>
@@ -141,6 +145,9 @@ function errorMessage(err: unknown): string {
   return (err as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Gagal menyimpan. Coba lagi.';
 }
 
+interface GridView { sort: { col: number; dir: 1 | -1 } | null; hidden: Record<number, Set<string>>; hiddenCols: number[] }
+const EMPTY_VIEW: GridView = { sort: null, hidden: {}, hiddenCols: [] };
+
 /** Tabel ala Google Sheets: cari, filter & urutkan per kolom, plus edit sel progress langsung di tabel. */
 export default function SheetGrid({
   headers, rows: allRows, totals, hint, emptyText, canEdit, kindOf, onEdit, onUpload, highlightRow, actionHeader, rowAction, footer, maxHeight,
@@ -163,9 +170,11 @@ export default function SheetGrid({
     const el = e.currentTarget;
     if (text && el.scrollWidth > el.clientWidth) setTip({ text, rect: el.getBoundingClientRect() });
   };
-  // Filter & sort per kolom; `hidden` = nilai yang disembunyikan per index kolom
-  const [sort, setSort] = useState<{ col: number; dir: 1 | -1 } | null>(null);
-  const [hidden, setHidden] = useState<Record<number, Set<string>>>({});
+  // Filter & sort per kolom; `hidden` = nilai yang disembunyikan per index kolom, `hiddenCols` = kolom
+  // yang disembunyikan. Semua lewat riwayat supaya salah pencet bisa di-Undo.
+  const [view, setView, undoView, canUndo] = useViewHistory<GridView>(EMPTY_VIEW);
+  const { sort, hidden, hiddenCols } = view;
+  const visCols = headers.map((_, i) => i).filter((i) => !hiddenCols.includes(i));
   const [menu, setMenu] = useState<{ col: number; rect: DOMRect } | null>(null);
   const [editing, setEditing] = useState<{ row: number; col: number; value: string } | null>(null);
   const [saving, setSaving] = useState<string | null>(null);
@@ -173,11 +182,7 @@ export default function SheetGrid({
   const fileInput = useRef<HTMLInputElement>(null);
   const uploadTarget = useRef<{ row: number; col: number } | null>(null);
 
-  const clearFilters = () => {
-    setSort(null);
-    setHidden({});
-    setMenu(null);
-  };
+  const toggleCol = (ci: number) => setView((v) => ({ ...v, hiddenCols: v.hiddenCols.includes(ci) ? v.hiddenCols.filter((c) => c !== ci) : [...v.hiddenCols, ci] }));
 
   // Nomor baris asli (baris 1 = header, sama dgn sheet) tetap dipakai walau difilter
   const activeFilters = Object.entries(hidden).filter(([, s]) => s.size > 0);
@@ -317,7 +322,7 @@ export default function SheetGrid({
     );
   };
 
-  const colCount = headers.length + (rowAction ? 1 : 0) + (addColumnMenu ? 1 : 0);
+  const colCount = visCols.length +(rowAction ? 1 : 0) + (addColumnMenu ? 1 : 0);
 
   return (
     <div>
@@ -335,11 +340,20 @@ export default function SheetGrid({
       )}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap', marginBottom: '10px' }}>
         <div style={{ color: '#777683', fontSize: '0.8rem', minWidth: 0 }}>{hint}</div>
-        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '0 12px', height: '36px', border: '1.5px solid #e1e0ff', borderRadius: '10px', background: 'white', flex: '0 1 280px', minWidth: 0 }}>
-          <Search size={14} color="#777683" />
-          <input value={query} onChange={(e) => { setQuery(e.target.value); setSelected(null); }} placeholder="Cari di tabel ini…" aria-label="Cari di tabel"
-            style={{ border: 'none', outline: 'none', fontSize: '0.8rem', fontFamily: 'var(--font-display)', flex: 1, minWidth: 0, background: 'transparent' }} />
-        </label>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', flex: '0 1 auto', minWidth: 0 }}>
+          <ViewToolbar
+            columns={headers.map((h, ci) => ({ id: String(ci), label: `${colLetter(ci)} · ${h}`, visible: !hiddenCols.includes(ci) }))}
+            onToggleColumn={(id) => toggleCol(Number(id))}
+            onShowAll={() => setView((v) => ({ ...v, hiddenCols: [] }))}
+            canUndo={canUndo} onUndo={() => { setMenu(null); undoView(); }}
+            canReset={Boolean(activeFilters.length || sort || hiddenCols.length)}
+            onReset={() => { setMenu(null); setView(EMPTY_VIEW); }} />
+          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '0 12px', height: '36px', border: '1.5px solid #e1e0ff', borderRadius: '10px', background: 'white', flex: '0 1 280px', minWidth: 0 }}>
+            <Search size={14} color="#777683" />
+            <input value={query} onChange={(e) => { setQuery(e.target.value); setSelected(null); }} placeholder="Cari di tabel ini…" aria-label="Cari di tabel"
+              style={{ border: 'none', outline: 'none', fontSize: '0.8rem', fontFamily: 'var(--font-display)', flex: 1, minWidth: 0, background: 'transparent' }} />
+          </label>
+        </div>
       </div>
 
       {actionError && (
@@ -356,7 +370,7 @@ export default function SheetGrid({
           <thead style={{ position: 'sticky', top: 0, zIndex: 2 }}>
             <tr>
               <th style={{ ...rowNoStyle, zIndex: 3 }} />
-              {headers.map((_, ci) => (
+              {visCols.map((ci) => (
                 <th key={ci} style={{ ...cellBase, background: HEAD_BG, color: '#5f6368', fontWeight: 400, fontSize: '0.72rem', textAlign: 'center', padding: '3px 10px', ...(ci === 0 ? { ...firstColStyle, zIndex: 3 } : {}) }}>
                   {colLetter(ci)}
                 </th>
@@ -366,7 +380,8 @@ export default function SheetGrid({
             </tr>
             <tr>
               <th style={{ ...rowNoStyle, zIndex: 3 }}>1</th>
-              {headers.map((h, ci) => {
+              {visCols.map((ci) => {
+                const h = headers[ci];
                 const on = Boolean(hidden[ci]?.size) || sort?.col === ci;
                 const SortIcon = sort?.col === ci ? (sort.dir === 1 ? ArrowDownAZ : ArrowDownZA) : ListFilter;
                 return (
@@ -410,7 +425,7 @@ export default function SheetGrid({
               return (
                 <tr key={i} onClick={() => setSelected(isSel ? null : no)}>
                   <td style={{ ...rowNoStyle, background: isSel ? '#d3e3fd' : mark ? '#e9e1ff' : HEAD_BG, color: isSel ? '#0b57d0' : mark ? '#6728e4' : '#5f6368', fontWeight: mark ? 700 : 400 }}>{no}</td>
-                  {headers.map((_, ci) => {
+                  {visCols.map((ci) => {
                     const v = r[ci] ?? '';
                     const editable = canEdit?.(i, ci);
                     const custom = customCell?.(i, ci, v);
@@ -436,9 +451,9 @@ export default function SheetGrid({
             <tfoot style={{ position: 'sticky', bottom: 0, zIndex: 2 }}>
               <tr>
                 <td style={{ ...rowNoStyle, borderTop: '2px solid #c7c8cf' }} />
-                {totals.map((v, ci) => (
+                {visCols.map((ci) => (
                   <td key={ci} style={{ ...cellBase, borderTop: '2px solid #c7c8cf', background: '#f3f0ff', fontWeight: 700, textAlign: numericCols.has(ci) ? 'right' : 'left', ...(ci === 0 ? firstColStyle : {}) }}>
-                    {renderCell(v)}
+                    {renderCell(totals[ci] ?? '')}
                   </td>
                 ))}
               </tr>
@@ -450,18 +465,14 @@ export default function SheetGrid({
       <p style={{ marginTop: '8px', color: '#9a99a6', fontSize: '0.72rem' }}>
         {filtered ? `${rows.length} dari ${allRows.length} baris` : `${allRows.length} baris`}
         {footer}
-        {(activeFilters.length > 0 || sort) && (
-          <button type="button" onClick={clearFilters} style={{ marginLeft: '8px', display: 'inline-flex', alignItems: 'center', gap: '3px', background: 'none', border: 'none', color: '#6728e4', cursor: 'pointer', fontSize: '0.72rem', fontWeight: 700, padding: 0 }}>
-            <X size={12} /> Hapus filter & urutan
-          </button>
-        )}
       </p>
 
       {menu && (
         <FilterMenu key={menu.col} header={headers[menu.col]} rect={menu.rect} values={menuValues}
           hidden={hidden[menu.col] ?? new Set()} sortDir={sort?.col === menu.col ? sort.dir : null}
-          onSort={(dir) => { setSort({ col: menu.col, dir }); setMenu(null); }}
-          onApply={(h) => { setHidden((prev) => ({ ...prev, [menu.col]: h })); setSelected(null); setMenu(null); }}
+          onSort={(dir) => { setView((v) => ({ ...v, sort: { col: menu.col, dir } })); setMenu(null); }}
+          onApply={(h) => { setView((v) => ({ ...v, hidden: { ...v.hidden, [menu.col]: h } })); setSelected(null); setMenu(null); }}
+          onHideColumn={() => { toggleCol(menu.col); setMenu(null); }}
           onClose={() => setMenu(null)}
           extra={columnMenu?.(menu.col, () => setMenu(null))} />
       )}
