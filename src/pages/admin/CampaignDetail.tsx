@@ -1,7 +1,7 @@
 import { stageLabel } from '../../lib/stages';
 import { useCallback, useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, Copy, Check, MessageCircle, LayoutDashboard, Building2, ExternalLink, UserCheck, MapPin, CalendarDays, Clock, Pencil } from 'lucide-react';
+import { ArrowLeft, Copy, Check, MessageCircle, LayoutDashboard, Building2, ExternalLink, UserCheck, MapPin, CalendarDays, Clock, Pencil, Sheet } from 'lucide-react';
 import { NICHES } from '../../lib/niches';
 import { buildBroadcast } from '../../lib/broadcast';
 import { SiInstagram, SiTiktok, SiThreads, SiX } from 'react-icons/si';
@@ -22,7 +22,7 @@ interface Campaign {
   briefCampaign?: { blocks: { kind: 'text' | 'file' | 'image' | 'video' | 'link'; content: string }[]; filledBy: 'admin' | 'client'; updatedAt: string };
   budget?: number; criteria: { niches: string[]; minFollowers?: number; minFollowersByPlatform?: Record<string, number | undefined>; provinces: string[]; cities?: string[]; platforms: string[] };
   status: string; workflowStage: string; applyOpen: boolean; applySlug: string; waGroupLink?: string;
-  customFields: CustomField[]; applyFields?: ApplyFields; accessCode: string; clientAccessCode?: string;
+  customFields: CustomField[]; applyFields?: ApplyFields; accessCode: string; clientAccessCode?: string; clientSpreadsheetId?: string;
   type?: 'online' | 'offline'; eventDetails?: { location?: string; date?: string; timeWindow?: string };
   fee?: { creatorFee?: number; picFee?: number; mgFee?: number }; feeNote?: string; benefits?: string[]; requirements?: string[]; infoLink?: string;
   brandName?: string | null; timeline?: { startDate?: string; endDate?: string };
@@ -336,6 +336,11 @@ export default function CampaignDetail() {
             description="Untuk brand/client: lihat progress creator, lalu Approve atau minta Revisi draft & hasil posting (dengan catatan). Tanpa login."
             url={campaign.clientAccessCode ? `${window.location.origin}/client-dashboard/${campaign._id}?code=${campaign.clientAccessCode}` : ''}
             copied={copiedKey === 'client'} onCopy={(url) => void copyLink('client', url)} />
+          {/* Sheet external dibuat otomatis saat sync pertama campaign (folder campaign di Shared Drive) */}
+          <ShareLink icon={Sheet} title="Google Sheet Client"
+            description="Versi Google Sheet dari dashboard client (Listing & Campaign Tracker, tanpa WA/email/PIC/handle by). Siapa pun yang punya link bisa edit, tapi hanya kolom Status & review/catatan revisi yang tidak dikunci. Tersambung realtime dengan platform."
+            url={campaign.clientSpreadsheetId ? `https://docs.google.com/spreadsheets/d/${campaign.clientSpreadsheetId}/edit` : ''}
+            copied={copiedKey === 'client-sheet'} onCopy={(url) => void copyLink('client-sheet', url)} />
           <ShareLink icon={LayoutDashboard} title="Dashboard PIC / Handle-by"
             description="Untuk PIC/Handle-by: lihat progress semua creator di campaign ini (hanya lihat). Tanpa login."
             url={`${window.location.origin}/campaign-dashboard/${campaign._id}?code=${campaign.accessCode}`}

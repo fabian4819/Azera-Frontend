@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react';
-import { CalendarDays, Check, ChevronDown, MessageCircle, RefreshCw, X } from 'lucide-react';
+import { CalendarDays, Check, ChevronDown, MessageCircle, RefreshCw, Sheet, X } from 'lucide-react';
 import Navbar from './layout/Navbar';
 import SheetGrid, { type Cell, type CellKind } from './SheetGrid';
 import ReviewStatusCell from './ReviewStatusCell';
@@ -22,6 +22,8 @@ export interface BoardView {
     name: string; brandName: string | null; briefContent: string; deliverables: string[]; waGroupLink: string;
     timeline?: { startDate?: string; endDate?: string };
     briefCampaign?: BriefCampaignData | null;
+    /** Dashboard client saja: Google Sheet external (Listing & Campaign Tracker), bisa diedit di sana juga */
+    clientSheetUrl?: string;
   };
   headers: string[];
   columns: { key: string; progressId?: string; kind?: CellKind; editable: boolean; review?: 'draft' | 'post' }[];
@@ -230,6 +232,11 @@ export default function CampaignBoard({ audience, view, loading, onReload, onEdi
           )}
         </div>
         <div style={{ display: 'flex', gap: '8px' }}>
+          {campaign.clientSheetUrl && (
+            <a href={campaign.clientSheetUrl} target="_blank" rel="noopener noreferrer" title="Approve kandidat & review progress juga bisa langsung di Google Sheet" style={{ ...glassBtn, padding: '0 16px', background: '#188038', border: 'none' }}>
+              <Sheet size={15} /> Buka Google Sheet
+            </a>
+          )}
           {campaign.waGroupLink && (
             <a href={campaign.waGroupLink} target="_blank" rel="noopener noreferrer" style={{ ...glassBtn, padding: '0 16px', background: '#25d366', border: 'none' }}>
               <MessageCircle size={15} /> Grup WA
