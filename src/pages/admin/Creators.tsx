@@ -41,6 +41,18 @@ const ACTIVITY_LABELS: Record<string, string> = {
   affiliator: 'Affiliator', live_streamer: 'Live Streamer',
 };
 const STATUS_LABELS: Record<string, string> = { pending: 'Menunggu', reviewing: 'Dikurasi', approved: 'Disetujui', rejected: 'Ditolak' };
+type EditableStatus = 'pending' | 'approved' | 'rejected';
+const EDITABLE_STATUSES: EditableStatus[] = ['pending', 'approved', 'rejected'];
+// Warna dropdown status = warna badge status (components/ui/StatusBadge.tsx)
+const STATUS_STYLE: Record<string, React.CSSProperties> = {
+  pending: { background: '#eceef3', color: '#464652' }, reviewing: { background: '#e1e0ff', color: '#15157d' },
+  approved: { background: '#d1fae5', color: '#065F46' }, rejected: { background: '#ffdad6', color: '#ba1a1a' },
+};
+const STATUS_NOTE: Record<EditableStatus, string> = {
+  approved: 'Creator menerima WhatsApp & email "lolos kurasi" berisi link Komunitas WhatsApp, dan ikut broadcast "semua creator disetujui".',
+  rejected: 'Creator menerima WhatsApp & email penolakan (akan dikabari kalau ada campaign yang cocok).',
+  pending: 'Tidak ada pesan yang dikirim ke creator.',
+};
 const complianceLabels: Record<string, { label: string; color: string; bg: string }> = {
   ok: { label: 'OK', color: '#065F46', bg: '#d1fae5' },
   sp1: { label: 'SP1', color: '#92400E', bg: '#fef3c7' },
@@ -87,6 +99,23 @@ interface Props {
 
 export default function Creators({ scope = 'general', selected, onSelectedChange }: Props) {
   const [creators, setCreators] = useState<CreatorItem[]>([]);
+  const [statusChange, setStatusChange] = useState<{ id: string; name: string; to: EditableStatus } | null>(null);
+  const [statusSaving, setStatusSaving] = useState(false);
+  const [statusError, setStatusError] = useState('');
+  const saveStatus = async () => {
+    if (!statusChange) return;
+    setStatusSaving(true);
+    setStatusError('');
+    try {
+      const res = await api.patch(`/admin/creators/${statusChange.id}`, { status: statusChange.to });
+      setCreators((prev) => prev.map((c) => (c._id === statusChange.id ? { ...c, status: res.data.status } : c)));
+      setStatusChange(null);
+    } catch {
+      setStatusError('Gagal mengubah status. Coba lagi.');
+    } finally {
+      setStatusSaving(false);
+    }
+  };
   const [loading, setLoading] = useState(true);
   const [globalFilter, setGlobalFilter] = useState('');
   const [sorting, setSorting] = useState<SortingState>([{ id: 'createdAt', desc: true }]);
@@ -225,7 +254,20 @@ export default function Creators({ scope = 'general', selected, onSelectedChange
         return <span style={{ background: comp.bg, color: comp.color, borderRadius: '999px', padding: '3px 10px', fontSize: '0.7rem', fontWeight: 700 }}>{comp.label}</span>;
       }),
       textCol('source', 'Sumber', (c) => SOURCE_LABELS[c.source] || c.source),
-      textCol('status', 'Status', (c) => STATUS_LABELS[c.status] || c.status, ({ row }) => <StatusBadge status={row.original.status} />),
+      // Status bisa diubah langsung dari tabel (bukan mode share); ke Disetujui/Ditolak = konfirmasi dulu, karena kirim WA + email
+      textCol('status', 'Status', (c) => STATUS_LABELS[c.status] || c.status, ({ row }) => onSelectedChange
+        ? <StatusBadge status={row.original.status} />
+        : (
+          <select
+            aria-label={`Status ${row.original.name}`}
+            value={row.original.status}
+            onClick={(e) => e.stopPropagation()}
+            onChange={(e) => setStatusChange({ id: row.original._id, name: row.original.name, to: e.target.value as EditableStatus })}
+            style={{ ...STATUS_STYLE[row.original.status] ?? STATUS_STYLE.pending, border: 'none', borderRadius: '999px', padding: '4px 8px 4px 12px', fontSize: '0.72rem', fontWeight: 700, fontFamily: 'var(--font-display)', cursor: 'pointer', outline: 'none' }}
+          >
+            {(row.original.status === 'reviewing' ? ['reviewing', ...EDITABLE_STATUSES] : EDITABLE_STATUSES).map((st) => <option key={st} value={st}>{STATUS_LABELS[st]}</option>)}
+          </select>
+        )),
     ];
   }, [scope, selected, onSelectedChange]);
 
@@ -242,6 +284,8 @@ export default function Creators({ scope = 'general', selected, onSelectedChange
   // Lebar kolom pilih tetap supaya kolom Nama tahu offset kirinya; bayangan cuma di kolom terkunci terakhir (Nama)
   const SELECT_W = 44;
   const stickyCol = (id: string, head: boolean): React.CSSProperties => {
+    // Status terkunci di kanan (bisa diubah langsung tanpa geser tabel)
+    if (id === 'status') return { position: 'sticky', right: 0, zIndex: head ? 3 : 1, background: head ? '#f8f9ff' : 'inherit', boxShadow: '-6px 0 8px -6px rgba(0,0,0,0.12)' };
     if (id !== 'select' && id !== 'name') return {};
     const left = id === 'name' && onSelectedChange ? SELECT_W : 0;
     return {
@@ -271,6 +315,23 @@ export default function Creators({ scope = 'general', selected, onSelectedChange
 
   return (
     <div>
+      {statusChange && (
+        <div role="dialog" aria-modal="true" aria-label="Konfirmasi ubah status" onClick={() => !statusSaving && setStatusChange(null)}
+          style={{ position: 'fixed', inset: 0, background: 'rgba(25,28,32,0.45)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
+          <div onClick={(e) => e.stopPropagation()} style={{ background: 'white', borderRadius: '20px', padding: '24px', maxWidth: '420px', width: '100%', fontFamily: 'var(--font-display)' }}>
+            <p style={{ fontWeight: 800, fontSize: '1.05rem', color: '#191c20', marginBottom: '8px' }}>Ubah status {statusChange.name} jadi {STATUS_LABELS[statusChange.to]}?</p>
+            <p style={{ fontSize: '0.84rem', color: '#464652', lineHeight: 1.6, marginBottom: '16px' }}>{STATUS_NOTE[statusChange.to]}</p>
+            {statusError && <p role="alert" style={{ color: '#ba1a1a', fontSize: '0.8rem', marginBottom: '10px' }}>{statusError}</p>}
+            <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+              <button type="button" onClick={() => { setStatusChange(null); setStatusError(''); }} disabled={statusSaving}
+                style={{ padding: '10px 16px', borderRadius: '10px', border: '1.5px solid #e1e0ff', background: 'white', color: '#464652', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600, fontFamily: 'inherit' }}>Batal</button>
+              <button type="button" onClick={() => void saveStatus()} disabled={statusSaving} className="btn-primary" style={{ padding: '10px 18px', fontSize: '0.85rem', opacity: statusSaving ? 0.6 : 1 }}>
+                {statusSaving ? 'Menyimpan...' : `Ya, ${STATUS_LABELS[statusChange.to]}`}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <div style={{ display: 'flex', gap: '12px', marginBottom: '18px', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ position: 'relative', flex: 1, minWidth: '240px' }}>
           <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#777683' }} />
