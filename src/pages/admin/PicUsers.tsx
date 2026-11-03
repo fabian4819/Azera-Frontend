@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { RefreshCw } from 'lucide-react';
 import api from '../../lib/api';
 import WaLink from '../../components/WaLink';
+import { toUrl } from '../../lib/links';
 
 const f = "var(--font-display)";
 // Kolom pertama terkunci di kiri saat tabel digeser horizontal (sama seperti tabel Creators)
@@ -43,10 +44,12 @@ export default function PicUsers() {
     return () => window.clearTimeout(timeoutId);
   }, []);
 
-  // Isian bebas dari PIC: jadi link cuma kalau http(s), selain itu teks biasa (cegah javascript: dsb.)
-  const linkOrText = (v?: string) => !v ? <span style={{ color: '#8a8a99' }}>-</span>
-    : /^https?:\/\//i.test(v) ? <a href={v} target="_blank" rel="noreferrer" style={{ color: '#6728e4', wordBreak: 'break-all' }}>{v}</a>
-      : <span style={{ wordBreak: 'break-all' }}>{v}</span>;
+  // Isian bebas dari PIC: link (https:// atau domain seperti instagram.com/agency) bisa diklik, selain itu teks biasa
+  const linkOrText = (v?: string) => {
+    if (!v) return <span style={{ color: '#8a8a99' }}>-</span>;
+    const href = toUrl(v);
+    return href ? <a href={href} target="_blank" rel="noreferrer" style={{ color: '#6728e4', wordBreak: 'break-all' }}>{v}</a> : <span style={{ wordBreak: 'break-all' }}>{v}</span>;
+  };
 
   const formatDate = (d: string) => new Date(d).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
 

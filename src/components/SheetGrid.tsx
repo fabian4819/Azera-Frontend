@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { ArrowDownAZ, ArrowDownZA, ListFilter, Pencil, Plus, Search, Upload, X } from 'lucide-react';
 import WaLink from './WaLink';
+import { profileUrlFor, toUrl } from '../lib/links';
 
 export type Cell = string | number;
 /** 'file' = upload gambar (screenshot), 'media' = upload foto/video (draft) */
@@ -17,13 +18,21 @@ const colLetter = (i: number): string => (i < 26 ? String.fromCharCode(65 + i) :
 // Kolom nomor WhatsApp (bukan "Balasan WA"): sel jadi link chat wa.me
 const isWaHeader = (h?: string) => !!h && /^(no\.? ?)?(whatsapp|wa)\b|wa back ?up/i.test(h.trim()) && !/balasan/i.test(h);
 
+const linkStyle: React.CSSProperties = { color: '#1a73e8' };
+const extLink = (href: string, text: string, key?: number) => (
+  <a key={key} href={href} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} style={linkStyle}>{text}</a>
+);
+
 function renderCell(v: Cell, header?: string) {
   if (typeof v === 'number') return v.toLocaleString('id-ID');
   if (isWaHeader(header)) return <WaLink phone={v} />;
-  if (/^https?:\/\//.test(v)) {
-    return <a href={v} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} style={{ color: '#1a73e8' }}>{v}</a>;
-  }
-  return v;
+  // Kolom platform (Instagram/TikTok/...): "@username" → profil medsos
+  const profile = profileUrlFor(header, v);
+  if (profile) return extLink(profile, v);
+  // Link di mana pun dalam sel (termasuk beberapa link dipisah spasi, mis. screenshot insight) bisa diklik
+  if (!/[./]/.test(v)) return v;
+  const parts = v.split(/(\s+)/);
+  return parts.some((p) => toUrl(p)) ? <>{parts.map((p, i) => { const u = toUrl(p); return u ? extLink(u, p, i) : p; })}</> : v;
 }
 
 const isEmpty = (v?: Cell) => v === undefined || v === '';

@@ -9,6 +9,7 @@ import { Search, RefreshCw, ChevronUp, ChevronDown, ChevronsUpDown, Filter, X as
 import StatusBadge from '../../components/ui/StatusBadge';
 import api from '../../lib/api';
 import WaLink from '../../components/WaLink';
+import { toUrl } from '../../lib/links';
 
 interface ExtensionMetric { followers?: number; engagementRate?: number; avgViews?: number; avgLikes?: number }
 interface Social { platform: string; username: string; profileUrl?: string; followers: number }
@@ -129,7 +130,7 @@ export default function Creators({ scope = 'general', selected, onSelectedChange
             const username = getValue<string>();
             if (!username) return <span style={{ color: '#c7c8cf' }}>-</span>;
             const url = socialUrl(social(row.original));
-            return url ? <a href={url} target="_blank" rel="noopener noreferrer" style={{ color: '#6728e4', textDecoration: 'none', fontWeight: 600 }}>@{username}</a> : `@${username}`;
+            return url ? <a href={url} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} style={{ color: '#6728e4', textDecoration: 'none', fontWeight: 600 }}>@{username}</a> : `@${username}`;
           },
         },
         {
@@ -214,7 +215,8 @@ export default function Creators({ scope = 'general', selected, onSelectedChange
       textCol('npwp', 'NPWP', (c) => c.npwp || ''),
       textCol('portfolio', 'Portfolio', (c) => c.portfolioLink || '', ({ getValue }) => {
         const v = getValue<string>();
-        return v ? <a href={v} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} style={{ color: '#6728e4', textDecoration: 'none' }}>Buka link</a> : <span style={{ color: '#c7c8cf' }}>-</span>;
+        const href = v ? toUrl(v) : null;
+        return href ? <a href={href} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} style={{ color: '#6728e4', textDecoration: 'none' }}>Buka link</a> : <span style={{ color: '#c7c8cf' }}>-</span>;
       }),
       numCol('performanceScore', 'Skor', (c) => c.performanceScore?.overall ?? 0, ({ getValue }) => <span style={{ fontWeight: 700, color: '#6728e4' }}>{getValue<number>()}</span>),
       numCol('cancelCount', 'Jumlah Cancel', (c) => c.cancelCount ?? 0),
