@@ -533,7 +533,7 @@ export default function FinanceRecap() {
                               {groupCell(g.company || '-')}
                               {groupCell(g.contact || '-', { fontSize: '0.74rem', color: '#464652' })}
                               {groupCell(monthLabel(g.runningMonth), { whiteSpace: 'nowrap' })}
-                              {groupCell(g.mastersheetUrl ? <a href={g.mastersheetUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#4b2fc4', fontWeight: 600, whiteSpace: 'nowrap' }}>Buka Sheet ↗</a> : '-')}
+                              {groupCell(g.mastersheetUrl ? g.mastersheetUrl.split(/\s+/).filter(Boolean).map((u, i, all) => <a key={u} href={u} target="_blank" rel="noopener noreferrer" style={{ display: 'block', color: '#4b2fc4', fontWeight: 600, whiteSpace: 'nowrap' }}>{all.length > 1 ? `Sheet ${i + 1}` : 'Buka Sheet'} ↗</a>) : '-')}
                             </>
                           )}
                           <td style={{ ...td, minWidth: '180px' }}>{it?.sow || '-'}</td>

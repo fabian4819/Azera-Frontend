@@ -285,7 +285,7 @@ function DocEditor({ config, initialId, initialData, onBack, onSaved }: {
 
 interface ListRow { _id: string; number: string; client: string; mastersheetUrl?: string; updatedAt: string; total?: number; paid?: boolean }
 /** Link Mastersheet dari bot WA (/invoice), hanya link Google Sheets yang dijadikan tautan */
-const isSheetUrl = (u?: string) => !!u && /^https:\/\/docs\.google\.com\/spreadsheets\//.test(u);
+const sheetLinks = (u?: string) => (u ?? '').split(/\s+/).filter((x) => /^https:\/\/docs\.google\.com\/spreadsheets\//.test(x));
 
 const fetchRows = (apiType: string): Promise<ListRow[]> =>
   api.get('/admin/documents', { params: { type: apiType } }).then((res) => res.data);
@@ -387,8 +387,9 @@ export default function Documents() {
                     <td style={{ padding: '9px 10px' }}>{r.client || '-'}</td>
                     {config.apiType === 'invoice' && (
                       <td style={{ padding: '9px 10px', whiteSpace: 'nowrap' }}>
-                        {isSheetUrl(r.mastersheetUrl)
-                          ? <a href={r.mastersheetUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#4b2fc4', fontWeight: 600 }}>Buka Sheet ↗</a>
+                        {/* Bisa lebih dari 1 mastersheet (dipisah baris baru dari bot /invoice) */}
+                        {sheetLinks(r.mastersheetUrl).length
+                          ? sheetLinks(r.mastersheetUrl).map((u, i, all) => <a key={u} href={u} target="_blank" rel="noopener noreferrer" style={{ color: '#4b2fc4', fontWeight: 600, marginRight: '8px' }}>{all.length > 1 ? `Sheet ${i + 1}` : 'Buka Sheet'} ↗</a>)
                           : '-'}
                       </td>
                     )}
