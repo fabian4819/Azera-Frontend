@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Navigate, useParams } from 'react-router-dom';
 import { Plus, FileDown, Pencil, Trash2, ArrowLeft, Save, AlertTriangle, ZoomIn, ZoomOut } from 'lucide-react';
 import api from '../../lib/api';
+import SheetGrid from '../../components/SheetGrid';
 import { useAuth, hasOwnerAccess } from '../../hooks/useAuth';
 import InvoiceRecapPanel from './InvoiceRecapPanel';
 
@@ -347,6 +348,9 @@ export default function Documents() {
     if (!(await openPdf(id, window.open('', '_blank')))) setError('Gagal membuat PDF.');
   };
 
+  const isInvoice = config.apiType === 'invoice';
+  const docHeaders = ['Nomor', 'Klien', ...(isInvoice ? ['Mastersheet', 'Total', 'Status'] : []), 'Terakhir Diubah'];
+
   const remove = async (id: string) => {
     try {
       await api.delete(`/admin/documents/${id}`);
@@ -369,63 +373,50 @@ export default function Documents() {
           <button onClick={() => setError('')} style={{ ...btn(false), padding: '4px 10px' }}>Tutup</button>
         </div>
       )}
-      <div style={cardStyle}>
-        {rows.length === 0 ? (
-          <p style={{ fontFamily: f, fontSize: '0.85rem', color: '#464652' }}>Belum ada {config.title}.</p>
-        ) : (
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem', fontFamily: f }}>
-              <thead>
-                <tr style={{ background: '#f8f9ff', textAlign: 'left' }}>
-                  {['Nomor', 'Klien', ...(config.apiType === 'invoice' ? ['Mastersheet', 'Total', 'Status'] : []), 'Terakhir Diubah', ''].map((h) => <th key={h} style={{ padding: '9px 10px', fontWeight: 700 }}>{h}</th>)}
-                </tr>
-              </thead>
-              <tbody>
-                {rows.map((r) => (
-                  <tr key={r._id} style={{ borderBottom: '1px solid #f0f0f0' }}>
-                    <td style={{ padding: '9px 10px', fontWeight: 600, whiteSpace: 'nowrap' }}>{r.number || '-'}</td>
-                    <td style={{ padding: '9px 10px' }}>{r.client || '-'}</td>
-                    {config.apiType === 'invoice' && (
-                      <td style={{ padding: '9px 10px', whiteSpace: 'nowrap' }}>
-                        {/* Bisa lebih dari 1 mastersheet (dipisah baris baru dari bot /invoice) */}
-                        {sheetLinks(r.mastersheetUrl).length
-                          ? sheetLinks(r.mastersheetUrl).map((u, i, all) => <a key={u} href={u} target="_blank" rel="noopener noreferrer" style={{ color: '#4b2fc4', fontWeight: 600, marginRight: '8px' }}>{all.length > 1 ? `Sheet ${i + 1}` : 'Buka Sheet'} ↗</a>)
-                          : '-'}
-                      </td>
-                    )}
-                    {config.apiType === 'invoice' && (
-                      <>
-                        <td style={{ padding: '9px 10px', whiteSpace: 'nowrap' }}>{rupiah(r.total ?? 0)}</td>
-                        <td style={{ padding: '9px 10px', whiteSpace: 'nowrap' }}>
-                          <span style={{ padding: '3px 10px', borderRadius: '999px', fontSize: '0.72rem', fontWeight: 700, background: r.paid ? '#d1fae5' : '#fef3c7', color: r.paid ? '#065F46' : '#92400E' }}>
-                            {r.paid ? 'Lunas' : 'Belum Lunas'}
-                          </span>
-                        </td>
-                      </>
-                    )}
-                    <td style={{ padding: '9px 10px', whiteSpace: 'nowrap' }}>{new Date(r.updatedAt).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' })}</td>
-                    <td style={{ padding: '9px 10px', whiteSpace: 'nowrap', textAlign: 'right' }}>
-                      {confirmDelete === r._id ? (
-                        <span style={{ display: 'inline-flex', gap: '6px', alignItems: 'center' }}>
-                          <span style={{ color: '#ba1a1a' }}>Hapus dokumen ini?</span>
-                          <button onClick={() => remove(r._id)} style={{ ...btn(), background: '#ba1a1a', padding: '6px 12px' }}>Ya, hapus</button>
-                          <button onClick={() => setConfirmDelete(null)} style={{ ...btn(false), padding: '6px 12px' }}>Batal</button>
-                        </span>
-                      ) : (
-                        <span style={{ display: 'inline-flex', gap: '6px' }}>
-                          <button onClick={() => edit(r._id)} style={{ ...btn(false), padding: '6px 12px' }}><Pencil size={13} /> Edit</button>
-                          <button onClick={() => pdf(r._id)} style={{ ...btn(), padding: '6px 12px' }}><FileDown size={13} /> PDF</button>
-                          <button onClick={() => setConfirmDelete(r._id)} title="Hapus" aria-label="Hapus" style={{ ...btn(false), padding: '6px 10px' }}><Trash2 size={13} /></button>
-                        </span>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
+      {/* Daftar ala Sheets: cari, filter & urut per kolom (mis. Status Belum Lunas), bekukan, sembunyikan kolom */}
+      <SheetGrid
+        storageKey={`docs:${config.apiType}`}
+        headers={docHeaders}
+        rows={rows.map((r) => [
+          r.number || '', r.client || '',
+          ...(isInvoice ? [sheetLinks(r.mastersheetUrl).join(' '), r.total ?? 0, r.paid ? 'Lunas' : 'Belum Lunas'] : []),
+          new Date(r.updatedAt).toLocaleString('sv-SE', { timeZone: 'Asia/Jakarta' }).slice(0, 16), // YYYY-MM-DD HH:mm, urut benar
+        ])}
+        emptyText={`Belum ada ${config.title}.`}
+        customCell={(_r, c, v) => {
+          if (!isInvoice) return undefined;
+          const h = docHeaders[c];
+          if (h === 'Mastersheet') {
+            const links = String(v).split(' ').filter(Boolean);
+            return links.length
+              ? <>{links.map((u, k) => <a key={u} href={u} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} style={{ color: '#4b2fc4', fontWeight: 600, marginRight: '8px' }}>{links.length > 1 ? `Sheet ${k + 1}` : 'Buka Sheet'} ↗</a>)}</>
+              : '-';
+          }
+          if (h === 'Total') return rupiah(Number(v));
+          if (h === 'Status') {
+            const paid = v === 'Lunas';
+            return <span style={{ padding: '3px 10px', borderRadius: '999px', fontSize: '0.72rem', fontWeight: 700, background: paid ? '#d1fae5' : '#fef3c7', color: paid ? '#065F46' : '#92400E' }}>{String(v)}</span>;
+          }
+          return undefined;
+        }}
+        actionHeader="Aksi"
+        rowAction={(i) => {
+          const r = rows[i];
+          return confirmDelete === r._id ? (
+            <span style={{ display: 'inline-flex', gap: '6px', alignItems: 'center' }}>
+              <span style={{ color: '#ba1a1a' }}>Hapus?</span>
+              <button onClick={() => remove(r._id)} style={{ ...btn(), background: '#ba1a1a', padding: '5px 10px' }}>Ya, hapus</button>
+              <button onClick={() => setConfirmDelete(null)} style={{ ...btn(false), padding: '5px 10px' }}>Batal</button>
+            </span>
+          ) : (
+            <span style={{ display: 'inline-flex', gap: '6px' }}>
+              <button onClick={() => edit(r._id)} style={{ ...btn(false), padding: '5px 10px' }}><Pencil size={13} /> Edit</button>
+              <button onClick={() => pdf(r._id)} style={{ ...btn(), padding: '5px 10px' }}><FileDown size={13} /> PDF</button>
+              <button onClick={() => setConfirmDelete(r._id)} title="Hapus" aria-label="Hapus" style={{ ...btn(false), padding: '5px 8px' }}><Trash2 size={13} /></button>
+            </span>
+          );
+        }}
+      />
     </div>
   );
 }

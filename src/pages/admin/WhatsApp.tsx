@@ -1,6 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 import { QrCode, CheckCircle2, LogOut, RefreshCw, Send, ChevronDown, ChevronUp } from 'lucide-react';
 import api from '../../lib/api';
+import SheetGrid from '../../components/SheetGrid';
+
+const LOG_HEADERS = ['Waktu', 'Trigger', 'Ke', 'Pesan', 'Status', 'Keterangan'];
+const LOG_STATUS_COL = LOG_HEADERS.indexOf('Status');
+const LOG_STATUS: Record<string, { label: string; color: string }> = {
+  sent: { label: 'Terkirim', color: '#065F46' }, queued: { label: 'Antri', color: '#92400E' },
+  failed: { label: 'Gagal', color: '#ba1a1a' }, skipped: { label: 'Dimatikan', color: '#8a8a99' },
+};
 
 const f = "var(--font-display)";
 const cardStyle: React.CSSProperties = {
@@ -201,36 +209,22 @@ function BotPanel({ botId, label, hint }: { botId: string; label: string; hint: 
             <RefreshCw size={16} />
           </button>
         </div>
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.78rem', fontFamily: f }}>
-            <thead>
-              <tr style={{ background: '#f8f9ff', textAlign: 'left' }}>
-                {['Waktu', 'Trigger', 'Ke', 'Pesan', 'Status'].map((h) => (
-                  <th key={h} style={{ padding: '8px 10px', fontWeight: 700 }}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {logs.map((l) => (
-                <tr key={l._id} style={{ borderBottom: '1px solid #f0f0f0' }}>
-                  <td style={{ padding: '8px 10px' }}>{new Date(l.createdAt).toLocaleString('id-ID')}</td>
-                  <td style={{ padding: '8px 10px' }}>{l.trigger}</td>
-                  <td style={{ padding: '8px 10px' }}>{l.to}</td>
-                  <td style={{ padding: '8px 10px', maxWidth: '280px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{l.payload}</td>
-                  <td style={{ padding: '8px 10px' }}>
-                    {l.status === 'sent' && <span style={{ color: '#065F46' }}>Terkirim</span>}
-                    {l.status === 'queued' && <span style={{ color: '#92400E' }}>Antri</span>}
-                    {l.status === 'failed' && <span style={{ color: '#ba1a1a' }} title={l.error}>Gagal</span>}
-                    {l.status === 'skipped' && <span style={{ color: '#8a8a99' }} title={l.error}>Dimatikan</span>}
-                  </td>
-                </tr>
-              ))}
-              {logs.length === 0 && (
-                <tr><td colSpan={5} style={{ padding: '16px', textAlign: 'center', color: '#8a8a99' }}>Belum ada pesan.</td></tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+        {/* Log ala Sheets: cari, filter & urut per kolom (mis. hanya Gagal), bekukan, sembunyikan kolom */}
+        <SheetGrid
+          storageKey="admin:wa-logs"
+          headers={LOG_HEADERS}
+          rows={logs.map((l) => [
+            new Date(l.createdAt).toLocaleString('sv-SE', { timeZone: 'Asia/Jakarta' }).slice(0, 16), // YYYY-MM-DD HH:mm, urut benar
+            l.trigger, l.to, l.payload, LOG_STATUS[l.status]?.label ?? l.status, l.error || '',
+          ])}
+          emptyText="Belum ada pesan."
+          maxHeight="60vh"
+          customCell={(_r, c, v) => {
+            if (c !== LOG_STATUS_COL) return undefined;
+            const st = Object.values(LOG_STATUS).find((x) => x.label === v);
+            return <span style={{ color: st?.color ?? '#464652', fontWeight: 700 }}>{String(v)}</span>;
+          }}
+        />
       </div>
 
       </>}

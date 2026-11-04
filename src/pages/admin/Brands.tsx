@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, RefreshCw } from 'lucide-react';
+import { RefreshCw } from 'lucide-react';
 import StatusBadge from '../../components/ui/StatusBadge';
 import api from '../../lib/api';
-import WaLink from '../../components/WaLink';
+import SheetGrid from '../../components/SheetGrid';
 
 interface Brand {
   _id: string;
@@ -19,8 +19,6 @@ interface Brand {
   createdAt: string;
 }
 
-const statusOptions = ['', 'new', 'reviewed', 'contacted'];
-
 const JASA_LABELS: Record<string, string> = {
   nano_micro_kol_campaign: 'Nano-Micro KOL Campaign',
   koc_campaign: 'KOC Campaign',
@@ -28,55 +26,21 @@ const JASA_LABELS: Record<string, string> = {
   event_creator_activation: 'Event Creator Activation',
 };
 
-// Kolom pertama terkunci di kiri saat tabel digeser horizontal (sama seperti tabel Creators)
-const frozenTh: React.CSSProperties = { position: 'sticky', left: 0, zIndex: 2, background: '#f8f9ff', boxShadow: '6px 0 8px -6px rgba(0,0,0,0.12)' };
-const frozenTd: React.CSSProperties = { position: 'sticky', left: 0, zIndex: 1, background: 'inherit', boxShadow: '6px 0 8px -6px rgba(0,0,0,0.12)' };
-const thStyle: React.CSSProperties = {
-  padding: '14px 16px',
-  textAlign: 'left',
-  fontFamily: "var(--font-display)",
-  fontWeight: 700,
-  color: '#191c20',
-  fontSize: '0.78rem',
-  whiteSpace: 'nowrap',
-  letterSpacing: '0.04em',
-};
-
-const tdStyle: React.CSSProperties = {
-  padding: '14px 16px',
-  fontSize: '0.875rem',
-  color: '#464652',
-  whiteSpace: 'nowrap',
-  fontFamily: "var(--font-display)",
-};
-
-const controlStyle: React.CSSProperties = {
-  padding: '10px 14px',
-  borderRadius: '10px',
-  border: '1.5px solid #c7c8cf',
-  fontSize: '0.875rem',
-  outline: 'none',
-  fontFamily: "var(--font-display)",
-  background: 'white',
-  cursor: 'pointer',
-  color: '#191c20',
-};
+// Tabel ala Sheets: cari, filter & urut per kolom (termasuk Status & Sumber), bekukan, sembunyikan kolom.
+const HEADERS = ['Brand', 'PIC', 'WhatsApp', 'Kategori', 'Paket', 'Sumber', 'Budget', 'Status', 'Tanggal'];
+const SOURCE_COL = HEADERS.indexOf('Sumber');
+const STATUS_COL = HEADERS.indexOf('Status');
+const SOURCE_LABEL = { whatsapp: 'WhatsApp Bot', web: 'Web' } as const;
 
 export default function Brands() {
   const [brands, setBrands] = useState<Brand[]>([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
   const navigate = useNavigate();
 
   const fetchBrands = async () => {
-    await Promise.resolve();
     setLoading(true);
     try {
-      const params: Record<string, string> = {};
-      if (statusFilter) params.status = statusFilter;
-      if (search) params.search = search;
-      const res = await api.get('/admin/brands', { params });
+      const res = await api.get('/admin/brands');
       setBrands(res.data);
     } catch {
       setBrands([]);
@@ -86,177 +50,41 @@ export default function Brands() {
   };
 
   useEffect(() => {
-    const timeoutId = window.setTimeout(() => {
-      void fetchBrands();
-    }, 0);
-
+    const timeoutId = window.setTimeout(() => { void fetchBrands(); }, 0);
     return () => window.clearTimeout(timeoutId);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [statusFilter]);
+  }, []);
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    fetchBrands();
-  };
-
-  const formatDate = (d: string) =>
-    new Date(d).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+  const rows = brands.map((b) => [
+    b.namaBrand, b.namaPIC, b.whatsapp, b.kategori || (b.jasa && JASA_LABELS[b.jasa]) || '', b.paket || '',
+    SOURCE_LABEL[b.source] ?? b.source, b.budget, b.status, b.createdAt.slice(0, 10),
+  ]);
 
   return (
-    <div>
-      {/* Filter bar */}
-      <div
-        style={{
-          display: 'flex',
-          gap: '12px',
-          marginBottom: '24px',
-          flexWrap: 'wrap',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-        }}
-      >
-        <form onSubmit={handleSearch} style={{ display: 'flex', gap: '10px', flex: 1, minWidth: '240px' }}>
-          <div style={{ position: 'relative', flex: 1 }}>
-            <Search
-              size={16}
-              style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#777683' }}
-            />
-            <input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Cari brand atau PIC..."
-              style={{ ...controlStyle, width: '100%', paddingLeft: '36px' }}
-            />
-          </div>
-          <button type="submit" className="btn-primary" style={{ padding: '10px 20px', fontSize: '0.875rem' }}>
-            Cari
-          </button>
-        </form>
-
-        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-          <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} style={controlStyle}>
-            <option value="">Semua Status</option>
-            {statusOptions.filter(Boolean).map((s) => (
-              <option key={s} value={s}>
-                {s.charAt(0).toUpperCase() + s.slice(1)}
-              </option>
-            ))}
-          </select>
-          <button
-            onClick={fetchBrands}
-            style={{
-              ...controlStyle,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              padding: '10px',
-              color: '#777683',
-            }}
-          >
-            <RefreshCw size={16} />
-          </button>
-        </div>
-      </div>
-
-      {/* Table */}
-      <div style={{ background: 'white', borderRadius: '16px', border: '1px solid #e1e0ff', overflow: 'hidden', boxShadow: '0 2px 12px rgba(107,46,232,0.06)' }}>
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem' }}>
-            <thead>
-              <tr style={{ background: '#f8f9ff', borderBottom: '1px solid #e1e0ff' }}>
-                {['Brand', 'PIC', 'WhatsApp', 'Kategori', 'Paket', 'Sumber', 'Budget', 'Status', 'Tanggal'].map((h, i) => (
-                  <th key={h} style={i === 0 ? { ...thStyle, ...frozenTh } : thStyle}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {loading ? (
-                <tr>
-                  <td colSpan={9} style={{ ...tdStyle, textAlign: 'center', padding: '48px' }}>
-                    Memuat...
-                  </td>
-                </tr>
-              ) : brands.length === 0 ? (
-                <tr>
-                  <td colSpan={9} style={{ ...tdStyle, textAlign: 'center', padding: '48px' }}>
-                    Belum ada data brand.
-                  </td>
-                </tr>
-              ) : (
-                brands.map((b, i) => (
-                  <tr
-                    key={b._id}
-                    // Klik baris = buka detail brand (Ctrl/⌘ = tab baru)
-                    onClick={(e) => (e.metaKey || e.ctrlKey ? window.open(`/admin/brands/${b._id}`, '_blank') : navigate(`/admin/brands/${b._id}`))}
-                    onKeyDown={(e) => { if (e.key === 'Enter') navigate(`/admin/brands/${b._id}`); }}
-                    tabIndex={0}
-                    style={{
-                      borderBottom: '1px solid #e1e0ff',
-                      background: i % 2 === 0 ? 'white' : '#fcfcff',
-                      transition: 'background 0.15s',
-                      cursor: 'pointer',
-                    }}
-                    onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.background = '#F8F6FF')}
-                    onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.background = i % 2 === 0 ? 'white' : '#fcfcff')}
-                  >
-                    <td style={{ ...tdStyle, ...frozenTd, fontWeight: 600, color: '#191c20' }}>{b.namaBrand}</td>
-                    <td style={tdStyle}>{b.namaPIC}</td>
-                    <td style={tdStyle}><WaLink phone={b.whatsapp} /></td>
-                    <td style={tdStyle}>{b.kategori || (b.jasa && JASA_LABELS[b.jasa]) || '-'}</td>
-                    <td style={tdStyle}>
-                      {b.paket ? (
-                        <span
-                          style={{
-                            background: '#e1e0ff',
-                            color: '#6728e4',
-                            borderRadius: '999px',
-                            padding: '3px 10px',
-                            fontSize: '0.72rem',
-                            fontFamily: "var(--font-display)",
-                            fontWeight: 700,
-                            textTransform: 'capitalize',
-                          }}
-                        >
-                          {b.paket}
-                        </span>
-                      ) : '-'}
-                    </td>
-                    <td style={tdStyle}>
-                      <span
-                        style={{
-                          background: b.source === 'whatsapp' ? 'rgba(37,211,102,0.14)' : '#f1f0fb',
-                          color: b.source === 'whatsapp' ? '#128c4a' : '#464652',
-                          borderRadius: '999px',
-                          padding: '3px 10px',
-                          fontSize: '0.72rem',
-                          fontFamily: "var(--font-display)",
-                          fontWeight: 700,
-                        }}
-                      >
-                        {b.source === 'whatsapp' ? 'WhatsApp Bot' : 'Web'}
-                      </span>
-                    </td>
-                    <td style={tdStyle}>{b.budget}</td>
-                    <td style={tdStyle}><StatusBadge status={b.status} /></td>
-                    <td style={tdStyle}>{formatDate(b.createdAt)}</td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-        <div
-          style={{
-            padding: '12px 16px',
-            borderTop: '1px solid #e1e0ff',
-            color: '#777683',
-            fontSize: '0.78rem',
-            fontFamily: "var(--font-display)",
-          }}
-        >
-          {brands.length} hasil ditemukan
-        </div>
-      </div>
-    </div>
+    <SheetGrid
+      storageKey="admin:brands"
+      headers={HEADERS}
+      rows={rows}
+      emptyText={loading ? 'Memuat...' : 'Belum ada brand.'}
+      hint={(
+        <button onClick={() => void fetchBrands()} aria-label="Muat ulang" title="Muat ulang"
+          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', borderRadius: '10px', border: '1.5px solid #c7c8cf', background: 'white', cursor: 'pointer', color: '#777683' }}>
+          <RefreshCw size={16} />
+        </button>
+      )}
+      // Klik baris = buka detail brand (Ctrl/⌘ = tab baru)
+      onRowClick={(i, e) => {
+        const url = `/admin/brands/${brands[i]._id}`;
+        if (e.metaKey || e.ctrlKey) window.open(url, '_blank'); else navigate(url);
+      }}
+      customCell={(_r, c, v) => {
+        if (c === STATUS_COL) return <StatusBadge status={String(v)} />;
+        if (c === SOURCE_COL) {
+          const wa = v === SOURCE_LABEL.whatsapp;
+          return <span style={{ padding: '3px 10px', borderRadius: '999px', fontSize: '0.72rem', fontWeight: 700, background: wa ? 'rgba(37,211,102,0.14)' : '#f1f0fb', color: wa ? '#128c4a' : '#464652' }}>{String(v)}</span>;
+        }
+        return undefined;
+      }}
+      footer={` · ${brands.length} brand`}
+    />
   );
 }

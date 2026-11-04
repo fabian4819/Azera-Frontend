@@ -1,20 +1,7 @@
 import { useEffect, useState } from 'react';
 import { RefreshCw } from 'lucide-react';
 import api from '../../lib/api';
-import WaLink from '../../components/WaLink';
-import { toUrl } from '../../lib/links';
-
-const f = "var(--font-display)";
-// Kolom pertama terkunci di kiri saat tabel digeser horizontal (sama seperti tabel Creators)
-const frozenTh: React.CSSProperties = { position: 'sticky', left: 0, zIndex: 2, background: '#f8f9ff', boxShadow: '6px 0 8px -6px rgba(0,0,0,0.12)' };
-const frozenTd: React.CSSProperties = { position: 'sticky', left: 0, zIndex: 1, background: 'inherit', boxShadow: '6px 0 8px -6px rgba(0,0,0,0.12)' };
-const thStyle: React.CSSProperties = {
-  padding: '14px 16px', textAlign: 'left', fontFamily: f,
-  fontWeight: 700, color: '#191c20', fontSize: '0.78rem', whiteSpace: 'nowrap', letterSpacing: '0.04em',
-};
-const tdStyle: React.CSSProperties = {
-  padding: '14px 16px', fontSize: '0.875rem', color: '#464652', fontFamily: f,
-};
+import SheetGrid from '../../components/SheetGrid';
 
 interface PicCampaignRef { _id: string; name: string }
 interface PicUserItem {
@@ -22,6 +9,10 @@ interface PicUserItem {
   city?: string; ownerName?: string; position?: string; backupPhone?: string; socialMedia?: string; portfolio?: string; ktpUrl?: string;
   campaignIds: PicCampaignRef[]; createdAt: string;
 }
+
+// Tabel ala Sheets (cari, filter & urut per kolom, bekukan, sembunyikan kolom). WhatsApp & link jadi klik-able otomatis.
+const HEADERS = ['Management/Agency', 'Kota', 'PIC', 'Jabatan', 'WhatsApp', 'WA Back Up', 'Email', 'Sosial Media', 'Portfolio', 'KTP', 'Campaign', 'Tanggal Daftar'];
+const KTP_COL = HEADERS.indexOf('KTP');
 
 export default function PicUsers() {
   const [picUsers, setPicUsers] = useState<PicUserItem[]>([]);
@@ -44,76 +35,31 @@ export default function PicUsers() {
     return () => window.clearTimeout(timeoutId);
   }, []);
 
-  // Isian bebas dari PIC: link (https:// atau domain seperti instagram.com/agency) bisa diklik, selain itu teks biasa
-  const linkOrText = (v?: string) => {
-    if (!v) return <span style={{ color: '#8a8a99' }}>-</span>;
-    const href = toUrl(v);
-    return href ? <a href={href} target="_blank" rel="noreferrer" style={{ color: '#6728e4', wordBreak: 'break-all' }}>{v}</a> : <span style={{ wordBreak: 'break-all' }}>{v}</span>;
-  };
-
-  const formatDate = (d: string) => new Date(d).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+  const rows = picUsers.map((p) => [
+    p.name, p.city || '', p.ownerName || '', p.position || '', p.phone, p.backupPhone || '', p.email,
+    p.socialMedia || '', p.portfolio || '', p.ktpUrl || '',
+    p.campaignIds.map((c) => c.name).join(', '),
+    p.createdAt.slice(0, 10), // YYYY-MM-DD supaya urut tanggal benar
+  ]);
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '16px' }}>
-        <button onClick={fetchPicUsers} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '10px', borderRadius: '10px', border: '1.5px solid #c7c8cf', background: 'white', cursor: 'pointer', color: '#777683' }}>
-          <RefreshCw size={16} />
-        </button>
-      </div>
-
-      <div style={{ background: 'white', borderRadius: '16px', border: '1px solid #e1e0ff', overflow: 'hidden', boxShadow: '0 2px 12px rgba(107,46,232,0.06)' }}>
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem' }}>
-            <thead>
-              <tr style={{ background: '#f8f9ff', borderBottom: '1px solid #e1e0ff' }}>
-                {['Management/Agency', 'Kota', 'PIC', 'Jabatan', 'WhatsApp', 'WA Back Up', 'Email', 'Sosial Media', 'Portfolio', 'KTP', 'Campaign', 'Tanggal Daftar'].map((h, i) => (
-                  <th key={h} style={i === 0 ? { ...thStyle, ...frozenTh } : thStyle}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {loading ? (
-                <tr><td colSpan={12} style={{ ...tdStyle, textAlign: 'center', padding: '48px' }}>Memuat...</td></tr>
-              ) : picUsers.length === 0 ? (
-                <tr><td colSpan={12} style={{ ...tdStyle, textAlign: 'center', padding: '48px' }}>Belum ada akun PIC yang sign up.</td></tr>
-              ) : picUsers.map((p, i) => (
-                <tr
-                  key={p._id}
-                  style={{ borderBottom: '1px solid #e1e0ff', background: i % 2 === 0 ? 'white' : '#fcfcff' }}
-                >
-                  <td style={{ ...tdStyle, ...frozenTd, fontWeight: 600, color: '#191c20' }}>{p.name}</td>
-                  <td style={tdStyle}>{p.city || <span style={{ color: '#8a8a99' }}>-</span>}</td>
-                  <td style={tdStyle}>{p.ownerName || <span style={{ color: '#8a8a99' }}>-</span>}</td>
-                  <td style={tdStyle}>{p.position || <span style={{ color: '#8a8a99' }}>-</span>}</td>
-                  <td style={tdStyle}><WaLink phone={p.phone} /></td>
-                  <td style={tdStyle}>{p.backupPhone ? <WaLink phone={p.backupPhone} /> : <span style={{ color: '#8a8a99' }}>-</span>}</td>
-                  <td style={tdStyle}>{p.email}</td>
-                  <td style={tdStyle}>{linkOrText(p.socialMedia)}</td>
-                  <td style={tdStyle}>{linkOrText(p.portfolio)}</td>
-                  <td style={tdStyle}>{p.ktpUrl ? <a href={p.ktpUrl} target="_blank" rel="noreferrer" style={{ color: '#6728e4', fontWeight: 600 }}>Lihat KTP</a> : <span style={{ color: '#8a8a99' }}>-</span>}</td>
-                  <td style={tdStyle}>
-                    {p.campaignIds.length === 0 ? (
-                      <span style={{ color: '#8a8a99' }}>Belum ada campaign</span>
-                    ) : (
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-                        {p.campaignIds.map((c) => (
-                          <span key={c._id} style={{ background: '#e1e0ff', color: '#6728e4', borderRadius: '999px', padding: '3px 10px', fontSize: '0.72rem', fontWeight: 700, whiteSpace: 'nowrap' }}>
-                            {c.name}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                  </td>
-                  <td style={tdStyle}>{formatDate(p.createdAt)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <div style={{ padding: '12px 16px', borderTop: '1px solid #e1e0ff', color: '#777683', fontSize: '0.78rem', fontFamily: f }}>
-          {picUsers.length} akun PIC/Handle-by
-        </div>
-      </div>
+      <SheetGrid
+        storageKey="admin:pic-users"
+        headers={HEADERS}
+        rows={rows}
+        emptyText={loading ? 'Memuat...' : 'Belum ada akun PIC yang sign up.'}
+        hint={(
+          <button onClick={() => void fetchPicUsers()} aria-label="Muat ulang" title="Muat ulang"
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', borderRadius: '10px', border: '1.5px solid #c7c8cf', background: 'white', cursor: 'pointer', color: '#777683' }}>
+            <RefreshCw size={16} />
+          </button>
+        )}
+        customCell={(_r, c, v) => (c === KTP_COL && v
+          ? <a href={String(v)} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()} style={{ color: '#6728e4', fontWeight: 600 }}>Lihat KTP</a>
+          : undefined)}
+        footer={` · ${picUsers.length} akun PIC/Handle-by`}
+      />
     </div>
   );
 }
