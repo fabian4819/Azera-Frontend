@@ -474,11 +474,11 @@ export default function FinanceRecap() {
 
   // Pengganti Export Excel: spreadsheet "Rekap Keuangan | AZERA" di Shared Drive, disinkron dulu baru dibuka.
   // Tab dibuka sinkron sebelum await supaya tidak diblokir popup blocker.
-  const openSheet = async () => {
+  const openSheet = async (scope: 'all' | 'pintarnya') => {
     setExporting(true);
     const tab = window.open('', '_blank');
     try {
-      const res = await api.get('/admin/finance-recap/sheet');
+      const res = await api.get('/admin/finance-recap/sheet', { params: { scope } });
       if (tab) tab.location.href = res.data.url; else window.location.href = res.data.url;
     } catch (err) {
       tab?.close();
@@ -575,8 +575,12 @@ export default function FinanceRecap() {
           </button>
         )}
         <button onClick={() => setManaging((v) => !v)} style={btn(false)}><Columns3 size={13} /> Kolom Tambahan</button>
-        <button onClick={() => void openSheet()} disabled={exporting} title="Semua periode, ter-update otomatis" style={{ ...btn(), opacity: exporting ? 0.6 : 1 }}>
-          <FileSpreadsheet size={13} /> {exporting ? 'Menyiapkan...' : 'Buka Google Sheet'}
+        {/* Dua spreadsheet terpisah: semua klien & khusus Pintarnya (PDS Digital Agency), realtime dua arah */}
+        <button onClick={() => void openSheet('pintarnya')} disabled={exporting} title="Spreadsheet khusus klien Pintarnya (PDS Digital Agency)" style={{ ...btn(false), opacity: exporting ? 0.6 : 1 }}>
+          <FileSpreadsheet size={13} /> Sheet Pintarnya
+        </button>
+        <button onClick={() => void openSheet('all')} disabled={exporting} title="Semua klien, semua periode, ter-update otomatis" style={{ ...btn(), opacity: exporting ? 0.6 : 1 }}>
+          <FileSpreadsheet size={13} /> {exporting ? 'Menyiapkan...' : 'Sheet Semua'}
         </button>
       </div>
 
