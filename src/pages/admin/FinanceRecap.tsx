@@ -200,14 +200,18 @@ const EXPENSE_COLS: [keyof Omit<Group['expense'], 'total' | 'custom'>, string][]
 ];
 
 type AutoFee = 'feeCreator' | 'feePic' | 'feeMg';
-type FeeField = AutoFee | 'reimburse' | 'ads' | 'opex';
+/** Fee Handle by & Gaji Admin: default dari invoice WA (/invoice), bisa diganti manual per campaign */
+type InvoiceFee = 'feeHandle' | 'adminInternal';
+type FeeField = AutoFee | InvoiceFee | 'reimburse' | 'ads' | 'opex';
 const FEE_FIELDS: { key: FeeField; label: string }[] = [
   { key: 'feeCreator', label: 'Fee Creator' }, { key: 'feePic', label: 'Fee PIC' }, { key: 'feeMg', label: 'Fee MG' },
+  { key: 'feeHandle', label: 'Fee Handle by' }, { key: 'adminInternal', label: 'Gaji Admin' },
   { key: 'reimburse', label: 'Reimburse' }, { key: 'ads', label: 'Ads' }, { key: 'opex', label: 'Opex' },
 ];
 const AUTO_FEES: FeeField[] = ['feeCreator', 'feePic', 'feeMg'];
+const INVOICE_FEES: FeeField[] = ['feeHandle', 'adminInternal'];
 interface FinanceRecord extends Record<FeeField, number> {
-  feeManual: AutoFee[];
+  feeManual: (AutoFee | InvoiceFee)[];
   auto: { acceptedCount: number; perCreator: Record<AutoFee, number>; totals: Record<AutoFee, number> };
 }
 
@@ -216,8 +220,8 @@ interface FinanceRecord extends Record<FeeField, number> {
  * Profit = uang masuk − uang keluar, jadi diubah lewat rincian ini, bukan diketik langsung.
  * Grup tanpa campaign: pilih campaign dulu (uang keluar diambil dari campaign itu).
  */
-function ExpenseEditor({ group, campaigns, onClose, onSaved }: {
-  group: Group; campaigns: { _id: string; name: string }[]; onClose: () => void; onSaved: () => void;
+function ExpenseEditor({ group, campaigns, focus, onClose, onSaved }: {
+  group: Group; campaigns: { _id: string; name: string }[]; focus?: FeeField; onClose: () => void; onSaved: () => void;
 }) {
   const [record, setRecord] = useState<FinanceRecord | null>(null);
   const [draft, setDraft] = useState<Partial<Record<FeeField, number | null>>>({});
@@ -231,15 +235,18 @@ function ExpenseEditor({ group, campaigns, onClose, onSaved }: {
   }, [group.campaignId]);
 
   // Nilai tampil: draft (null = kembali otomatis) > record
+  const overridable = (k: FeeField) => AUTO_FEES.includes(k) || INVOICE_FEES.includes(k);
+  const savedManual = (k: FeeField) => !!record?.feeManual.includes(k as AutoFee);
+  // Angka invoice WA cuma diketahui selama belum dioverride (rekap mengirim angka efektif)
+  const invoiceDefault = (k: FeeField) => (savedManual(k) ? undefined : group.expense[k as InvoiceFee]);
   const valueOf = (k: FeeField) => {
     const d = draft[k];
-    if (d === null) return record?.auto.totals[k as AutoFee] ?? 0;
-    return d ?? record?.[k] ?? 0;
+    if (d === null) return AUTO_FEES.includes(k) ? record?.auto.totals[k as AutoFee] ?? 0 : invoiceDefault(k) ?? 0;
+    if (d !== undefined) return d;
+    return INVOICE_FEES.includes(k) && !savedManual(k) ? group.expense[k as InvoiceFee] : record?.[k] ?? 0;
   };
-  const isManual = (k: FeeField) => AUTO_FEES.includes(k) && (draft[k] === null ? false : draft[k] !== undefined || !!record?.feeManual.includes(k as AutoFee));
-  // Fee Handle & Gaji Admin datang dari invoice WA (/invoice), bukan dari campaign → tidak diedit di sini
-  const fromInvoice = group.expense.feeHandle + group.expense.adminInternal;
-  const total = FEE_FIELDS.reduce((sum, { key }) => sum + valueOf(key), 0) + group.expense.custom + fromInvoice;
+  const isManual = (k: FeeField) => overridable(k) && (draft[k] === null ? false : draft[k] !== undefined || savedManual(k));
+  const total = FEE_FIELDS.reduce((sum, { key }) => sum + valueOf(key), 0) + group.expense.custom;
   const profit = group.income - total;
 
   const save = async () => {
@@ -280,11 +287,11 @@ function ExpenseEditor({ group, campaigns, onClose, onSaved }: {
         ) : (
           <>
             <p style={{ fontFamily: f, fontSize: '0.74rem', color: '#8a8a99', marginBottom: '14px' }}>
-              Sama dengan tab Finance di halaman campaign. Fee otomatis = fee per creator × {record.auto.acceptedCount} creator di-approve; ketik angka untuk mengganti manual.
+              Sama dengan tab Finance di halaman campaign. Fee otomatis = fee per creator × {record.auto.acceptedCount} creator di-approve; Fee Handle by & Gaji Admin otomatis dari invoice WA. Ketik angka untuk mengganti manual.
             </p>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '12px' }}>
               {FEE_FIELDS.map(({ key, label }) => {
-                const auto = AUTO_FEES.includes(key);
+                const auto = overridable(key);
                 const manual = isManual(key);
                 return (
                   <label key={key} style={{ display: 'block' }}>
@@ -296,12 +303,12 @@ function ExpenseEditor({ group, campaigns, onClose, onSaved }: {
                         </span>
                       )}
                     </span>
-                    <input type="number" style={{ ...input, width: '100%' }} value={valueOf(key)}
+                    <input type="number" autoFocus={focus === key} style={{ ...input, width: '100%', ...(focus === key ? { borderColor: '#6728e4' } : {}) }} value={valueOf(key)}
                       onChange={(e) => setDraft((d) => ({ ...d, [key]: Number(e.target.value) || 0 }))} />
                     {auto && manual && (
                       <button type="button" onClick={() => setDraft((d) => ({ ...d, [key]: null }))}
                         style={{ background: 'none', border: 'none', padding: 0, marginTop: '4px', cursor: 'pointer', fontFamily: f, fontSize: '0.68rem', fontWeight: 700, color: '#6728e4' }}>
-                        Pakai otomatis ({rupiah(record.auto.totals[key as AutoFee])})
+                        {AUTO_FEES.includes(key) ? `Pakai otomatis (${rupiah(record.auto.totals[key as AutoFee])})` : 'Pakai angka dari invoice WA'}
                       </button>
                     )}
                   </label>
@@ -313,10 +320,8 @@ function ExpenseEditor({ group, campaigns, onClose, onSaved }: {
                 + {rupiah(group.expense.custom)} dari kolom tambahan uang keluar (diubah di panel Data Rekap invoice).
               </p>
             )}
-            {fromInvoice > 0 && (
-              <p style={{ fontFamily: f, fontSize: '0.72rem', color: '#8a8a99', marginTop: '10px' }}>
-                + {rupiah(fromInvoice)} dari invoice WA (Fee Handle by {rupiah(group.expense.feeHandle)}, Gaji Admin {rupiah(group.expense.adminInternal)}{group.adminNote ? `: ${group.adminNote}` : ''}).
-              </p>
+            {group.adminNote && (
+              <p style={{ fontFamily: f, fontSize: '0.72rem', color: '#8a8a99', marginTop: '10px' }}>Keterangan Gaji Admin (invoice WA): {group.adminNote}</p>
             )}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', marginTop: '16px', padding: '12px', borderRadius: '12px', background: '#f8f9ff' }}>
               {[['Uang Masuk', group.income, '#047857'], ['Uang Keluar', total, '#b91c1c'], ['Profit', profit, profit < 0 ? '#b91c1c' : '#4b2fc4']].map(([l, v, c]) => (
@@ -353,6 +358,8 @@ export default function FinanceRecap() {
   const [busyInvoice, setBusyInvoice] = useState<string | null>(null);
   const [exporting, setExporting] = useState(false);
   const [editingGroup, setEditingGroup] = useState<Group | null>(null);
+  const [editingFocus, setEditingFocus] = useState<FeeField | undefined>(undefined);
+  const openEditor = (g: Group, focusField?: FeeField) => { setEditingFocus(focusField); setEditingGroup(g); };
   const [showHidden, setShowHidden] = useState(false);
   const [confirmHide, setConfirmHide] = useState<string | null>(null);
   const [campaigns, setCampaigns] = useState<{ _id: string; name: string }[]>([]);
@@ -426,7 +433,8 @@ export default function FinanceRecap() {
     ? `${from ? new Date(`${from}T00:00:00`).toLocaleDateString('id-ID', { dateStyle: 'medium' }) : '…'} – ${to ? new Date(`${to}T00:00:00`).toLocaleDateString('id-ID', { dateStyle: 'medium' }) : '…'}`
     : 'Semua periode';
   // Rincian uang keluar per kolom; kolom yang nol di semua baris disembunyikan supaya tabel tidak terlalu lebar
-  const expenseCols = EXPENSE_COLS.filter(([k]) => data?.groups.some((g) => g.expense[k]));
+  // Semua kolom biaya selalu tampil (juga yang masih 0) supaya bisa diisi langsung dari tabel
+  const expenseCols = EXPENSE_COLS;
   const headers = ['Campaign', 'Perusahaan', 'Contact', 'Bulan Running', 'Master Sheet', 'SOW', 'Tier', 'Jumlah Talent', 'Fee/Talent', 'Total',
     'Total Payment', 'Invoice', 'Status', 'Jatuh Tempo', ...columns.map((c) => c.label), ...expenseCols.map(([, l]) => l), 'Uang Keluar', 'Profit', 'Margin', ''];
 
@@ -469,7 +477,7 @@ export default function FinanceRecap() {
       </div>
 
       {editingGroup && (
-        <ExpenseEditor group={editingGroup} campaigns={campaigns} onClose={() => setEditingGroup(null)} onSaved={() => { setEditingGroup(null); load(); }} />
+        <ExpenseEditor group={editingGroup} campaigns={campaigns} focus={editingFocus} onClose={() => setEditingGroup(null)} onSaved={() => { setEditingGroup(null); load(); }} />
       )}
       <style>{`.recap-table-scroll button:hover { border-color: #c4b5fd !important; background: #f4f3ff !important; }`}</style>
 
@@ -563,17 +571,19 @@ export default function FinanceRecap() {
                                 const v = g.custom[c.key];
                                 return <Fragment key={c.key}>{groupCell(v === undefined ? '-' : c.type === 'text' ? String(v) : rupiah(Number(v)), { whiteSpace: c.type === 'text' ? 'normal' : 'nowrap' })}</Fragment>;
                               })}
-                              {expenseCols.map(([k]) => (
-                                <Fragment key={k}>{groupCell(e[k] ? rupiah(e[k]) : '-', { whiteSpace: 'nowrap', color: '#464652' },
-                                  k === 'adminInternal' && g.adminNote ? g.adminNote : undefined)}</Fragment>
+                              {expenseCols.map(([k, label]) => (
+                                <Fragment key={k}>{groupCell(
+                                  <button onClick={() => openEditor(g, k)} title={`${k === 'adminInternal' && g.adminNote ? `${g.adminNote}\n\n` : ''}Klik untuk ubah ${label}`} style={{ ...editableCell('#464652'), fontWeight: 400 }}>
+                                    {e[k] ? rupiah(e[k]) : '-'} <Pencil size={10} />
+                                  </button>, { whiteSpace: 'nowrap' })}</Fragment>
                               ))}
                               {/* Uang keluar & profit: klik → editor rincian biaya (profit = masuk − keluar) */}
                               {groupCell(
-                                <button onClick={() => setEditingGroup(g)} title={`${breakdown || 'Belum ada biaya'}\n\nKlik untuk ubah`} style={editableCell('#b91c1c')}>
+                                <button onClick={() => openEditor(g)} title={`${breakdown || 'Belum ada biaya'}\n\nKlik untuk ubah`} style={editableCell('#b91c1c')}>
                                   {rupiah(e.total)} <Pencil size={11} />
                                 </button>, { whiteSpace: 'nowrap' })}
                               {groupCell(
-                                <button onClick={() => setEditingGroup(g)} title="Profit = uang masuk − uang keluar. Klik untuk ubah rincian uang keluar" style={{ ...editableCell(g.profit < 0 ? '#b91c1c' : '#047857'), fontWeight: 800 }}>
+                                <button onClick={() => openEditor(g)} title="Profit = uang masuk − uang keluar. Klik untuk ubah rincian uang keluar" style={{ ...editableCell(g.profit < 0 ? '#b91c1c' : '#047857'), fontWeight: 800 }}>
                                   {rupiah(g.profit)} <Pencil size={11} />
                                 </button>, { whiteSpace: 'nowrap' })}
                               {groupCell(g.margin != null ? `${g.margin}%` : '-', { whiteSpace: 'nowrap' })}
