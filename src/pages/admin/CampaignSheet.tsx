@@ -463,6 +463,7 @@ export default function CampaignSheet() {
       ) : isRecap && recapSubTab === 'pic' && view.byPic ? (
         <SheetGrid
           key={`${kind}-byPic`}
+          storageKey="sheet:recap-pic"
           headers={view.byPic.headers}
           rows={view.byPic.rows}
           totals={view.byPic.totals}
@@ -482,6 +483,7 @@ export default function CampaignSheet() {
       ) : (
         <SheetGrid
           key={kind}
+          storageKey={`sheet:${kind}`}
           headers={view.headers}
           rows={view.rows}
           totals={view.totals}

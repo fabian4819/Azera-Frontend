@@ -123,7 +123,7 @@ function ApplicantsTab({ view, onDecide }: { view: ApplicantsView | null; onDeci
           <button type="button" onClick={() => setError('')} aria-label="Tutup pesan" style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#93000a', display: 'flex' }}><X size={14} /></button>
         </div>
       )}
-      <SheetGrid headers={view.headers} rows={view.rows} emptyText="Belum ada kandidat yang lolos kurasi admin." actionHeader="Status" rowAction={rowAction} maxHeight="calc(100vh - 200px)" />
+      <SheetGrid storageKey="board:listing" headers={view.headers} rows={view.rows} emptyText="Belum ada kandidat yang lolos kurasi admin." actionHeader="Status" rowAction={rowAction} maxHeight="calc(100vh - 200px)" />
     </section>
   );
 }
@@ -301,6 +301,7 @@ export default function CampaignBoard({ audience, view, loading, onReload, onEdi
               </div>
             )}
             <SheetGrid
+              storageKey="board:tracker"
               headers={view.headers}
               rows={view.rows.map((r) => r.cells)}
               hint={hint}

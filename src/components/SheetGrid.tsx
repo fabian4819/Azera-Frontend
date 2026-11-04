@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { ArrowDownAZ, ArrowDownZA, EyeOff, ListFilter, Pencil, Plus, Search, Upload, X } from 'lucide-react';
+import { ArrowDownAZ, ArrowDownZA, EyeOff, ListFilter, Pencil, Plus, Search, Snowflake, Upload, X } from 'lucide-react';
+import FreezeControl from './FreezeControl';
+import { useFreeze } from '../hooks/useFreeze';
 import WaLink from './WaLink';
 import ViewToolbar from './ViewToolbar';
 import { useViewHistory } from '../hooks/useViewHistory';
@@ -54,13 +56,16 @@ interface FilterMenuProps {
   onSort: (dir: 1 | -1) => void;
   onApply: (hidden: Set<string>) => void;
   onHideColumn: () => void;
+  /** Bekukan kolom: sampai kolom ini / lepas (undefined = tidak tersedia, mis. layar sempit) */
+  onFreezeHere?: () => void;
+  onUnfreeze?: () => void;
   onClose: () => void;
   /** Pengaturan kolom (admin), tampil di atas opsi urut/filter */
   extra?: ReactNode;
 }
 
 /** Dropdown filter kolom ala Google Sheets: urutkan A→Z / Z→A + filter berdasarkan nilai. */
-function FilterMenu({ header, rect, values, hidden, sortDir, onSort, onApply, onHideColumn, onClose, extra }: FilterMenuProps) {
+function FilterMenu({ header, rect, values, hidden, sortDir, onSort, onApply, onHideColumn, onFreezeHere, onUnfreeze, onClose, extra }: FilterMenuProps) {
   const [draft, setDraft] = useState(() => new Set(hidden));
   const [search, setSearch] = useState('');
   const shown = values.filter((v) => v.key.toLowerCase().includes(search.trim().toLowerCase()));
@@ -80,6 +85,8 @@ function FilterMenu({ header, rect, values, hidden, sortDir, onSort, onApply, on
         <button type="button" style={{ ...item, fontWeight: sortDir === 1 ? 700 : 400 }} onClick={() => onSort(1)}><ArrowDownAZ size={15} /> Urutkan A → Z</button>
         <button type="button" style={{ ...item, fontWeight: sortDir === -1 ? 700 : 400 }} onClick={() => onSort(-1)}><ArrowDownZA size={15} /> Urutkan Z → A</button>
         <button type="button" style={item} onClick={onHideColumn}><EyeOff size={15} /> Sembunyikan kolom</button>
+        {onFreezeHere && <button type="button" style={item} onClick={onFreezeHere}><Snowflake size={15} /> Bekukan sampai kolom ini</button>}
+        {onUnfreeze && <button type="button" style={item} onClick={onUnfreeze}><Snowflake size={15} /> Lepas bekuan kolom</button>}
         <div style={{ borderTop: `1px solid ${GRID}`, margin: '6px 0' }} />
         <div style={{ padding: '0 12px' }}>
           <p style={{ fontSize: '0.75rem', fontWeight: 700, color: '#5f6368', marginBottom: '6px' }}>Filter menurut nilai</p>
@@ -139,6 +146,10 @@ interface SheetGridProps {
   addColumnMenu?: (close: () => void) => ReactNode;
   /** Isi sel kustom (mis. badge status + tombol Approve/Revisi); undefined = render biasa */
   customCell?: (row: number, col: number, v: Cell) => ReactNode | undefined;
+  /** Kunci simpan pilihan bekukan kolom/baris per tabel (default dari header pertama) */
+  storageKey?: string;
+  /** Klik baris (index asli), mis. buka halaman detail. Ctrl/⌘ diteruskan supaya bisa buka tab baru. */
+  onRowClick?: (row: number, e: React.MouseEvent) => void;
 }
 
 function errorMessage(err: unknown): string {
@@ -151,7 +162,7 @@ const EMPTY_VIEW: GridView = { sort: null, hidden: {}, hiddenCols: [] };
 /** Tabel ala Google Sheets: cari, filter & urutkan per kolom, plus edit sel progress langsung di tabel. */
 export default function SheetGrid({
   headers, rows: allRows, totals, hint, emptyText, canEdit, kindOf, onEdit, onUpload, highlightRow, actionHeader, rowAction, footer, maxHeight,
-  columnMenu, headerIcon, addColumnMenu, customCell,
+  columnMenu, headerIcon, addColumnMenu, customCell, storageKey, onRowClick,
 }: SheetGridProps) {
   const [addMenu, setAddMenu] = useState<DOMRect | null>(null);
   // Di HP, kolom nama + aksi yang sticky menutup hampir seluruh layar → cuma sticky di layar lebar
@@ -216,6 +227,45 @@ export default function SheetGrid({
     return set;
   }, [headers, allRows]);
 
+  // Bekukan kolom & baris (ala Sheets). Posisi sticky diukur dari ukuran sel sebenarnya, jadi tetap pas
+  // walau lebar kolom beda-beda. Cuma di layar lebar: di HP kolom beku menutupi hampir seluruh tabel.
+  const [freeze, setFreeze] = useFreeze(storageKey ?? `grid:${headers[0] ?? ''}`);
+  const frozenCols = wide ? visCols.slice(0, freeze.cols) : [];
+  const frozenRowCount = wide ? Math.min(freeze.rows, rows.length) : 0;
+  const letterRefs = useRef(new Map<number, HTMLTableCellElement>());
+  const theadRef = useRef<HTMLTableSectionElement>(null);
+  const bodyRowRefs = useRef<(HTMLTableRowElement | null)[]>([]);
+  const [offsets, setOffsets] = useState<{ left: Record<number, number>; top: number[] }>({ left: {}, top: [] });
+  const frozenKey = frozenCols.join(',');
+  useEffect(() => {
+    if (!frozenCols.length && !frozenRowCount) return;
+    const measure = () => {
+      const left: Record<number, number> = {};
+      let x = ROW_NO_W;
+      for (const ci of frozenCols) { left[ci] = x; x += letterRefs.current.get(ci)?.offsetWidth ?? 0; }
+      const top: number[] = [];
+      let y = theadRef.current?.offsetHeight ?? 0;
+      for (let p = 0; p < frozenRowCount; p++) { top.push(y); y += bodyRowRefs.current[p]?.offsetHeight ?? 0; }
+      const next = { left, top };
+      setOffsets((o) => (JSON.stringify(o) === JSON.stringify(next) ? o : next));
+    };
+    // Ukur ulang tiap kali lebar kolom / tinggi baris berubah (isi sel, filter, resize jendela)
+    const ro = new ResizeObserver(measure);
+    for (const ci of frozenCols) { const el = letterRefs.current.get(ci); if (el) ro.observe(el); }
+    if (theadRef.current) ro.observe(theadRef.current);
+    for (let p = 0; p < frozenRowCount; p++) { const el = bodyRowRefs.current[p]; if (el) ro.observe(el); }
+    return () => ro.disconnect();
+  }, [frozenKey, frozenRowCount, rows]); // eslint-disable-line react-hooks/exhaustive-deps
+  const lastFrozen = frozenCols[frozenCols.length - 1];
+  /** Gaya sticky kiri untuk kolom beku; layer = z-index (header lebih tinggi dari isi) */
+  const colStick = (ci: number, layer: number): React.CSSProperties => (frozenCols.includes(ci)
+    ? { position: 'sticky', left: offsets.left[ci] ?? ROW_NO_W, zIndex: layer, ...(ci === lastFrozen ? { boxShadow: 'inset -2px 0 0 #c7c8cf' } : {}) }
+    : {});
+  /** Sel baris beku: sticky atas di bawah header; persilangan dengan kolom beku paling atas */
+  const rowStick = (p: number, ci?: number): React.CSSProperties => (p < frozenRowCount
+    ? { position: 'sticky', top: offsets.top[p] ?? 0, zIndex: ci !== undefined && frozenCols.includes(ci) ? 4 : 2, ...(p === frozenRowCount - 1 ? { boxShadow: 'inset 0 -2px 0 #c7c8cf' } : {}) }
+    : {});
+
   const startEdit = (row: number, col: number) => {
     if (!canEdit?.(row, col) || saving) return;
     if (kindOf?.(col) === 'file' || kindOf?.(col) === 'media') return;
@@ -267,8 +317,6 @@ export default function SheetGrid({
     ...cellBase, position: 'sticky', left: 0, zIndex: 1, width: ROW_NO_W, minWidth: ROW_NO_W, textAlign: 'center',
     background: HEAD_BG, color: '#5f6368', fontSize: '0.72rem',
   };
-  // Kolom pertama (nama creator) ikut nempel di kiri saat scroll horizontal
-  const firstColStyle: React.CSSProperties = wide ? { position: 'sticky', left: ROW_NO_W, zIndex: 1 } : {};
   const stickyRight: React.CSSProperties = wide ? { position: 'sticky', right: 0 } : {};
   const inputType = (k?: CellKind) => (k === 'number' ? 'text' : k === 'date' ? 'date' : k === 'link' ? 'url' : 'text');
 
@@ -348,6 +396,7 @@ export default function SheetGrid({
             canUndo={canUndo} onUndo={() => { setMenu(null); undoView(); }}
             canReset={Boolean(activeFilters.length || sort || hiddenCols.length)}
             onReset={() => { setMenu(null); setView(EMPTY_VIEW); }} />
+          {wide && <FreezeControl freeze={freeze} onChange={setFreeze} maxCols={visCols.length} />}
           <label style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '0 12px', height: '36px', border: '1.5px solid #e1e0ff', borderRadius: '10px', background: 'white', flex: '0 1 280px', minWidth: 0 }}>
             <Search size={14} color="#777683" />
             <input value={query} onChange={(e) => { setQuery(e.target.value); setSelected(null); }} placeholder="Cari di tabel ini…" aria-label="Cari di tabel"
@@ -367,11 +416,12 @@ export default function SheetGrid({
 
       <div style={{ background: 'white', border: `1px solid ${GRID}`, borderRadius: '10px', overflow: 'auto', maxHeight: maxHeight ?? 'calc(100vh - 300px)', minHeight: '240px' }}>
         <table style={{ borderCollapse: 'separate', borderSpacing: 0, minWidth: '100%', fontFamily: 'Arial, Helvetica, sans-serif' }}>
-          <thead style={{ position: 'sticky', top: 0, zIndex: 2 }}>
+          <thead ref={theadRef} style={{ position: 'sticky', top: 0, zIndex: 6 }}>
             <tr>
               <th style={{ ...rowNoStyle, zIndex: 3 }} />
               {visCols.map((ci) => (
-                <th key={ci} style={{ ...cellBase, background: HEAD_BG, color: '#5f6368', fontWeight: 400, fontSize: '0.72rem', textAlign: 'center', padding: '3px 10px', ...(ci === 0 ? { ...firstColStyle, zIndex: 3 } : {}) }}>
+                <th key={ci} ref={(el) => { if (el) letterRefs.current.set(ci, el); else letterRefs.current.delete(ci); }}
+                  style={{ ...cellBase, background: HEAD_BG, color: '#5f6368', fontWeight: 400, fontSize: '0.72rem', textAlign: 'center', padding: '3px 10px', ...colStick(ci, 3) }}>
                   {colLetter(ci)}
                 </th>
               ))}
@@ -385,7 +435,7 @@ export default function SheetGrid({
                 const on = Boolean(hidden[ci]?.size) || sort?.col === ci;
                 const SortIcon = sort?.col === ci ? (sort.dir === 1 ? ArrowDownAZ : ArrowDownZA) : ListFilter;
                 return (
-                  <th key={ci} title={h} style={{ ...cellBase, background: '#f3f0ff', fontWeight: 700, textAlign: 'left', ...(ci === 0 ? { ...firstColStyle, zIndex: 3 } : {}) }}>
+                  <th key={ci} title={h} style={{ ...cellBase, background: '#f3f0ff', fontWeight: 700, textAlign: 'left', ...colStick(ci, 3) }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                       <span style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>{h}</span>
                       {headerIcon?.(ci)}
@@ -418,13 +468,13 @@ export default function SheetGrid({
                   {filtered ? 'Tidak ada baris yang cocok dengan pencarian/filter.' : emptyText}
                 </td>
               </tr>
-            ) : rows.map(({ r, i, no }) => {
+            ) : rows.map(({ r, i, no }, p) => {
               const isSel = selected === no;
               const mark = highlightRow?.(i);
               const bg = isSel ? '#e8f0fe' : mark ? '#fbf8ff' : 'white';
               return (
-                <tr key={i} onClick={() => setSelected(isSel ? null : no)}>
-                  <td style={{ ...rowNoStyle, background: isSel ? '#d3e3fd' : mark ? '#e9e1ff' : HEAD_BG, color: isSel ? '#0b57d0' : mark ? '#6728e4' : '#5f6368', fontWeight: mark ? 700 : 400 }}>{no}</td>
+                <tr key={i} ref={(el) => { bodyRowRefs.current[p] = el; }} onClick={(e) => { if (onRowClick) onRowClick(i, e); else setSelected(isSel ? null : no); }} style={onRowClick ? { cursor: 'pointer' } : undefined}>
+                  <td style={{ ...rowNoStyle, background: isSel ? '#d3e3fd' : mark ? '#e9e1ff' : HEAD_BG, color: isSel ? '#0b57d0' : mark ? '#6728e4' : '#5f6368', fontWeight: mark ? 700 : 400, ...(p < frozenRowCount ? { ...rowStick(p), zIndex: 5 } : {}) }}>{no}</td>
                   {visCols.map((ci) => {
                     const v = r[ci] ?? '';
                     const editable = canEdit?.(i, ci);
@@ -434,25 +484,25 @@ export default function SheetGrid({
                         onMouseEnter={editable || custom !== undefined ? undefined : (e) => showTip(e, String(v))}
                         onMouseLeave={() => setTip(null)}
                         onClick={editable ? (e) => { e.stopPropagation(); startEdit(i, ci); } : undefined}
-                        style={{ ...cellBase, background: editable && !isSel ? '#fffdf2' : bg, cursor: editable ? 'text' : 'default', textAlign: numericCols.has(ci) ? 'right' : 'left', ...(ci === 0 ? firstColStyle : {}) }}>
+                        style={{ ...cellBase, background: editable && !isSel ? '#fffdf2' : bg, cursor: editable ? 'text' : 'default', textAlign: numericCols.has(ci) ? 'right' : 'left', ...colStick(ci, 3), ...rowStick(p, ci) }}>
                         {custom ?? (canEdit ? renderEditableCell(i, ci, v) : renderCell(v, headers[ci]))}
                       </td>
                     );
                   })}
                   {addColumnMenu && <td style={{ ...cellBase, background: bg }} />}
                   {rowAction && (
-                    <td onClick={(e) => e.stopPropagation()} style={{ ...cellBase, background: bg, ...stickyRight, overflow: 'visible' }}>{rowAction(i)}</td>
+                    <td onClick={(e) => e.stopPropagation()} style={{ ...cellBase, background: bg, ...stickyRight, overflow: 'visible', ...rowStick(p), ...(stickyRight.position ? { zIndex: 4 } : {}) }}>{rowAction(i)}</td>
                   )}
                 </tr>
               );
             })}
           </tbody>
           {totals && rows.length > 0 && !filtered && (
-            <tfoot style={{ position: 'sticky', bottom: 0, zIndex: 2 }}>
+            <tfoot style={{ position: 'sticky', bottom: 0, zIndex: 6 }}>
               <tr>
                 <td style={{ ...rowNoStyle, borderTop: '2px solid #c7c8cf' }} />
                 {visCols.map((ci) => (
-                  <td key={ci} style={{ ...cellBase, borderTop: '2px solid #c7c8cf', background: '#f3f0ff', fontWeight: 700, textAlign: numericCols.has(ci) ? 'right' : 'left', ...(ci === 0 ? firstColStyle : {}) }}>
+                  <td key={ci} style={{ ...cellBase, borderTop: '2px solid #c7c8cf', background: '#f3f0ff', fontWeight: 700, textAlign: numericCols.has(ci) ? 'right' : 'left', ...colStick(ci, 3) }}>
                     {renderCell(totals[ci] ?? '')}
                   </td>
                 ))}
@@ -473,6 +523,8 @@ export default function SheetGrid({
           onSort={(dir) => { setView((v) => ({ ...v, sort: { col: menu.col, dir } })); setMenu(null); }}
           onApply={(h) => { setView((v) => ({ ...v, hidden: { ...v.hidden, [menu.col]: h } })); setSelected(null); setMenu(null); }}
           onHideColumn={() => { toggleCol(menu.col); setMenu(null); }}
+          onFreezeHere={wide ? () => { setFreeze({ ...freeze, cols: visCols.indexOf(menu.col) + 1 }); setMenu(null); } : undefined}
+          onUnfreeze={wide && frozenCols.length ? () => { setFreeze({ ...freeze, cols: 0 }); setMenu(null); } : undefined}
           onClose={() => setMenu(null)}
           extra={columnMenu?.(menu.col, () => setMenu(null))} />
       )}
