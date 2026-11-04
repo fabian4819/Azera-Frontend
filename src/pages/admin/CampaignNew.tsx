@@ -80,8 +80,6 @@ export default function CampaignNew() {
   const [name, setName] = useState('');
   const [objective, setObjective] = useState('');
   const [budget, setBudget] = useState('');
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
   const [selectedNiches, setSelectedNiches] = useState<string[]>([]);
   const [addingCustomNiche, setAddingCustomNiche] = useState(false);
   const [customNicheInput, setCustomNicheInput] = useState('');
@@ -167,7 +165,6 @@ export default function CampaignNew() {
         infoLink: infoLink.trim() || undefined,
         customFields: cleanFields(customFields),
         applyFields,
-        timeline: { startDate: startDate || undefined, endDate: endDate || undefined },
         criteria: {
           niches: selectedNiches,
           minFollowersByPlatform: Object.fromEntries(selectedPlatforms.filter((p) => minFollowers[p]).map((p) => [p, Number(minFollowers[p])])),
@@ -235,17 +232,6 @@ export default function CampaignNew() {
               </select>
             </div>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginTop: '14px' }} className="form-2col">
-            <div>
-              <label style={labelStyle}>Mulai</label>
-              <input value={startDate} onChange={(e) => setStartDate(e.target.value)} type="date" style={inputStyle} />
-            </div>
-            <div>
-              <label style={labelStyle}>Selesai</label>
-              <input value={endDate} onChange={(e) => setEndDate(e.target.value)} type="date" style={inputStyle} />
-            </div>
-          </div>
-
           <div style={{ marginTop: '14px', background: '#f8f9ff', borderRadius: '12px', padding: '16px' }}>
             <p style={{ ...labelStyle, marginBottom: '10px' }}>Visit <span style={{ fontWeight: 400, color: '#777683' }}>(opsional, tampil di bawah nama campaign)</span></p>
             <div style={{ marginBottom: '10px' }}>
