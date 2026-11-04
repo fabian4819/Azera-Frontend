@@ -1,7 +1,9 @@
-import { Fragment, useCallback, useEffect, useState } from 'react';
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { AlertTriangle, ArrowDownCircle, ArrowUpCircle, Columns3, Plus, Trash2, TrendingUp, Clock, FileSpreadsheet, ChevronDown, Pencil, X, EyeOff, RotateCcw } from 'lucide-react';
+import { Search, AlertTriangle, ArrowDownCircle, ArrowUpCircle, Columns3, Plus, Trash2, TrendingUp, Clock, FileSpreadsheet, ChevronDown, Pencil, X, EyeOff, RotateCcw } from 'lucide-react';
 import api from '../../lib/api';
+import FreezeControl from '../../components/FreezeControl';
+import { useFreeze } from '../../hooks/useFreeze';
 import type { RecapColumn } from './InvoiceRecapPanel';
 
 /**
@@ -361,6 +363,14 @@ export default function FinanceRecap() {
   const [editingFocus, setEditingFocus] = useState<FeeField | undefined>(undefined);
   const openEditor = (g: Group, focusField?: FeeField) => { setEditingFocus(focusField); setEditingGroup(g); };
   const [showHidden, setShowHidden] = useState(false);
+  // Cari, filter & urut grup (per campaign) + bekukan kolom awal (Campaign … Master Sheet)
+  const [query, setQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<'' | 'unpaid' | 'paid' | 'overdue'>('');
+  const [monthFilter, setMonthFilter] = useState('');
+  const [sortBy, setSortBy] = useState<'' | 'profit' | 'total' | 'expense' | 'month'>('');
+  const [freeze, setFreeze] = useFreeze('finance-recap');
+  const headRefs = useRef<(HTMLTableCellElement | null)[]>([]);
+  const [lefts, setLefts] = useState<number[]>([]);
   const [confirmHide, setConfirmHide] = useState<string | null>(null);
   const [campaigns, setCampaigns] = useState<{ _id: string; name: string }[]>([]);
   useEffect(() => { api.get('/admin/campaigns').then((res) => setCampaigns(res.data)).catch(() => {}); }, []);
@@ -438,6 +448,43 @@ export default function FinanceRecap() {
   const headers = ['Campaign', 'Perusahaan', 'Contact', 'Bulan Running', 'Master Sheet', 'SOW', 'Tier', 'Jumlah Talent', 'Fee/Talent', 'Total',
     'Total Payment', 'Invoice', 'Status', 'Jatuh Tempo', ...columns.map((c) => c.label), ...expenseCols.map(([, l]) => l), 'Uang Keluar', 'Profit', 'Margin', ''];
 
+  const allGroups = useMemo(() => data?.groups ?? [], [data]);
+  const months = [...new Set(allGroups.map((g) => g.runningMonth).filter(Boolean))].sort().reverse();
+  const groups = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    let out = allGroups.filter((g) => {
+      if (q && ![g.campaign, g.company, g.contact, ...g.invoices.map((i) => i.number), ...g.items.map((i) => i.sow)].some((v) => (v || '').toLowerCase().includes(q))) return false;
+      if (monthFilter && g.runningMonth !== monthFilter) return false;
+      if (statusFilter === 'paid' && !g.invoices.every((i) => i.paid)) return false;
+      if (statusFilter === 'unpaid' && !g.invoices.some((i) => !i.paid)) return false;
+      if (statusFilter === 'overdue' && !g.invoices.some((i) => i.overdue)) return false;
+      return true;
+    });
+    const by: Record<string, (g: Group) => number | string> = { profit: (g) => g.profit, total: (g) => g.totalInvoice, expense: (g) => g.expense.total, month: (g) => g.runningMonth };
+    if (sortBy) out = [...out].sort((a, b) => { const x = by[sortBy](a), y = by[sortBy](b); return x < y ? 1 : x > y ? -1 : 0; });
+    return out;
+  }, [allGroups, query, monthFilter, statusFilter, sortBy]);
+  const filtering = Boolean(query.trim() || monthFilter || statusFilter);
+
+  // Kolom beku (maks 5 kolom grup pertama): offset kiri diukur dari lebar header sebenarnya
+  const frozenCols = Math.min(freeze.cols, 5);
+  useEffect(() => {
+    if (!frozenCols) return;
+    const measure = () => {
+      const l: number[] = [];
+      let x = 0;
+      for (let c = 0; c < frozenCols; c++) { l.push(x); x += headRefs.current[c]?.offsetWidth ?? 0; }
+      setLefts((o) => (o.join() === l.join() ? o : l));
+    };
+    const ro = new ResizeObserver(measure);
+    headRefs.current.slice(0, frozenCols).forEach((el) => { if (el) ro.observe(el); });
+    return () => ro.disconnect();
+  }, [frozenCols, groups.length]);
+  const freezeStyle = (c: number, head = false): React.CSSProperties => (c < frozenCols
+    ? { position: 'sticky', left: lefts[c] ?? 0, zIndex: head ? 4 : 1, background: head ? '#f8f9ff' : 'white', ...(c === frozenCols - 1 ? { boxShadow: 'inset -2px 0 0 #e1e0ff' } : {}) }
+    : {});
+  const filterInput: React.CSSProperties = { ...input, height: '34px' };
+
   return (
     <div>
       {/* Filter periode */}
@@ -498,9 +545,41 @@ export default function FinanceRecap() {
         <SummaryCard icon={Clock} color="#b45309" label="Piutang (Belum Lunas)" value={rupiah(t?.receivable ?? 0)} hint={t?.overdue ? `${rupiah(t.overdue)} sudah lewat jatuh tempo` : 'total invoice yang belum dibayar'} />
       </div>
 
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '10px' }}>
+        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '0 12px', height: '36px', border: '1.5px solid #e1e0ff', borderRadius: '10px', background: 'white', flex: '1 1 240px', minWidth: 0 }}>
+          <Search size={14} color="#777683" />
+          <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Cari campaign, perusahaan, contact, nomor invoice, SOW…" aria-label="Cari di rekap"
+            style={{ border: 'none', outline: 'none', fontSize: '0.8rem', fontFamily: f, flex: 1, minWidth: 0, background: 'transparent' }} />
+        </label>
+        <select aria-label="Filter status" style={filterInput} value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as typeof statusFilter)}>
+          <option value="">Semua status</option>
+          <option value="unpaid">Ada yang belum lunas</option>
+          <option value="paid">Lunas semua</option>
+          <option value="overdue">Lewat jatuh tempo</option>
+        </select>
+        <select aria-label="Filter bulan running" style={filterInput} value={monthFilter} onChange={(e) => setMonthFilter(e.target.value)}>
+          <option value="">Semua bulan running</option>
+          {months.map((m) => <option key={m} value={m}>{monthLabel(m)}</option>)}
+        </select>
+        <select aria-label="Urutkan" style={filterInput} value={sortBy} onChange={(e) => setSortBy(e.target.value as typeof sortBy)}>
+          <option value="">Urutan default</option>
+          <option value="profit">Profit tertinggi</option>
+          <option value="total">Total payment tertinggi</option>
+          <option value="expense">Uang keluar tertinggi</option>
+          <option value="month">Bulan running terbaru</option>
+        </select>
+        <FreezeControl freeze={{ cols: frozenCols, rows: 0 }} onChange={(fz) => setFreeze({ cols: fz.cols, rows: 0 })} maxCols={5} showRows={false} />
+        {filtering && (
+          <button onClick={() => { setQuery(''); setStatusFilter(''); setMonthFilter(''); }} style={{ ...btn(false), height: '36px' }}><X size={13} /> Hapus filter</button>
+        )}
+        <span style={{ fontFamily: f, fontSize: '0.74rem', color: '#8a8a99' }}>{filtering ? `${groups.length} dari ${allGroups.length} campaign` : `${allGroups.length} campaign`}</span>
+      </div>
+
       <div style={cardStyle}>
         {!data ? (
           <p style={{ fontFamily: f, fontSize: '0.85rem', color: '#464652' }}>Memuat...</p>
+        ) : groups.length === 0 && filtering ? (
+          <p style={{ fontFamily: f, fontSize: '0.85rem', color: '#464652' }}>Tidak ada yang cocok dengan pencarian/filter.</p>
         ) : data.groups.length === 0 ? (
           <p style={{ fontFamily: f, fontSize: '0.85rem', color: '#464652' }}>
             Belum ada invoice di periode ini. Buat di menu <Link to="/admin/documents/invoice" style={{ color: '#4b2fc4', fontWeight: 600 }}>Invoice</Link>.
@@ -508,9 +587,9 @@ export default function FinanceRecap() {
         ) : (
           <div style={{ overflow: 'auto', maxHeight: 'calc(100vh - 220px)' }} className="recap-table-scroll">
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.8rem', fontFamily: f }}>
-              <thead><tr>{headers.map((h) => <th key={h} style={th}>{h}</th>)}</tr></thead>
+              <thead><tr>{headers.map((h, c) => <th key={h} ref={(el) => { headRefs.current[c] = el; }} style={{ ...th, ...freezeStyle(c, true) }}>{h}</th>)}</tr></thead>
               <tbody>
-                {data.groups.map((g) => {
+                {groups.map((g) => {
                   const items = g.items.length ? g.items : [null];
                   const span = items.length;
                   const e = g.expense;
@@ -536,12 +615,12 @@ export default function FinanceRecap() {
                                     </span>
                                   )}
                                 </>,
-                                { minWidth: '150px' },
+                                { minWidth: '150px', ...freezeStyle(0) },
                               )}
-                              {groupCell(g.company || '-')}
-                              {groupCell(g.contact || '-', { fontSize: '0.74rem', color: '#464652' })}
-                              {groupCell(monthLabel(g.runningMonth), { whiteSpace: 'nowrap' })}
-                              {groupCell(g.mastersheetUrl ? g.mastersheetUrl.split(/\s+/).filter(Boolean).map((u, i, all) => <a key={u} href={u} target="_blank" rel="noopener noreferrer" style={{ display: 'block', color: '#4b2fc4', fontWeight: 600, whiteSpace: 'nowrap' }}>{all.length > 1 ? `Sheet ${i + 1}` : 'Buka Sheet'} ↗</a>) : '-')}
+                              {groupCell(g.company || '-', freezeStyle(1))}
+                              {groupCell(g.contact || '-', { fontSize: '0.74rem', color: '#464652', ...freezeStyle(2) })}
+                              {groupCell(monthLabel(g.runningMonth), { whiteSpace: 'nowrap', ...freezeStyle(3) })}
+                              {groupCell(g.mastersheetUrl ? g.mastersheetUrl.split(/\s+/).filter(Boolean).map((u, i, all) => <a key={u} href={u} target="_blank" rel="noopener noreferrer" style={{ display: 'block', color: '#4b2fc4', fontWeight: 600, whiteSpace: 'nowrap' }}>{all.length > 1 ? `Sheet ${i + 1}` : 'Buka Sheet'} ↗</a>) : '-', freezeStyle(4))}
                             </>
                           )}
                           <td style={{ ...td, minWidth: '180px' }}>{it?.sow || '-'}</td>
