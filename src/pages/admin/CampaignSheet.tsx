@@ -12,7 +12,7 @@ const GRID = '#e2e3e3';
 
 interface ColumnMeta { key: string; progressId?: string; kind?: CellKind; access: Access; submission?: { type: 'draft' | 'post'; review?: boolean } }
 interface SheetView {
-  campaign: { _id: string; name: string; brandName: string | null };
+  campaign: { _id: string; name: string; brandName: string | null; approvalFlow?: 'two_step' | 'client_only' };
   headers: string[];
   rows: Cell[][];
   totals?: Cell[];
@@ -346,6 +346,20 @@ export default function CampaignSheet() {
       display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '4px 10px', borderRadius: '6px', border: 'none',
       background: bg, color, fontSize: '0.72rem', fontWeight: 700, cursor: busy ? 'wait' : 'pointer', opacity: busy ? 0.6 : 1,
     });
+    // Skema "langsung ke client": status = keputusan client, admin tidak approve/reject
+    if (view?.campaign.approvalFlow === 'client_only') {
+      return (
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+          <span style={{ background: s.bg, color: s.color, borderRadius: '999px', padding: '2px 9px', fontSize: '0.7rem', fontWeight: 700 }}>{s.label}</span>
+          <span style={{ fontSize: '0.7rem', color: '#8a8a99' }}>diputuskan client</span>
+          {status === 'accepted' && (
+            <button type="button" onClick={() => copyPortal(row)} title="Salin magic link portal creator ini" style={btn('#f0eeff', '#6728e4')}>
+              <Copy size={12} /> {copied === appId ? 'Tersalin' : 'Link'}
+            </button>
+          )}
+        </span>
+      );
+    }
     return (
       <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
         <span style={{ background: s.bg, color: s.color, borderRadius: '999px', padding: '2px 9px', fontSize: '0.7rem', fontWeight: 700 }}>{s.label}</span>
@@ -487,7 +501,9 @@ export default function CampaignSheet() {
           headers={view.headers}
           rows={view.rows}
           totals={view.totals}
-          hint={tab.hint}
+          hint={kind === 'applicants' && view?.campaign.approvalFlow === 'client_only'
+            ? 'Skema langsung ke client: semua pendaftar otomatis masuk Listing client. Status di sini ikut keputusan client.'
+            : tab.hint}
           emptyText={tab.empty}
           canEdit={isMaster ? (_row, col) => Boolean(view.columns?.[col]?.progressId || (view.columns?.[col]?.submission && !view.columns[col].submission?.review))
             : isRecap ? (_row, col) => view.columns?.[col]?.access === 'edit'

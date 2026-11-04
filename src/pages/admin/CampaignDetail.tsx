@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, Copy, Check, MessageCircle, LayoutDashboard, Building2, ExternalLink, UserCheck, MapPin, CalendarDays, Clock, Pencil, Sheet } from 'lucide-react';
 import { NICHES } from '../../lib/niches';
+import { APPROVAL_FLOW_OPTIONS, approvalFlowLabel, type ApprovalFlow } from '../../lib/approvalFlow';
 import { buildBroadcast } from '../../lib/broadcast';
 import { SiInstagram, SiTiktok, SiThreads, SiX } from 'react-icons/si';
 import type { IconType } from 'react-icons';
@@ -23,6 +24,7 @@ interface Campaign {
   budget?: number; criteria: { niches: string[]; minFollowers?: number; minFollowersByPlatform?: Record<string, number | undefined>; provinces: string[]; cities?: string[]; platforms: string[] };
   status: string; workflowStage: string; applyOpen: boolean; applySlug: string; waGroupLink?: string;
   customFields: CustomField[]; applyFields?: ApplyFields; accessCode: string; clientAccessCode?: string; clientSpreadsheetId?: string;
+  approvalFlow?: ApprovalFlow;
   type?: 'online' | 'offline'; eventDetails?: { location?: string; date?: string; timeWindow?: string };
   fee?: { creatorFee?: number; picFee?: number; mgFee?: number }; feeNote?: string; benefits?: string[]; requirements?: string[]; infoLink?: string;
   brandName?: string | null; timeline?: { startDate?: string; endDate?: string };
@@ -502,6 +504,9 @@ function CampaignInfo({ campaign: c, onSaved }: { campaign: Campaign; onSaved: (
                 </div>
               </Block>
             )}
+            <Block title="Skema Lolos Creator">
+              <Chip tone={c.approvalFlow === 'client_only' ? 'lime' : 'violet'}>{approvalFlowLabel(c.approvalFlow)}</Chip>
+            </Block>
             {c.infoLink && (
               <Block title="Link Info">
                 <a href={c.infoLink} target="_blank" rel="noopener noreferrer" style={{ color: '#6728e4', fontSize: '0.85rem', wordBreak: 'break-all' }}>{c.infoLink}</a>
@@ -573,6 +578,7 @@ function CampaignInfoEdit({ campaign: c, onCancel, onSaved }: { campaign: Campai
     Object.fromEntries(Object.entries(c.criteria.minFollowersByPlatform || {}).map(([k, v]) => [k, v != null ? String(v) : ''])),
   );
   const [niches, setNiches] = useState<string[]>(c.criteria.niches || []);
+  const [approvalFlow, setApprovalFlow] = useState<ApprovalFlow>(c.approvalFlow ?? 'two_step');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const nicheOptions = [...NICHES, ...niches.filter((n) => !NICHES.includes(n))];
@@ -588,6 +594,7 @@ function CampaignInfoEdit({ campaign: c, onCancel, onSaved }: { campaign: Campai
         fee: { creatorFee: numOrUndef(creatorFee), picFee: numOrUndef(picFee), mgFee: numOrUndef(mgFee) },
         feeNote: feeNote.trim(), infoLink: infoLink.trim(),
         eventDetails: { location: visitLocation.trim(), date: visitDate || null, timeWindow: visitTime.trim() },
+        approvalFlow,
         criteria: {
           ...c.criteria, platforms, niches,
           minFollowersByPlatform: Object.fromEntries(platforms.map((p) => [p, numOrUndef(minFollowers[p] || '')])),
@@ -603,6 +610,7 @@ function CampaignInfoEdit({ campaign: c, onCancel, onSaved }: { campaign: Campai
         ...(briefContent !== undefined ? { briefContent: res.data.briefContent } : { broadcastStale: true }),
         objective: res.data.objective, benefits: res.data.benefits, requirements: res.data.requirements, deliverables: res.data.deliverables,
         fee: res.data.fee, feeNote: res.data.feeNote, infoLink: res.data.infoLink, eventDetails: res.data.eventDetails, criteria: res.data.criteria,
+        approvalFlow: res.data.approvalFlow,
       });
     } catch (err) {
       const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
@@ -637,6 +645,19 @@ function CampaignInfoEdit({ campaign: c, onCancel, onSaved }: { campaign: Campai
         {field('Tanggal Visit', <input type="date" value={visitDate} onChange={(e) => setVisitDate(e.target.value)} style={editInput} />)}
         {field('Jam Visit', <input value={visitTime} onChange={(e) => setVisitTime(e.target.value)} placeholder="09.00–12.00 WIB" style={editInput} />)}
       </div>
+      {field('Skema Lolos Creator', (
+        <div>
+          <select value={approvalFlow} onChange={(e) => setApprovalFlow(e.target.value as ApprovalFlow)} style={editInput}>
+            {APPROVAL_FLOW_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+          </select>
+          <p style={{ fontSize: '0.74rem', color: '#777683', marginTop: '6px', lineHeight: 1.5, fontFamily: font }}>
+            {APPROVAL_FLOW_OPTIONS.find((o) => o.value === approvalFlow)?.desc}
+            {approvalFlow !== (c.approvalFlow ?? 'two_step') && (approvalFlow === 'client_only'
+              ? ' Pendaftar yang masih Pending akan langsung diteruskan ke Listing client saat disimpan.'
+              : ' Pendaftar yang sudah diteruskan tetap di Listing client; pendaftar baru menunggu kurasi admin lagi.')}
+          </p>
+        </div>
+      ))}
       {field('Link Info', <input value={infoLink} onChange={(e) => setInfoLink(e.target.value)} placeholder="https://..." style={editInput} />)}
       {field('Platform & Min. Followers', (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>

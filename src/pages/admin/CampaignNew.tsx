@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import api from '../../lib/api';
 import { shortApplyCode } from '../../lib/applyForm';
+import { APPROVAL_FLOW_OPTIONS, type ApprovalFlow } from '../../lib/approvalFlow';
 import { buildBroadcast } from '../../lib/broadcast';
 import { NICHES as niches } from '../../lib/niches';
 import { WILAYAH_API, type WilayahOption } from '../../lib/wilayah';
@@ -91,6 +92,7 @@ export default function CampaignNew() {
   const [cityIds, setCityIds] = useState<string[]>([]);
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([]);
   const [type, setType] = useState<'online' | 'offline'>('online');
+  const [approvalFlow, setApprovalFlow] = useState<ApprovalFlow>('two_step');
   const [eventLocation, setEventLocation] = useState('');
   const [eventDate, setEventDate] = useState('');
   const [eventTimeWindow, setEventTimeWindow] = useState('');
@@ -174,6 +176,7 @@ export default function CampaignNew() {
         },
         type,
         // Visit opsional untuk semua tipe campaign (bukan cuma offline/event)
+        approvalFlow,
         eventDetails: eventLocation.trim() || eventDate || eventTimeWindow.trim() ? { location: eventLocation.trim(), date: eventDate || undefined, timeWindow: eventTimeWindow.trim() } : undefined,
       });
       // PIC yang dicentang di tahap 2, best-effort, campaign sudah terbuat
@@ -230,6 +233,21 @@ export default function CampaignNew() {
                 <option value="online">Online</option>
                 <option value="offline">Offline / Event</option>
               </select>
+            </div>
+          </div>
+          <div style={{ marginTop: '14px' }}>
+            <label style={labelStyle}>Skema Lolos Creator</label>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }} className="form-2col">
+              {APPROVAL_FLOW_OPTIONS.map((o) => {
+                const on = approvalFlow === o.value;
+                return (
+                  <button key={o.value} type="button" onClick={() => setApprovalFlow(o.value)} aria-pressed={on}
+                    style={{ textAlign: 'left', padding: '12px 14px', borderRadius: '12px', cursor: 'pointer', fontFamily: "var(--font-display)", border: on ? '2px solid #6728e4' : '1.5px solid #e1e0ff', background: on ? '#f4f0ff' : 'white' }}>
+                    <span style={{ display: 'block', fontWeight: 700, fontSize: '0.85rem', color: '#191c20', marginBottom: '4px' }}>{o.label}</span>
+                    <span style={{ display: 'block', fontSize: '0.74rem', color: '#777683', lineHeight: 1.5 }}>{o.desc}</span>
+                  </button>
+                );
+              })}
             </div>
           </div>
           <div style={{ marginTop: '14px', background: '#f8f9ff', borderRadius: '12px', padding: '16px' }}>
