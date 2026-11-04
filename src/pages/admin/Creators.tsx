@@ -7,6 +7,8 @@ import {
 } from '@tanstack/react-table';
 import { Search, RefreshCw, ChevronUp, ChevronDown, ChevronsUpDown, Filter, X as XIcon, ExternalLink, ArrowDownAZ, ArrowDownZA, EyeOff } from 'lucide-react';
 import ViewToolbar from '../../components/ViewToolbar';
+import FreezeControl from '../../components/FreezeControl';
+import { useFreeze } from '../../hooks/useFreeze';
 import { useViewHistory } from '../../hooks/useViewHistory';
 import StatusBadge from '../../components/ui/StatusBadge';
 import api from '../../lib/api';
@@ -289,16 +291,16 @@ export default function Creators({ scope = 'general', selected, onSelectedChange
     if (e.metaKey || e.ctrlKey) window.open(url, '_blank'); else navigate(url);
   };
 
-  // Lebar kolom pilih tetap supaya kolom Nama tahu offset kirinya; bayangan cuma di kolom terkunci terakhir (Nama)
+  // Lebar kolom pilih tetap; kolom beku (pilihan "Bekukan", default 1 = Nama) offset kirinya diukur dari lebar asli
   const SELECT_W = 44;
   const stickyCol = (id: string, head: boolean): React.CSSProperties => {
     // Status terkunci di kanan (bisa diubah langsung tanpa geser tabel)
     if (id === 'status') return { position: 'sticky', right: 0, zIndex: head ? 3 : 1, background: head ? '#f8f9ff' : 'inherit', boxShadow: '-6px 0 8px -6px rgba(0,0,0,0.12)' };
-    if (id !== 'select' && id !== 'name') return {};
-    const left = id === 'name' && onSelectedChange ? SELECT_W : 0;
+    if (!frozenIds.includes(id)) return {};
     return {
-      position: 'sticky', left, zIndex: head ? 3 : 1, background: head ? '#f8f9ff' : 'inherit',
-      ...(id === 'select' ? { width: SELECT_W, minWidth: SELECT_W, maxWidth: SELECT_W, padding: head ? 0 : '12px 0' } : { boxShadow: '6px 0 8px -6px rgba(0,0,0,0.12)' }),
+      position: 'sticky', left: lefts[id] ?? 0, zIndex: head ? 3 : 1, background: head ? '#f8f9ff' : 'inherit',
+      ...(id === 'select' ? { width: SELECT_W, minWidth: SELECT_W, maxWidth: SELECT_W, padding: head ? 0 : '12px 0' } : {}),
+      ...(id === frozenIds[frozenIds.length - 1] && id !== 'select' ? { boxShadow: '6px 0 8px -6px rgba(0,0,0,0.12)' } : {}),
     };
   };
 
@@ -322,6 +324,41 @@ export default function Creators({ scope = 'general', selected, onSelectedChange
 
   const hideable = table.getAllLeafColumns().filter((c) => c.id !== 'select');
   const visibleCount = table.getVisibleLeafColumns().length;
+
+  // Bekukan kolom & baris (ala Sheets), disimpan per menu di browser
+  const [freeze, setFreeze] = useFreeze(`creators:${scope}`);
+  const visibleIds = table.getVisibleLeafColumns().map((c) => c.id);
+  const dataIds = visibleIds.filter((id) => id !== 'select' && id !== 'status');
+  const frozenIds = [...(visibleIds.includes('select') ? ['select'] : []), ...dataIds.slice(0, freeze.cols)];
+  const frozenRowCount = Math.min(freeze.rows, table.getRowModel().rows.length);
+  const thRefs = useRef(new Map<string, HTMLTableCellElement>());
+  const theadRef = useRef<HTMLTableSectionElement>(null);
+  const rowRefs = useRef<(HTMLTableRowElement | null)[]>([]);
+  const [lefts, setLefts] = useState<Record<string, number>>({});
+  const [tops, setTops] = useState<number[]>([]);
+  const frozenKey = frozenIds.join(',');
+  const rowCount = table.getRowModel().rows.length;
+  useEffect(() => {
+    const measure = () => {
+      const l: Record<string, number> = {};
+      let x = 0;
+      for (const id of frozenKey ? frozenKey.split(',') : []) { l[id] = x; x += thRefs.current.get(id)?.offsetWidth ?? 0; }
+      const t: number[] = [];
+      let y = theadRef.current?.offsetHeight ?? 0;
+      for (let p = 0; p < frozenRowCount; p++) { t.push(y); y += rowRefs.current[p]?.offsetHeight ?? 0; }
+      setLefts((o) => (JSON.stringify(o) === JSON.stringify(l) ? o : l));
+      setTops((o) => (JSON.stringify(o) === JSON.stringify(t) ? o : t));
+    };
+    const ro = new ResizeObserver(measure);
+    thRefs.current.forEach((el) => ro.observe(el));
+    if (theadRef.current) ro.observe(theadRef.current);
+    rowRefs.current.slice(0, frozenRowCount).forEach((el) => { if (el) ro.observe(el); });
+    return () => ro.disconnect();
+  }, [frozenKey, frozenRowCount, rowCount]);
+  /** Baris beku: sticky atas tepat di bawah header */
+  const rowStick = (p: number, id: string): React.CSSProperties => (p < frozenRowCount
+    ? { position: 'sticky', top: tops[p] ?? 0, zIndex: frozenIds.includes(id) || id === 'status' ? 4 : 2, background: 'inherit', ...(p === frozenRowCount - 1 ? { boxShadow: 'inset 0 -2px 0 #c7c8cf' } : {}) }
+    : {});
 
   return (
     <div>
@@ -357,6 +394,7 @@ export default function Creators({ scope = 'general', selected, onSelectedChange
             onShowAll={() => setView((v) => ({ ...v, columnVisibility: {} }))}
             canUndo={canUndo} onUndo={undoView}
             canReset={view !== DEFAULT_VIEW} onReset={() => setView(DEFAULT_VIEW)} />
+          <FreezeControl freeze={freeze} onChange={setFreeze} maxCols={dataIds.length} />
           <button onClick={fetchCreators} style={{ padding: '10px', borderRadius: '10px', border: '1.5px solid #c7c8cf', background: 'white', cursor: 'pointer', color: '#777683', display: 'flex' }}>
             <RefreshCw size={16} />
           </button>
@@ -375,11 +413,12 @@ export default function Creators({ scope = 'general', selected, onSelectedChange
         {/* Kolom pilih (mode share) + Nama terkunci di kiri saat tabel digeser horizontal */}
         <div style={{ overflow: 'auto', maxHeight: '75vh' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
-            <thead>
+            <thead ref={theadRef} style={{ position: 'sticky', top: 0, zIndex: 5 }}>
               {table.getHeaderGroups().map((hg) => (
                 <tr key={hg.id} style={{ background: '#f8f9ff', borderBottom: '1px solid #e1e0ff' }}>
                   {hg.headers.map((header) => (
-                    <th key={header.id} style={{ padding: 0, position: 'sticky', top: 0, background: '#f8f9ff', zIndex: 1, ...stickyCol(header.column.id, true) }}>
+                    <th key={header.id} ref={(el) => { if (el) thRefs.current.set(header.column.id, el); else thRefs.current.delete(header.column.id); }}
+                      style={{ padding: 0, position: 'sticky', top: 0, background: '#f8f9ff', zIndex: 1, ...stickyCol(header.column.id, true) }}>
                       {header.column.getCanFilter() ? (
                         <ColumnHeaderCell column={header.column} table={table}>
                           {flexRender(header.column.columnDef.header, header.getContext())}
@@ -402,6 +441,7 @@ export default function Creators({ scope = 'general', selected, onSelectedChange
               ) : table.getRowModel().rows.map((row, i) => (
                 <tr
                   key={row.id}
+                  ref={(el) => { rowRefs.current[i] = el; }}
                   // Klik baris = buka detail creator (Ctrl/⌘ = tab baru); mode pilih (share) = centang
                   onClick={(e) => openRow(e, row.original._id)}
                   onKeyDown={(e) => { if (e.key === 'Enter') openRow(e, row.original._id); }}
@@ -411,7 +451,7 @@ export default function Creators({ scope = 'general', selected, onSelectedChange
                   onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.background = i % 2 === 0 ? 'white' : '#fcfcff')}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <td key={cell.id} style={{ padding: '12px 14px', color: '#464652', whiteSpace: 'nowrap', fontFamily: 'var(--font-display)', ...stickyCol(cell.column.id, false), ...(cell.column.id === 'select' ? { textAlign: 'center' } : {}) }}>
+                    <td key={cell.id} style={{ padding: '12px 14px', color: '#464652', whiteSpace: 'nowrap', fontFamily: 'var(--font-display)', ...stickyCol(cell.column.id, false), ...rowStick(i, cell.column.id), ...(cell.column.id === 'select' ? { textAlign: 'center' } : {}) }}>
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </td>
                   ))}
