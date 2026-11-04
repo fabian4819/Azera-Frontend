@@ -1,6 +1,6 @@
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, AlertTriangle, ArrowDownCircle, ArrowUpCircle, Columns3, Plus, Trash2, TrendingUp, Clock, FileSpreadsheet, ChevronDown, Pencil, X, EyeOff, RotateCcw } from 'lucide-react';
+import { Search, ListFilter, AlertTriangle, ArrowDownCircle, ArrowUpCircle, Columns3, Plus, Trash2, TrendingUp, Clock, FileSpreadsheet, ChevronDown, Pencil, X, EyeOff, RotateCcw } from 'lucide-react';
 import api from '../../lib/api';
 import FreezeControl from '../../components/FreezeControl';
 import { useFreeze } from '../../hooks/useFreeze';
@@ -34,6 +34,12 @@ const td: React.CSSProperties = { padding: '8px 10px', borderBottom: '1px solid 
 
 const rupiah = (v: number) => `Rp${Math.round(v).toLocaleString('id-ID')}`;
 const ymd = (d: Date) => d.toLocaleDateString('en-CA');
+type FilterCol = 'campaign' | 'company' | 'month' | 'status';
+const HEADER_FILTER: Record<string, FilterCol> = { Campaign: 'campaign', Perusahaan: 'company', 'Bulan Running': 'month', Status: 'status' };
+const INVOICE_STATUSES: string[] = ['Lunas', 'Belum Lunas', 'Lewat Jatuh Tempo'];
+/** Status invoice di grup ini (grup bisa berisi beberapa invoice); dipakai filter kolom Status */
+const groupStatuses = (g: { invoices: { paid: boolean; overdue: boolean }[] }) =>
+  [...new Set(g.invoices.map((i): string => (i.paid ? 'Lunas' : i.overdue ? 'Lewat Jatuh Tempo' : 'Belum Lunas')))];
 const monthLabel = (ym: string) => (ym ? new Date(`${ym}-01T00:00:00`).toLocaleDateString('id-ID', { month: 'long', year: 'numeric' }) : '-');
 
 type Mode = 'week' | 'month' | 'year' | 'custom' | 'all';
@@ -59,7 +65,7 @@ function rangeOf(mode: Mode, ref: string, customFrom: string, customTo: string):
 interface Group {
   key: string; campaignId: string | null; campaign: string; company: string; contact: string; mastersheetUrl: string; runningMonth: string;
   items: { sow: string; tier: string; qty: number; unitFee: number; amount: number }[];
-  invoices: { _id: string; number: string; issueDate: string; dueDate: string; total: number; paid: boolean; paidAt: string; overdue: boolean }[];
+  invoices: { _id: string; shortId?: number; number: string; issueDate: string; dueDate: string; total: number; paid: boolean; paidAt: string; overdue: boolean }[];
   custom: Record<string, string | number>; totalInvoice: number; income: number; receivable: number;
   expense: { feeCreator: number; feePic: number; feeMg: number; feeHandle: number; adminInternal: number; reimburse: number; ads: number; opex: number; custom: number; total: number };
   /** Keterangan Gaji Admin dari invoice WA */
@@ -85,6 +91,52 @@ function TierPill({ tier }: { tier: string }) {
 }
 
 /** Daftar per invoice dalam satu sel grup; tinggi baris tetap supaya kolom Invoice/Status/Jatuh Tempo sejajar */
+/** Filter per kolom ala Sheets di header Rekap Keuangan: centang nilai yang mau ditampilkan. */
+function HeaderFilter({ label, values, selected, onChange }: {
+  label: string; values: string[]; selected: Set<string> | null; onChange: (s: Set<string> | null) => void;
+}) {
+  const [open, setOpen] = useState<DOMRect | null>(null);
+  const [draft, setDraft] = useState<Set<string>>(new Set());
+  const [q, setQ] = useState('');
+  const active = selected !== null;
+  const shown = values.filter((v) => v.toLowerCase().includes(q.trim().toLowerCase()));
+  const toggle = (v: string) => setDraft((d) => { const n = new Set(d); if (n.has(v)) n.delete(v); else n.add(v); return n; });
+  return (
+    <>
+      <button type="button" aria-label={`Filter ${label}`} title={`Filter ${label}`}
+        onClick={(e) => { setDraft(new Set(selected ?? values)); setQ(''); setOpen(e.currentTarget.getBoundingClientRect()); }}
+        style={{ marginLeft: '6px', verticalAlign: 'middle', width: '22px', height: '22px', borderRadius: '5px', border: 'none', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', background: active ? '#6728e4' : 'transparent', color: active ? 'white' : '#5f6368' }}>
+        <ListFilter size={13} />
+      </button>
+      {open && (
+        <>
+          <div onClick={() => setOpen(null)} style={{ position: 'fixed', inset: 0, zIndex: 60 }} />
+          <div role="dialog" aria-label={`Filter ${label}`} style={{ position: 'fixed', top: Math.min(open.bottom + 4, window.innerHeight - 380), left: Math.max(8, Math.min(open.left, window.innerWidth - 268)), width: 260, zIndex: 61, background: 'white', borderRadius: '10px', boxShadow: '0 4px 16px rgba(0,0,0,.18)', padding: '10px 12px', fontFamily: f, fontWeight: 400 }}>
+            <p style={{ fontSize: '0.75rem', fontWeight: 700, color: '#5f6368', marginBottom: '6px' }}>Tampilkan {label}</p>
+            <div style={{ display: 'flex', gap: '10px', marginBottom: '6px' }}>
+              <button type="button" onClick={() => setDraft(new Set(values))} style={{ background: 'none', border: 'none', color: '#1a73e8', cursor: 'pointer', fontSize: '0.75rem', padding: 0 }}>Pilih semua</button>
+              <button type="button" onClick={() => setDraft(new Set())} style={{ background: 'none', border: 'none', color: '#1a73e8', cursor: 'pointer', fontSize: '0.75rem', padding: 0 }}>Hapus</button>
+            </div>
+            {values.length > 8 && <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Cari nilai…" style={{ ...input, width: '100%', marginBottom: '6px' }} />}
+            <div style={{ maxHeight: '220px', overflowY: 'auto' }}>
+              {shown.map((v) => (
+                <label key={v} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '4px 0', fontSize: '0.78rem', cursor: 'pointer' }}>
+                  <input type="checkbox" checked={draft.has(v)} onChange={() => toggle(v)} />
+                  <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{v || '(Kosong)'}</span>
+                </label>
+              ))}
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '8px' }}>
+              <button type="button" onClick={() => setOpen(null)} style={btn(false)}>Batal</button>
+              <button type="button" onClick={() => { onChange(draft.size === values.length ? null : draft); setOpen(null); }} style={btn()}>OK</button>
+            </div>
+          </div>
+        </>
+      )}
+    </>
+  );
+}
+
 function invoiceList(g: Group, render: (inv: Group['invoices'][number]) => React.ReactNode) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
@@ -365,8 +417,8 @@ export default function FinanceRecap() {
   const [showHidden, setShowHidden] = useState(false);
   // Cari, filter & urut grup (per campaign) + bekukan kolom awal (Campaign … Master Sheet)
   const [query, setQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'' | 'unpaid' | 'paid' | 'overdue'>('');
-  const [monthFilter, setMonthFilter] = useState('');
+  // Filter per kolom (header): null = semua nilai tampil
+  const [colFilters, setColFilters] = useState<Partial<Record<FilterCol, Set<string> | null>>>({});
   const [sortBy, setSortBy] = useState<'' | 'profit' | 'total' | 'expense' | 'month'>('');
   const [freeze, setFreeze] = useFreeze('finance-recap');
   const headRefs = useRef<(HTMLTableCellElement | null)[]>([]);
@@ -420,18 +472,18 @@ export default function FinanceRecap() {
     }
   };
 
-  const exportExcel = async () => {
+  // Pengganti Export Excel: spreadsheet "Rekap Keuangan | AZERA" di Shared Drive, disinkron dulu baru dibuka.
+  // Tab dibuka sinkron sebelum await supaya tidak diblokir popup blocker.
+  const openSheet = async () => {
     setExporting(true);
+    const tab = window.open('', '_blank');
     try {
-      const res = await api.get('/admin/finance-recap/export', { params: { from, to }, responseType: 'blob' });
-      const url = URL.createObjectURL(res.data);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `rekap-keuangan_${from || 'awal'}_${to || 'sekarang'}.xlsx`;
-      a.click();
-      URL.revokeObjectURL(url);
-    } catch {
-      setError('Gagal export Excel.');
+      const res = await api.get('/admin/finance-recap/sheet');
+      if (tab) tab.location.href = res.data.url; else window.location.href = res.data.url;
+    } catch (err) {
+      tab?.close();
+      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      setError(message || 'Gagal menyiapkan Google Sheet.');
     } finally {
       setExporting(false);
     }
@@ -449,22 +501,27 @@ export default function FinanceRecap() {
     'Total Payment', 'Invoice', 'Status', 'Jatuh Tempo', ...columns.map((c) => c.label), ...expenseCols.map(([, l]) => l), 'Uang Keluar', 'Profit', 'Margin', ''];
 
   const allGroups = useMemo(() => data?.groups ?? [], [data]);
-  const months = [...new Set(allGroups.map((g) => g.runningMonth).filter(Boolean))].sort().reverse();
+  const filterValues = useMemo(() => {
+    const uniq = (f: (g: Group) => string[]) => [...new Set(allGroups.flatMap(f))].sort((a, b) => a.localeCompare(b, 'id'));
+    return {
+      campaign: uniq((g) => [g.campaign]),
+      company: uniq((g) => [g.company || '']),
+      month: [...new Set(allGroups.map((g) => g.runningMonth))].sort().reverse().map(monthLabel),
+      status: INVOICE_STATUSES.filter((st) => allGroups.some((g) => groupStatuses(g).includes(st))),
+    } as Record<FilterCol, string[]>;
+  }, [allGroups]);
   const groups = useMemo(() => {
     const q = query.trim().toLowerCase();
+    const pass = (col: FilterCol, vals: string[]) => { const sel = colFilters[col]; return !sel || vals.some((v) => sel.has(v)); };
     let out = allGroups.filter((g) => {
-      if (q && ![g.campaign, g.company, g.contact, ...g.invoices.map((i) => i.number), ...g.items.map((i) => i.sow)].some((v) => (v || '').toLowerCase().includes(q))) return false;
-      if (monthFilter && g.runningMonth !== monthFilter) return false;
-      if (statusFilter === 'paid' && !g.invoices.every((i) => i.paid)) return false;
-      if (statusFilter === 'unpaid' && !g.invoices.some((i) => !i.paid)) return false;
-      if (statusFilter === 'overdue' && !g.invoices.some((i) => i.overdue)) return false;
-      return true;
+      if (q && ![g.campaign, g.company, g.contact, ...g.invoices.map((i) => i.number), ...g.invoices.map((i) => (i.shortId ? `#${i.shortId}` : '')), ...g.items.map((i) => i.sow)].some((v) => (v || '').toLowerCase().includes(q))) return false;
+      return pass('campaign', [g.campaign]) && pass('company', [g.company || '']) && pass('month', [monthLabel(g.runningMonth)]) && pass('status', groupStatuses(g));
     });
     const by: Record<string, (g: Group) => number | string> = { profit: (g) => g.profit, total: (g) => g.totalInvoice, expense: (g) => g.expense.total, month: (g) => g.runningMonth };
     if (sortBy) out = [...out].sort((a, b) => { const x = by[sortBy](a), y = by[sortBy](b); return x < y ? 1 : x > y ? -1 : 0; });
     return out;
-  }, [allGroups, query, monthFilter, statusFilter, sortBy]);
-  const filtering = Boolean(query.trim() || monthFilter || statusFilter);
+  }, [allGroups, query, colFilters, sortBy]);
+  const filtering = Boolean(query.trim() || Object.values(colFilters).some(Boolean));
 
   // Kolom beku (maks 5 kolom grup pertama): offset kiri diukur dari lebar header sebenarnya
   const frozenCols = Math.min(freeze.cols, 5);
@@ -518,8 +575,8 @@ export default function FinanceRecap() {
           </button>
         )}
         <button onClick={() => setManaging((v) => !v)} style={btn(false)}><Columns3 size={13} /> Kolom Tambahan</button>
-        <button onClick={exportExcel} disabled={exporting || !data?.groups.length} style={{ ...btn(), opacity: exporting || !data?.groups.length ? 0.6 : 1 }}>
-          <FileSpreadsheet size={13} /> {exporting ? 'Menyiapkan...' : 'Export Excel'}
+        <button onClick={() => void openSheet()} disabled={exporting} title="Semua periode, ter-update otomatis" style={{ ...btn(), opacity: exporting ? 0.6 : 1 }}>
+          <FileSpreadsheet size={13} /> {exporting ? 'Menyiapkan...' : 'Buka Google Sheet'}
         </button>
       </div>
 
@@ -548,19 +605,9 @@ export default function FinanceRecap() {
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '10px' }}>
         <label style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '0 12px', height: '36px', border: '1.5px solid #e1e0ff', borderRadius: '10px', background: 'white', flex: '1 1 240px', minWidth: 0 }}>
           <Search size={14} color="#777683" />
-          <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Cari campaign, perusahaan, contact, nomor invoice, SOW…" aria-label="Cari di rekap"
+          <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Cari campaign, perusahaan, contact, ID/nomor invoice, SOW…" aria-label="Cari di rekap"
             style={{ border: 'none', outline: 'none', fontSize: '0.8rem', fontFamily: f, flex: 1, minWidth: 0, background: 'transparent' }} />
         </label>
-        <select aria-label="Filter status" style={filterInput} value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as typeof statusFilter)}>
-          <option value="">Semua status</option>
-          <option value="unpaid">Ada yang belum lunas</option>
-          <option value="paid">Lunas semua</option>
-          <option value="overdue">Lewat jatuh tempo</option>
-        </select>
-        <select aria-label="Filter bulan running" style={filterInput} value={monthFilter} onChange={(e) => setMonthFilter(e.target.value)}>
-          <option value="">Semua bulan running</option>
-          {months.map((m) => <option key={m} value={m}>{monthLabel(m)}</option>)}
-        </select>
         <select aria-label="Urutkan" style={filterInput} value={sortBy} onChange={(e) => setSortBy(e.target.value as typeof sortBy)}>
           <option value="">Urutan default</option>
           <option value="profit">Profit tertinggi</option>
@@ -570,7 +617,7 @@ export default function FinanceRecap() {
         </select>
         <FreezeControl freeze={{ cols: frozenCols, rows: 0 }} onChange={(fz) => setFreeze({ cols: fz.cols, rows: 0 })} maxCols={5} showRows={false} />
         {filtering && (
-          <button onClick={() => { setQuery(''); setStatusFilter(''); setMonthFilter(''); }} style={{ ...btn(false), height: '36px' }}><X size={13} /> Hapus filter</button>
+          <button onClick={() => { setQuery(''); setColFilters({}); }} style={{ ...btn(false), height: '36px' }}><X size={13} /> Hapus filter</button>
         )}
         <span style={{ fontFamily: f, fontSize: '0.74rem', color: '#8a8a99' }}>{filtering ? `${groups.length} dari ${allGroups.length} campaign` : `${allGroups.length} campaign`}</span>
       </div>
@@ -587,7 +634,15 @@ export default function FinanceRecap() {
         ) : (
           <div style={{ overflow: 'auto', maxHeight: 'calc(100vh - 220px)' }} className="recap-table-scroll">
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.8rem', fontFamily: f }}>
-              <thead><tr>{headers.map((h, c) => <th key={h} ref={(el) => { headRefs.current[c] = el; }} style={{ ...th, ...freezeStyle(c, true) }}>{h}</th>)}</tr></thead>
+              <thead><tr>{headers.map((h, c) => {
+                const col = HEADER_FILTER[h];
+                return (
+                  <th key={h} ref={(el) => { headRefs.current[c] = el; }} style={{ ...th, ...freezeStyle(c, true) }}>
+                    {h}
+                    {col && <HeaderFilter label={h} values={filterValues[col]} selected={colFilters[col] ?? null} onChange={(sel) => setColFilters((fs) => ({ ...fs, [col]: sel }))} />}
+                  </th>
+                );
+              })}</tr></thead>
               <tbody>
                 {groups.map((g) => {
                   const items = g.items.length ? g.items : [null];
@@ -635,7 +690,7 @@ export default function FinanceRecap() {
                               {groupCell(invoiceList(g, (inv) => (
                                 <button onClick={() => openPdf(inv._id)} title={`Buka PDF · ${rupiah(inv.total)} · ${inv.issueDate}`}
                                   style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontFamily: f, fontSize: '0.76rem', fontWeight: 600, color: '#4b2fc4', textDecoration: 'underline', textUnderlineOffset: '2px' }}>
-                                  {inv.number || '-'} ↗
+                                  {inv.shortId ? <span style={{ color: '#8a8a99', textDecoration: 'none', marginRight: '4px' }}>#{inv.shortId}</span> : null}{inv.number || '-'} ↗
                                 </button>
                               )))}
                               {groupCell(invoiceList(g, (inv) => (

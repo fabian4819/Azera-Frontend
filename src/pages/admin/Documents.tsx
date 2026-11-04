@@ -284,7 +284,7 @@ function DocEditor({ config, initialId, initialData, onBack, onSaved }: {
   );
 }
 
-interface ListRow { _id: string; number: string; client: string; mastersheetUrl?: string; updatedAt: string; total?: number; paid?: boolean }
+interface ListRow { _id: string; shortId?: number; number: string; client: string; mastersheetUrl?: string; updatedAt: string; total?: number; paid?: boolean }
 /** Link Mastersheet dari bot WA (/invoice), hanya link Google Sheets yang dijadikan tautan */
 const sheetLinks = (u?: string) => (u ?? '').split(/\s+/).filter((x) => /^https:\/\/docs\.google\.com\/spreadsheets\//.test(x));
 
@@ -349,7 +349,7 @@ export default function Documents() {
   };
 
   const isInvoice = config.apiType === 'invoice';
-  const docHeaders = ['Nomor', 'Klien', ...(isInvoice ? ['Mastersheet', 'Total', 'Status'] : []), 'Terakhir Diubah'];
+  const docHeaders = [...(isInvoice ? ['ID'] : []), 'Nomor', 'Klien', ...(isInvoice ? ['Mastersheet', 'Total', 'Status'] : []), 'Terakhir Diubah'];
 
   const remove = async (id: string) => {
     try {
@@ -378,6 +378,7 @@ export default function Documents() {
         storageKey={`docs:${config.apiType}`}
         headers={docHeaders}
         rows={rows.map((r) => [
+          ...(isInvoice ? [r.shortId ?? ''] : []), // angka supaya urut #9 sebelum #10
           r.number || '', r.client || '',
           ...(isInvoice ? [sheetLinks(r.mastersheetUrl).join(' '), r.total ?? 0, r.paid ? 'Lunas' : 'Belum Lunas'] : []),
           new Date(r.updatedAt).toLocaleString('sv-SE', { timeZone: 'Asia/Jakarta' }).slice(0, 16), // YYYY-MM-DD HH:mm, urut benar
@@ -386,6 +387,7 @@ export default function Documents() {
         customCell={(_r, c, v) => {
           if (!isInvoice) return undefined;
           const h = docHeaders[c];
+          if (h === 'ID') return v === '' ? '' : <span style={{ fontWeight: 700, color: '#6728e4' }}>#{v}</span>;
           if (h === 'Mastersheet') {
             const links = String(v).split(' ').filter(Boolean);
             return links.length
