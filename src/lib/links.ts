@@ -1,11 +1,12 @@
 import { PLATFORM_PREFIX } from './applyForm';
 
-/** Header kolom tabel = nama platform (tab Pendaftar/Listing: "Instagram", "TikTok", ...) */
+/** Header kolom tabel = nama platform ("Instagram") atau "Username <platform>" (tab Pendaftar/Listing) */
 const PLATFORM_BY_HEADER: Record<string, string> = { instagram: 'instagram', tiktok: 'tiktok', threads: 'threads', x: 'x' };
 
 /** "@username" di kolom platform → URL profil (tiktok.com/@..., instagram.com/...). null kalau bukan. */
 export function profileUrlFor(header: string | undefined, value: string): string | null {
-  const platform = header ? PLATFORM_BY_HEADER[header.trim().toLowerCase()] : undefined;
+  // "Instagram" (header lama) atau "Username Instagram" (tab Pendaftar/Listing dengan metrik ekstensi)
+  const platform = header ? PLATFORM_BY_HEADER[header.trim().toLowerCase().replace(/^username\s+/, '')] : undefined;
   const v = value.trim();
   if (!platform || !v) return null;
   if (/^https?:\/\//i.test(v)) return v;
