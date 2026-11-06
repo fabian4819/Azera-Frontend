@@ -13,13 +13,19 @@ interface Social { username?: string; url?: string; followers?: number }
 interface ImportRow {
   tab: string; rowNumber: number; name: string; phone: string; age?: number; domicile?: string; gender?: string;
   instagram?: Social; tiktok?: Social; approval?: string; errors: string[];
+  /** Hasil cocok ke Existing Creator: baru, sudah ada & dilengkapi, atau sudah ada & sama persis */
+  status?: 'new' | 'updated' | 'existing';
 }
 interface Preview {
   rows: ImportRow[]; total: number; validCount: number; invalidCount: number; noPhone: number;
   ignoredHeaders: string[]; tabs: { name: string; rows: number }[];
+  creators: { new: number; updated: number; unchanged: number };
 }
 type Source = File | string;
 
+const STATUS: Record<string, [string, string, string]> = {
+  new: ['Baru', '#d1fae5', '#065F46'], updated: ['Sudah ada · dilengkapi', '#e0e7ff', '#3730a3'], existing: ['Sudah ada · sama', '#f1f1f4', '#5f6368'],
+};
 const num = (n?: number) => (n === undefined || n === null ? '-' : n.toLocaleString('id-ID'));
 const td: React.CSSProperties = { padding: '8px 10px', whiteSpace: 'nowrap' };
 const COLUMNS = 'Nama Lengkap, Umur, Domisili, Jenis Kelamin, No WA, Username IG, Link IG, Followers IG, Username TikTok, Link TikTok, Followers TikTok, Approval';
@@ -42,7 +48,7 @@ export default function Import() {
   const [source, setSource] = useState<Source | null>(null);
   const [preview, setPreview] = useState<Preview | null>(null);
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<{ created: number; updated: number; rows: number; skipped: { rowNumber: number; tab: string; reason: string }[] } | null>(null);
+  const [result, setResult] = useState<{ created: number; updated: number; unchanged: number; rows: number; skipped: { rowNumber: number; tab: string; reason: string }[] } | null>(null);
   const [error, setError] = useState('');
 
   const send = (path: string, picked: Source) => {
@@ -133,7 +139,7 @@ export default function Import() {
         <div style={{ ...cardStyle, background: '#d1fae5' }}>
           <p style={{ fontFamily: f, fontWeight: 700, color: '#065F46' }}>
             <CheckCircle2 size={16} style={{ verticalAlign: 'middle', marginRight: '6px' }} />
-            {result.rows} baris diproses: {result.created} creator baru{result.updated > 0 ? `, ${result.updated} creator dilengkapi` : ''}.{' '}
+            {result.rows} baris diproses: {result.created} creator baru, {result.updated} dilengkapi, {result.unchanged} sudah ada (tidak berubah).{' '}
             <Link to="/admin/existing-creators" style={{ color: '#065F46' }}>Lihat Existing Creator →</Link>
           </p>
           {result.skipped.length > 0 && (
@@ -157,6 +163,13 @@ export default function Import() {
               {loading ? 'Mengimport...' : `Import ${preview.validCount.toLocaleString('id-ID')} Baris`}
             </button>
           </div>
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '12px' }}>
+            {([['new', preview.creators.new, 'creator baru'], ['updated', preview.creators.updated, 'sudah ada, akan dilengkapi'], ['existing', preview.creators.unchanged, 'sudah ada, tidak berubah (dilewati)']] as const).map(([k, n, label]) => (
+              <span key={k} style={{ padding: '6px 12px', borderRadius: '999px', background: STATUS[k][1], color: STATUS[k][2], fontFamily: f, fontSize: '0.8rem', fontWeight: 700 }}>
+                {n.toLocaleString('id-ID')} {label}
+              </span>
+            ))}
+          </div>
           <p style={{ fontFamily: f, fontSize: '0.8rem', color: '#464652', marginBottom: '8px' }}>
             Tab (niche): {preview.tabs.map((t) => `${t.name} (${t.rows})`).join(' · ')}
           </p>
@@ -174,7 +187,7 @@ export default function Import() {
           )}
           {preview.rows.length < preview.total && (
             <p style={{ fontFamily: f, fontSize: '0.78rem', color: '#777683', marginBottom: '8px' }}>
-              Menampilkan {preview.rows.length} baris contoh (baris bermasalah selalu tampil di atas). Semua {preview.total.toLocaleString('id-ID')} baris ikut diproses saat import.
+              Menampilkan {preview.rows.length} baris contoh (baris bermasalah, lalu creator baru, tampil paling atas). Semua {preview.total.toLocaleString('id-ID')} baris ikut diproses saat import.
             </p>
           )}
           <div style={{ overflowX: 'auto', maxHeight: '60vh', overflowY: 'auto' }}>
@@ -202,7 +215,7 @@ export default function Import() {
                     <td style={{ padding: '8px 10px' }}>
                       {r.errors.length > 0
                         ? <span style={{ color: '#ba1a1a', display: 'flex', alignItems: 'center', gap: '4px' }}><AlertTriangle size={12} /> {r.errors.join(', ')}</span>
-                        : <span style={{ color: '#065F46' }}>OK</span>}
+                        : r.status && <span style={{ padding: '2px 10px', borderRadius: '999px', background: STATUS[r.status][1], color: STATUS[r.status][2], fontWeight: 700 }}>{STATUS[r.status][0]}</span>}
                     </td>
                   </tr>
                 ))}
