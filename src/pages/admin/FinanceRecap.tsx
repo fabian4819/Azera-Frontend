@@ -81,6 +81,16 @@ interface Recap {
   totals: { income: number; expense: number; profit: number; margin: number | null; receivable: number; overdue: number; invoiceCount: number; paidCount: number; hiddenCount: number };
 }
 
+const TIER_COLORS: Record<string, [string, string]> = {
+  nano: ['#14532d', '#fff'], micro: ['#7c2d12', '#fff'], macro: ['#1e3a8a', '#fff'], mega: ['#581c87', '#fff'],
+  buzzer: ['#fde68a', '#78350f'], 'reimburse produk': ['#3f2d12', '#fff'],
+};
+function TierPill({ tier }: { tier: string }) {
+  if (!tier) return <span style={{ color: '#c7c8cf' }}>-</span>;
+  const [bg, fg] = TIER_COLORS[tier.toLowerCase()] ?? ['#ede9fe', '#4c1d95'];
+  return <span style={{ padding: '3px 12px', borderRadius: '999px', fontSize: '0.72rem', fontWeight: 700, background: bg, color: fg, whiteSpace: 'nowrap' }}>{tier}</span>;
+}
+
 /** Daftar per invoice dalam satu sel grup; tinggi baris tetap supaya kolom Invoice/Status/Jatuh Tempo sejajar */
 /** Filter per kolom ala Sheets di header Rekap Keuangan: centang nilai yang mau ditampilkan. */
 function HeaderFilter({ label, values, selected, onChange }: {
@@ -513,7 +523,7 @@ export default function FinanceRecap() {
   // Rincian uang keluar per kolom; kolom yang nol di semua baris disembunyikan supaya tabel tidak terlalu lebar
   // Semua kolom biaya selalu tampil (juga yang masih 0) supaya bisa diisi langsung dari tabel
   const expenseCols = EXPENSE_COLS;
-  const headers = ['Campaign', 'Perusahaan', 'Contact', 'Bulan Running', 'Master Sheet', 'Item', 'Scope of Work', 'Jumlah Talent', 'Fee/Talent', 'Total',
+  const headers = ['Campaign', 'Perusahaan', 'Contact', 'Bulan Running', 'Master Sheet', 'Item', 'Scope of Work', 'Tier', 'Jumlah Talent', 'Fee/Talent', 'Total',
     'Total Payment', 'Invoice', 'Status', 'Jatuh Tempo', ...columns.map((c) => c.label), ...expenseCols.map(([, l]) => l), 'Uang Keluar', 'Profit', 'Margin', ''];
 
   const allGroups = useMemo(() => data?.groups ?? [], [data]);
@@ -700,6 +710,7 @@ export default function FinanceRecap() {
                           )}
                           <td style={{ ...td, minWidth: '180px' }}>{it?.item || '-'}</td>
                           <td style={{ ...td, minWidth: '140px' }}>{it?.sow || '-'}</td>
+                          <td style={td}><TierPill tier={it?.tier ?? ''} /></td>
                           <td style={{ ...td, textAlign: 'center' }}>{it ? it.qty : '-'}</td>
                           <td style={{ ...td, whiteSpace: 'nowrap' }}>{it ? rupiah(it.unitFee) : '-'}</td>
                           <td style={{ ...td, whiteSpace: 'nowrap' }}>{it ? rupiah(it.amount) : '-'}</td>
