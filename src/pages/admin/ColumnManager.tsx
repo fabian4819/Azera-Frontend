@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ArrowLeft, ArrowRight, Eye, EyeOff, Pencil, Plus, Trash2 } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Eye, EyeOff, Pencil, Plus, RotateCcw, Trash2 } from 'lucide-react';
 
 export type Access = 'hidden' | 'view' | 'edit';
 type Platform = 'instagram' | 'tiktok' | 'threads' | 'x';
@@ -62,19 +62,16 @@ interface ColumnMenuProps {
   /** Kolom progress (bisa diubah/hapus), kosong untuk kolom data sistem */
   progress?: ProgressColumn;
   access: Access;
-  canMoveLeft: boolean;
-  canMoveRight: boolean;
   onAccess: (a: Access) => void;
   /** Kolom sistem yang boleh diisi creator (Draft, Link Posting, Insight) */
   creatorEditable?: boolean;
   onChange: (next: ProgressColumn) => void;
-  onMove: (dir: -1 | 1) => void;
   onInsertRight: () => void;
   onDelete: () => void;
 }
 
 /** Bagian atas dropdown header kolom Master Sheet: pengaturan kolom langsung dari tabel. */
-export function ColumnMenu({ progress, access, creatorEditable, canMoveLeft, canMoveRight, onAccess, onChange, onMove, onInsertRight, onDelete }: ColumnMenuProps) {
+export function ColumnMenu({ progress, access, creatorEditable, onAccess, onChange, onInsertRight, onDelete }: ColumnMenuProps) {
   const [label, setLabel] = useState(progress?.label ?? '');
 
   if (!progress && creatorEditable) {
@@ -151,12 +148,51 @@ export function ColumnMenu({ progress, access, creatorEditable, canMoveLeft, can
         </div>
       </div>
       <div style={{ borderTop: '1px solid #e2e3e3', margin: '6px 0' }} />
-      <div style={{ display: 'flex' }}>
-        <button type="button" disabled={!canMoveLeft} onClick={() => onMove(-1)} style={{ ...item, opacity: canMoveLeft ? 1 : 0.35 }}><ArrowLeft size={14} /> Geser kiri</button>
-        <button type="button" disabled={!canMoveRight} onClick={() => onMove(1)} style={{ ...item, opacity: canMoveRight ? 1 : 0.35 }}><ArrowRight size={14} /> Geser kanan</button>
-      </div>
       <button type="button" onClick={onInsertRight} style={item}><Plus size={14} /> Sisipkan kolom di kanan</button>
       <button type="button" onClick={onDelete} style={{ ...item, color: '#b3261e' }}><Trash2 size={14} /> Hapus kolom</button>
+    </div>
+  );
+}
+
+interface ColumnLayoutProps {
+  /** Judul semua kolom sesuai urutan tampil sekarang */
+  headers: string[];
+  col: number;
+  /** Kolom progress diganti namanya lewat pengaturan kolomnya sendiri (di bawah) */
+  canRename: boolean;
+  onRename: (label: string) => void;
+  /** Pindahkan kolom ini ke posisi `to` (index tampil) */
+  onMove: (to: number) => void;
+  onReset: () => void;
+}
+
+/** Bagian paling atas dropdown header Master Sheet (semua kolom): ganti nama, pindah posisi, reset. */
+export function ColumnLayout({ headers, col, canRename, onRename, onMove, onReset }: ColumnLayoutProps) {
+  const [label, setLabel] = useState(headers[col] ?? '');
+  const commit = () => { if (label.trim() !== headers[col]) onRename(label.trim()); };
+  return (
+    <div>
+      <div style={{ padding: '4px 12px 6px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        {canRename && (
+          <div>
+            <span style={lbl}>Ganti nama (kosongkan = nama default)</span>
+            <input value={label} onChange={(e) => setLabel(e.target.value)} onBlur={commit} onKeyDown={(e) => { if (e.key === 'Enter') commit(); }}
+              maxLength={80} aria-label="Ganti nama kolom" style={{ ...sel, padding: '6px 8px' }} />
+          </div>
+        )}
+        <div>
+          <span style={lbl}>Pindah ke posisi (atau tarik judul kolom)</span>
+          <select value={col} aria-label="Pindah ke posisi" style={sel} onChange={(e) => onMove(Number(e.target.value))}>
+            {headers.map((h, i) => <option key={i} value={i}>{i + 1}. {i === col ? `${h} (posisi sekarang)` : h}</option>)}
+          </select>
+        </div>
+      </div>
+      <div style={{ display: 'flex' }}>
+        <button type="button" disabled={col === 0} onClick={() => onMove(col - 1)} style={{ ...item, opacity: col > 0 ? 1 : 0.35 }}><ArrowLeft size={14} /> Geser kiri</button>
+        <button type="button" disabled={col === headers.length - 1} onClick={() => onMove(col + 1)} style={{ ...item, opacity: col < headers.length - 1 ? 1 : 0.35 }}><ArrowRight size={14} /> Geser kanan</button>
+      </div>
+      <button type="button" onClick={onReset} style={item}><RotateCcw size={14} /> Kembalikan nama & urutan default</button>
+      <div style={{ borderTop: '1px solid #e2e3e3', margin: '6px 0' }} />
     </div>
   );
 }

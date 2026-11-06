@@ -150,6 +150,8 @@ interface SheetGridProps {
   storageKey?: string;
   /** Klik baris (index asli), mis. buka halaman detail. Ctrl/⌘ diteruskan supaya bisa buka tab baru. */
   onRowClick?: (row: number, e: React.MouseEvent) => void;
+  /** Admin: drag & drop judul kolom; kolom `from` dipindah ke posisi `to` (index asli) */
+  onMoveColumn?: (from: number, to: number) => void;
 }
 
 function errorMessage(err: unknown): string {
@@ -162,7 +164,7 @@ const EMPTY_VIEW: GridView = { sort: null, hidden: {}, hiddenCols: [] };
 /** Tabel ala Google Sheets: cari, filter & urutkan per kolom, plus edit sel progress langsung di tabel. */
 export default function SheetGrid({
   headers, rows: allRows, totals, hint, emptyText, canEdit, kindOf, onEdit, onUpload, highlightRow, actionHeader, rowAction, footer, maxHeight,
-  columnMenu, headerIcon, addColumnMenu, customCell, storageKey, onRowClick,
+  columnMenu, headerIcon, addColumnMenu, customCell, storageKey, onRowClick, onMoveColumn,
 }: SheetGridProps) {
   const [addMenu, setAddMenu] = useState<DOMRect | null>(null);
   // Di HP, kolom nama + aksi yang sticky menutup hampir seluruh layar → cuma sticky di layar lebar
@@ -187,6 +189,15 @@ export default function SheetGrid({
   const { sort, hidden, hiddenCols } = view;
   const visCols = headers.map((_, i) => i).filter((i) => !hiddenCols.includes(i));
   const [menu, setMenu] = useState<{ col: number; rect: DOMRect } | null>(null);
+  const [drag, setDrag] = useState<{ from: number; over: number | null } | null>(null);
+  const dropColumn = (to: number) => {
+    if (drag && drag.from !== to && onMoveColumn) {
+      // Filter/sort disimpan per index kolom; index bergeser setelah dipindah, jadi direset
+      setView(EMPTY_VIEW);
+      onMoveColumn(drag.from, to);
+    }
+    setDrag(null);
+  };
   const [editing, setEditing] = useState<{ row: number; col: number; value: string } | null>(null);
   const [saving, setSaving] = useState<string | null>(null);
   const [actionError, setActionError] = useState('');
@@ -435,7 +446,18 @@ export default function SheetGrid({
                 const on = Boolean(hidden[ci]?.size) || sort?.col === ci;
                 const SortIcon = sort?.col === ci ? (sort.dir === 1 ? ArrowDownAZ : ArrowDownZA) : ListFilter;
                 return (
-                  <th key={ci} title={h} style={{ ...cellBase, background: '#f3f0ff', fontWeight: 700, textAlign: 'left', ...colStick(ci, 3) }}>
+                  <th key={ci} title={onMoveColumn ? `${h} (tarik untuk memindah kolom)` : h}
+                    draggable={Boolean(onMoveColumn)}
+                    onDragStart={onMoveColumn ? (e) => { e.dataTransfer.effectAllowed = 'move'; setDrag({ from: ci, over: null }); } : undefined}
+                    onDragOver={drag ? (e) => { e.preventDefault(); if (drag.over !== ci) setDrag({ ...drag, over: ci }); } : undefined}
+                    onDrop={drag ? (e) => { e.preventDefault(); dropColumn(ci); } : undefined}
+                    onDragEnd={() => setDrag(null)}
+                    style={{
+                      ...cellBase, background: drag?.from === ci ? '#e4dbfb' : '#f3f0ff', fontWeight: 700, textAlign: 'left', ...colStick(ci, 3),
+                      ...(onMoveColumn ? { cursor: 'grab' } : {}),
+                      // Garis tujuan: kiri kalau digeser ke kiri, kanan kalau ke kanan
+                      ...(drag && drag.over === ci && drag.from !== ci ? { boxShadow: `inset ${drag.from > ci ? 3 : -3}px 0 0 #6728e4` } : {}),
+                    }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                       <span style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>{h}</span>
                       {headerIcon?.(ci)}

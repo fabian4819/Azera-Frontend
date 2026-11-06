@@ -4,7 +4,7 @@ import { ArrowLeft, Check, Copy, ExternalLink, MessageCircle, RefreshCw, X } fro
 import api from '../../lib/api';
 import SheetGrid, { type Cell, type CellKind } from '../../components/SheetGrid';
 import ReviewStatusCell from '../../components/ReviewStatusCell';
-import { AccessIcon, AddColumnMenu, ColumnMenu, type Access, type ProgressColumn } from './ColumnManager';
+import { AccessIcon, AddColumnMenu, ColumnLayout, ColumnMenu, type Access, type ProgressColumn } from './ColumnManager';
 import { SHEET_TABS, type SheetKind } from './sheetTabs';
 
 const f = 'var(--font-display)';
@@ -22,6 +22,7 @@ interface SheetView {
   rowLinks?: string[];
   rowNotes?: { draft?: string; post?: string }[];
   progressColumns?: ProgressColumn[];
+  columnLabels?: Record<string, string>;
   byPic?: { headers: string[]; rows: Cell[][]; rowIds?: string[]; totals?: Cell[]; columns?: ColumnMeta[] };
   sheetUrl: string | null;
 }
@@ -189,14 +190,24 @@ export default function CampaignSheet() {
 
   // Kelola kolom langsung dari header tabel, tiap perubahan langsung disimpan ke campaign
   const progressCols = view?.progressColumns ?? [];
-  const saveColumns = async (progressColumns: ProgressColumn[], columnAccess?: Record<string, Access>) => {
+  const saveColumns = async (progressColumns: ProgressColumn[], columnAccess?: Record<string, Access>) =>
+    saveCampaign({ progressColumns, ...(columnAccess ? { columnAccess } : {}) });
+  const saveCampaign = async (patch: Record<string, unknown>) => {
     setActionError('');
     try {
-      await api.patch(`/admin/campaigns/${id}`, { progressColumns, ...(columnAccess ? { columnAccess } : {}) });
+      await api.patch(`/admin/campaigns/${id}`, patch);
       await reloadCurrent();
     } catch {
       setActionError('Gagal menyimpan pengaturan kolom. Coba lagi.');
     }
+  };
+  // Urutan & nama kolom per campaign: berlaku juga di dashboard client/PIC/creator dan Google Sheet
+  const moveColumn = (from: number, to: number) => {
+    const keys = (view?.columns ?? []).map((c) => c.key);
+    if (from === to || !keys[from] || to < 0 || to >= keys.length) return;
+    const [k] = keys.splice(from, 1);
+    keys.splice(to, 0, k);
+    void saveCampaign({ columnOrder: keys });
   };
 
   const columnMenu = (col: number, close: () => void) => {
@@ -206,21 +217,29 @@ export default function CampaignSheet() {
     const progress = pIdx === -1 ? undefined : progressCols[pIdx];
     const withCol = (fn: (list: ProgressColumn[]) => void) => { const list = [...progressCols]; fn(list); return list; };
     return (
-      <ColumnMenu
-        progress={progress}
-        access={meta.access}
-        creatorEditable={Boolean(meta.submission && !meta.submission.review)}
-        canMoveLeft={pIdx > 0}
-        canMoveRight={pIdx !== -1 && pIdx < progressCols.length - 1}
-        onAccess={(a) => {
-          const access = Object.fromEntries((view?.columns ?? []).filter((c) => !c.progressId).map((c) => [c.key, c.access])) as Record<string, Access>;
-          void saveColumns(progressCols, { ...access, [meta.key]: a });
-        }}
-        onChange={(next) => void saveColumns(withCol((l) => { l[pIdx] = next; }))}
-        onMove={(dir) => { close(); void saveColumns(withCol((l) => { [l[pIdx], l[pIdx + dir]] = [l[pIdx + dir], l[pIdx]]; })); }}
-        onInsertRight={() => { close(); void saveColumns(withCol((l) => { l.splice(pIdx + 1, 0, { id: crypto.randomUUID(), label: 'Kolom baru', type: 'text', creatorAccess: 'edit' }); })); }}
-        onDelete={() => { close(); void saveColumns(progressCols.filter((c) => c.id !== meta.progressId)); }}
-      />
+      <>
+        <ColumnLayout
+          key={col}
+          headers={view?.headers ?? []}
+          col={col}
+          canRename={!progress}
+          onRename={(label) => void saveCampaign({ columnLabels: { ...view?.columnLabels, [meta.key]: label } })}
+          onMove={(to) => { close(); moveColumn(col, to); }}
+          onReset={() => { close(); void saveCampaign({ columnLabels: {}, columnOrder: [] }); }}
+        />
+        <ColumnMenu
+          progress={progress}
+          access={meta.access}
+          creatorEditable={Boolean(meta.submission && !meta.submission.review)}
+          onAccess={(a) => {
+            const access = Object.fromEntries((view?.columns ?? []).filter((c) => !c.progressId).map((c) => [c.key, c.access])) as Record<string, Access>;
+            void saveColumns(progressCols, { ...access, [meta.key]: a });
+          }}
+          onChange={(next) => void saveColumns(withCol((l) => { l[pIdx] = next; }))}
+          onInsertRight={() => { close(); void saveColumns(withCol((l) => { l.splice(pIdx + 1, 0, { id: crypto.randomUUID(), label: 'Kolom baru', type: 'text', creatorAccess: 'edit' }); })); }}
+          onDelete={() => { close(); void saveColumns(progressCols.filter((c) => c.id !== meta.progressId)); }}
+        />
+      </>
     );
   };
 
@@ -515,6 +534,7 @@ export default function CampaignSheet() {
           actionHeader={isRecap ? 'Aksi' : 'Status'}
           rowAction={kind === 'applicants' ? applicantAction : isRecap ? creatorRecapAction : undefined}
           columnMenu={isMaster ? columnMenu : undefined}
+          onMoveColumn={isMaster ? moveColumn : undefined}
           headerIcon={isMaster ? (col) => (view.columns?.[col] ? <AccessIcon access={view.columns[col].access} /> : null) : undefined}
           addColumnMenu={isMaster ? (close) => <AddColumnMenu onAdd={(cols) => { close(); void saveColumns([...progressCols, ...cols]); }} /> : undefined}
           footer=" · Data langsung dari database, sama dengan yang disinkron ke Google Sheets."
