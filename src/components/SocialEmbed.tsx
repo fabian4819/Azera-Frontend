@@ -21,7 +21,7 @@ function loadScriptOnce(src: string, id: string, onLoad: () => void) {
 }
 
 /**
- * Embed resmi Instagram/TikTok (oEmbed publik, gratis, tanpa API key), sistem
+ * Embed resmi Instagram/TikTok/Threads (oEmbed publik, gratis, tanpa API key), sistem
  * ini tidak punya penyimpanan video sendiri, jadi "video creator" berarti
  * postingan aslinya di-embed langsung dari platform. Lihat docs/plan section AD-49.
  */
@@ -33,10 +33,17 @@ function tiktokVideoId(url: string) {
   return url.match(/\/video\/(\d+)/)?.[1];
 }
 
+// Embed resmi Threads = halaman "<link post>/embed" (yang juga dipakai embed.js Threads), langsung sebagai iframe
+function threadsEmbedUrl(url: string) {
+  const m = url.match(/threads\.(?:net|com)\/(@[^/?#]+\/post\/[^/?#]+)/i);
+  return m ? `https://www.threads.com/${m[1]}/embed/` : undefined;
+}
+
 export default function SocialEmbed({ platform: savedPlatform, url }: { platform: 'instagram' | 'tiktok'; url: string }) {
   // Link adalah sumber kebenaran, pilihan platform di admin bisa salah (default-nya Instagram),
   // dan link TikTok yang dirender sebagai embed IG cuma jadi kotak putih kosong.
-  const platform = /tiktok\.com/i.test(url) ? 'tiktok' : /instagram\.com/i.test(url) ? 'instagram' : savedPlatform;
+  const threadsSrc = threadsEmbedUrl(url);
+  const platform = threadsSrc ? 'threads' : /tiktok\.com/i.test(url) ? 'tiktok' : /instagram\.com/i.test(url) ? 'instagram' : savedPlatform;
   useEffect(() => {
     if (platform !== 'instagram') return;
     loadScriptOnce('https://www.instagram.com/embed.js', 'ig-embed-script', () => {
@@ -49,7 +56,14 @@ export default function SocialEmbed({ platform: savedPlatform, url }: { platform
     // sempat membuat iframe ±1900px lebar & ±2600px tinggi sebelum merapikan ukurannya, tanpa ini kartu
     // ikut melar sesaat dan muncul garis putih panjang di luar kartu.
     <div style={{ background: platform === 'tiktok' ? '#000' : 'var(--surface)', borderRadius: '14px', overflow: 'hidden', clipPath: 'inset(0 round 14px)', height: `${TIKTOK_H}px`, minWidth: '326px', display: 'flex', flexDirection: 'column' }}>
-      {platform === 'instagram' ? (
+      {platform === 'threads' ? (
+        <iframe
+          src={threadsSrc}
+          title="Threads post"
+          loading="lazy"
+          style={{ width: '100%', minWidth: '325px', height: `${TIKTOK_H}px`, border: 0, display: 'block', background: '#fff' }}
+        />
+      ) : platform === 'instagram' ? (
         // Wrapper memotong baris "Add a comment..." di bawah embed IG (lihat .ig-embed-crop di index.css)
         <div className="ig-embed-crop">
           <blockquote
