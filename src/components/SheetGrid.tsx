@@ -161,8 +161,11 @@ function errorMessage(err: unknown): string {
   return (err as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Gagal menyimpan. Coba lagi.';
 }
 
-interface GridView { sort: { col: number; dir: 1 | -1 } | null; hidden: Record<number, Set<string>>; hiddenCols: number[] }
-const EMPTY_VIEW: GridView = { sort: null, hidden: {}, hiddenCols: [] };
+// `only` = filter "hanya nilai ini" (dipilih kalau yang dicentang lebih sedikit dari yang tidak): baris baru
+// dengan nilai lain ikut tersaring, seperti filter di Google Sheets yang tetap jalan saat data baru masuk.
+// ponytail: mode dipilih otomatis dari jumlah centang, tambah pilihan eksplisit kalau ada yang bingung.
+interface GridView { sort: { col: number; dir: 1 | -1 } | null; hidden: Record<number, Set<string>>; only: Record<number, Set<string>>; hiddenCols: number[] }
+const EMPTY_VIEW: GridView = { sort: null, hidden: {}, only: {}, hiddenCols: [] };
 
 /** Tabel ala Google Sheets: cari, filter & urutkan per kolom, plus edit sel progress langsung di tabel. */
 export default function SheetGrid({
@@ -189,7 +192,8 @@ export default function SheetGrid({
   // Filter & sort per kolom; `hidden` = nilai yang disembunyikan per index kolom, `hiddenCols` = kolom
   // yang disembunyikan. Semua lewat riwayat supaya salah pencet bisa di-Undo.
   const [view, setView, undoView, canUndo] = useViewHistory<GridView>(EMPTY_VIEW);
-  const { sort, hidden, hiddenCols } = view;
+  const { sort, hidden, only, hiddenCols } = view;
+  const isFiltered = (ci: number) => Boolean(hidden[ci]?.size || only[ci]);
   const visCols = headers.map((_, i) => i).filter((i) => !hiddenCols.includes(i));
   const [menu, setMenu] = useState<{ col: number; rect: DOMRect } | null>(null);
   const [drag, setDrag] = useState<{ from: number; over: number | null } | null>(null);
@@ -210,7 +214,7 @@ export default function SheetGrid({
   const toggleCol = (ci: number) => setView((v) => ({ ...v, hiddenCols: v.hiddenCols.includes(ci) ? v.hiddenCols.filter((c) => c !== ci) : [...v.hiddenCols, ci] }));
 
   // Nomor baris asli (baris 1 = header, sama dgn sheet) tetap dipakai walau difilter
-  const activeFilters = Object.entries(hidden).filter(([, s]) => s.size > 0);
+  const activeFilters = [...Object.entries(hidden).filter(([, s]) => s.size > 0), ...Object.entries(only)];
   const filtered = Boolean(query.trim()) || activeFilters.length > 0;
   const rows = useMemo(() => {
     let out = allRows.map((r, i) => ({ r, i, no: i + 2 }));
@@ -218,9 +222,11 @@ export default function SheetGrid({
     if (q) out = out.filter(({ r }) => r.some((c) => String(c).toLowerCase().includes(q)));
     const active = Object.entries(hidden).filter(([, s]) => s.size > 0);
     if (active.length) out = out.filter(({ r }) => active.every(([ci, s]) => !s.has(String(r[Number(ci)] ?? ''))));
+    const onlyActive = Object.entries(only);
+    if (onlyActive.length) out = out.filter(({ r }) => onlyActive.every(([ci, s]) => s.has(String(r[Number(ci)] ?? ''))));
     if (sort) out = [...out].sort((a, b) => compareCells(a.r[sort.col], b.r[sort.col], sort.dir));
     return out;
-  }, [allRows, query, hidden, sort]);
+  }, [allRows, query, hidden, only, sort]);
 
   // Nilai unik + jumlahnya untuk kolom yang dropdown-nya sedang dibuka
   const menuValues = useMemo(() => {
@@ -446,7 +452,7 @@ export default function SheetGrid({
               <th style={{ ...rowNoStyle, zIndex: 3 }}>1</th>
               {visCols.map((ci) => {
                 const h = headers[ci];
-                const on = Boolean(hidden[ci]?.size) || sort?.col === ci;
+                const on = isFiltered(ci) || sort?.col === ci;
                 const SortIcon = sort?.col === ci ? (sort.dir === 1 ? ArrowDownAZ : ArrowDownZA) : ListFilter;
                 return (
                   <th key={ci} title={onMoveColumn ? `${h} (tarik untuk memindah kolom)` : h}
@@ -467,7 +473,7 @@ export default function SheetGrid({
                       <button type="button" aria-label={`${columnMenu ? 'Atur, filter & urutkan' : 'Filter & urutkan'} ${h}`} title={columnMenu ? 'Atur kolom, filter & urutkan' : 'Filter & urutkan'}
                         onClick={(e) => { e.stopPropagation(); setMenu({ col: ci, rect: e.currentTarget.getBoundingClientRect() }); }}
                         style={{ flexShrink: 0, width: '22px', height: '22px', borderRadius: '4px', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', background: on ? '#6728e4' : 'transparent', color: on ? 'white' : '#5f6368' }}>
-                        {hidden[ci]?.size ? <ListFilter size={13} /> : <SortIcon size={13} />}
+                        {isFiltered(ci) ? <ListFilter size={13} /> : <SortIcon size={13} />}
                       </button>
                     </div>
                   </th>
@@ -544,9 +550,21 @@ export default function SheetGrid({
 
       {menu && (
         <FilterMenu key={menu.col} header={headers[menu.col]} rect={menu.rect} values={menuValues}
-          hidden={hidden[menu.col] ?? new Set()} sortDir={sort?.col === menu.col ? sort.dir : null}
+          hidden={only[menu.col] ? new Set(menuValues.map((v) => v.key).filter((k) => !only[menu.col].has(k))) : hidden[menu.col] ?? new Set()} sortDir={sort?.col === menu.col ? sort.dir : null}
           onSort={(dir) => { setView((v) => ({ ...v, sort: { col: menu.col, dir } })); setMenu(null); }}
-          onApply={(h) => { setView((v) => ({ ...v, hidden: { ...v.hidden, [menu.col]: h } })); setSelected(null); setMenu(null); }}
+          onApply={(h) => {
+            const col = menu.col;
+            const checked = menuValues.map((v) => v.key).filter((k) => !h.has(k));
+            const asOnly = h.size > 0 && checked.length < h.size;
+            setView((v) => {
+              const hiddenRest = { ...v.hidden }; delete hiddenRest[col];
+              const onlyRest = { ...v.only }; delete onlyRest[col];
+              return asOnly
+                ? { ...v, hidden: hiddenRest, only: { ...onlyRest, [col]: new Set(checked) } }
+                : { ...v, hidden: { ...hiddenRest, [col]: h }, only: onlyRest };
+            });
+            setSelected(null); setMenu(null);
+          }}
           onHideColumn={() => { toggleCol(menu.col); setMenu(null); }}
           onFreezeHere={wide ? () => { setFreeze({ ...freeze, cols: visCols.indexOf(menu.col) + 1 }); setMenu(null); } : undefined}
           onUnfreeze={wide && frozenCols.length ? () => { setFreeze({ ...freeze, cols: 0 }); setMenu(null); } : undefined}
