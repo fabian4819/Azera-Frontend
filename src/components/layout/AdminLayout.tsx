@@ -1,6 +1,6 @@
 import { Fragment, useState } from 'react';
 import { Link, useLocation, Outlet } from 'react-router-dom';
-import { LayoutDashboard, Building2, Users, Contact, UserCheck, ImageIcon, Megaphone, Upload, MessageCircle, Inbox, MessageSquareText, Bot, Plug, LogOut, ChevronsLeft, ChevronsRight, FolderOpen, FileText, Receipt, FileSignature, ChevronDown, Wallet } from 'lucide-react';
+import { LayoutDashboard, Building2, Users, Contact, UserCheck, UserRoundCheck, ImageIcon, Megaphone, Upload, MessageCircle, Inbox, MessageSquareText, Bot, Plug, LogOut, ChevronsLeft, ChevronsRight, FolderOpen, FileText, Receipt, FileSignature, ChevronDown, Wallet } from 'lucide-react';
 import { useAuth, hasOwnerAccess } from '../../hooks/useAuth';
 import BottomNav from './BottomNav';
 
@@ -18,6 +18,7 @@ const navItems = [
   { label: 'Brands', to: '/admin/brands', icon: Building2 },
   { label: 'Creators', to: '/admin/creators', icon: Users },
   { label: 'Creator Campaign', to: '/admin/campaign-creators', icon: Contact },
+  { label: 'Existing Creator', to: '/admin/existing-creators', icon: UserRoundCheck },
   { label: 'Ekstensi KOL Lister', to: '/admin/extension', icon: Plug },
   { label: 'PIC', to: '/admin/pic', icon: UserCheck },
   { label: 'Portfolio', to: '/admin/portfolio', icon: ImageIcon },
@@ -37,7 +38,7 @@ const OWNER_ONLY = ['/admin/documents/invoice', '/admin/finance-recap'];
 const pageTitles: Record<string, string> = {
   '/admin/dashboard': 'Dashboard',
   '/admin/campaigns': 'Campaigns',
-  '/admin/import': 'Import Data Historis',
+  '/admin/import': 'Import Creator Kurasi',
   '/admin/whatsapp': 'WhatsApp',
   '/admin/whatsapp/inbox': 'Inbox WhatsApp',
   '/admin/wa-templates': 'Template Pesan WhatsApp',
@@ -45,6 +46,7 @@ const pageTitles: Record<string, string> = {
   '/admin/brands': 'Brand Submissions',
   '/admin/creators': 'Creator Registrations',
   '/admin/campaign-creators': 'Creator Campaign',
+  '/admin/existing-creators': 'Existing Creator (sebelum platform)',
   '/admin/extension': 'Ekstensi KOL Lister',
   '/admin/pic': 'PIC / Handle-by',
   '/admin/portfolio': 'Portfolio Manager',

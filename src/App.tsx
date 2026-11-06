@@ -41,6 +41,7 @@ const CampaignNew = lazy(() => import('./pages/admin/CampaignNew'));
 const CampaignDetail = lazy(() => import('./pages/admin/CampaignDetail'));
 const CampaignSheet = lazy(() => import('./pages/admin/CampaignSheet'));
 const Import = lazy(() => import('./pages/admin/Import'));
+const ExistingCreators = lazy(() => import('./pages/admin/ExistingCreators'));
 const Documents = lazy(() => import('./pages/admin/Documents'));
 const FinanceRecap = lazy(() => import('./pages/admin/FinanceRecap'));
 const WhatsApp = lazy(() => import('./pages/admin/WhatsApp'));
@@ -186,6 +187,7 @@ export default function App() {
             <Route path="brands/:id" element={<BrandDetail />} />
             <Route path="creators" element={<Creators key="general" />} />
             <Route path="campaign-creators" element={<Creators key="campaign" scope="campaign" />} />
+            <Route path="existing-creators" element={<ExistingCreators />} />
             <Route path="creators/:id" element={<CreatorDetail />} />
             <Route path="extension" element={<ExtensionConnect />} />
             <Route path="pic" element={<PicUsers />} />

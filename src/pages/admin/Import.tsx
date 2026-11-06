@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import { Upload, CheckCircle2, AlertTriangle, Link2 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import api from '../../lib/api';
 
 const f = "var(--font-display)";
@@ -8,105 +9,116 @@ const cardStyle: React.CSSProperties = {
   boxShadow: '0 2px 12px rgba(107,46,232,0.05)', marginBottom: '20px',
 };
 
+interface Social { username?: string; url?: string; followers?: number }
 interface ImportRow {
-  rowNumber: number; campaignName: string; brandName: string; creatorName: string; platform: string;
-  link?: string; views?: number; reach?: number; likes?: number; comments?: number; shares?: number; saved?: number;
-  niche?: string; postedAt?: string; feeCreator?: number; feePic?: number; feeMg?: number;
-  errors: string[];
+  tab: string; rowNumber: number; name: string; phone: string; age?: number; domicile?: string; gender?: string;
+  instagram?: Social; tiktok?: Social; approval?: string; errors: string[];
 }
+interface Preview {
+  rows: ImportRow[]; total: number; validCount: number; invalidCount: number; noPhone: number;
+  ignoredHeaders: string[]; tabs: { name: string; rows: number }[];
+}
+type Source = File | string;
 
 const num = (n?: number) => (n === undefined || n === null ? '-' : n.toLocaleString('id-ID'));
-const rp = (n?: number) => (n === undefined || n === null ? '-' : `Rp${n.toLocaleString('id-ID')}`);
 const td: React.CSSProperties = { padding: '8px 10px', whiteSpace: 'nowrap' };
+const COLUMNS = 'Nama Lengkap, Umur, Domisili, Jenis Kelamin, No WA, Username IG, Link IG, Followers IG, Username TikTok, Link TikTok, Followers TikTok, Approval';
 
+function SocialCell({ s }: { s?: Social }) {
+  if (!s) return <>-</>;
+  const label = s.username ? `@${s.username}` : 'link';
+  return (
+    <>
+      {s.url ? <a href={s.url} target="_blank" rel="noreferrer" style={{ color: '#6B2EE8' }}>{label}</a> : label}
+      {s.followers !== undefined && <span style={{ color: '#777683' }}> · {num(s.followers)}</span>}
+    </>
+  );
+}
+
+/** Import creator kurasi (yang sudah dipilih & pernah ikut campaign sebelum ada platform) ke menu Existing Creator. */
 export default function Import() {
   const inputRef = useRef<HTMLInputElement>(null);
   const [link, setLink] = useState('');
-  const [source, setSource] = useState('');
-  const [rows, setRows] = useState<ImportRow[]>([]);
+  const [source, setSource] = useState<Source | null>(null);
+  const [preview, setPreview] = useState<Preview | null>(null);
   const [loading, setLoading] = useState(false);
-  const [ignoredHeaders, setIgnoredHeaders] = useState<string[]>([]);
-  const [sheetCount, setSheetCount] = useState(1);
-  const [result, setResult] = useState<{ created: number; updated: number; skipped: { rowNumber: number; reason: string }[] } | null>(null);
+  const [result, setResult] = useState<{ created: number; updated: number; rows: number; skipped: { rowNumber: number; tab: string; reason: string }[] } | null>(null);
   const [error, setError] = useState('');
 
-  // Langsung preview begitu file dipilih, tidak ada tombol Preview terpisah
-  const preview = async (picked: File | string) => {
-    setSource(typeof picked === 'string' ? 'Google Sheets' : picked.name);
-    setRows([]);
+  const send = (path: string, picked: Source) => {
+    if (typeof picked === 'string') return api.post(path, { url: picked });
+    const formData = new FormData();
+    formData.append('file', picked);
+    return api.post(path, formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+  };
+  const errorOf = (err: unknown, fallback: string) => (err as { response?: { data?: { message?: string } } }).response?.data?.message || fallback;
+
+  // Langsung preview begitu file/link dipilih
+  const load = async (picked: Source) => {
+    setSource(picked);
+    setPreview(null);
     setLoading(true);
     setError('');
     setResult(null);
     try {
-      let res;
-      if (typeof picked === 'string') {
-        res = await api.post('/admin/import/preview', { url: picked });
-      } else {
-        const formData = new FormData();
-        formData.append('file', picked);
-        res = await api.post('/admin/import/preview', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
-      }
-      setRows(res.data.rows);
-      setIgnoredHeaders(res.data.ignoredHeaders || []);
-      setSheetCount(res.data.sheetCount || 1);
+      setPreview((await send('/admin/import/preview', picked)).data);
     } catch (err) {
-      const message = (err as { response?: { data?: { message?: string } } }).response?.data?.message;
-      if (message && message !== 'Gagal membaca file') { setError(message); return; }
-      setError('Gagal membaca file. Pastikan format sesuai (Nama Campaign, Brand, Nama Creator, Platform, Link Konten, Niche Akun, Views, Reach, Likes, Comments, Shares, Saved, Tanggal Posting, Fee Creator, Fee PIC, Fee MG).');
+      setError(errorOf(err, `Gagal membaca file. Pastikan baris 1 berisi kolom: ${COLUMNS}.`));
     } finally {
       setLoading(false);
     }
   };
 
+  // Server membaca ulang sumber yang sama (file/link), jadi yang diimport persis yang di-preview
   const confirm = async () => {
+    if (!source) return;
     setLoading(true);
+    setError('');
     try {
-      const res = await api.post('/admin/import/confirm', { rows });
-      setResult(res.data);
-      setRows([]);
-      setIgnoredHeaders([]);
-      setSource('');
+      setResult((await send('/admin/import/confirm', source)).data);
+      setPreview(null);
+      setSource(null);
       setLink('');
-    } catch {
-      setError('Gagal import data.');
+    } catch (err) {
+      setError(errorOf(err, 'Gagal import data.'));
     } finally {
       setLoading(false);
     }
   };
-
-  const validCount = rows.filter((r) => r.errors.length === 0).length;
 
   return (
     <div>
       <div style={cardStyle}>
         <p style={{ fontFamily: f, fontSize: '0.85rem', color: '#464652', marginBottom: '16px', lineHeight: 1.6 }}>
-          Upload spreadsheet (.xlsx atau .csv) dengan kolom: <strong>Nama Campaign, Brand, Nama Creator, Platform, Link Konten,
-          Niche Akun, Views, Reach, Likes, Comments, Shares, Saved, Tanggal Posting, Fee Creator, Fee PIC, Fee MG</strong>. Satu file = satu campaign = satu brand (sheet pertama saja yang dibaca). Satu baris = satu platform per creator.
-          Fee = fee per creator untuk campaign tsb (cukup diisi di salah satu baris kalau creator punya lebih dari satu platform). Tanggal pakai format dd/mm/yyyy.
-          Bisa juga pakai link Google Sheets yang aksesnya "Anyone with the link", tab yang dibaca sesuai link (gid). Import ulang file/link yang sama akan meng-update angka, bukan menggandakan data.
+          Import <strong>creator kurasi</strong> (yang sudah dipilih &amp; pernah ikut campaign sebelum ada platform). Hasilnya masuk menu{' '}
+          <Link to="/admin/existing-creators" style={{ color: '#6B2EE8', fontWeight: 700 }}>Existing Creator</Link>, terpisah dari Creators.
+          Semua tab dibaca, <strong>nama tab = niche</strong> (Beauty, Lifestyle, Food, dst). Kolom baris 1: <strong>{COLUMNS}</strong>
+          {' '}(kolom "Followers" tanpa keterangan otomatis ikut IG/TikTok di sebelah kirinya; kolom Duplicate Check diabaikan).
+          Creator dikenali dari No WA, atau username IG/TikTok kalau WA kosong. Import ulang melengkapi data (niche &amp; akun baru ditambah,
+          followers diperbarui, data lain tidak ditimpa), bukan menggandakan.
         </p>
         <input
           ref={inputRef} type="file" accept=".xlsx,.csv" hidden
           onChange={(e) => {
             const picked = e.target.files?.[0];
-            e.target.value = ''; // supaya file yang sama bisa dipilih lagi (import ulang)
-            if (picked) preview(picked);
+            e.target.value = '';
+            if (picked) void load(picked);
           }}
         />
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
           <button onClick={() => inputRef.current?.click()} disabled={loading} className="btn-primary" style={{ padding: '9px 18px', fontSize: '0.82rem', opacity: loading ? 0.6 : 1 }}>
             <Upload size={14} /> {loading ? 'Memproses...' : 'Pilih File'}
           </button>
-          {source && <span style={{ fontFamily: f, fontSize: '0.82rem', color: '#464652' }}>{source}</span>}
+          {source && <span style={{ fontFamily: f, fontSize: '0.82rem', color: '#464652' }}>{typeof source === 'string' ? 'Google Sheets' : source.name}</span>}
         </div>
         <form
-          onSubmit={(e) => { e.preventDefault(); if (link.trim()) preview(link.trim()); }}
+          onSubmit={(e) => { e.preventDefault(); if (link.trim()) void load(link.trim()); }}
           style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginTop: '14px' }}
         >
           <span style={{ fontFamily: f, fontSize: '0.82rem', color: '#464652' }}>atau</span>
           <input
             type="url" value={link} onChange={(e) => setLink(e.target.value)}
-            placeholder="Paste link Google Sheets (akses: Anyone with the link)"
+            placeholder="Paste link Google Sheets (akses: Anyone with the link), semua tab ikut dibaca"
             aria-label="Link Google Sheets"
             style={{ flex: '1 1 320px', padding: '9px 14px', borderRadius: '999px', border: '1px solid #e1e0ff', fontFamily: f, fontSize: '0.82rem' }}
           />
@@ -121,80 +133,76 @@ export default function Import() {
         <div style={{ ...cardStyle, background: '#d1fae5' }}>
           <p style={{ fontFamily: f, fontWeight: 700, color: '#065F46' }}>
             <CheckCircle2 size={16} style={{ verticalAlign: 'middle', marginRight: '6px' }} />
-            {result.created} baris baru diimport{result.updated > 0 ? `, ${result.updated} baris diperbarui` : ''}.
+            {result.rows} baris diproses: {result.created} creator baru{result.updated > 0 ? `, ${result.updated} creator dilengkapi` : ''}.{' '}
+            <Link to="/admin/existing-creators" style={{ color: '#065F46' }}>Lihat Existing Creator →</Link>
           </p>
           {result.skipped.length > 0 && (
-            <div style={{ marginTop: '10px' }}>
+            <div style={{ marginTop: '10px', maxHeight: '240px', overflowY: 'auto' }}>
               <p style={{ fontFamily: f, fontSize: '0.8rem', color: '#92400E', fontWeight: 700 }}>{result.skipped.length} baris dilewati:</p>
               {result.skipped.map((s) => (
-                <p key={s.rowNumber} style={{ fontSize: '0.78rem', color: '#92400E', fontFamily: f }}>Baris {s.rowNumber}: {s.reason}</p>
+                <p key={`${s.tab}-${s.rowNumber}`} style={{ fontSize: '0.78rem', color: '#92400E', fontFamily: f }}>{s.tab} baris {s.rowNumber}: {s.reason}</p>
               ))}
             </div>
           )}
         </div>
       )}
 
-      {rows.length > 0 && (
+      {preview && (
         <div style={cardStyle}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', flexWrap: 'wrap', marginBottom: '12px' }}>
             <p style={{ fontFamily: f, fontWeight: 700, fontSize: '0.95rem' }}>
-              Preview: {validCount}/{rows.length} baris valid
+              Preview: {preview.validCount.toLocaleString('id-ID')}/{preview.total.toLocaleString('id-ID')} baris valid
             </p>
-            <button onClick={confirm} disabled={loading || validCount === 0} className="btn-primary" style={{ padding: '9px 18px', fontSize: '0.82rem', opacity: loading || validCount === 0 ? 0.6 : 1 }}>
-              {loading ? 'Mengimport...' : `Import ${validCount} Baris`}
+            <button onClick={confirm} disabled={loading || preview.validCount === 0} className="btn-primary" style={{ padding: '9px 18px', fontSize: '0.82rem', opacity: loading || preview.validCount === 0 ? 0.6 : 1 }}>
+              {loading ? 'Mengimport...' : `Import ${preview.validCount.toLocaleString('id-ID')} Baris`}
             </button>
           </div>
-          {sheetCount > 1 && (
-            <p style={{ fontFamily: f, fontSize: '0.8rem', color: '#92400E', marginBottom: '12px' }}>
+          <p style={{ fontFamily: f, fontSize: '0.8rem', color: '#464652', marginBottom: '8px' }}>
+            Tab (niche): {preview.tabs.map((t) => `${t.name} (${t.rows})`).join(' · ')}
+          </p>
+          {preview.noPhone > 0 && (
+            <p style={{ fontFamily: f, fontSize: '0.8rem', color: '#92400E', marginBottom: '8px' }}>
               <AlertTriangle size={12} style={{ verticalAlign: 'middle', marginRight: '4px' }} />
-              File ini punya {sheetCount} sheet, yang dibaca hanya sheet pertama. Pisahkan tiap campaign ke file sendiri.
+              {preview.noPhone.toLocaleString('id-ID')} baris tanpa No WA, tetap diimport dan dikenali dari username IG/TikTok.
             </p>
           )}
-          {ignoredHeaders.length > 0 && (
-            <p style={{ fontFamily: f, fontSize: '0.8rem', color: '#92400E', marginBottom: '12px' }}>
+          {preview.ignoredHeaders.length > 0 && (
+            <p style={{ fontFamily: f, fontSize: '0.8rem', color: '#92400E', marginBottom: '8px' }}>
               <AlertTriangle size={12} style={{ verticalAlign: 'middle', marginRight: '4px' }} />
-              Kolom tidak dikenali & diabaikan: <strong>{ignoredHeaders.join(', ')}</strong>. Ganti nama header kalau kolom ini seharusnya ikut diimport.
+              Kolom tidak dikenali &amp; diabaikan: <strong>{preview.ignoredHeaders.join(', ')}</strong>.
             </p>
           )}
-          <div style={{ overflowX: 'auto' }}>
+          {preview.rows.length < preview.total && (
+            <p style={{ fontFamily: f, fontSize: '0.78rem', color: '#777683', marginBottom: '8px' }}>
+              Menampilkan {preview.rows.length} baris contoh (baris bermasalah selalu tampil di atas). Semua {preview.total.toLocaleString('id-ID')} baris ikut diproses saat import.
+            </p>
+          )}
+          <div style={{ overflowX: 'auto', maxHeight: '60vh', overflowY: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.78rem', fontFamily: f }}>
               <thead>
-                <tr style={{ background: '#f8f9ff', textAlign: 'left' }}>
-                  {['#', 'Campaign', 'Brand', 'Creator', 'Platform', 'Link', 'Niche', 'Views', 'Reach', 'Likes', 'Comments', 'Shares', 'Saved', 'Tanggal', 'Fee Creator', 'Fee PIC', 'Fee MG', 'Status'].map((h) => (
-                    <th key={h} style={{ padding: '8px 10px', fontWeight: 700 }}>{h}</th>
+                <tr style={{ background: '#f8f9ff', textAlign: 'left', position: 'sticky', top: 0 }}>
+                  {['Tab', 'Baris', 'Nama', 'Umur', 'Domisili', 'Gender', 'No WA', 'Instagram', 'TikTok', 'Approval', 'Status'].map((h) => (
+                    <th key={h} style={{ padding: '8px 10px', fontWeight: 700, background: '#f8f9ff' }}>{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
-                {rows.map((r) => (
-                  <tr key={r.rowNumber} style={{ borderBottom: '1px solid #f0f0f0', background: r.errors.length ? '#fff5f5' : 'transparent' }}>
+                {preview.rows.map((r) => (
+                  <tr key={`${r.tab}-${r.rowNumber}`} style={{ borderBottom: '1px solid #f0f0f0', background: r.errors.length ? '#fff5f5' : 'transparent' }}>
+                    <td style={td}>{r.tab}</td>
                     <td style={td}>{r.rowNumber}</td>
-                    <td style={td}>{r.campaignName}</td>
-                    <td style={td}>{r.brandName}</td>
-                    <td style={td}>{r.creatorName}</td>
-                    <td style={{ ...td, textTransform: 'capitalize' }}>{r.platform}</td>
-                    <td style={{ ...td, maxWidth: '180px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                      {r.link ? <a href={r.link} target="_blank" rel="noreferrer" title={r.link} style={{ color: '#6B2EE8' }}>{r.link}</a> : '-'}
-                    </td>
-                    <td style={td}>{r.niche || '-'}</td>
-                    <td style={td}>{num(r.views)}</td>
-                    <td style={td}>{num(r.reach)}</td>
-                    <td style={td}>{num(r.likes)}</td>
-                    <td style={td}>{num(r.comments)}</td>
-                    <td style={td}>{num(r.shares)}</td>
-                    <td style={td}>{num(r.saved)}</td>
-                    <td style={td}>{r.postedAt && !Number.isNaN(Date.parse(r.postedAt)) ? new Date(r.postedAt).toLocaleDateString('id-ID', { timeZone: 'UTC' }) : (r.postedAt || '-')}</td>
-                    <td style={td}>{rp(r.feeCreator)}</td>
-                    <td style={td}>{rp(r.feePic)}</td>
-                    <td style={td}>{rp(r.feeMg)}</td>
+                    <td style={td}>{r.name || '-'}</td>
+                    <td style={td}>{r.age ?? '-'}</td>
+                    <td style={td}>{r.domicile || '-'}</td>
+                    <td style={td}>{r.gender || '-'}</td>
+                    <td style={td}>{r.phone || '-'}</td>
+                    <td style={td}><SocialCell s={r.instagram} /></td>
+                    <td style={td}><SocialCell s={r.tiktok} /></td>
+                    <td style={td}>{r.approval || '-'}</td>
                     <td style={{ padding: '8px 10px' }}>
-                      {r.errors.length > 0 ? (
-                        <span style={{ color: '#ba1a1a', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                          <AlertTriangle size={12} /> {r.errors.join(', ')}
-                        </span>
-                      ) : (
-                        <span style={{ color: '#065F46' }}>OK</span>
-                      )}
+                      {r.errors.length > 0
+                        ? <span style={{ color: '#ba1a1a', display: 'flex', alignItems: 'center', gap: '4px' }}><AlertTriangle size={12} /> {r.errors.join(', ')}</span>
+                        : <span style={{ color: '#065F46' }}>OK</span>}
                     </td>
                   </tr>
                 ))}
