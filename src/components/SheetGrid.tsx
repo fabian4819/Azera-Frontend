@@ -68,6 +68,9 @@ interface FilterMenuProps {
 function FilterMenu({ header, rect, values, hidden, sortDir, onSort, onApply, onHideColumn, onFreezeHere, onUnfreeze, onClose, extra }: FilterMenuProps) {
   const [draft, setDraft] = useState(() => new Set(hidden));
   const [search, setSearch] = useState('');
+  // Fokus ke kotak cari tanpa menggulung menu ke bawah (autoFocus menggulung ke input kalau menunya panjang)
+  const searchRef = useRef<HTMLInputElement>(null);
+  useEffect(() => { searchRef.current?.focus({ preventScroll: true }); }, []);
   const shown = values.filter((v) => v.key.toLowerCase().includes(search.trim().toLowerCase()));
   const toggle = (k: string) => setDraft((d) => { const n = new Set(d); if (n.has(k)) n.delete(k); else n.add(k); return n; });
   const setShown = (hide: boolean) => setDraft((d) => { const n = new Set(d); shown.forEach((v) => (hide ? n.add(v.key) : n.delete(v.key))); return n; });
@@ -97,7 +100,7 @@ function FilterMenu({ header, rect, values, hidden, sortDir, onSort, onApply, on
           </div>
           <label style={{ display: 'flex', alignItems: 'center', gap: '6px', border: `1px solid ${GRID}`, borderRadius: '6px', padding: '0 8px', height: '30px' }}>
             <Search size={13} color="#777683" />
-            <input autoFocus value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Cari nilai…" aria-label="Cari nilai"
+            <input ref={searchRef} value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Cari nilai…" aria-label="Cari nilai"
               style={{ border: 'none', outline: 'none', fontSize: '0.78rem', flex: 1, minWidth: 0 }} />
           </label>
           <div style={{ maxHeight: '200px', overflowY: 'auto', margin: '6px 0' }}>
