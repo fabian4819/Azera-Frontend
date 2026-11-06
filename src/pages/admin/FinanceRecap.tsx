@@ -1,4 +1,5 @@
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useAutoRefresh } from '../../hooks/useAutoRefresh';
 import { Link } from 'react-router-dom';
 import { Search, ListFilter, AlertTriangle, ArrowDownCircle, ArrowUpCircle, Columns3, Plus, Trash2, TrendingUp, Clock, FileSpreadsheet, ChevronDown, Pencil, X, EyeOff, RotateCcw } from 'lucide-react';
 import api from '../../lib/api';
@@ -458,6 +459,7 @@ export default function FinanceRecap() {
       .catch(() => setError('Gagal memuat rekap keuangan.'));
   }, [from, to, showHidden]);
   useEffect(() => { load(); }, [load]);
+  useAutoRefresh(load);
 
   /** Sembunyikan / pulihkan semua invoice di satu baris rekap (invoice-nya sendiri tidak dihapus) */
   const setHidden = async (g: Group, hidden: boolean) => {

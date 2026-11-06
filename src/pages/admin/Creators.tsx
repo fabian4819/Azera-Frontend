@@ -10,6 +10,7 @@ import ViewToolbar from '../../components/ViewToolbar';
 import FreezeControl from '../../components/FreezeControl';
 import { useFreeze } from '../../hooks/useFreeze';
 import { useViewHistory } from '../../hooks/useViewHistory';
+import { useAutoRefresh } from '../../hooks/useAutoRefresh';
 import StatusBadge from '../../components/ui/StatusBadge';
 import api from '../../lib/api';
 import WaLink from '../../components/WaLink';
@@ -133,15 +134,16 @@ export default function Creators({ scope = 'general', selected, onSelectedChange
   const [sheetUrl, setSheetUrl] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  const fetchCreators = async () => {
-    setLoading(true);
+  // quiet = auto-refresh di belakang: tanpa "Memuat..." & data lama tetap tampil kalau gagal
+  const fetchCreators = async (quiet = false) => {
+    if (!quiet) setLoading(true);
     try {
       const res = await api.get('/admin/creators', { params: scope === 'share' ? {} : { scope } });
       setCreators(scope === 'share' ? res.data.filter((c: CreatorItem) => c.source !== 'extension' && c.phone) : res.data);
     } catch {
-      setCreators([]);
+      if (!quiet) setCreators([]);
     } finally {
-      setLoading(false);
+      if (!quiet) setLoading(false);
     }
   };
 
@@ -149,6 +151,7 @@ export default function Creators({ scope = 'general', selected, onSelectedChange
     const timeoutId = window.setTimeout(() => { void fetchCreators(); }, 0);
     return () => window.clearTimeout(timeoutId);
   }, []);
+  useAutoRefresh(() => fetchCreators(true));
 
   useEffect(() => {
     api.get('/admin/creators/sheet-url').then((res) => setSheetUrl(res.data.url)).catch(() => setSheetUrl(null));
@@ -395,7 +398,7 @@ export default function Creators({ scope = 'general', selected, onSelectedChange
             canUndo={canUndo} onUndo={undoView}
             canReset={view !== DEFAULT_VIEW} onReset={() => setView(DEFAULT_VIEW)} />
           <FreezeControl freeze={freeze} onChange={setFreeze} maxCols={dataIds.length} />
-          <button onClick={fetchCreators} style={{ padding: '10px', borderRadius: '10px', border: '1.5px solid #c7c8cf', background: 'white', cursor: 'pointer', color: '#777683', display: 'flex' }}>
+          <button onClick={() => void fetchCreators()} style={{ padding: '10px', borderRadius: '10px', border: '1.5px solid #c7c8cf', background: 'white', cursor: 'pointer', color: '#777683', display: 'flex' }}>
             <RefreshCw size={16} />
           </button>
           {sheetUrl && (

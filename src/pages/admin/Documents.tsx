@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useAutoRefresh } from '../../hooks/useAutoRefresh';
 import { Navigate, useParams } from 'react-router-dom';
 import { Plus, FileDown, Pencil, Trash2, ArrowLeft, Save, AlertTriangle, ZoomIn, ZoomOut } from 'lucide-react';
 import api from '../../lib/api';
@@ -316,6 +317,8 @@ export default function Documents() {
     setEditing(null); setError(''); setConfirmDelete(null);
   }
   useEffect(() => load(), [load]);
+  // Invoice dari bot WA /invoice langsung muncul tanpa refresh
+  useAutoRefresh(load);
 
   if (!config) return <p style={{ fontFamily: f }}>Jenis dokumen tidak dikenal.</p>;
   // Invoice = data keuangan, khusus owner (API juga menolak)
