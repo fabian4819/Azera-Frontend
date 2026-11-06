@@ -293,8 +293,11 @@ function ExpenseEditor({ group, campaigns, focus, onClose, onSaved }: {
   const savedManual = (k: FeeField) => !!record?.feeManual.includes(k as AutoFee);
   // Angka invoice WA cuma diketahui selama belum dioverride (rekap mengirim angka efektif)
   const invoiceDefault = (k: FeeField) => (savedManual(k) ? undefined : group.expense[k as InvoiceFee]);
+  const unlinked = !group.campaignId;
   const valueOf = (k: FeeField) => {
     const d = draft[k];
+    // Invoice tanpa campaign: angka efektif dari rekap (override invoice / angka invoice WA), null = kembali ke invoice WA
+    if (unlinked) return d === null || d === undefined ? group.expense[k as keyof Group['expense']] ?? 0 : d;
     if (d === null) return AUTO_FEES.includes(k) ? record?.auto.totals[k as AutoFee] ?? 0 : invoiceDefault(k) ?? 0;
     if (d !== undefined) return d;
     return INVOICE_FEES.includes(k) && !savedManual(k) ? group.expense[k as InvoiceFee] : record?.[k] ?? 0;
@@ -306,8 +309,11 @@ function ExpenseEditor({ group, campaigns, focus, onClose, onSaved }: {
   const save = async () => {
     setBusy(true); setError('');
     try {
-      if (!group.campaignId) {
+      if (!group.campaignId && linkTo) {
         await Promise.all(group.invoices.map((inv) => api.patch(`/admin/finance-recap/invoices/${inv._id}`, { campaignId: linkTo })));
+      } else if (!group.campaignId) {
+        // Biaya disimpan langsung di invoice (tanpa campaign)
+        if (Object.keys(draft).length) await api.patch(`/admin/finance-recap/invoices/${group.invoices[0]._id}`, { expense: draft });
       } else if (Object.keys(draft).length) {
         await api.patch(`/admin/campaigns/${group.campaignId}/finance`, draft);
       }
@@ -328,11 +334,29 @@ function ExpenseEditor({ group, campaigns, focus, onClose, onSaved }: {
 
         {!group.campaignId ? (
           <>
-            <p style={{ fontFamily: f, fontSize: '0.78rem', color: '#464652', margin: '8px 0 12px' }}>
-              Invoice ini belum dihubungkan ke campaign, jadi belum ada data biaya. Pilih campaign-nya: uang keluar diambil dari fee creator/PIC/MG di Recap Payment + reimburse/ads/opex campaign itu.
+            <p style={{ fontFamily: f, fontSize: '0.74rem', color: '#8a8a99', margin: '8px 0 14px' }}>
+              Invoice ini belum terhubung ke campaign. Biaya bisa langsung diisi di sini (disimpan di invoice ini).
             </p>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '12px' }}>
+              {FEE_FIELDS.map(({ key, label }) => (
+                <label key={key} style={{ display: 'block' }}>
+                  <span style={{ display: 'block', fontFamily: f, fontSize: '0.72rem', fontWeight: 700, color: '#464652', marginBottom: '4px' }}>{label}</span>
+                  <input type="number" autoFocus={focus === key} style={{ ...input, width: '100%', ...(focus === key ? { borderColor: '#6728e4' } : {}) }} value={valueOf(key)}
+                    onChange={(e) => setDraft((d) => ({ ...d, [key]: Number(e.target.value) || 0 }))} />
+                </label>
+              ))}
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', marginTop: '16px', padding: '12px', borderRadius: '12px', background: '#f8f9ff' }}>
+              {[['Uang Masuk', group.income, '#047857'], ['Uang Keluar', total, '#b91c1c'], ['Profit', profit, profit < 0 ? '#b91c1c' : '#4b2fc4']].map(([l, v, c]) => (
+                <div key={l as string}>
+                  <p style={{ fontFamily: f, fontSize: '0.7rem', color: '#8a8a99' }}>{l}</p>
+                  <p style={{ fontFamily: f, fontWeight: 800, fontSize: '0.95rem', color: c as string }}>{rupiah(v as number)}</p>
+                </div>
+              ))}
+            </div>
+            <p style={{ fontFamily: f, fontSize: '0.72rem', color: '#464652', margin: '14px 0 6px' }}>Atau hubungkan ke campaign (biaya lalu diambil dari Recap Payment campaign itu):</p>
             <select style={{ ...input, width: '100%' }} value={linkTo} onChange={(e) => setLinkTo(e.target.value)}>
-              <option value="">Pilih campaign</option>
+              <option value="">Tidak dihubungkan (pakai biaya di atas)</option>
               {campaigns.map((c) => <option key={c._id} value={c._id}>{c.name}</option>)}
             </select>
           </>
@@ -388,12 +412,12 @@ function ExpenseEditor({ group, campaigns, focus, onClose, onSaved }: {
           </>
         )}
 
-        {error && record && <p style={{ color: '#ba1a1a', fontFamily: f, fontSize: '0.78rem', marginTop: '10px' }}>{error}</p>}
+        {error && (record || !group.campaignId) && <p style={{ color: '#ba1a1a', fontFamily: f, fontSize: '0.78rem', marginTop: '10px' }}>{error}</p>}
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '16px' }}>
           <button onClick={onClose} style={btn(false)}>Batal</button>
-          <button onClick={save} disabled={busy || (!group.campaignId ? !linkTo : !record || !Object.keys(draft).length)}
-            style={{ ...btn(), opacity: busy || (!group.campaignId ? !linkTo : !record || !Object.keys(draft).length) ? 0.6 : 1 }}>
-            {busy ? 'Menyimpan...' : group.campaignId ? 'Simpan' : 'Hubungkan'}
+          <button onClick={save} disabled={busy || (!group.campaignId ? !linkTo && !Object.keys(draft).length : !record || !Object.keys(draft).length)}
+            style={{ ...btn(), opacity: busy || (!group.campaignId ? !linkTo && !Object.keys(draft).length : !record || !Object.keys(draft).length) ? 0.6 : 1 }}>
+            {busy ? 'Menyimpan...' : !group.campaignId && linkTo ? 'Hubungkan' : 'Simpan'}
           </button>
         </div>
       </div>
