@@ -65,7 +65,7 @@ function rangeOf(mode: Mode, ref: string, customFrom: string, customTo: string):
 
 interface Group {
   key: string; campaignId: string | null; campaign: string; company: string; contact: string; mastersheetUrl: string; runningMonth: string;
-  items: { sow: string; tier: string; qty: number; unitFee: number; amount: number }[];
+  items: { item: string; sow: string; tier: string; qty: number; unitFee: number; amount: number }[];
   invoices: { _id: string; shortId?: number; number: string; issueDate: string; dueDate: string; total: number; paid: boolean; paidAt: string; overdue: boolean }[];
   custom: Record<string, string | number>; totalInvoice: number; income: number; receivable: number;
   expense: { feeCreator: number; feePic: number; feeMg: number; feeHandle: number; adminInternal: number; reimburse: number; ads: number; opex: number; custom: number; total: number };
@@ -79,16 +79,6 @@ interface Group {
 interface Recap {
   columns: RecapColumn[]; groups: Group[];
   totals: { income: number; expense: number; profit: number; margin: number | null; receivable: number; overdue: number; invoiceCount: number; paidCount: number; hiddenCount: number };
-}
-
-const TIER_COLORS: Record<string, [string, string]> = {
-  nano: ['#14532d', '#fff'], micro: ['#7c2d12', '#fff'], macro: ['#1e3a8a', '#fff'], mega: ['#581c87', '#fff'],
-  buzzer: ['#fde68a', '#78350f'], 'reimburse produk': ['#3f2d12', '#fff'],
-};
-function TierPill({ tier }: { tier: string }) {
-  if (!tier) return <span style={{ color: '#c7c8cf' }}>-</span>;
-  const [bg, fg] = TIER_COLORS[tier.toLowerCase()] ?? ['#ede9fe', '#4c1d95'];
-  return <span style={{ padding: '3px 12px', borderRadius: '999px', fontSize: '0.72rem', fontWeight: 700, background: bg, color: fg, whiteSpace: 'nowrap' }}>{tier}</span>;
 }
 
 /** Daftar per invoice dalam satu sel grup; tinggi baris tetap supaya kolom Invoice/Status/Jatuh Tempo sejajar */
@@ -523,7 +513,7 @@ export default function FinanceRecap() {
   // Rincian uang keluar per kolom; kolom yang nol di semua baris disembunyikan supaya tabel tidak terlalu lebar
   // Semua kolom biaya selalu tampil (juga yang masih 0) supaya bisa diisi langsung dari tabel
   const expenseCols = EXPENSE_COLS;
-  const headers = ['Campaign', 'Perusahaan', 'Contact', 'Bulan Running', 'Master Sheet', 'SOW', 'Tier', 'Jumlah Talent', 'Fee/Talent', 'Total',
+  const headers = ['Campaign', 'Perusahaan', 'Contact', 'Bulan Running', 'Master Sheet', 'Item', 'Scope of Work', 'Jumlah Talent', 'Fee/Talent', 'Total',
     'Total Payment', 'Invoice', 'Status', 'Jatuh Tempo', ...columns.map((c) => c.label), ...expenseCols.map(([, l]) => l), 'Uang Keluar', 'Profit', 'Margin', ''];
 
   const allGroups = useMemo(() => data?.groups ?? [], [data]);
@@ -540,7 +530,7 @@ export default function FinanceRecap() {
     const q = query.trim().toLowerCase();
     const pass = (col: FilterCol, vals: string[]) => { const sel = colFilters[col]; return !sel || vals.some((v) => sel.has(v)); };
     let out = allGroups.filter((g) => {
-      if (q && ![g.campaign, g.company, g.contact, ...g.invoices.map((i) => i.number), ...g.invoices.map((i) => (i.shortId ? `#${i.shortId}` : '')), ...g.items.map((i) => i.sow)].some((v) => (v || '').toLowerCase().includes(q))) return false;
+      if (q && ![g.campaign, g.company, g.contact, ...g.invoices.map((i) => i.number), ...g.invoices.map((i) => (i.shortId ? `#${i.shortId}` : '')), ...g.items.flatMap((i) => [i.item, i.sow])].some((v) => (v || '').toLowerCase().includes(q))) return false;
       return pass('campaign', [g.campaign]) && pass('company', [g.company || '']) && pass('month', [monthLabel(g.runningMonth)]) && pass('status', groupStatuses(g));
     });
     const by: Record<string, (g: Group) => number | string> = { profit: (g) => g.profit, total: (g) => g.totalInvoice, expense: (g) => g.expense.total, month: (g) => g.runningMonth };
@@ -708,8 +698,8 @@ export default function FinanceRecap() {
                               {groupCell(g.mastersheetUrl ? g.mastersheetUrl.split(/\s+/).filter(Boolean).map((u, i, all) => <a key={u} href={u} target="_blank" rel="noopener noreferrer" style={{ display: 'block', color: '#4b2fc4', fontWeight: 600, whiteSpace: 'nowrap' }}>{all.length > 1 ? `Sheet ${i + 1}` : 'Buka Sheet'} ↗</a>) : '-', freezeStyle(4))}
                             </>
                           )}
-                          <td style={{ ...td, minWidth: '180px' }}>{it?.sow || '-'}</td>
-                          <td style={td}><TierPill tier={it?.tier ?? ''} /></td>
+                          <td style={{ ...td, minWidth: '180px' }}>{it?.item || '-'}</td>
+                          <td style={{ ...td, minWidth: '140px' }}>{it?.sow || '-'}</td>
                           <td style={{ ...td, textAlign: 'center' }}>{it ? it.qty : '-'}</td>
                           <td style={{ ...td, whiteSpace: 'nowrap' }}>{it ? rupiah(it.unitFee) : '-'}</td>
                           <td style={{ ...td, whiteSpace: 'nowrap' }}>{it ? rupiah(it.amount) : '-'}</td>
