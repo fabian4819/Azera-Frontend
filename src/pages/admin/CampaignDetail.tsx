@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, Copy, Check, MessageCircle, LayoutDashboard, Building2, ExternalLink, UserCheck, MapPin, CalendarDays, Clock, Pencil, Sheet } from 'lucide-react';
 import { NICHES } from '../../lib/niches';
+import CampaignWaSenders, { type WaSenders } from './CampaignWaSenders';
 import { APPROVAL_FLOW_OPTIONS, approvalFlowLabel, type ApprovalFlow } from '../../lib/approvalFlow';
 import { buildBroadcast } from '../../lib/broadcast';
 import { SiInstagram, SiTiktok, SiThreads, SiX } from 'react-icons/si';
@@ -25,6 +26,7 @@ interface Campaign {
   status: string; workflowStage: string; applyOpen: boolean; applySlug: string; waGroupLink?: string;
   customFields: CustomField[]; applyFields?: ApplyFields; accessCode: string; clientAccessCode?: string; clientSpreadsheetId?: string;
   approvalFlow?: ApprovalFlow;
+  waSenders?: WaSenders;
   type?: 'online' | 'offline'; eventDetails?: { location?: string; date?: string; timeWindow?: string };
   fee?: { creatorFee?: number; picFee?: number; mgFee?: number }; feeNote?: string; benefits?: string[]; requirements?: string[]; infoLink?: string;
   brandName?: string | null; timeline?: { startDate?: string; endDate?: string };
@@ -371,6 +373,9 @@ export default function CampaignDetail() {
               </div>
             </div>
           </div>
+
+          <CampaignWaSenders campaignId={campaign._id} value={campaign.waSenders}
+            onSaved={(waSenders) => setCampaign((c) => (c ? { ...c, waSenders } : c))} />
         </div>
       )}
 

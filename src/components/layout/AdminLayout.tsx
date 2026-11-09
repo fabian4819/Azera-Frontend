@@ -1,6 +1,6 @@
 import { Fragment, useState } from 'react';
 import { Link, useLocation, Outlet } from 'react-router-dom';
-import { LayoutDashboard, Building2, Users, Contact, UserCheck, UserRoundCheck, ImageIcon, Megaphone, Upload, MessageCircle, Inbox, MessageSquareText, Bot, Plug, LogOut, ChevronsLeft, ChevronsRight, FolderOpen, FileText, Receipt, FileSignature, ChevronDown, Wallet } from 'lucide-react';
+import { LayoutDashboard, Building2, Users, Contact, UserCheck, UserRoundCheck, Smartphone, ImageIcon, Megaphone, Upload, MessageCircle, Inbox, MessageSquareText, Bot, Plug, LogOut, ChevronsLeft, ChevronsRight, FolderOpen, FileText, Receipt, FileSignature, ChevronDown, Wallet } from 'lucide-react';
 import { useAuth, hasOwnerAccess } from '../../hooks/useAuth';
 import BottomNav from './BottomNav';
 
@@ -12,6 +12,7 @@ const navItems = [
   { label: 'Campaigns', to: '/admin/campaigns', icon: Megaphone },
   { label: 'Import Data', to: '/admin/import', icon: Upload },
   { label: 'WhatsApp', to: '/admin/whatsapp', icon: MessageCircle },
+  { label: 'WhatsApp Admin', to: '/admin/whatsapp-admin', icon: Smartphone },
   { label: 'Inbox WhatsApp', to: '/admin/whatsapp/inbox', icon: Inbox },
   { label: 'Template Pesan', to: '/admin/wa-templates', icon: MessageSquareText },
   { label: 'Template Bot Lead', to: '/admin/lead-bot-templates', icon: Bot },
@@ -40,6 +41,7 @@ const pageTitles: Record<string, string> = {
   '/admin/campaigns': 'Campaigns',
   '/admin/import': 'Import Creator Kurasi',
   '/admin/whatsapp': 'WhatsApp',
+  '/admin/whatsapp-admin': 'WhatsApp Admin (nomor pribadi admin)',
   '/admin/whatsapp/inbox': 'Inbox WhatsApp',
   '/admin/wa-templates': 'Template Pesan WhatsApp',
   '/admin/lead-bot-templates': 'Template Bot WhatsApp (Lead Masuk)',

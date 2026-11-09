@@ -42,6 +42,7 @@ const CampaignDetail = lazy(() => import('./pages/admin/CampaignDetail'));
 const CampaignSheet = lazy(() => import('./pages/admin/CampaignSheet'));
 const Import = lazy(() => import('./pages/admin/Import'));
 const ExistingCreators = lazy(() => import('./pages/admin/ExistingCreators'));
+const WhatsAppAdmin = lazy(() => import('./pages/admin/WhatsAppAdmin'));
 const Documents = lazy(() => import('./pages/admin/Documents'));
 const FinanceRecap = lazy(() => import('./pages/admin/FinanceRecap'));
 const WhatsApp = lazy(() => import('./pages/admin/WhatsApp'));
@@ -179,6 +180,7 @@ export default function App() {
             <Route path="documents/:type" element={<Documents />} />
             <Route path="finance-recap" element={<OwnerOnly><FinanceRecap /></OwnerOnly>} />
             <Route path="whatsapp" element={<WhatsApp />} />
+            <Route path="whatsapp-admin" element={<WhatsAppAdmin />} />
             <Route path="whatsapp/inbox" element={<NoDeveloper><WhatsAppInbox /></NoDeveloper>} />
             <Route path="wa-templates" element={<WaTemplates />} />
             <Route path="lead-bot-templates" element={<LeadBotTemplates />} />
