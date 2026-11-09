@@ -66,7 +66,7 @@ function rangeOf(mode: Mode, ref: string, customFrom: string, customTo: string):
 interface Group {
   key: string; campaignId: string | null; campaign: string; company: string; contact: string; mastersheetUrl: string; runningMonth: string;
   items: { item: string; sow: string; tier: string; qty: number; unitFee: number; amount: number }[];
-  invoices: { _id: string; shortId?: number; number: string; issueDate: string; dueDate: string; total: number; paid: boolean; paidAt: string; overdue: boolean }[];
+  invoices: { _id: string; shortId?: number; number: string; issueDate: string; dueDate: string; total: number; paid: boolean; paidAt: string; overdue: boolean; advance: number; paidAmount: number; shortfall: number; note: string }[];
   custom: Record<string, string | number>; totalInvoice: number; income: number; receivable: number;
   expense: { feeCreator: number; feePic: number; feeMg: number; feeHandle: number; adminInternal: number; reimburse: number; ads: number; opex: number; custom: number; total: number };
   /** Keterangan Gaji Admin dari invoice WA */
@@ -246,6 +246,51 @@ function DueDateInput({ value, overdue, paid, busy, onChange }: { value: string;
         ...(overdue ? { background: '#fee2e2', borderColor: '#fca5a5', color: '#b91c1c', fontWeight: 700 } : paid ? { color: '#8a8a99' } : {}),
       }}
     />
+  );
+}
+
+type InvoiceItem = Group['invoices'][number];
+const digits = (v: string) => Number(v.replace(/\D/g, '')) || 0;
+
+/** Talangan (uang Azera dipakai dulu), bayar sebagian (kurang bayar) & catatan per invoice; sama dengan /talang, /bayar, /catatan di bot */
+function InvoiceExtras({ inv, busy, onSave }: { inv: InvoiceItem; busy: boolean; onSave: (body: Record<string, unknown>) => void }) {
+  const [open, setOpen] = useState(false);
+  const [advance, setAdvance] = useState('');
+  const [paidAmount, setPaidAmount] = useState('');
+  const [note, setNote] = useState('');
+  const start = () => {
+    setAdvance(inv.advance ? String(inv.advance) : '');
+    setPaidAmount(inv.paidAmount ? String(inv.paidAmount) : '');
+    setNote(inv.note);
+    setOpen(true);
+  };
+  const parts = [
+    inv.advance > 0 && !inv.paid ? `Talangan ${rupiah(inv.advance)}` : '',
+    inv.shortfall ? `Bayar ${rupiah(inv.paidAmount)} · kurang ${rupiah(inv.shortfall)}` : '',
+  ].filter(Boolean);
+  if (!open) {
+    return (
+      <button onClick={start} disabled={busy} title={inv.note || 'Isi talangan, sudah dibayar sebagian, atau catatan'}
+        style={{ ...editableCell(inv.shortfall ? '#b45309' : '#464652'), fontWeight: 400, textAlign: 'left', maxWidth: '240px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', opacity: busy ? 0.5 : 1 }}>
+        {parts.join(' · ') || (inv.note ? '' : '-')}{inv.note ? `${parts.length ? ' · ' : ''}📝 ${inv.note}` : ''} <Pencil size={10} />
+      </button>
+    );
+  }
+  const save = () => {
+    onSave({ advance: digits(advance), paidAmount: inv.paid ? undefined : digits(paidAmount), note: note.trim() });
+    setOpen(false);
+  };
+  const box: React.CSSProperties = { ...input, padding: '4px 8px', fontSize: '0.74rem', width: '100%' };
+  return (
+    <div style={{ display: 'grid', gap: '4px', minWidth: '220px' }}>
+      <input value={advance} onChange={(e) => setAdvance(e.target.value)} inputMode="numeric" placeholder="Dana talangan (Rp)" aria-label="Dana talangan" style={box} />
+      {!inv.paid && <input value={paidAmount} onChange={(e) => setPaidAmount(e.target.value)} inputMode="numeric" placeholder={`Sudah dibayar (dari ${rupiah(inv.total)})`} aria-label="Sudah dibayar" style={box} />}
+      <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={2} maxLength={1000} placeholder="Catatan, mis. transfer kurang 500rb" aria-label="Catatan invoice" style={{ ...box, resize: 'vertical' }} />
+      <div style={{ display: 'flex', gap: '6px' }}>
+        <button onClick={save} style={{ ...box, width: 'auto', background: '#6728e4', color: 'white', border: 'none', cursor: 'pointer', fontWeight: 700 }}>Simpan</button>
+        <button onClick={() => setOpen(false)} style={{ ...box, width: 'auto', cursor: 'pointer' }}>Batal</button>
+      </div>
+    </div>
   );
 }
 
@@ -524,7 +569,7 @@ export default function FinanceRecap() {
   // Semua kolom biaya selalu tampil (juga yang masih 0) supaya bisa diisi langsung dari tabel
   const expenseCols = EXPENSE_COLS;
   const headers = ['Campaign', 'Perusahaan', 'Contact', 'Bulan Running', 'Master Sheet', 'Item', 'Scope of Work', 'Tier', 'Jumlah Talent', 'Fee/Talent', 'Total',
-    'Total Payment', 'Invoice', 'Status', 'Jatuh Tempo', ...columns.map((c) => c.label), ...expenseCols.map(([, l]) => l), 'Uang Keluar', 'Profit', 'Margin', ''];
+    'Total Payment', 'Invoice', 'Status', 'Jatuh Tempo', 'Pembayaran & Catatan', ...columns.map((c) => c.label), ...expenseCols.map(([, l]) => l), 'Uang Keluar', 'Profit', 'Margin', ''];
 
   const allGroups = useMemo(() => data?.groups ?? [], [data]);
   const filterValues = useMemo(() => {
@@ -540,7 +585,7 @@ export default function FinanceRecap() {
     const q = query.trim().toLowerCase();
     const pass = (col: FilterCol, vals: string[]) => { const sel = colFilters[col]; return !sel || vals.some((v) => sel.has(v)); };
     let out = allGroups.filter((g) => {
-      if (q && ![g.campaign, g.company, g.contact, ...g.invoices.map((i) => i.number), ...g.invoices.map((i) => (i.shortId ? `#${i.shortId}` : '')), ...g.items.flatMap((i) => [i.item, i.sow])].some((v) => (v || '').toLowerCase().includes(q))) return false;
+      if (q && ![g.campaign, g.company, g.contact, ...g.invoices.map((i) => i.number), ...g.invoices.map((i) => (i.shortId ? `#${i.shortId}` : '')), ...g.items.flatMap((i) => [i.item, i.sow]), ...g.invoices.map((i) => i.note)].some((v) => (v || '').toLowerCase().includes(q))) return false;
       return pass('campaign', [g.campaign]) && pass('company', [g.company || '']) && pass('month', [monthLabel(g.runningMonth)]) && pass('status', groupStatuses(g));
     });
     const by: Record<string, (g: Group) => number | string> = { profit: (g) => g.profit, total: (g) => g.totalInvoice, expense: (g) => g.expense.total, month: (g) => g.runningMonth };
@@ -731,6 +776,9 @@ export default function FinanceRecap() {
                               {groupCell(invoiceList(g, (inv) => (
                                 <DueDateInput value={inv.dueDate} overdue={inv.overdue} paid={inv.paid} busy={busyInvoice === inv._id}
                                   onChange={(v) => patchInvoice(inv._id, { dueDate: v })} />
+                              )))}
+                              {groupCell(invoiceList(g, (inv) => (
+                                <InvoiceExtras inv={inv} busy={busyInvoice === inv._id} onSave={(body) => patchInvoice(inv._id, body)} />
                               )))}
                               {columns.map((c) => {
                                 const v = g.custom[c.key];
