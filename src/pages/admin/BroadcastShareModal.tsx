@@ -18,6 +18,15 @@ const isDefaultGroup = (name = '') => {
   return n === 'GRUP PIC AZERA' || n.startsWith('AZERA MG X PARTNER');
 };
 
+/** Grup terakhir yang di-share per WA pengirim (per browser), jadi centangan awal campaign berikutnya */
+const lastGroupsKey = (bot: string) => `broadcast-groups:${bot}`;
+const loadLastGroups = (bot: string): string[] | null => {
+  try { return JSON.parse(localStorage.getItem(lastGroupsKey(bot)) || 'null'); } catch { return null; }
+};
+const saveLastGroups = (bot: string, jids: string[]) => {
+  try { localStorage.setItem(lastGroupsKey(bot), JSON.stringify(jids)); } catch { /* storage diblokir */ }
+};
+
 interface PanelProps {
   campaignId: string;
   text: string;
@@ -65,12 +74,14 @@ export function BroadcastSharePanel({ campaignId, text, onTextChange: setText, o
     setBot(id);
   };
 
-  // Grup ikut nomor pengirim, dicentang ulang ke grup default tiap ganti WA
+  // Grup ikut nomor pengirim; centangan awal = grup share terakhir WA itu, kalau belum pernah = grup default
   useEffect(() => {
     if (!bot) return;
     api.get('/admin/campaigns/wa-groups', { params: { bot } }).then((r) => {
-      setGroups(r.data);
-      setGroupIds(r.data.filter((g: Group) => isDefaultGroup(g.name)).map((g: Group) => g.jid));
+      const list: Group[] = r.data;
+      setGroups(list);
+      const last = loadLastGroups(bot);
+      setGroupIds(last ? list.filter((g) => last.includes(g.jid)).map((g) => g.jid) : list.filter((g) => isDefaultGroup(g.name)).map((g) => g.jid));
     }).catch(() => setGroups([]));
   }, [bot]);
 
@@ -120,6 +131,7 @@ export function BroadcastSharePanel({ campaignId, text, onTextChange: setText, o
       await persist();
       const target = kind === 'group' ? { groupJids: ids } : kind === 'creator' ? { creatorIds: ids } : { picIds: ids };
       const res = await api.post(`/admin/campaigns/${campaignId}/share`, { message: text, bot, ...target });
+      if (kind === 'group') saveLastGroups(bot, ids);
       const failed: string[] = res.data.failed || [];
       setStatus({ ok: !failed.length, text: `${res.data.sent} pesan masuk antrian kirim (WA ${SENDER_LABELS[bot] ?? bot})${failed.length ? `, ${failed.length} gagal (nomor tidak valid)` : ''}.` });
     } catch (err: unknown) {

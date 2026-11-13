@@ -130,7 +130,6 @@ export default function CustomFormBuilder({ campaignId, onChange, initial, initi
     setActiveId(field.id);
   };
 
-  const addField = () => insertAfterActive({ id: crypto.randomUUID(), label: '', type: 'select', required: false, options: ['Opsi 1'] });
 
   const duplicate = (f: CustomField) => insertAfterActive({ ...f, id: crypto.randomUUID(), options: [...(f.options || [])] });
 
@@ -142,6 +141,17 @@ export default function CustomFormBuilder({ campaignId, onChange, initial, initi
   // Urutan semua kartu (default + custom); PIC/Handle by yang dihapus tidak ikut, balik ke posisi default kalau dikembalikan
   const keys = applyOrder(applyFields.order, defaultApplyKeys({ askDomicile, platforms, customIds: fields.map((f) => f.id) }))
     .filter((k) => (k !== 'pic' || applyFields.pic) && (k !== 'handleBy' || applyFields.handleBy));
+  // Pertanyaan baru tepat di bawah kartu `after` (field default maupun custom); tanpa `after` = paling bawah
+  const addField = (after = activeId ?? keys[keys.length - 1]) => {
+    const id = crypto.randomUUID();
+    const at = keys.indexOf(after ?? '');
+    setFields((prev) => [...prev, { id, label: '', type: 'select', required: false, options: ['Opsi 1'] }]);
+    setApply({ order: at === -1 ? [...keys, id] : [...keys.slice(0, at + 1), id, ...keys.slice(at + 1)] });
+    setActiveId(id);
+  };
+  const addBtn = (key: string) => (
+    <button type="button" onClick={(e) => { e.stopPropagation(); addField(key); }} title="Tambah pertanyaan di bawah ini" aria-label="Tambah pertanyaan di bawah ini" style={iconBtn}><Plus size={18} /></button>
+  );
   const reorder = (from: number, to: number) => {
     if (from === -1 || to < 0 || to >= keys.length || from === to) return;
     const next = [...keys];
@@ -212,7 +222,7 @@ export default function CustomFormBuilder({ campaignId, onChange, initial, initi
       {grip(key)}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', marginBottom: '10px' }}>
         {fieldTitle(title)}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>{editBtn(key, 'keterangan')}{lockedTag}</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>{editBtn(key, 'keterangan')}{lockedTag}{addBtn(key)}</div>
       </div>
       {descBlock(key)}
       {body}
@@ -310,7 +320,7 @@ export default function CustomFormBuilder({ campaignId, onChange, initial, initi
           {grip('pic')}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px' }}>
             <p style={{ fontFamily: font, fontSize: '0.95rem', color: '#191c20' }}>PIC{assignedPicIds.length > 0 && <span style={{ color: '#d93025' }}> *</span>}</p>
-            <button onClick={() => setApply({ pic: false })} title="Hapus field PIC dari form" style={iconBtn}><Trash2 size={18} /></button>
+            <div style={{ display: 'flex' }}>{addBtn('pic')}<button onClick={() => setApply({ pic: false })} title="Hapus field PIC dari form" style={iconBtn}><Trash2 size={18} /></button></div>
           </div>
           {descBlock('pic')}
           <p style={{ fontSize: '0.78rem', color: '#777683', fontFamily: font, margin: '4px 0 8px' }}>
@@ -340,7 +350,7 @@ export default function CustomFormBuilder({ campaignId, onChange, initial, initi
           {grip('handleBy')}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px' }}>
             <p style={{ fontFamily: font, fontSize: '0.95rem', color: '#191c20' }}>Handle by{applyFields.handleByRequired && <span style={{ color: '#d93025' }}> *</span>}</p>
-            <button onClick={() => setApply({ handleBy: false })} title="Hapus field Handle by dari form" style={iconBtn}><Trash2 size={18} /></button>
+            <div style={{ display: 'flex' }}>{addBtn('handleBy')}<button onClick={() => setApply({ handleBy: false })} title="Hapus field Handle by dari form" style={iconBtn}><Trash2 size={18} /></button></div>
           </div>
           {descBlock('handleBy')}
           {answerLine('50%', 'Nama HB + nomor WA')}
@@ -407,7 +417,7 @@ export default function CustomFormBuilder({ campaignId, onChange, initial, initi
                   </p>
                   {f.description && <p style={{ fontFamily: font, fontSize: '0.8rem', color: '#777683', marginTop: '4px', whiteSpace: 'pre-wrap' }}>{f.description}</p>}
                 </div>
-                {editBtn(f.id, 'judul & keterangan')}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>{editBtn(f.id, 'judul & keterangan')}{addBtn(f.id)}</div>
               </div>
             )}
 
@@ -456,6 +466,7 @@ export default function CustomFormBuilder({ campaignId, onChange, initial, initi
               <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '2px', borderTop: '1px solid #e1e0ff', paddingTop: '6px' }}>
                 <button onClick={() => move(f.id, -1)} disabled={i === 0} title="Pindah ke atas" style={{ ...iconBtn, opacity: i === 0 ? 0.3 : 1 }}><ArrowUp size={18} /></button>
                 <button onClick={() => move(f.id, 1)} disabled={i === keys.length - 1} title="Pindah ke bawah" style={{ ...iconBtn, opacity: i === keys.length - 1 ? 0.3 : 1 }}><ArrowDown size={18} /></button>
+                {addBtn(f.id)}
                 <button onClick={(e) => { e.stopPropagation(); duplicate(f); }} title="Duplikat" style={iconBtn}><Copy size={18} /></button>
                 <button onClick={(e) => { e.stopPropagation(); remove(f.id); }} title="Hapus" style={iconBtn}><Trash2 size={18} /></button>
                 <span style={{ width: '1px', height: '28px', background: '#e1e0ff', margin: '0 10px' }} />
@@ -496,7 +507,7 @@ export default function CustomFormBuilder({ campaignId, onChange, initial, initi
       {/* Tombol tambah ikut scroll di samping (ala Google Forms), pertanyaan baru masuk di bawah kartu yang aktif */}
       <div className="fb-side" style={{ position: 'sticky', top: '120px', flexShrink: 0 }}>
         <button
-          onClick={addField}
+          onClick={() => addField()}
           title="Tambah pertanyaan"
           aria-label="Tambah pertanyaan"
           style={{ width: '48px', height: '48px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#6728e4', border: 'none', borderRadius: '50%', color: 'white', cursor: 'pointer', boxShadow: '0 6px 18px rgba(103,40,228,0.35)' }}
