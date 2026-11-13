@@ -18,13 +18,18 @@ const isDefaultGroup = (name = '') => {
   return n === 'GRUP PIC AZERA' || n.startsWith('AZERA MG X PARTNER');
 };
 
-/** Grup terakhir yang di-share per WA pengirim (per browser), jadi centangan awal campaign berikutnya */
-const lastGroupsKey = (bot: string) => `broadcast-groups:${bot}`;
-const loadLastGroups = (bot: string): string[] | null => {
-  try { return JSON.parse(localStorage.getItem(lastGroupsKey(bot)) || 'null'); } catch { return null; }
+/** Penerima share terakhir (per browser) jadi centangan awal campaign berikutnya.
+ * Key: `groups:<bot>` (grup ikut nomor pengirim), `creators`, `pics`. */
+const loadLast = (key: string): string[] | null => {
+  try { return JSON.parse(localStorage.getItem(`broadcast-${key}`) || 'null'); } catch { return null; }
 };
-const saveLastGroups = (bot: string, jids: string[]) => {
-  try { localStorage.setItem(lastGroupsKey(bot), JSON.stringify(jids)); } catch { /* storage diblokir */ }
+const saveLast = (key: string, ids: string[]) => {
+  try { localStorage.setItem(`broadcast-${key}`, JSON.stringify(ids)); } catch { /* storage diblokir */ }
+};
+// Centangan terakhir yang masih ada di daftar
+const keepLast = (key: string, ids: string[]) => {
+  const last = loadLast(key);
+  return last ? ids.filter((id) => last.includes(id)) : [];
 };
 
 interface PanelProps {
@@ -57,8 +62,14 @@ export function BroadcastSharePanel({ campaignId, text, onTextChange: setText, o
   const [bot, setBot] = useState('');
 
   useEffect(() => {
-    api.get('/admin/creators').then((r) => setCreators(r.data)).catch(() => setCreators([]));
-    api.get('/admin/pic').then((r) => setPics(r.data)).catch(() => setPics([]));
+    api.get('/admin/creators').then((r) => {
+      setCreators(r.data);
+      setCreatorIds(keepLast('creators', r.data.map((c: Creator) => c._id)));
+    }).catch(() => setCreators([]));
+    api.get('/admin/pic').then((r) => {
+      setPics(r.data);
+      setPicIds(keepLast('pics', r.data.map((p: Pic) => p._id)));
+    }).catch(() => setPics([]));
     // Default: partnership kalau terhubung, selain itu WA pertama yang terhubung (di lokal = developer)
     api.get('/admin/campaigns/wa-senders').then((r) => {
       const list: Sender[] = r.data;
@@ -80,7 +91,7 @@ export function BroadcastSharePanel({ campaignId, text, onTextChange: setText, o
     api.get('/admin/campaigns/wa-groups', { params: { bot } }).then((r) => {
       const list: Group[] = r.data;
       setGroups(list);
-      const last = loadLastGroups(bot);
+      const last = loadLast(`groups:${bot}`);
       setGroupIds(last ? list.filter((g) => last.includes(g.jid)).map((g) => g.jid) : list.filter((g) => isDefaultGroup(g.name)).map((g) => g.jid));
     }).catch(() => setGroups([]));
   }, [bot]);
@@ -131,7 +142,7 @@ export function BroadcastSharePanel({ campaignId, text, onTextChange: setText, o
       await persist();
       const target = kind === 'group' ? { groupJids: ids } : kind === 'creator' ? { creatorIds: ids } : { picIds: ids };
       const res = await api.post(`/admin/campaigns/${campaignId}/share`, { message: text, bot, ...target });
-      if (kind === 'group') saveLastGroups(bot, ids);
+      saveLast(kind === 'group' ? `groups:${bot}` : kind === 'creator' ? 'creators' : 'pics', ids);
       const failed: string[] = res.data.failed || [];
       setStatus({ ok: !failed.length, text: `${res.data.sent} pesan masuk antrian kirim (WA ${SENDER_LABELS[bot] ?? bot})${failed.length ? `, ${failed.length} gagal (nomor tidak valid)` : ''}.` });
     } catch (err: unknown) {

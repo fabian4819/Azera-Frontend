@@ -22,7 +22,7 @@ import CustomFormBuilder, { type CustomField, type ApplyFields } from './CustomF
 interface Campaign {
   _id: string; name: string; objective: string; briefContent?: string; deliverables: string[];
   briefCampaign?: { blocks: { kind: 'text' | 'file' | 'image' | 'video' | 'link'; content: string }[]; filledBy: 'admin' | 'client'; updatedAt: string };
-  budget?: number; criteria: { niches: string[]; minFollowers?: number; minFollowersByPlatform?: Record<string, number | undefined>; provinces: string[]; cities?: string[]; platforms: string[] };
+  budget?: number; criteria: { niches: string[]; minFollowers?: number; minFollowersByPlatform?: Record<string, number | undefined>; provinces: string[]; cities?: string[]; platforms: string[]; avgMetrics?: boolean };
   status: string; workflowStage: string; applyOpen: boolean; applySlug: string; waGroupLink?: string;
   customFields: CustomField[]; applyFields?: ApplyFields; accessCode: string; clientAccessCode?: string; clientSpreadsheetId?: string;
   approvalFlow?: ApprovalFlow;
@@ -582,6 +582,7 @@ function CampaignInfoEdit({ campaign: c, onCancel, onSaved }: { campaign: Campai
   const [minFollowers, setMinFollowers] = useState<Record<string, string>>(
     Object.fromEntries(Object.entries(c.criteria.minFollowersByPlatform || {}).map(([k, v]) => [k, v != null ? String(v) : ''])),
   );
+  const [avgMetrics, setAvgMetrics] = useState(c.criteria.avgMetrics !== false);
   const [niches, setNiches] = useState<string[]>(c.criteria.niches || []);
   const [approvalFlow, setApprovalFlow] = useState<ApprovalFlow>(c.approvalFlow ?? 'two_step');
   const [saving, setSaving] = useState(false);
@@ -601,7 +602,7 @@ function CampaignInfoEdit({ campaign: c, onCancel, onSaved }: { campaign: Campai
         eventDetails: { location: visitLocation.trim(), date: visitDate || null, timeWindow: visitTime.trim() },
         approvalFlow,
         criteria: {
-          ...c.criteria, platforms, niches,
+          ...c.criteria, platforms, niches, avgMetrics,
           minFollowersByPlatform: Object.fromEntries(platforms.map((p) => [p, numOrUndef(minFollowers[p] || '')])),
         },
       };
@@ -679,6 +680,10 @@ function CampaignInfoEdit({ campaign: c, onCancel, onSaved }: { campaign: Campai
               </div>
             );
           })}
+          {platforms.length > 0 && <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontFamily: "var(--font-display)", fontSize: '0.82rem', color: '#191c20', cursor: 'pointer' }}>
+            <input type="checkbox" checked={avgMetrics} onChange={(e) => setAvgMetrics(e.target.checked)} style={{ accentColor: '#6728e4', width: '16px', height: '16px' }} />
+            Tampilkan kolom Avg Views, Avg Likes & Avg Comments di sheet Listing / Pendaftar
+          </label>}
         </div>
       ))}
       {field('Niche', (

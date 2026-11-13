@@ -91,6 +91,7 @@ export default function CampaignNew() {
   const [citiesByProvince, setCitiesByProvince] = useState<Record<string, WilayahOption[]>>({});
   const [cityIds, setCityIds] = useState<string[]>([]);
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([]);
+  const [avgMetrics, setAvgMetrics] = useState(true);
   const [type, setType] = useState<'online' | 'offline'>('online');
   const [approvalFlow, setApprovalFlow] = useState<ApprovalFlow>('two_step');
   const [eventLocation, setEventLocation] = useState('');
@@ -173,6 +174,7 @@ export default function CampaignNew() {
           provinces: provinceIds.map(provinceName).filter(Boolean),
           cities: cityIds.map(cityName).filter(Boolean),
           platforms: selectedPlatforms,
+          avgMetrics,
         },
         type,
         // Visit opsional untuk semua tipe campaign (bukan cuma offline/event)
@@ -366,6 +368,14 @@ export default function CampaignNew() {
                   <input value={minFollowers[p.value] ?? ''} onChange={(e) => setMinFollowers((m) => ({ ...m, [p.value]: e.target.value }))} type="number" min={0} placeholder="1000" style={inputStyle} />
                 </div>
               ))}
+            </div>
+          )}
+          {selectedPlatforms.length > 0 && (
+            <div style={{ marginBottom: '14px' }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontFamily: "var(--font-display)", fontSize: '0.82rem', color: '#191c20', cursor: 'pointer' }}>
+              <input type="checkbox" checked={avgMetrics} onChange={(e) => setAvgMetrics(e.target.checked)} style={{ accentColor: '#6728e4', width: '16px', height: '16px' }} />
+              Tampilkan kolom Avg Views, Avg Likes & Avg Comments di sheet Listing / Pendaftar
+            </label>
             </div>
           )}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }} className="form-2col">
