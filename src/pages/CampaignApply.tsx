@@ -47,6 +47,13 @@ const Pill = ({ label, selected, onClick }: { label: string; selected: boolean; 
 );
 
 /** Ilustrasi "pendaftaran ditutup": papan TUTUP tergantung di pintu (inline SVG, warna brand). */
+/** Keterangan field: URL jadi link yang bisa diklik (buka tab baru) */
+const Linkified = ({ text }: { text: string }) => (
+  <>{text.split(/(https?:\/\/[^\s]+)/g).map((part, i) => i % 2
+    ? <a key={i} href={part} target="_blank" rel="noopener noreferrer" style={{ color: '#6728e4', textDecoration: 'underline', wordBreak: 'break-all' }}>{part}</a>
+    : part)}</>
+);
+
 const ClosedIllustration = () => (
   <svg viewBox="0 0 240 200" width="220" height="183" role="img" aria-label="Ilustrasi papan tutup" style={{ display: 'block', margin: '0 auto 20px' }}>
     <ellipse cx="120" cy="186" rx="88" ry="8" fill="#e1e0ff" />
@@ -174,7 +181,7 @@ export default function CampaignApply() {
   const customById = new Map((campaign?.customFields || []).map((f) => [f.id, f]));
   const orderedKeys = applyOrder(fields.order, defaultApplyKeys({ askDomicile, platforms, customIds: [...customById.keys()] }));
   const descStyle: React.CSSProperties = { fontSize: '0.78rem', color: '#777683', margin: '-2px 0 8px', lineHeight: 1.5, whiteSpace: 'pre-wrap', fontFamily: "var(--font-display)" };
-  const fieldDesc = (key: string) => fields.descriptions?.[key] ? <p style={descStyle}>{fields.descriptions[key]}</p> : null;
+  const fieldDesc = (key: string) => fields.descriptions?.[key] ? <p style={descStyle}><Linkified text={fields.descriptions[key]} /></p> : null;
   // Info "nomor/email sudah terdaftar" tampil di bawah field kontak yang posisinya paling bawah
   const lastContactKey = orderedKeys.indexOf('phone') > orderedKeys.indexOf('email') ? 'phone' : 'email';
 
@@ -442,7 +449,7 @@ export default function CampaignApply() {
               return (
             <div key={f.id} style={{ marginBottom: '18px' }}>
               <label style={{ ...labelStyle, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{f.label}{f.required && ' *'}</label>
-              {f.description && <p style={{ fontSize: '0.78rem', color: '#777683', margin: '-2px 0 8px', lineHeight: 1.5, whiteSpace: 'pre-wrap', fontFamily: "var(--font-display)" }}>{f.description}</p>}
+              {f.description && <p style={{ fontSize: '0.78rem', color: '#777683', margin: '-2px 0 8px', lineHeight: 1.5, whiteSpace: 'pre-wrap', fontFamily: "var(--font-display)" }}><Linkified text={f.description} /></p>}
               {f.type === 'file' && (
                 <div>
                   <input type="file" accept="image/*,video/*,application/pdf,.doc,.docx" disabled={uploading === f.id} onChange={(e) => void uploadCustomFile(f.id, e.target.files?.[0])} style={{ ...inputStyle, padding: '10px 14px' }} />
