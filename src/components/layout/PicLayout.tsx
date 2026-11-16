@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { Link, useLocation, Outlet } from 'react-router-dom';
-import { Megaphone, LogOut, ChevronsLeft, ChevronsRight } from 'lucide-react';
+import { Megaphone, LogOut, ChevronsLeft, ChevronsRight, UserRound } from 'lucide-react';
 import { usePicAuth } from '../../hooks/usePicAuth';
 import BottomNav from './BottomNav';
 
 const navItems = [
   { label: 'My Campaigns', to: '/pic/campaigns', icon: Megaphone },
+  { label: 'Profil & Rekening', to: '/pic/profile', icon: UserRound },
 ];
 
 const COLLAPSE_KEY = 'azera_pic_sidebar_collapsed';
@@ -127,7 +128,7 @@ export default function PicLayout() {
             borderBottom: '1px solid var(--outline-variant)', flexShrink: 0,
           }}
         >
-          <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.15rem', color: 'var(--on-background)' }}>My Campaigns</h1>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.15rem', color: 'var(--on-background)' }}>{navItems.find((n) => n.to === activeTo)?.label ?? 'My Campaigns'}</h1>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <div style={{ textAlign: 'right' }}>
               <p style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '0.875rem', color: 'var(--on-background)' }}>

@@ -95,6 +95,8 @@ export default function CampaignApply() {
   const [handleBy, setHandleBy] = useState('');
   const [customValues, setCustomValues] = useState<Record<string, string | string[]>>({});
   const [niches, setNiches] = useState<string[]>([]);
+  // Opsi "Lainnya": niche di luar daftar campaign, diketik sendiri
+  const [otherNiche, setOtherNiche] = useState<string | null>(null);
   // id wilayah (dropdown); nama dikirim ke server saat submit, sama seperti KOLRegister
   const [province, setProvince] = useState('');
   const [city, setCity] = useState('');
@@ -218,7 +220,12 @@ export default function CampaignApply() {
       setSubmitError('Nama, nomor WA, dan email wajib diisi.');
       return;
     }
-    if (!niches.length) {
+    const allNiches = [...niches, ...(otherNiche?.trim() ? [otherNiche.trim()] : [])];
+    if (otherNiche !== null && !otherNiche.trim()) {
+      setSubmitError('Isi niche lainnya, atau batalkan pilihan Lainnya.');
+      return;
+    }
+    if (!allNiches.length) {
       setSubmitError('Niche wajib diisi.');
       return;
     }
@@ -255,7 +262,7 @@ export default function CampaignApply() {
     setLoading(true);
     try {
       await api.post(`/campaigns/${slug}/apply`, {
-        name, phone, email, niches, updateName,
+        name, phone, email, niches: allNiches, updateName,
         province: provinces.find((p) => p.id === province)?.name || '',
         city: cities.find((c) => c.id === city)?.name || '',
         socials: platforms.map((p) => ({ platform: p, username: socials[p].username, followers: Number(socials[p].followers) })),
@@ -393,7 +400,11 @@ export default function CampaignApply() {
               {nicheOptions.map((n) => (
                 <Pill key={n} label={n} selected={niches.includes(n)} onClick={() => setNiches((prev) => (prev.includes(n) ? prev.filter((x) => x !== n) : [...prev, n]))} />
               ))}
+              <Pill label="Lainnya" selected={otherNiche !== null} onClick={() => setOtherNiche((v) => (v === null ? '' : null))} />
             </div>
+            {otherNiche !== null && (
+              <input value={otherNiche} onChange={(e) => setOtherNiche(e.target.value)} placeholder="Tulis niche kamu" maxLength={60} autoFocus style={{ ...inputStyle, marginTop: '10px' }} />
+            )}
           </div>
                 );
                 case 'domicile': return askDomicile && (

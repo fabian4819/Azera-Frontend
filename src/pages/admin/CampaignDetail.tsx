@@ -164,6 +164,21 @@ export default function CampaignDetail() {
     }
   };
 
+  // Pakai campaign ini sebagai template job baru, lalu langsung buka hasilnya untuk diedit
+  const [duplicating, setDuplicating] = useState(false);
+  const duplicateCampaign = async () => {
+    setDuplicating(true);
+    setActionError('');
+    try {
+      const res = await api.post(`/admin/campaigns/${id}/duplicate`);
+      navigate(`/admin/campaigns/${res.data._id}`);
+    } catch {
+      setActionError('Gagal menduplikat campaign. Coba lagi.');
+    } finally {
+      setDuplicating(false);
+    }
+  };
+
   const copyLink = async (key: string, url: string) => {
     try {
       await navigator.clipboard.writeText(url);
@@ -228,6 +243,10 @@ export default function CampaignDetail() {
           )}
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+          <button onClick={() => void duplicateCampaign()} disabled={duplicating} title="Buat campaign baru dengan form, kriteria, fee & PIC yang sama"
+            style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 14px', borderRadius: '999px', border: '1px solid #c9b6f7', background: 'white', color: '#6728e4', fontSize: '0.78rem', fontWeight: 700, fontFamily: "var(--font-display)", cursor: duplicating ? 'wait' : 'pointer' }}>
+            <Copy size={14} /> {duplicating ? 'Menduplikat...' : 'Duplikat campaign'}
+          </button>
           <span style={{ background: '#e1e0ff', color: '#6728e4', borderRadius: '999px', padding: '4px 12px', fontSize: '0.75rem', fontWeight: 700 }}>
             {stageLabel(campaign.workflowStage)}
           </span>

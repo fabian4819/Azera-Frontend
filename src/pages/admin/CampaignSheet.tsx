@@ -6,6 +6,7 @@ import SheetGrid, { type Cell, type CellKind } from '../../components/SheetGrid'
 import ReviewStatusCell from '../../components/ReviewStatusCell';
 import { AccessIcon, AddColumnMenu, ColumnLayout, ColumnMenu, type Access, type ProgressColumn } from './ColumnManager';
 import { SHEET_TABS, type SheetKind } from './sheetTabs';
+import ClientSheetApprove from './ClientSheetApprove';
 
 const f = 'var(--font-display)';
 const GRID = '#e2e3e3';
@@ -473,6 +474,8 @@ export default function CampaignSheet() {
           <button type="button" onClick={() => setActionError('')} aria-label="Tutup pesan" style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#93000a', display: 'flex' }}><X size={14} /></button>
         </div>
       )}
+
+      {kind === 'applicants' && id && <ClientSheetApprove campaignId={id} />}
 
       {isRecap && view?.byPic && (
         <div role="tablist" style={{ display: 'flex', gap: '4px', marginBottom: '14px' }}>

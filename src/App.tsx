@@ -64,6 +64,7 @@ const CreatorPortal = lazy(() => import('./pages/CreatorPortal'));
 const PicLayout = lazy(() => import('./components/layout/PicLayout'));
 const PicCampaigns = lazy(() => import('./pages/pic/PicCampaigns'));
 const PicCampaignDetail = lazy(() => import('./pages/pic/PicCampaignDetail'));
+const PicProfile = lazy(() => import('./pages/pic/PicProfile'));
 
 function RouteFallback() {
   return <div style={{ minHeight: '100vh', background: 'var(--surface)' }} />;
@@ -211,6 +212,7 @@ export default function App() {
             <Route index element={<Navigate to="/pic/campaigns" replace />} />
             <Route path="campaigns" element={<PicCampaigns />} />
             <Route path="campaigns/:id" element={<PicCampaignDetail />} />
+            <Route path="profile" element={<PicProfile />} />
           </Route>
 
           {/* Catch-all */}

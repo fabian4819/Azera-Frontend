@@ -106,6 +106,20 @@ export default function CustomFormBuilder({ campaignId, onChange, initial, initi
       setPicBusy(null);
     }
   };
+  // Satu per satu (endpoint assign per PIC), berhenti di PIC pertama yang gagal
+  const toggleAllPics = async (on: boolean) => {
+    for (const p of pics.filter((x) => assignedPicIds.includes(x._id) !== on)) {
+      setPicBusy(p._id);
+      setPicError('');
+      try {
+        await onTogglePic(p as Parameters<Props['onTogglePic']>[0], on);
+      } catch {
+        setPicError(`Gagal ${on ? 'menambahkan' : 'melepas'} ${p.name}. Coba lagi.`);
+        break;
+      }
+    }
+    setPicBusy(null);
+  };
   // Lepas mouse di mana pun (bukan cuma di atas grip) mematikan mode drag; kalau tidak, kartu tetap
   // draggable dan input judul/keterangan di dalamnya tidak bisa diklik/diseleksi.
   useEffect(() => {
@@ -304,11 +318,12 @@ export default function CustomFormBuilder({ campaignId, onChange, initial, initi
           case 'email': return fixedCard(key, 'Email', answerLine('50%', 'you@email.com'));
           case 'niches': return fixedCard(key, 'Niche', (
             <>
-              <p style={{ fontSize: '0.76rem', color: '#777683', fontFamily: font, margin: '-4px 0 10px' }}>Opsi dari niche di kriteria campaign (tahap 1), boleh pilih lebih dari satu.</p>
+              <p style={{ fontSize: '0.76rem', color: '#777683', fontFamily: font, margin: '-4px 0 10px' }}>Opsi dari niche di kriteria campaign (tahap 1), boleh pilih lebih dari satu. Creator juga bisa pilih Lainnya lalu ketik niche sendiri.</p>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
                 {nicheOptions.map((n) => (
                   <span key={n} style={{ padding: '7px 14px', borderRadius: '999px', background: '#e1e0ff', color: '#6728e4', fontSize: '0.78rem', fontWeight: 600, fontFamily: font }}>{n}</span>
                 ))}
+                <span style={{ padding: '7px 14px', borderRadius: '999px', border: '1px dashed #c9b6f7', color: '#6728e4', fontSize: '0.78rem', fontWeight: 600, fontFamily: font }}>Lainnya (isi sendiri)</span>
               </div>
             </>
           ));
@@ -330,6 +345,10 @@ export default function CustomFormBuilder({ campaignId, onChange, initial, initi
             <p style={{ fontSize: '0.8rem', color: '#9a99a6', fontFamily: font }}>Belum ada akun PIC terdaftar. PIC daftar sendiri lewat halaman /login, lalu muncul di sini.</p>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '10px', minHeight: '38px', borderBottom: '1px solid #f0eeff', cursor: picBusy ? 'wait' : 'pointer' }}>
+                <input type="checkbox" checked={pics.every((p) => assignedPicIds.includes(p._id))} disabled={Boolean(picBusy)} onChange={(e) => void toggleAllPics(e.target.checked)} style={{ width: '18px', height: '18px', accentColor: '#6728e4' }} />
+                <span style={{ fontSize: '0.88rem', fontWeight: 700, color: '#191c20', fontFamily: font }}>Pilih semua PIC</span>
+              </label>
               {pics.map((p) => {
                 const on = assignedPicIds.includes(p._id);
                 return (

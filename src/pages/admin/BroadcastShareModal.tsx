@@ -52,6 +52,8 @@ export function BroadcastSharePanel({ campaignId, text, onTextChange: setText, o
   const [groups, setGroups] = useState<Group[]>([]);
   const [creators, setCreators] = useState<Creator[]>([]);
   const [groupIds, setGroupIds] = useState<string[]>([]);
+  // Grup yang dikirimi dengan tag @all (mention semua anggota), diingat per nomor pengirim
+  const [tagAllIds, setTagAllIds] = useState<string[]>([]);
   const [creatorIds, setCreatorIds] = useState<string[]>([]);
   const [pics, setPics] = useState<Pic[]>([]);
   const [picIds, setPicIds] = useState<string[]>([]);
@@ -91,6 +93,7 @@ export function BroadcastSharePanel({ campaignId, text, onTextChange: setText, o
     api.get('/admin/campaigns/wa-groups', { params: { bot } }).then((r) => {
       const list: Group[] = r.data;
       setGroups(list);
+      setTagAllIds(loadLast(`tagall:${bot}`) || []);
       const last = loadLast(`groups:${bot}`);
       setGroupIds(last ? list.filter((g) => last.includes(g.jid)).map((g) => g.jid) : list.filter((g) => isDefaultGroup(g.name)).map((g) => g.jid));
     }).catch(() => setGroups([]));
@@ -140,9 +143,10 @@ export function BroadcastSharePanel({ campaignId, text, onTextChange: setText, o
     setStatus(null);
     try {
       await persist();
-      const target = kind === 'group' ? { groupJids: ids } : kind === 'creator' ? { creatorIds: ids } : { picIds: ids };
+      const target = kind === 'group' ? { groupJids: ids, tagAllJids: tagAllIds.filter((j) => ids.includes(j)) } : kind === 'creator' ? { creatorIds: ids } : { picIds: ids };
       const res = await api.post(`/admin/campaigns/${campaignId}/share`, { message: text, bot, ...target });
       saveLast(kind === 'group' ? `groups:${bot}` : kind === 'creator' ? 'creators' : 'pics', ids);
+      if (kind === 'group') saveLast(`tagall:${bot}`, tagAllIds);
       const failed: string[] = res.data.failed || [];
       setStatus({ ok: !failed.length, text: `${res.data.sent} pesan masuk antrian kirim (WA ${SENDER_LABELS[bot] ?? bot})${failed.length ? `, ${failed.length} gagal (nomor tidak valid)` : ''}.` });
     } catch (err: unknown) {
@@ -187,6 +191,12 @@ export function BroadcastSharePanel({ campaignId, text, onTextChange: setText, o
           <div>
             {shareBtn('group', 'Share ke Grup', Users, groupIds.length)}
             <ChecklistDropdown placeholder="Pilih grup WhatsApp" options={groupOptions} selected={groupIds} onChange={setGroupIds} />
+            {groupIds.length > 0 && (
+              <div style={{ marginTop: '8px' }}>
+                <p style={{ fontSize: '0.74rem', color: '#777683', fontFamily: font, margin: '0 0 4px' }}>Tag @all (mention semua anggota) di grup, cuma jalan kalau WA pengirim admin grup itu:</p>
+                <ChecklistDropdown placeholder="Tanpa tag @all" options={groupOptions.filter((o) => groupIds.includes(o.id))} selected={tagAllIds.filter((j) => groupIds.includes(j))} onChange={(ids) => setTagAllIds([...tagAllIds.filter((j) => !groupIds.includes(j)), ...ids])} />
+              </div>
+            )}
           </div>
           <div>
             {shareBtn('creator', 'Share ke Creator', UserRound, creatorIds.length)}
