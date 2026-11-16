@@ -4,6 +4,7 @@ import api from '../../lib/api';
 import { NICHES } from '../../lib/niches';
 import { PLATFORM_LABELS, applyOrder, defaultApplyKeys } from '../../lib/applyForm';
 import ApplySocialField from '../../components/ApplySocialField';
+import CopyFormPicker from './CopyFormPicker';
 
 export type CustomFieldType = 'text' | 'textarea' | 'number' | 'select' | 'checkbox' | 'file';
 /** description = keterangan opsional dari admin, tampil di bawah judul pertanyaan di form apply */
@@ -309,6 +310,7 @@ export default function CustomFormBuilder({ campaignId, onChange, initial, initi
           muncul otomatis untuk tiap platform yang dipilih di kriteria campaign (tahap 1). PIC dan Handle by boleh dihapus.
           Tambahkan pertanyaan lain sesuai kebutuhan campaign.
         </p>
+        <CopyFormPicker excludeId={campaignId} onApply={(f, a) => { setFields(f); setApplyFields(a); setActiveId(null); }} />
       </div>
 
       {keys.map((key, i) => {
