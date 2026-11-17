@@ -8,6 +8,7 @@ import { ApplyIllustration } from '../components/illustrations';
 import { WILAYAH_API, type WilayahOption } from '../lib/wilayah';
 import { PLATFORM_LABELS, applyOrder, defaultApplyKeys } from '../lib/applyForm';
 import ApplySocialField from '../components/ApplySocialField';
+import BuzzerSocialField, { type SocialDraft } from '../components/BuzzerSocialField';
 
 type CustomFieldType = 'text' | 'textarea' | 'number' | 'select' | 'checkbox' | 'file';
 interface CustomField { id: string; label: string; description?: string; type: CustomFieldType; required: boolean; options?: string[] }
@@ -21,7 +22,7 @@ interface CampaignInfo {
   customFields?: CustomField[];
   applyFields?: ApplyFields;
   picOptions?: PicOption[];
-  criteria?: { niches?: string[]; platforms?: string[]; provinces?: string[]; cities?: string[]; minFollowersByPlatform?: Record<string, number | undefined> };
+  criteria?: { niches?: string[]; platforms?: string[]; provinces?: string[]; cities?: string[]; minFollowersByPlatform?: Record<string, number | undefined>; buzzerMax?: Record<string, number | undefined> };
 }
 
 const inputStyle: React.CSSProperties = {
@@ -110,6 +111,7 @@ export default function CampaignApply() {
   const [uploading, setUploading] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState<Record<string, string>>({});
   const [socials, setSocials] = useState<Record<string, { username: string; followers: string }>>({});
+  const [buzzerAccounts, setBuzzerAccounts] = useState<Record<string, SocialDraft[]>>({});
 
   useEffect(() => {
     api.get(`/campaigns/${slug}`)
@@ -167,7 +169,10 @@ export default function CampaignApply() {
       .catch(() => setCities([]));
   };
 
-  const platforms = campaign?.criteria?.platforms ?? [];
+  // Campaign buzzer: cuma platform yang diberi maks akun oleh admin, tiap platform boleh beberapa akun
+  const buzzerMax = Object.fromEntries((campaign?.criteria?.platforms ?? []).map((p) => [p, Math.min(20, Number(campaign?.criteria?.buzzerMax?.[p]) || 0)]).filter(([, n]) => Number(n) > 0)) as Record<string, number>;
+  const isBuzzer = Object.keys(buzzerMax).length > 0;
+  const platforms = isBuzzer ? Object.keys(buzzerMax) : campaign?.criteria?.platforms ?? [];
   // Pilihan niche ikut yang dipilih admin pas bikin campaign; fallback ke daftar umum kalau campaign-nya belum punya niche (lama).
   const nicheOptions = campaign?.criteria?.niches?.length ? campaign.criteria.niches : NICHES;
   // Provinsi & kota cuma ditanya kalau campaign punya kriteria provinsi/kota
@@ -233,7 +238,10 @@ export default function CampaignApply() {
       setSubmitError('Provinsi dan kota wajib diisi.');
       return;
     }
-    const missingSocial = platforms.find((p) => !socials[p]?.username.trim() || socials[p]?.followers === '');
+    const accountsOf = (p: string) => (buzzerAccounts[p]?.length ? buzzerAccounts[p] : [{ username: '', followers: '' }]);
+    const missingSocial = isBuzzer
+      ? platforms.find((p) => accountsOf(p).some((a) => !a.username.trim() || a.followers === ''))
+      : platforms.find((p) => !socials[p]?.username.trim() || socials[p]?.followers === '');
     if (missingSocial) {
       setSubmitError(`Username & jumlah followers ${PLATFORM_LABELS[missingSocial] ?? missingSocial} wajib diisi.`);
       return;
@@ -265,7 +273,9 @@ export default function CampaignApply() {
         name, phone, email, niches: allNiches, updateName,
         province: provinces.find((p) => p.id === province)?.name || '',
         city: cities.find((c) => c.id === city)?.name || '',
-        socials: platforms.map((p) => ({ platform: p, username: socials[p].username, followers: Number(socials[p].followers) })),
+        socials: isBuzzer
+          ? platforms.flatMap((p) => accountsOf(p).map((a) => ({ platform: p, username: a.username, followers: Number(a.followers) })))
+          : platforms.map((p) => ({ platform: p, username: socials[p].username, followers: Number(socials[p].followers) })),
         picUserId: showPic ? picUserId : undefined,
         handleBy: fields.handleBy ? handleBy : undefined,
         customAnswers: customValues,
@@ -451,7 +461,11 @@ export default function CampaignApply() {
                 return (
                   <div style={{ marginBottom: '18px' }}>
                     {fieldDesc(key)}
-                    <ApplySocialField platform={p} minFollowers={minFollowers(p)} username={socials[p]?.username} followers={socials[p]?.followers} onChange={(patch) => setSocial(p, patch)} />
+                    {isBuzzer ? (
+                      <BuzzerSocialField platform={p} max={buzzerMax[p]} minFollowers={minFollowers(p)} accounts={buzzerAccounts[p] ?? [{ username: '', followers: '' }]} onChange={(list) => setBuzzerAccounts((prev) => ({ ...prev, [p]: list }))} />
+                    ) : (
+                      <ApplySocialField platform={p} minFollowers={minFollowers(p)} username={socials[p]?.username} followers={socials[p]?.followers} onChange={(patch) => setSocial(p, patch)} />
+                    )}
                   </div>
                 );
               }

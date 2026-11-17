@@ -1,4 +1,6 @@
 import { stageLabel } from '../../lib/stages';
+import BuzzerSettings from './BuzzerSettings';
+import { buzzerDraftFrom, buzzerMaxFrom, type BuzzerDraft } from '../../lib/buzzer';
 import { useCallback, useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, Copy, Check, MessageCircle, LayoutDashboard, Building2, ExternalLink, UserCheck, MapPin, CalendarDays, Clock, Pencil, Sheet } from 'lucide-react';
@@ -22,7 +24,7 @@ import CustomFormBuilder, { type CustomField, type ApplyFields } from './CustomF
 interface Campaign {
   _id: string; name: string; objective: string; briefContent?: string; deliverables: string[];
   briefCampaign?: { blocks: { kind: 'text' | 'file' | 'image' | 'video' | 'link'; content: string }[]; filledBy: 'admin' | 'client'; updatedAt: string };
-  budget?: number; criteria: { niches: string[]; minFollowers?: number; minFollowersByPlatform?: Record<string, number | undefined>; provinces: string[]; cities?: string[]; platforms: string[]; avgMetrics?: boolean };
+  budget?: number; criteria: { niches: string[]; minFollowers?: number; minFollowersByPlatform?: Record<string, number | undefined>; provinces: string[]; cities?: string[]; platforms: string[]; avgMetrics?: boolean; buzzerMax?: Record<string, number | undefined> };
   status: string; workflowStage: string; applyOpen: boolean; applySlug: string; waGroupLink?: string;
   customFields: CustomField[]; applyFields?: ApplyFields; accessCode: string; clientAccessCode?: string; clientSpreadsheetId?: string;
   approvalFlow?: ApprovalFlow;
@@ -342,6 +344,7 @@ export default function CampaignDetail() {
           initial={campaign.customFields || []}
           initialApplyFields={campaign.applyFields}
           platforms={campaign.criteria.platforms}
+          buzzerMax={campaign.criteria.buzzerMax}
           minFollowers={campaign.criteria.minFollowersByPlatform}
           askDomicile={campaign.criteria.provinces.length + (campaign.criteria.cities?.length ?? 0) > 0}
           niches={campaign.criteria.niches}
@@ -602,6 +605,7 @@ function CampaignInfoEdit({ campaign: c, onCancel, onSaved }: { campaign: Campai
     Object.fromEntries(Object.entries(c.criteria.minFollowersByPlatform || {}).map(([k, v]) => [k, v != null ? String(v) : ''])),
   );
   const [avgMetrics, setAvgMetrics] = useState(c.criteria.avgMetrics !== false);
+  const [buzzer, setBuzzer] = useState<BuzzerDraft>(buzzerDraftFrom(c.criteria.buzzerMax));
   const [niches, setNiches] = useState<string[]>(c.criteria.niches || []);
   const [approvalFlow, setApprovalFlow] = useState<ApprovalFlow>(c.approvalFlow ?? 'two_step');
   const [saving, setSaving] = useState(false);
@@ -621,7 +625,7 @@ function CampaignInfoEdit({ campaign: c, onCancel, onSaved }: { campaign: Campai
         eventDetails: { location: visitLocation.trim(), date: visitDate || null, timeWindow: visitTime.trim() },
         approvalFlow,
         criteria: {
-          ...c.criteria, platforms, niches, avgMetrics,
+          ...c.criteria, platforms, niches, avgMetrics, buzzerMax: buzzerMaxFrom(buzzer, platforms),
           minFollowersByPlatform: Object.fromEntries(platforms.map((p) => [p, numOrUndef(minFollowers[p] || '')])),
         },
       };
@@ -703,6 +707,7 @@ function CampaignInfoEdit({ campaign: c, onCancel, onSaved }: { campaign: Campai
             <input type="checkbox" checked={avgMetrics} onChange={(e) => setAvgMetrics(e.target.checked)} style={{ accentColor: '#6728e4', width: '16px', height: '16px' }} />
             Tampilkan kolom Avg Views, Avg Likes & Avg Comments di sheet Listing / Pendaftar
           </label>}
+          <BuzzerSettings platforms={platforms} value={buzzer} onChange={setBuzzer} />
         </div>
       ))}
       {field('Niche', (

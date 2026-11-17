@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import BuzzerSocialField from '../../components/BuzzerSocialField';
 import { Plus, Trash2, Copy, ArrowUp, ArrowDown, X, Circle, Square, GripHorizontal, Lock, Undo2, Pencil } from 'lucide-react';
 import api from '../../lib/api';
 import { NICHES } from '../../lib/niches';
@@ -47,6 +48,8 @@ interface Props {
   initialApplyFields?: ApplyFields;
   /** Platform di kriteria campaign, tiap platform jadi field wajib username + followers di form apply */
   platforms?: string[];
+  /** Campaign buzzer: maks akun per platform (platform 0/kosong tidak ditanya) */
+  buzzerMax?: Record<string, number | undefined>;
   /** Min. followers per platform dari kriteria, ditampilkan sebagai keterangan di label */
   minFollowers?: Record<string, number | string | undefined>;
   /** Kriteria provinsi/kota terisi → field Provinsi & Kota muncul (wajib) di form apply */
@@ -81,7 +84,7 @@ const answerLine = (w: string, text: string) => (
 );
 
 /** Builder pertanyaan tambahan form Apply, pengalaman ala Google Forms (AD-47). */
-export default function CustomFormBuilder({ campaignId, onChange, initial, initialApplyFields, platforms = [], minFollowers = {}, askDomicile = false, niches = [], pics, assignedPicIds, onTogglePic, onSaved }: Props) {
+export default function CustomFormBuilder({ campaignId, onChange, initial, initialApplyFields, platforms: allPlatforms = [], buzzerMax, minFollowers = {}, askDomicile = false, niches = [], pics, assignedPicIds, onTogglePic, onSaved }: Props) {
   const [fields, setFields] = useState<CustomField[]>(initial);
   const [applyFields, setApplyFields] = useState<ApplyFields>(initialApplyFields ?? DEFAULT_APPLY_FIELDS);
   const [saved, setSaved] = useState(JSON.stringify([initial, initialApplyFields ?? DEFAULT_APPLY_FIELDS]));
@@ -91,6 +94,9 @@ export default function CustomFormBuilder({ campaignId, onChange, initial, initi
   const [handleId, setHandleId] = useState<string | null>(null);
   const [dragId, setDragId] = useState<string | null>(null);
   const nicheOptions = niches.length ? niches : NICHES;
+  // Buzzer: cuma platform yang diberi maks akun yang ditanya (sama dengan form Apply publik)
+  const isBuzzer = allPlatforms.some((p) => Number(buzzerMax?.[p]) > 0);
+  const platforms = isBuzzer ? allPlatforms.filter((p) => Number(buzzerMax?.[p]) > 0) : allPlatforms;
   const [saving, setSaving] = useState(false);
   const [status, setStatus] = useState<{ ok: boolean; text: string } | null>(null);
   const [picBusy, setPicBusy] = useState<string | null>(null);
@@ -383,7 +389,9 @@ export default function CustomFormBuilder({ campaignId, onChange, initial, initi
         }
         if (key.startsWith('social:')) {
           const p = key.slice(7);
-          return fixedCard(key, `Username & Followers ${PLATFORM_LABELS[p] ?? p}`, <ApplySocialField platform={p} minFollowers={minFollowers[p]} />);
+          return fixedCard(key, `Username & Followers ${PLATFORM_LABELS[p] ?? p}`, isBuzzer
+            ? <BuzzerSocialField platform={p} max={Number(buzzerMax?.[p])} minFollowers={minFollowers[p]} accounts={[]} />
+            : <ApplySocialField platform={p} minFollowers={minFollowers[p]} />);
         }
         const f = fields.find((x) => x.id === key);
         if (!f) return null;

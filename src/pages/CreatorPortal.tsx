@@ -32,17 +32,19 @@ export default function CreatorPortal() {
     return () => window.clearTimeout(t);
   }, [load]);
 
-  const editCell = async (_row: number, col: number, value: string) => {
-    await api.patch(`/portal/${token}/cell`, { columnId: view?.columns[col]?.progressId, value });
+  // rowId: campaign buzzer, satu link untuk semua baris akun milik creator ini
+  const editCell = async (row: number, col: number, value: string) => {
+    await api.patch(`/portal/${token}/cell`, { rowId: view?.rows[row]?.id, columnId: view?.columns[col]?.progressId, value });
     await load();
   };
 
-  const uploadCell = async (_row: number, col: number, files: File[]) => {
+  const uploadCell = async (row: number, col: number, files: File[]) => {
     const isDraft = view?.columns[col]?.kind === 'media';
     if (isDraft && files.some((file) => file.size > 80 * 1024 * 1024)) {
       throw { response: { data: { message: 'Ukuran file maksimal 80MB per file' } } };
     }
     const fd = new FormData();
+    fd.append('rowId', view?.rows[row]?.id ?? '');
     fd.append('columnId', view?.columns[col]?.progressId ?? '');
     files.forEach((file) => fd.append('files', file));
     await api.post(`/portal/${token}/${isDraft ? 'draft' : 'cell'}/upload`, fd, { headers: { 'Content-Type': 'multipart/form-data' } });

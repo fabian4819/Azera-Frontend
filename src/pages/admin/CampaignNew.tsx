@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react';
+import BuzzerSettings from './BuzzerSettings';
+import { buzzerMaxFrom, type BuzzerDraft } from '../../lib/buzzer';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import api from '../../lib/api';
@@ -80,7 +82,6 @@ export default function CampaignNew() {
   const brandId = brands.find((b) => b.namaBrand.trim().toLowerCase() === brandName.trim().toLowerCase())?._id;
   const [name, setName] = useState('');
   const [objective, setObjective] = useState('');
-  const [budget, setBudget] = useState('');
   const [selectedNiches, setSelectedNiches] = useState<string[]>([]);
   const [addingCustomNiche, setAddingCustomNiche] = useState(false);
   const [customNicheInput, setCustomNicheInput] = useState('');
@@ -92,6 +93,7 @@ export default function CampaignNew() {
   const [cityIds, setCityIds] = useState<string[]>([]);
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([]);
   const [avgMetrics, setAvgMetrics] = useState(true);
+  const [buzzer, setBuzzer] = useState<BuzzerDraft>(null);
   const [type, setType] = useState<'online' | 'offline'>('online');
   const [approvalFlow, setApprovalFlow] = useState<ApprovalFlow>('two_step');
   const [eventLocation, setEventLocation] = useState('');
@@ -145,8 +147,8 @@ export default function CampaignNew() {
   const next = (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    if (!brandName.trim() || !name || !objective || !budget) {
-      setError('Brand, nama, tujuan, dan budget wajib diisi.');
+    if (!brandName.trim() || !name || !objective) {
+      setError('Brand, nama, dan tujuan wajib diisi.');
       return;
     }
     setStep(2);
@@ -159,7 +161,6 @@ export default function CampaignNew() {
     try {
       const res = await api.post('/admin/campaigns', {
         ...(brandId ? { brandId } : { brandName: brandName.trim() }), name, objective,
-        budget: Number(budget),
         deliverables: lines(sow),
         fee: { creatorFee: num(creatorFee), picFee: num(picFee), mgFee: num(mgFee) },
         feeNote: feeNote.trim() || undefined,
@@ -175,6 +176,7 @@ export default function CampaignNew() {
           cities: cityIds.map(cityName).filter(Boolean),
           platforms: selectedPlatforms,
           avgMetrics,
+          buzzerMax: buzzerMaxFrom(buzzer, selectedPlatforms),
         },
         type,
         // Visit opsional untuk semua tipe campaign (bukan cuma offline/event)
@@ -224,18 +226,12 @@ export default function CampaignNew() {
             <label style={labelStyle}>Tujuan Campaign * <span style={{ fontWeight: 400, color: '#777683' }}>(input mentah, nanti bisa dirapikan AI)</span></label>
             <textarea value={objective} onChange={(e) => setObjective(e.target.value)} rows={3} placeholder="Naikkan awareness produk lewat nano KOL ibu muda..." style={{ ...inputStyle, resize: 'vertical' }} />
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }} className="form-2col">
-            <div>
-              <label style={labelStyle}>Budget (Rp) *</label>
-              <input value={budget} onChange={(e) => setBudget(e.target.value)} type="number" placeholder="5000000" style={inputStyle} />
-            </div>
-            <div>
-              <label style={labelStyle}>Tipe Campaign</label>
-              <select value={type} onChange={(e) => setType(e.target.value as 'online' | 'offline')} style={{ ...inputStyle, cursor: 'pointer' }}>
-                <option value="online">Online</option>
-                <option value="offline">Offline / Event</option>
-              </select>
-            </div>
+          <div>
+            <label style={labelStyle}>Tipe Campaign</label>
+            <select value={type} onChange={(e) => setType(e.target.value as 'online' | 'offline')} style={{ ...inputStyle, cursor: 'pointer' }}>
+              <option value="online">Online</option>
+              <option value="offline">Offline / Event</option>
+            </select>
           </div>
           <div style={{ marginTop: '14px' }}>
             <label style={labelStyle}>Skema Lolos Creator</label>
@@ -370,6 +366,7 @@ export default function CampaignNew() {
               ))}
             </div>
           )}
+          <BuzzerSettings platforms={selectedPlatforms} value={buzzer} onChange={setBuzzer} />
           {selectedPlatforms.length > 0 && (
             <div style={{ marginBottom: '14px' }}>
             <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontFamily: "var(--font-display)", fontSize: '0.82rem', color: '#191c20', cursor: 'pointer' }}>
@@ -418,6 +415,7 @@ export default function CampaignNew() {
             initial={customFields}
             initialApplyFields={applyFields}
             platforms={selectedPlatforms}
+            buzzerMax={buzzerMaxFrom(buzzer, selectedPlatforms)}
             minFollowers={minFollowers}
             askDomicile={provinceIds.length + cityIds.length > 0}
             niches={selectedNiches}
