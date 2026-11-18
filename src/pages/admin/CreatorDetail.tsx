@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useWaConfirm } from '../../lib/waConfirm';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, ThumbsUp, ThumbsDown, Unlock, ExternalLink, Radar, ChevronDown, ChevronUp } from 'lucide-react';
 import { SiInstagram, SiTiktok, SiThreads, SiX } from 'react-icons/si';
@@ -123,6 +124,7 @@ export default function CreatorDetail() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [creator, setCreator] = useState<Creator | null>(null);
+  const confirmWa = useWaConfirm();
   const [scoreBreakdown, setScoreBreakdown] = useState<ScoreBreakdown | null>(null);
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [snapshots, setSnapshots] = useState<Snapshot[]>([]);
@@ -170,10 +172,16 @@ export default function CreatorDetail() {
   }, [snapshots, searchParams]);
 
   const decide = async (status: 'approved' | 'rejected') => {
+    const waSender = await confirmWa({
+      title: `Kirim WA ke ${creator?.name ?? 'creator'}`,
+      description: status === 'approved' ? 'Creator dikabari profilnya disetujui + link Komunitas WhatsApp AzeraKOL.' : 'Creator dikabari profilnya belum lolos kurasi.',
+      trigger: status === 'approved' ? 'creator_profile_approved' : 'creator_profile_rejected',
+    });
+    if (waSender === null) return;
     setDeciding(true);
     setActionError('');
     try {
-      const res = await api.patch(`/admin/creators/${id}`, { status });
+      const res = await api.patch(`/admin/creators/${id}`, { status, waSender });
       setCreator(res.data);
       setChanging(false);
     } catch (err: unknown) {

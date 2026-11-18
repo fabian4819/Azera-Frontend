@@ -1,4 +1,5 @@
 import { Fragment, useState } from 'react';
+import WaConfirmProvider from '../WaConfirmProvider';
 import { Link, useLocation, Outlet } from 'react-router-dom';
 import { LayoutDashboard, Building2, Users, Contact, UserCheck, UserRoundCheck, Smartphone, ImageIcon, Megaphone, Upload, MessageCircle, Inbox, MessageSquareText, Bot, Plug, LogOut, ChevronsLeft, ChevronsRight, FolderOpen, FileText, Receipt, FileSignature, ChevronDown, Wallet } from 'lucide-react';
 import { useAuth, hasOwnerAccess } from '../../hooks/useAuth';
@@ -33,8 +34,9 @@ const allDocItems = [
   { label: 'SPK', to: '/admin/documents/spk', icon: FileSignature },
   { label: 'Rekap Keuangan', to: '/admin/finance-recap', icon: Wallet },
 ];
-/** Invoice & Rekap Keuangan = data uang, khusus owner & developer (API juga menolak role lain) */
-const OWNER_ONLY = ['/admin/documents/invoice', '/admin/finance-recap'];
+/** Invoice & Rekap Keuangan = data uang, Quotation & Brands juga disembunyikan dari admin/CE:
+ * khusus owner & developer (API juga menolak role lain; Quotation masih boleh untuk role finance) */
+const OWNER_ONLY = ['/admin/documents/invoice', '/admin/finance-recap', '/admin/documents/quotation', '/admin/brands'];
 
 const pageTitles: Record<string, string> = {
   '/admin/dashboard': 'Dashboard',
@@ -99,8 +101,9 @@ export default function AdminLayout() {
     .filter((item) => location.pathname === item.to || location.pathname.startsWith(item.to + '/'))
     .sort((a, b) => b.to.length - a.to.length)[0]?.to;
 
-  const docItems = allDocItems.filter((item) => hasOwnerAccess(admin?.role) || !OWNER_ONLY.includes(item.to));
-  const visibleNavItems = navItems.filter((item) => !((admin?.role === 'developer' || admin?.role === 'admin') && item.to === '/admin/whatsapp/inbox'));
+  const allowed = (to: string) => hasOwnerAccess(admin?.role) || !OWNER_ONLY.includes(to) || (to === '/admin/documents/quotation' && admin?.role === 'finance');
+  const docItems = allDocItems.filter((item) => allowed(item.to));
+  const visibleNavItems = navItems.filter((item) => allowed(item.to) && !((admin?.role === 'developer' || admin?.role === 'admin') && item.to === '/admin/whatsapp/inbox'));
   const bottomPrimary = BOTTOM_NAV_PRIMARY.map((to) => visibleNavItems.find((i) => i.to === to)).filter((i): i is typeof visibleNavItems[number] => !!i);
   const bottomMore = [...visibleNavItems.filter((i) => !BOTTOM_NAV_PRIMARY.includes(i.to)), ...docItems];
 
@@ -245,7 +248,7 @@ export default function AdminLayout() {
           </div>
         </header>
         <main className="admin-main dashboard-main-mobile-pad" style={{ flex: 1, background: '#f8f9ff', borderRadius: '24px', padding: '28px', overflow: 'auto' }}>
-          <Outlet />
+          <WaConfirmProvider><Outlet /></WaConfirmProvider>
         </main>
       </div>
 

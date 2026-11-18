@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useWaConfirm, useGroupLinkPrompt } from '../../lib/waConfirm';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, Check, Copy, ExternalLink, MessageCircle, RefreshCw, X } from 'lucide-react';
+import { ArrowLeft, Check, Copy, ExternalLink, EyeOff, MessageCircle, RefreshCw, X } from 'lucide-react';
 import api from '../../lib/api';
 import SheetGrid, { type Cell, type CellKind } from '../../components/SheetGrid';
 import ReviewStatusCell from '../../components/ReviewStatusCell';
@@ -11,9 +12,9 @@ import ClientSheetApprove from './ClientSheetApprove';
 const f = 'var(--font-display)';
 const GRID = '#e2e3e3';
 
-interface ColumnMeta { key: string; progressId?: string; kind?: CellKind; access: Access; submission?: { type: 'draft' | 'post'; review?: boolean } }
+interface ColumnMeta { key: string; progressId?: string; kind?: CellKind; access: Access; clientHidden?: boolean; submission?: { type: 'draft' | 'post'; review?: boolean } }
 interface SheetView {
-  campaign: { _id: string; name: string; brandName: string | null; approvalFlow?: 'two_step' | 'client_only' };
+  campaign: { _id: string; name: string; brandName: string | null; approvalFlow?: 'two_step' | 'client_only'; waGroupLink?: string };
   headers: string[];
   rows: Cell[][];
   totals?: Cell[];
@@ -240,13 +241,37 @@ export default function CampaignSheet() {
           onInsertRight={() => { close(); void saveColumns(withCol((l) => { l.splice(pIdx + 1, 0, { id: crypto.randomUUID(), label: 'Kolom baru', type: 'text', creatorAccess: 'edit' }); })); }}
           onDelete={() => { close(); void saveColumns(progressCols.filter((c) => c.id !== meta.progressId)); }}
         />
+        <div style={{ padding: '4px 12px 8px' }}>
+          <span style={{ display: 'block', fontSize: '0.7rem', fontWeight: 700, color: '#464652', marginBottom: '4px' }}>Client (dashboard & sheet client)</span>
+          <div role="radiogroup" style={{ display: 'flex', gap: '6px' }}>
+            {([[false, 'Tampil'], [true, 'Disembunyikan']] as const).map(([hide, label]) => (
+              <button key={label} type="button" role="radio" aria-checked={Boolean(meta.clientHidden) === hide}
+                onClick={() => {
+                  const next = (view?.columns ?? []).filter((c) => (c.key === meta.key ? hide : c.clientHidden)).map((c) => c.key);
+                  void saveCampaign({ clientHiddenColumns: next });
+                }}
+                style={{ padding: '4px 10px', borderRadius: '999px', border: '1px solid #c9b6f7', cursor: 'pointer', fontSize: '0.72rem', fontWeight: 700,
+                  background: Boolean(meta.clientHidden) === hide ? '#6728e4' : 'white', color: Boolean(meta.clientHidden) === hide ? 'white' : '#6728e4' }}>
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
       </>
     );
   };
 
+  const confirmWa = useWaConfirm();
+  const promptGroupLink = useGroupLinkPrompt();
+  // "Lewati" isi link grup cukup sekali per buka halaman, supaya approve beruntun tidak ditanya terus
+  const groupLinkSkipped = useRef(false);
   const decide = async (row: number, status: 'accepted' | 'rejected') => {
     const appId = view?.rowIds?.[row];
     if (!appId) return;
+    if (status === 'accepted' && id && !groupLinkSkipped.current) {
+      if (!(await promptGroupLink(id, view?.campaign.waGroupLink))) return;
+      if (!view?.campaign.waGroupLink) groupLinkSkipped.current = true;
+    }
     setDeciding(appId);
     setActionError('');
     try {
@@ -275,12 +300,18 @@ export default function CampaignSheet() {
   // AD-adjustment-6: admin minta info bank/e-wallet via WA ke PIC / creator campaign ini, semua atau satu orang.
   // Pesan = template "Minta Info Bank/E-Wallet (PIC)" / "(Creator)" di menu Template Pesan.
   const requestBankInfo = async (target: 'pic' | 'creator', targetId?: string, name?: string) => {
+    const waSender = await confirmWa({
+      title: 'Minta info rekening via WA',
+      description: `Bot mengirim template permintaan info bank/e-wallet ke ${name ?? (target === 'pic' ? 'semua PIC di Rekap per PIC' : 'semua creator di Recap Payment')}.`,
+      trigger: target === 'pic' ? 'pic_bank_info_request' : 'creator_bank_info_request', campaignId: id,
+    });
+    if (waSender === null) return;
     setRequestingBankInfo(targetId ?? 'all');
     setActionError(''); setActionNotice('');
     try {
       const res = target === 'pic'
-        ? await api.post(`/admin/campaigns/${id}/recap/request-bank-info`, targetId ? { picUserId: targetId } : {})
-        : await api.post(`/admin/campaigns/${id}/recap/request-creator-bank-info`, targetId ? { applicationId: targetId } : {});
+        ? await api.post(`/admin/campaigns/${id}/recap/request-bank-info`, { ...(targetId ? { picUserId: targetId } : {}), waSender })
+        : await api.post(`/admin/campaigns/${id}/recap/request-creator-bank-info`, { ...(targetId ? { applicationId: targetId } : {}), waSender });
       setActionNotice(name ? `Pesan WA permintaan info bank/e-wallet terkirim ke ${name}.` : `Pesan WA terkirim ke ${res.data.count} ${target === 'pic' ? 'PIC' : 'creator'}.`);
       await reloadCurrent();
     } catch (err) {
@@ -298,9 +329,15 @@ export default function CampaignSheet() {
   };
 
   const togglePicPaid = async (picId: string, paid: boolean) => {
+    const waSender = paid ? await confirmWa({
+      title: 'Tandai PIC Lunas',
+      description: 'Creator di bawah PIC ini ikut ditandai Lunas, dan yang baru Lunas dikirimi WA "Pembayaran Creator Selesai".',
+      trigger: 'payment_completed', campaignId: id, confirmLabel: 'Tandai Lunas & kirim',
+    }) : '';
+    if (waSender === null) return;
     setTogglingPaidId(picId);
     try {
-      const res = await api.patch(`/admin/campaigns/${id}/sheet/recap-pic-paid`, { picUserId: picId, paid });
+      const res = await api.patch(`/admin/campaigns/${id}/sheet/recap-pic-paid`, { picUserId: picId, paid, waSender });
       setActionNotice(res.data.creatorsMarkedPaid ? `PIC ditandai Lunas, ${res.data.creatorsMarkedPaid} creator di bawahnya ikut ditandai Lunas.` : '');
       await reloadCurrent();
     } catch {
@@ -312,9 +349,15 @@ export default function CampaignSheet() {
 
   // Status bayar per creator (Recap Payment tab Creator); Lunas → WA "Pembayaran Creator Selesai" ke creator
   const toggleCreatorPaid = async (applicationId: string, paid: boolean) => {
+    const waSender = paid ? await confirmWa({
+      title: 'Tandai creator Lunas',
+      description: 'Creator ini dikirimi WA "Pembayaran Creator Selesai".',
+      trigger: 'payment_completed', campaignId: id, confirmLabel: 'Tandai Lunas & kirim',
+    }) : '';
+    if (waSender === null) return;
     setTogglingPaidId(applicationId);
     try {
-      await api.patch(`/admin/applications/${applicationId}/payment`, { creatorPaymentStatus: paid ? 'paid' : 'unpaid' });
+      await api.patch(`/admin/applications/${applicationId}/payment`, { creatorPaymentStatus: paid ? 'paid' : 'unpaid', waSender });
       await reloadCurrent();
     } catch {
       setActionError('Gagal mengubah status pembayaran. Coba lagi.');
@@ -475,7 +518,7 @@ export default function CampaignSheet() {
         </div>
       )}
 
-      {kind === 'applicants' && id && <ClientSheetApprove campaignId={id} />}
+      {kind === 'applicants' && id && <ClientSheetApprove campaignId={id} waGroupLink={view?.campaign.waGroupLink} />}
 
       {isRecap && view?.byPic && (
         <div role="tablist" style={{ display: 'flex', gap: '4px', marginBottom: '14px' }}>
@@ -538,7 +581,12 @@ export default function CampaignSheet() {
           rowAction={kind === 'applicants' ? applicantAction : isRecap ? creatorRecapAction : undefined}
           columnMenu={isMaster ? columnMenu : undefined}
           onMoveColumn={isMaster ? moveColumn : undefined}
-          headerIcon={isMaster ? (col) => (view.columns?.[col] ? <AccessIcon access={view.columns[col].access} /> : null) : undefined}
+          headerIcon={isMaster ? (col) => (view.columns?.[col] ? (
+            <span style={{ display: 'flex', gap: '3px' }}>
+              <AccessIcon access={view.columns[col].access} />
+              {view.columns[col].clientHidden && <span title="Disembunyikan dari client" style={{ display: 'flex' }}><EyeOff size={12} color="#c2410c" /></span>}
+            </span>
+          ) : null) : undefined}
           addColumnMenu={isMaster ? (close) => <AddColumnMenu onAdd={(cols) => { close(); void saveColumns([...progressCols, ...cols]); }} /> : undefined}
           footer=" · Data langsung dari database, sama dengan yang disinkron ke Google Sheets."
         />

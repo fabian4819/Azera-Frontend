@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useWaConfirm, useGroupLinkPrompt } from '../../lib/waConfirm';
 import { ListChecks, X } from 'lucide-react';
 import api from '../../lib/api';
 
@@ -20,7 +21,9 @@ const BY_TEXT = { username: 'username', phone: 'no. WA', name: 'nama' };
 
 /** Client ACC manual di tab sendiri (mis. "List ok") di spreadsheet Listing: cocokkan otomatis ke
  * pendaftar (username/link sosmed → no. WA → nama), lalu approve tahap client sekaligus. */
-export default function ClientSheetApprove({ campaignId }: { campaignId: string }) {
+export default function ClientSheetApprove({ campaignId, waGroupLink }: { campaignId: string; waGroupLink?: string }) {
+  const confirmWa = useWaConfirm();
+  const promptGroupLink = useGroupLinkPrompt();
   const [open, setOpen] = useState(false);
   const [tabs, setTabs] = useState<string[] | null>(null);
   const [tab, setTab] = useState('');
@@ -46,10 +49,23 @@ export default function ClientSheetApprove({ campaignId }: { campaignId: string 
 
   const run = async (apply: boolean) => {
     if (!tab) return;
+    let waSender = '';
+    if (apply) {
+      setOpen(false); // modal link grup & konfirmasi WA tampil di atas halaman, bukan di balik modal ini
+      const go = await promptGroupLink(campaignId, waGroupLink);
+      const picked = go ? await confirmWa({
+        title: `Approve ${toApprove} creator`,
+        description: `Creator yang di-approve client dikirimi WA "lolos" berisi link portal${waGroupLink ? ' & link grup campaign' : ''}. Akun buzzer milik orang yang sama digabung satu pesan.`,
+        trigger: 'creator_accepted', campaignId, confirmLabel: 'Approve & kirim',
+      }) : null;
+      setOpen(true);
+      if (picked === null) return;
+      waSender = picked;
+    }
     setBusy(true);
     setMessage(null);
     try {
-      const res = await api.post(`/admin/campaigns/${campaignId}/client-sheet/approve`, { tab, apply });
+      const res = await api.post(`/admin/campaigns/${campaignId}/client-sheet/approve`, { tab, apply, waSender });
       setRows(res.data.rows);
       if (apply) setMessage({ ok: true, text: `${res.data.approved} creator di-approve client. Creator dikabari otomatis lewat WA.` });
     } catch (err) {

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useWaConfirm } from '../../lib/waConfirm';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -110,12 +111,21 @@ export default function Creators({ scope = 'general', selected, onSelectedChange
   const [statusChange, setStatusChange] = useState<{ id: string; name: string; to: EditableStatus } | null>(null);
   const [statusSaving, setStatusSaving] = useState(false);
   const [statusError, setStatusError] = useState('');
+  const confirmWa = useWaConfirm();
   const saveStatus = async () => {
     if (!statusChange) return;
+    // Disetujui / ditolak = bot kirim WA keputusan kurasi ke creator
+    const notify = statusChange.to === 'approved' || statusChange.to === 'rejected';
+    const waSender = notify ? await confirmWa({
+      title: `Kirim WA ke ${statusChange.name}`,
+      description: statusChange.to === 'approved' ? 'Creator dikabari profilnya disetujui + link Komunitas WhatsApp AzeraKOL.' : 'Creator dikabari profilnya belum lolos kurasi.',
+      trigger: statusChange.to === 'approved' ? 'creator_profile_approved' : 'creator_profile_rejected',
+    }) : '';
+    if (waSender === null) return;
     setStatusSaving(true);
     setStatusError('');
     try {
-      const res = await api.patch(`/admin/creators/${statusChange.id}`, { status: statusChange.to });
+      const res = await api.patch(`/admin/creators/${statusChange.id}`, { status: statusChange.to, waSender });
       setCreators((prev) => prev.map((c) => (c._id === statusChange.id ? { ...c, status: res.data.status } : c)));
       setStatusChange(null);
     } catch {

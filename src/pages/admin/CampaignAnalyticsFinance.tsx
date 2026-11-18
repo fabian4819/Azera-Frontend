@@ -1,4 +1,5 @@
 import { useEffect, useState, Fragment } from 'react';
+import MoneyInput from '../../components/ui/MoneyInput';
 import { Sparkles, RefreshCw, FileText, ImageIcon, ExternalLink } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import api from '../../lib/api';
@@ -286,13 +287,8 @@ export default function CampaignAnalyticsFinance({ campaignId, view, stage, onSt
                       </span>
                     )}
                   </label>
-                  <input
-                    key={`${field}-${finance[field]}`}
-                    defaultValue={finance[field]}
-                    onBlur={(e) => { if (Number(e.target.value) !== finance[field]) void saveFinanceField(field, Number(e.target.value) || 0); }}
-                    type="number"
-                    style={{ ...inputStyle, padding: '8px 10px' }}
-                  />
+                  <FinanceFieldInput key={`${field}-${finance[field]}`} initial={finance[field]} style={{ ...inputStyle, padding: '8px 10px' }}
+                    onCommit={(v) => { if (v !== finance[field]) void saveFinanceField(field, v); }} />
                   {isAuto && (
                     <p style={{ fontSize: '0.68rem', color: '#8a8a99', fontFamily: f, marginTop: '4px' }}>
                       {manual ? (
@@ -351,4 +347,10 @@ export default function CampaignAnalyticsFinance({ campaignId, view, stage, onSt
       </div>}
     </>
   );
+}
+
+/** Isian nominal berformat (150.000), disimpan saat keluar dari kolom seperti sebelumnya */
+function FinanceFieldInput({ initial, onCommit, style }: { initial: number; onCommit: (v: number) => void; style: React.CSSProperties }) {
+  const [v, setV] = useState(initial);
+  return <MoneyInput value={v} onChange={setV} onBlur={() => onCommit(v)} style={style} />;
 }

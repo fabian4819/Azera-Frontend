@@ -1,7 +1,7 @@
 import { stageLabel } from '../../lib/stages';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ExternalLink, Copy, Check, Users, Wallet, Megaphone, Trophy, Landmark } from 'lucide-react';
+import { ExternalLink, Copy, Check, Users, Wallet, Megaphone, Trophy, Landmark, MessageCircle } from 'lucide-react';
 import picApi from '../../lib/picApi';
 
 const f = "var(--font-display)";
@@ -23,6 +23,7 @@ export default function PicCampaigns() {
   const [campaigns, setCampaigns] = useState<PicCampaign[]>([]);
   const [board, setBoard] = useState<Leaderboard | null>(null);
   const [hasBank, setHasBank] = useState(true);
+  const [groupLink, setGroupLink] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [copied, setCopied] = useState<string | null>(null);
@@ -30,7 +31,7 @@ export default function PicCampaigns() {
   useEffect(() => {
     picApi.get('/pic/campaigns').then((r) => setCampaigns(r.data)).catch(() => setError('Gagal memuat campaign.')).finally(() => setLoading(false));
     picApi.get('/pic/leaderboard').then((r) => setBoard(r.data)).catch(() => setBoard(null));
-    picApi.get('/pic/me').then((r) => setHasBank(Boolean(r.data.paymentInfo?.accountNumber))).catch(() => undefined);
+    picApi.get('/pic/me').then((r) => { setHasBank(Boolean(r.data.paymentInfo?.accountNumber)); setGroupLink(r.data.picGroupLink || ''); }).catch(() => undefined);
   }, []);
 
   const copy = async (c: PicCampaign) => {
@@ -57,6 +58,13 @@ export default function PicCampaigns() {
   return (
     <div style={{ display: 'grid', gap: '16px' }}>
       {error && <p role="alert" style={{ color: '#ba1a1a', fontFamily: f, fontSize: '0.84rem' }}>{error}</p>}
+      {groupLink && (
+        <a href={groupLink} target="_blank" rel="noopener noreferrer" style={{ ...cardStyle, display: 'flex', alignItems: 'center', gap: '10px', background: '#e9fbe9', borderColor: '#9be29b', textDecoration: 'none', color: '#146c2e', fontFamily: f, fontSize: '0.86rem' }}>
+          <MessageCircle size={18} style={{ flexShrink: 0 }} />
+          <span style={{ flex: 1 }}><b>Gabung Grup WhatsApp PIC Azera</b> · info job & pembayaran. Klik untuk minta bergabung, admin akan menyetujui.</span>
+          <ExternalLink size={15} />
+        </a>
+      )}
       {!hasBank && (
         <Link to="/pic/profile" style={{ ...cardStyle, display: 'flex', alignItems: 'center', gap: '10px', background: '#fff7e6', borderColor: '#ffd591', textDecoration: 'none', color: '#8a5300', fontFamily: f, fontSize: '0.86rem' }}>
           <Landmark size={18} style={{ flexShrink: 0 }} /> Rekening/e-wallet belum diisi. Isi di Profil & Rekening supaya fee PIC bisa ditransfer.

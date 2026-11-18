@@ -12,7 +12,7 @@ export type CustomFieldType = 'text' | 'textarea' | 'number' | 'select' | 'check
 export interface CustomField { id: string; label: string; description?: string; type: CustomFieldType; required: boolean; options?: string[] }
 /** Field default form Apply: Nama/WA/Email selalu ada; PIC & Handle by bisa dihapus admin.
  * order = urutan semua field (default + custom id) hasil drag, lihat lib/applyForm.ts */
-export interface ApplyFields { pic: boolean; handleBy: boolean; handleByRequired: boolean; order?: string[]; descriptions?: Record<string, string> }
+export interface ApplyFields { pic: boolean; handleBy: boolean; handleByRequired: boolean; niches?: boolean; nichesRequired?: boolean; order?: string[]; descriptions?: Record<string, string> }
 const DEFAULT_APPLY_FIELDS: ApplyFields = { pic: true, handleBy: true, handleByRequired: false };
 
 const TYPE_LABELS: Record<CustomFieldType, string> = {
@@ -161,7 +161,7 @@ export default function CustomFormBuilder({ campaignId, onChange, initial, initi
 
   // Urutan semua kartu (default + custom); PIC/Handle by yang dihapus tidak ikut, balik ke posisi default kalau dikembalikan
   const keys = applyOrder(applyFields.order, defaultApplyKeys({ askDomicile, platforms, customIds: fields.map((f) => f.id) }))
-    .filter((k) => (k !== 'pic' || applyFields.pic) && (k !== 'handleBy' || applyFields.handleBy));
+    .filter((k) => (k !== 'pic' || applyFields.pic) && (k !== 'handleBy' || applyFields.handleBy) && (k !== 'niches' || applyFields.niches !== false));
   // Pertanyaan baru tepat di bawah kartu `after` (field default maupun custom); tanpa `after` = paling bawah
   const addField = (after = activeId ?? keys[keys.length - 1]) => {
     const id = crypto.randomUUID();
@@ -238,12 +238,12 @@ export default function CustomFormBuilder({ campaignId, onChange, initial, initi
     } as React.CSSProperties,
   });
 
-  const fixedCard = (key: string, title: string, body: React.ReactNode) => (
+  const fixedCard = (key: string, title: string, body: React.ReactNode, required = true) => (
     <div key={key} {...cardProps(key)}>
       {grip(key)}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', marginBottom: '10px' }}>
-        {fieldTitle(title)}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>{editBtn(key, 'keterangan')}{lockedTag}{addBtn(key)}</div>
+        {fieldTitle(title, required)}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>{editBtn(key, 'keterangan')}{required && lockedTag}{addBtn(key)}</div>
       </div>
       {descBlock(key)}
       {body}
@@ -311,9 +311,9 @@ export default function CustomFormBuilder({ campaignId, onChange, initial, initi
       <div style={{ background: 'white', borderRadius: '12px', border: '1px solid #e1e0ff', borderTop: '10px solid #6728e4', padding: '22px 24px', marginBottom: '12px' }}>
         <p style={{ fontFamily: font, fontWeight: 700, fontSize: '1.4rem', color: '#191c20', marginBottom: '6px' }}>Form Kustom Pendaftaran</p>
         <p style={{ fontSize: '0.82rem', color: '#777683' }}>
-          Field default di bawah otomatis ada di form Apply. Nama, WhatsApp, Email, dan Niche wajib; Provinsi & Kota
+          Field default di bawah otomatis ada di form Apply. Nama, WhatsApp, dan Email wajib; Niche, PIC, dan Handle by boleh dihapus; Provinsi & Kota
           muncul (wajib) kalau kriteria provinsi/kota diisi di tahap 1; username + followers
-          muncul otomatis untuk tiap platform yang dipilih di kriteria campaign (tahap 1). PIC dan Handle by boleh dihapus.
+          muncul otomatis untuk tiap platform yang dipilih di kriteria campaign (tahap 1).
           Tambahkan pertanyaan lain sesuai kebutuhan campaign.
         </p>
         <CopyFormPicker excludeId={campaignId} onApply={(f, a) => { setFields(f); setApplyFields(a); setActiveId(null); }} />
@@ -324,17 +324,28 @@ export default function CustomFormBuilder({ campaignId, onChange, initial, initi
           case 'name': return fixedCard(key, 'Nama Lengkap', answerLine('50%', 'Teks jawaban singkat'));
           case 'phone': return fixedCard(key, 'Nomor WhatsApp', answerLine('50%', '08xxxxxxxxxx'));
           case 'email': return fixedCard(key, 'Email', answerLine('50%', 'you@email.com'));
-          case 'niches': return fixedCard(key, 'Niche', (
+          case 'niches': return (
+        <div key="niches" {...cardProps('niches')}>
+          {grip('niches')}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', marginBottom: '10px' }}>
+            {fieldTitle('Niche', applyFields.nichesRequired !== false)}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>{editBtn('niches', 'keterangan')}{addBtn('niches')}<button onClick={() => setApply({ niches: false })} title="Hapus field Niche dari form" style={iconBtn}><Trash2 size={18} /></button></div>
+          </div>
+          {descBlock('niches')}
             <>
-              <p style={{ fontSize: '0.76rem', color: '#777683', fontFamily: font, margin: '-4px 0 10px' }}>Opsi dari niche di kriteria campaign (tahap 1), boleh pilih lebih dari satu. Creator juga bisa pilih Lainnya lalu ketik niche sendiri.</p>
+              <p style={{ fontSize: '0.76rem', color: '#777683', fontFamily: font, margin: '-4px 0 10px' }}>Opsi dari niche di kriteria campaign (tahap 1) + Lainnya, boleh pilih lebih dari satu.</p>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
                 {nicheOptions.map((n) => (
                   <span key={n} style={{ padding: '7px 14px', borderRadius: '999px', background: '#e1e0ff', color: '#6728e4', fontSize: '0.78rem', fontWeight: 600, fontFamily: font }}>{n}</span>
                 ))}
-                <span style={{ padding: '7px 14px', borderRadius: '999px', border: '1px dashed #c9b6f7', color: '#6728e4', fontSize: '0.78rem', fontWeight: 600, fontFamily: font }}>Lainnya (isi sendiri)</span>
+                {!nicheOptions.includes('Lainnya') && <span style={{ padding: '7px 14px', borderRadius: '999px', background: '#e1e0ff', color: '#6728e4', fontSize: '0.78rem', fontWeight: 600, fontFamily: font }}>Lainnya</span>}
               </div>
             </>
-          ));
+          <div style={{ display: 'flex', justifyContent: 'flex-end', borderTop: '1px solid #e1e0ff', paddingTop: '8px', marginTop: '12px' }}>
+            <Toggle label="Wajib diisi" checked={applyFields.nichesRequired !== false} onChange={(v) => setApply({ nichesRequired: v })} />
+          </div>
+        </div>
+          );
           case 'domicile': return fixedCard(key, 'Provinsi & Kota / Kabupaten Domisili', (
             <div style={{ display: 'flex', gap: '16px' }}>{answerLine('40%', 'Pilih provinsi ▾')}{answerLine('40%', 'Pilih kota / kabupaten ▾')}</div>
           ));
@@ -506,8 +517,13 @@ export default function CustomFormBuilder({ campaignId, onChange, initial, initi
         );
       })}
 
-      {(!applyFields.pic || !applyFields.handleBy) && (
+      {(!applyFields.pic || !applyFields.handleBy || applyFields.niches === false) && (
         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '12px' }}>
+          {applyFields.niches === false && (
+            <button onClick={() => setApply({ niches: true })} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '7px 14px', borderRadius: '999px', border: '1px solid #c9b6f7', background: 'white', color: '#6728e4', fontSize: '0.78rem', fontWeight: 700, fontFamily: font, cursor: 'pointer' }}>
+              <Undo2 size={14} /> Kembalikan field Niche
+            </button>
+          )}
           {!applyFields.pic && (
             <button onClick={() => setApply({ pic: true })} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '7px 14px', borderRadius: '999px', border: '1px solid #c9b6f7', background: 'white', color: '#6728e4', fontSize: '0.78rem', fontWeight: 700, fontFamily: font, cursor: 'pointer' }}>
               <Undo2 size={14} /> Kembalikan field PIC

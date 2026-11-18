@@ -1,4 +1,6 @@
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import MoneyInput from '../../components/ui/MoneyInput';
+import { FINANCE_TIERS } from '../../lib/financeTier';
 import { useAutoRefresh } from '../../hooks/useAutoRefresh';
 import { Link } from 'react-router-dom';
 import { Search, ListFilter, AlertTriangle, ArrowDownCircle, ArrowUpCircle, Columns3, Plus, Trash2, TrendingUp, Clock, FileSpreadsheet, ChevronDown, Pencil, X, EyeOff, RotateCcw } from 'lucide-react';
@@ -73,6 +75,7 @@ interface Group {
   adminNote: string;
   profit: number; margin: number | null;
   approvedCreators: number | null; talentWarning: string;
+  talentCount: number; feeFinanceAuto: boolean;
   /** Disembunyikan dari rekap: tidak ikut total & export, bisa dipulihkan */
   hidden: boolean;
 }
@@ -295,17 +298,17 @@ function InvoiceExtras({ inv, busy, onSave }: { inv: InvoiceItem; busy: boolean;
 }
 
 const EXPENSE_COLS: [keyof Omit<Group['expense'], 'total' | 'custom'>, string][] = [
-  ['feeCreator', 'Fee Creator'], ['feePic', 'Fee PIC'], ['feeMg', 'Fee MG'], ['feeHandle', 'Fee Handle by'],
+  ['feeCreator', 'Fee Creator'], ['feePic', 'Fee PIC'], ['feeMg', 'Fee MG'], ['feeHandle', 'Fee Finance'],
   ['adminInternal', 'Gaji Admin'], ['reimburse', 'Reimburse'], ['ads', 'Ads'], ['opex', 'Opex'],
 ];
 
 type AutoFee = 'feeCreator' | 'feePic' | 'feeMg';
-/** Fee Handle by & Gaji Admin: default dari invoice WA (/invoice), bisa diganti manual per campaign */
+/** Fee Finance & Gaji Admin: default dari invoice WA (/invoice), bisa diganti manual per campaign */
 type InvoiceFee = 'feeHandle' | 'adminInternal';
 type FeeField = AutoFee | InvoiceFee | 'reimburse' | 'ads' | 'opex';
 const FEE_FIELDS: { key: FeeField; label: string }[] = [
   { key: 'feeCreator', label: 'Fee Creator' }, { key: 'feePic', label: 'Fee PIC' }, { key: 'feeMg', label: 'Fee MG' },
-  { key: 'feeHandle', label: 'Fee Handle by' }, { key: 'adminInternal', label: 'Gaji Admin' },
+  { key: 'feeHandle', label: 'Fee Finance' }, { key: 'adminInternal', label: 'Gaji Admin' },
   { key: 'reimburse', label: 'Reimburse' }, { key: 'ads', label: 'Ads' }, { key: 'opex', label: 'Opex' },
 ];
 const AUTO_FEES: FeeField[] = ['feeCreator', 'feePic', 'feeMg'];
@@ -350,6 +353,21 @@ function ExpenseEditor({ group, campaigns, focus, onClose, onSaved }: {
   };
   const isManual = (k: FeeField) => overridable(k) && (draft[k] === null ? false : draft[k] !== undefined || savedManual(k));
   const total = FEE_FIELDS.reduce((sum, { key }) => sum + valueOf(key), 0) + group.expense.custom;
+  // Fee Finance: pilih tarif per jumlah talent (otomatis terpilih dari jumlah talent di invoice selama belum diisi manual)
+  const tierPicker = (
+    <>
+      <select aria-label="Tarif Fee Finance" value={FINANCE_TIERS.find((t) => t.fee === valueOf('feeHandle'))?.fee ?? ''} onChange={(e) => e.target.value && setDraft((d) => ({ ...d, feeHandle: Number(e.target.value) }))}
+        style={{ ...input, width: '100%', marginTop: '6px', fontSize: '0.74rem' }}>
+        <option value="">Pilih tarif…</option>
+        {FINANCE_TIERS.map((t) => <option key={t.fee} value={t.fee}>{t.label} · {rupiah(t.fee)}</option>)}
+      </select>
+      {group.talentCount > 0 && (
+        <span style={{ display: 'block', fontFamily: f, fontSize: '0.66rem', color: '#8a8a99', marginTop: '3px' }}>
+          {group.talentCount.toLocaleString('id-ID')} talent di invoice{group.feeFinanceAuto && draft.feeHandle === undefined ? ' · tarif otomatis' : ''}
+        </span>
+      )}
+    </>
+  );
   const profit = group.income - total;
 
   const save = async () => {
@@ -387,8 +405,9 @@ function ExpenseEditor({ group, campaigns, focus, onClose, onSaved }: {
               {FEE_FIELDS.map(({ key, label }) => (
                 <label key={key} style={{ display: 'block' }}>
                   <span style={{ display: 'block', fontFamily: f, fontSize: '0.72rem', fontWeight: 700, color: '#464652', marginBottom: '4px' }}>{label}</span>
-                  <input type="number" autoFocus={focus === key} style={{ ...input, width: '100%', ...(focus === key ? { borderColor: '#6728e4' } : {}) }} value={valueOf(key)}
-                    onChange={(e) => setDraft((d) => ({ ...d, [key]: Number(e.target.value) || 0 }))} />
+                  <MoneyInput autoFocus={focus === key} style={{ ...input, width: '100%', ...(focus === key ? { borderColor: '#6728e4' } : {}) }} value={valueOf(key)}
+                    onChange={(v) => setDraft((d) => ({ ...d, [key]: v }))} />
+                  {key === 'feeHandle' && tierPicker}
                 </label>
               ))}
             </div>
@@ -411,7 +430,7 @@ function ExpenseEditor({ group, campaigns, focus, onClose, onSaved }: {
         ) : (
           <>
             <p style={{ fontFamily: f, fontSize: '0.74rem', color: '#8a8a99', marginBottom: '14px' }}>
-              Sama dengan tab Finance di halaman campaign. Fee otomatis = fee per creator × {record.auto.acceptedCount} creator di-approve; Fee Handle by & Gaji Admin otomatis dari invoice WA. Ketik angka untuk mengganti manual.
+              Sama dengan tab Finance di halaman campaign. Fee otomatis = fee per creator × {record.auto.acceptedCount} creator di-approve; Gaji Admin otomatis dari invoice WA; Fee Finance dari invoice WA, kalau kosong dari tarif jumlah talent. Ketik angka untuk mengganti manual.
             </p>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '12px' }}>
               {FEE_FIELDS.map(({ key, label }) => {
@@ -427,8 +446,9 @@ function ExpenseEditor({ group, campaigns, focus, onClose, onSaved }: {
                         </span>
                       )}
                     </span>
-                    <input type="number" autoFocus={focus === key} style={{ ...input, width: '100%', ...(focus === key ? { borderColor: '#6728e4' } : {}) }} value={valueOf(key)}
-                      onChange={(e) => setDraft((d) => ({ ...d, [key]: Number(e.target.value) || 0 }))} />
+                    <MoneyInput autoFocus={focus === key} style={{ ...input, width: '100%', ...(focus === key ? { borderColor: '#6728e4' } : {}) }} value={valueOf(key)}
+                      onChange={(v) => setDraft((d) => ({ ...d, [key]: v }))} />
+                    {key === 'feeHandle' && tierPicker}
                     {auto && manual && (
                       <button type="button" onClick={() => setDraft((d) => ({ ...d, [key]: null }))}
                         style={{ background: 'none', border: 'none', padding: 0, marginTop: '4px', cursor: 'pointer', fontFamily: f, fontSize: '0.68rem', fontWeight: 700, color: '#6728e4' }}>
@@ -723,7 +743,7 @@ export default function FinanceRecap() {
                   const items = g.items.length ? g.items : [null];
                   const span = items.length;
                   const e = g.expense;
-                  const breakdown = [['Fee creator', e.feeCreator], ['Fee PIC', e.feePic], ['Fee MG', e.feeMg], ['Fee Handle by', e.feeHandle], ['Gaji Admin internal', e.adminInternal], ['Reimburse', e.reimburse], ['Ads', e.ads], ['Opex', e.opex], ['Kolom tambahan', e.custom]]
+                  const breakdown = [['Fee creator', e.feeCreator], ['Fee PIC', e.feePic], ['Fee MG', e.feeMg], ['Fee Finance', e.feeHandle], ['Gaji Admin internal', e.adminInternal], ['Reimburse', e.reimburse], ['Ads', e.ads], ['Opex', e.opex], ['Kolom tambahan', e.custom]]
                     .filter(([, v]) => v).map(([k, v]) => `${k}: ${rupiah(v as number)}`).concat(g.adminNote ? [`(${g.adminNote})`] : []).join('\n');
                   const groupCell = (content: React.ReactNode, extra: React.CSSProperties = {}, title?: string) => <td rowSpan={span} title={title} style={{ ...td, borderRight: '1px solid #f0f0f0', ...extra }}>{content}</td>;
                   return (

@@ -13,7 +13,7 @@ import BuzzerSocialField, { type SocialDraft } from '../components/BuzzerSocialF
 type CustomFieldType = 'text' | 'textarea' | 'number' | 'select' | 'checkbox' | 'file';
 interface CustomField { id: string; label: string; description?: string; type: CustomFieldType; required: boolean; options?: string[] }
 interface PicOption { _id: string; name: string }
-interface ApplyFields { pic: boolean; handleBy: boolean; handleByRequired: boolean; order?: string[]; descriptions?: Record<string, string> }
+interface ApplyFields { pic: boolean; handleBy: boolean; handleByRequired: boolean; niches?: boolean; nichesRequired?: boolean; order?: string[]; descriptions?: Record<string, string> }
 
 interface CampaignInfo {
   name: string;
@@ -96,8 +96,6 @@ export default function CampaignApply() {
   const [handleBy, setHandleBy] = useState('');
   const [customValues, setCustomValues] = useState<Record<string, string | string[]>>({});
   const [niches, setNiches] = useState<string[]>([]);
-  // Opsi "Lainnya": niche di luar daftar campaign, diketik sendiri
-  const [otherNiche, setOtherNiche] = useState<string | null>(null);
   // id wilayah (dropdown); nama dikirim ke server saat submit, sama seperti KOLRegister
   const [province, setProvince] = useState('');
   const [city, setCity] = useState('');
@@ -186,7 +184,8 @@ export default function CampaignApply() {
 
   // Urutan field dari builder admin (drag), field default + custom dalam satu daftar
   const customById = new Map((campaign?.customFields || []).map((f) => [f.id, f]));
-  const orderedKeys = applyOrder(fields.order, defaultApplyKeys({ askDomicile, platforms, customIds: [...customById.keys()] }));
+  const orderedKeys = applyOrder(fields.order, defaultApplyKeys({ askDomicile, platforms, customIds: [...customById.keys()] })).filter((k) => k !== 'niches' || fields.niches !== false);
+  const nichesRequired = fields.niches !== false && fields.nichesRequired !== false;
   const descStyle: React.CSSProperties = { fontSize: '0.78rem', color: '#777683', margin: '-2px 0 8px', lineHeight: 1.5, whiteSpace: 'pre-wrap', fontFamily: "var(--font-display)" };
   const fieldDesc = (key: string) => fields.descriptions?.[key] ? <p style={descStyle}><Linkified text={fields.descriptions[key]} /></p> : null;
   // Info "nomor/email sudah terdaftar" tampil di bawah field kontak yang posisinya paling bawah
@@ -225,12 +224,7 @@ export default function CampaignApply() {
       setSubmitError('Nama, nomor WA, dan email wajib diisi.');
       return;
     }
-    const allNiches = [...niches, ...(otherNiche?.trim() ? [otherNiche.trim()] : [])];
-    if (otherNiche !== null && !otherNiche.trim()) {
-      setSubmitError('Isi niche lainnya, atau batalkan pilihan Lainnya.');
-      return;
-    }
-    if (!allNiches.length) {
+    if (nichesRequired && !niches.length) {
       setSubmitError('Niche wajib diisi.');
       return;
     }
@@ -270,7 +264,7 @@ export default function CampaignApply() {
     setLoading(true);
     try {
       await api.post(`/campaigns/${slug}/apply`, {
-        name, phone, email, niches: allNiches, updateName,
+        name, phone, email, niches, updateName,
         province: provinces.find((p) => p.id === province)?.name || '',
         city: cities.find((c) => c.id === city)?.name || '',
         socials: isBuzzer
@@ -404,17 +398,16 @@ export default function CampaignApply() {
                 );
                 case 'niches': return (
           <div style={{ marginBottom: '18px' }}>
-            <label style={labelStyle}>Niche * <span style={{ fontWeight: 400, color: '#777683' }}>(boleh lebih dari satu)</span></label>
+            <label style={labelStyle}>Niche{nichesRequired && ' *'} <span style={{ fontWeight: 400, color: '#777683' }}>(boleh lebih dari satu)</span></label>
             {fieldDesc('niches')}
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
               {nicheOptions.map((n) => (
                 <Pill key={n} label={n} selected={niches.includes(n)} onClick={() => setNiches((prev) => (prev.includes(n) ? prev.filter((x) => x !== n) : [...prev, n]))} />
               ))}
-              <Pill label="Lainnya" selected={otherNiche !== null} onClick={() => setOtherNiche((v) => (v === null ? '' : null))} />
+              {!nicheOptions.includes('Lainnya') && (
+                <Pill label="Lainnya" selected={niches.includes('Lainnya')} onClick={() => setNiches((prev) => (prev.includes('Lainnya') ? prev.filter((x) => x !== 'Lainnya') : [...prev, 'Lainnya']))} />
+              )}
             </div>
-            {otherNiche !== null && (
-              <input value={otherNiche} onChange={(e) => setOtherNiche(e.target.value)} placeholder="Tulis niche kamu" maxLength={60} autoFocus style={{ ...inputStyle, marginTop: '10px' }} />
-            )}
           </div>
                 );
                 case 'domicile': return askDomicile && (
