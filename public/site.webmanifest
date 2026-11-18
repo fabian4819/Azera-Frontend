@@ -2,7 +2,7 @@
   "name": "AzeraKOL",
   "short_name": "AzeraKOL",
   "description": "Jasa KOL management dan influencer marketing untuk brand dan kreator Indonesia.",
-  "start_url": "/",
+  "start_url": "/admin/dashboard",
   "display": "standalone",
   "background_color": "#f8f9ff",
   "theme_color": "#6728e4",
