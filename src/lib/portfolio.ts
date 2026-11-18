@@ -1,7 +1,7 @@
 // Tipe & helper Portfolio yang dipakai halaman publik (ringkasan + detail) dan admin.
 import type { CSSProperties } from 'react';
 
-export const PORTFOLIO_CATEGORIES = ['KOL Campaign', 'KOC Campaign', 'Affiliate Campaign', 'Event Creator Activation'];
+export const PORTFOLIO_CATEGORIES = ['KOL Campaign', 'KOC Campaign', 'Affiliate Campaign', 'Event Creator Activation', 'Clippers Campaign'];
 // sama dengan pilihan niche di CampaignNew (admin)
 export const KOL_NICHES = ['Beauty', 'Fashion', 'Food & Beverage', 'Travel', 'Tech', 'Fitness', 'Parenting', 'Gaming', 'Finance', 'Education', 'Lifestyle', 'Entertainment'];
 export const SCOPE_OPTIONS = ['sourcing', 'briefing', 'content review', 'monitoring posting', 'pengumpulan insight', 'reporting'];
@@ -89,6 +89,7 @@ export function creatorLabel(category: string) {
   if (category === 'KOC Campaign') return 'Total KOC Activated';
   if (category === 'Affiliate Campaign') return 'Total Affiliate Activated';
   if (category === 'Event Creator Activation') return 'Total Event Creators Activated';
+  if (category === 'Clippers Campaign') return 'Total Clippers Activated';
   return 'Total KOL Activated';
 }
 

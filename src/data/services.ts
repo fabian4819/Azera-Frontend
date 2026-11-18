@@ -40,12 +40,12 @@ export interface ServiceContent {
 export const services: ServiceContent[] = [
   {
     slug: 'nano-micro-kol-campaign',
-    navLabel: 'Nano-Micro KOL Campaign',
+    navLabel: 'Nano–Micro KOL Campaign',
     portfolioCategory: 'KOL Campaign',
     eyebrow: 'Core Service',
     headlinePlain: 'Nano-Micro KOL',
     headlineHighlight: 'Campaign',
-    subheading: 'Campaign Bersama Puluhan hingga Ribuan Nano-Micro KOL',
+    subheading: 'Jangkau audiens yang relevan lewat KOL terkurasi untuk product launch, grand opening, dan campaign awareness.',
     tags: ['#Awareness', '#Engagement', '#Review Produk', '#Product Launch'],
     description: [
       'Lebih dari sekadar jumlah KOL.',
@@ -103,7 +103,7 @@ export const services: ServiceContent[] = [
     eyebrow: 'Core Service',
     headlinePlain: 'KOC',
     headlineHighlight: 'Campaign',
-    subheading: 'Aktivasi Everyday Consumers untuk Konten Autentik Skala Besar',
+    subheading: 'Buat konten dalam volume besar bersama everyday creators, mulai dari review produk, product seeding, hingga posting awareness.',
     tags: ['#Authentic Review', '#Product Seeding', '#UGC', '#Mass Content Distribution'],
     description: [
       'Lebih dari sekadar review biasa.',
@@ -161,7 +161,7 @@ export const services: ServiceContent[] = [
     eyebrow: 'Core Service',
     headlinePlain: 'Affiliate Creator',
     headlineHighlight: 'Campaign',
-    subheading: 'Campaign Berbasis Performa untuk Dorong Penjualan Nyata',
+    subheading: 'Dorong penjualan lewat konten creator yang terhubung ke produk melalui link affiliate atau keranjang belanja.',
     tags: ['#Traffic', '#Conversion', '#Sales', '#GMV'],
     description: [
       'Lebih dari sekadar promosi.',
@@ -219,7 +219,7 @@ export const services: ServiceContent[] = [
     eyebrow: 'Core Service',
     headlinePlain: 'Event Creator',
     headlineHighlight: 'Activation',
-    subheading: 'Ramaikan Event Kamu dengan KOC dan Nano Creators',
+    subheading: 'Hadirkan creator ke booth, expo, atau event brand untuk meramaikan aktivitas dan membuat konten langsung dari lokasi.',
     tags: ['#Live Content', '#On-Ground Excitement', '#Event Exposure', '#Social Media Coverage'],
     description: [
       'Lebih dari sekadar kehadiran.',
@@ -268,6 +268,64 @@ export const services: ServiceContent[] = [
       { question: 'Apakah creator membuat konten secara live saat event?', answer: 'Ya, creator menghasilkan live content dari lokasi event untuk memperkuat exposure secara real-time di media sosial.' },
       { question: 'Berapa banyak creator yang bisa hadir dalam satu event?', answer: 'Jumlah creator disesuaikan dengan skala event dan kebutuhan brand, dari kelompok kecil hingga aktivasi skala besar.' },
       { question: 'Apakah ada dokumentasi hasil setelah event selesai?', answer: 'Ya, kami menyediakan laporan dokumentasi dan metrik exposure dari seluruh konten yang dihasilkan creator selama event berlangsung.' },
+    ],
+  },
+  {
+    slug: 'clippers-campaign',
+    navLabel: 'Clippers Campaign',
+    portfolioCategory: 'Clippers Campaign',
+    eyebrow: 'Core Service',
+    headlinePlain: 'Clippers',
+    headlineHighlight: 'Campaign',
+    subheading: 'Ubah rekaman podcast, live, atau footage brand jadi video pendek siap tayang di TikTok, Reels, dan YouTube Shorts.',
+    tags: ['#Short Video', '#Podcast Clips', '#Live Highlights', '#Repurpose Content'],
+    description: [
+      'Lebih dari sekadar potongan video.',
+      'Rekaman panjang brand kamu, dari podcast, live streaming, hingga footage event, dipotong jadi video pendek oleh jaringan clipper lalu disebar di banyak akun untuk memperluas jangkauan.',
+    ],
+    scopeTitle: 'Cakupan Layanan',
+    scope: [
+      { title: 'Repurpose Konten Panjang', desc: 'Podcast, live, webinar, atau footage brand diolah jadi banyak video pendek.' },
+      { title: 'Jaringan Clipper', desc: 'Banyak clipper bekerja paralel, jadi volume video tinggi dalam waktu singkat.' },
+      { title: 'Siap Tayang Multi-Platform', desc: 'Format vertikal dengan hook & subtitle untuk TikTok, Reels, dan YouTube Shorts.' },
+      { title: 'Distribusi Banyak Akun', desc: 'Video disebar di akun-akun clipper untuk menjangkau audiens baru.' },
+      { title: 'Kontrol Kualitas', desc: 'Setiap klip direview supaya sesuai brief dan aman untuk brand.' },
+      { title: 'Laporan Transparan', desc: 'Jumlah klip, views, dan engagement dilaporkan tiap campaign.' },
+    ],
+    workflow: [
+      { title: 'Plan', desc: 'Diskusi materi sumber, pesan utama, dan target platform bersama tim AzeraKOL.' },
+      { title: 'Match', desc: 'Kami menyiapkan clipper yang sesuai gaya konten dan audiens brand kamu.' },
+      { title: 'Execute', desc: 'Clipper memotong, mengedit, dan memposting video pendek sesuai brief.' },
+      { title: 'Scale', desc: 'Klip dengan performa terbaik dianalisis dan diperbanyak untuk jangkauan maksimal.' },
+    ],
+    pricing: [
+      {
+        badge: 'Starter',
+        name: 'Clipping Satu Seri Konten',
+        features: [
+          'Clipping dari satu sumber konten (podcast/live)',
+          'Format vertikal + subtitle',
+          'Laporan views akhir campaign',
+          'Pendampingan 1 PIC dedicated',
+        ],
+      },
+      {
+        badge: 'Enterprise',
+        name: 'Clipping Skala Besar Berkelanjutan',
+        dark: true,
+        features: [
+          'Jaringan clipper skala besar',
+          'Distribusi multi-platform (TikTok, Reels, Shorts)',
+          'Dashboard tracking views real-time',
+          'Dedicated campaign manager & laporan berkala',
+        ],
+      },
+    ],
+    faq: [
+      { question: 'Konten apa saja yang bisa dijadikan clip?', answer: 'Podcast, live streaming, webinar, talkshow, rekaman event, maupun footage brand lainnya yang berdurasi panjang.' },
+      { question: 'Di platform mana video pendeknya tayang?', answer: 'TikTok, Instagram Reels, dan YouTube Shorts, disesuaikan dengan target audiens brand kamu.' },
+      { question: 'Berapa banyak clip yang bisa dihasilkan?', answer: 'Volume clip disesuaikan dengan panjang materi sumber dan skala campaign, dari puluhan hingga ratusan video pendek.' },
+      { question: 'Apakah brand bisa review clip sebelum tayang?', answer: 'Bisa. Clip melalui tahap review supaya sesuai brief dan aman untuk citra brand sebelum diposting.' },
     ],
   },
 ];

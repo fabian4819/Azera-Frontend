@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useAppManifest } from '../../lib/useAppManifest';
 import { Link, useLocation, Outlet } from 'react-router-dom';
 import { Megaphone, LogOut, ChevronsLeft, ChevronsRight, UserRound } from 'lucide-react';
 import { usePicAuth } from '../../hooks/usePicAuth';
@@ -13,6 +14,7 @@ const COLLAPSE_KEY = 'azera_pic_sidebar_collapsed';
 
 export default function PicLayout() {
   const location = useLocation();
+  useAppManifest('/pic.webmanifest');
   const { pic, logout } = usePicAuth();
   const [collapsed, setCollapsed] = useState(() => localStorage.getItem(COLLAPSE_KEY) === '1');
 

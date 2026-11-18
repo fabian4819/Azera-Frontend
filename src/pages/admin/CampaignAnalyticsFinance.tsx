@@ -70,7 +70,7 @@ interface FinanceRecord {
   /** Fee otomatis = fee per creator (tahap 1) x creator yang di-approve */
   auto: { acceptedCount: number; perCreator: Record<AutoFee, number>; totals: Record<AutoFee, number> };
 }
-const FEE_LABELS: Record<string, string> = { feeCreator: 'Fee Creator', feePic: 'Fee PIC', feeMg: 'Fee MG', reimburse: 'Reimburse', ads: 'Ads', opex: 'Opex' };
+const FEE_LABELS: Record<string, string> = { feeCreator: 'Fee Creator', feePic: 'Fee PIC', feeMg: 'Fee MG (Handle by)', reimburse: 'Reimburse', ads: 'Ads', opex: 'Opex' };
 const AUTO_FEES: AutoFee[] = ['feeCreator', 'feePic', 'feeMg'];
 const rupiah = (n: number) => `Rp${n.toLocaleString('id-ID')}`;
 interface DocRecord { _id: string; type: string; pdfUrl?: string; data: Record<string, unknown>; createdAt: string }

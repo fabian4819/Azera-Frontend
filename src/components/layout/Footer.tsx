@@ -141,10 +141,11 @@ export default function Footer() {
           <motion.div {...reveal(0)}>
             <h4 style={headingStyle}>Services</h4>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-              <FooterLink to="/service/nano-micro-kol-campaign">Nano-Micro KOL Campaign</FooterLink>
+              <FooterLink to="/service/nano-micro-kol-campaign">Nano–Micro KOL Campaign</FooterLink>
               <FooterLink to="/service/koc-campaign">KOC Campaign</FooterLink>
               <FooterLink to="/service/affiliate-creator-campaign">Affiliate Creator Campaign</FooterLink>
               <FooterLink to="/service/event-creator-activation">Event Creator Activation</FooterLink>
+              <FooterLink to="/service/clippers-campaign">Clippers Campaign</FooterLink>
             </div>
           </motion.div>
 

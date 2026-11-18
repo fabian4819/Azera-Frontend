@@ -298,7 +298,7 @@ function InvoiceExtras({ inv, busy, onSave }: { inv: InvoiceItem; busy: boolean;
 }
 
 const EXPENSE_COLS: [keyof Omit<Group['expense'], 'total' | 'custom'>, string][] = [
-  ['feeCreator', 'Fee Creator'], ['feePic', 'Fee PIC'], ['feeMg', 'Fee MG'], ['feeHandle', 'Fee Finance'],
+  ['feeCreator', 'Fee Creator'], ['feePic', 'Fee PIC'], ['feeMg', 'Fee MG (Handle by)'], ['feeHandle', 'Fee Finance'],
   ['adminInternal', 'Gaji Admin'], ['reimburse', 'Reimburse'], ['ads', 'Ads'], ['opex', 'Opex'],
 ];
 
@@ -307,7 +307,7 @@ type AutoFee = 'feeCreator' | 'feePic' | 'feeMg';
 type InvoiceFee = 'feeHandle' | 'adminInternal';
 type FeeField = AutoFee | InvoiceFee | 'reimburse' | 'ads' | 'opex';
 const FEE_FIELDS: { key: FeeField; label: string }[] = [
-  { key: 'feeCreator', label: 'Fee Creator' }, { key: 'feePic', label: 'Fee PIC' }, { key: 'feeMg', label: 'Fee MG' },
+  { key: 'feeCreator', label: 'Fee Creator' }, { key: 'feePic', label: 'Fee PIC' }, { key: 'feeMg', label: 'Fee MG (Handle by)' },
   { key: 'feeHandle', label: 'Fee Finance' }, { key: 'adminInternal', label: 'Gaji Admin' },
   { key: 'reimburse', label: 'Reimburse' }, { key: 'ads', label: 'Ads' }, { key: 'opex', label: 'Opex' },
 ];
@@ -743,7 +743,7 @@ export default function FinanceRecap() {
                   const items = g.items.length ? g.items : [null];
                   const span = items.length;
                   const e = g.expense;
-                  const breakdown = [['Fee creator', e.feeCreator], ['Fee PIC', e.feePic], ['Fee MG', e.feeMg], ['Fee Finance', e.feeHandle], ['Gaji Admin internal', e.adminInternal], ['Reimburse', e.reimburse], ['Ads', e.ads], ['Opex', e.opex], ['Kolom tambahan', e.custom]]
+                  const breakdown = [['Fee creator', e.feeCreator], ['Fee PIC', e.feePic], ['Fee MG (Handle by)', e.feeMg], ['Fee Finance', e.feeHandle], ['Gaji Admin internal', e.adminInternal], ['Reimburse', e.reimburse], ['Ads', e.ads], ['Opex', e.opex], ['Kolom tambahan', e.custom]]
                     .filter(([, v]) => v).map(([k, v]) => `${k}: ${rupiah(v as number)}`).concat(g.adminNote ? [`(${g.adminNote})`] : []).join('\n');
                   const groupCell = (content: React.ReactNode, extra: React.CSSProperties = {}, title?: string) => <td rowSpan={span} title={title} style={{ ...td, borderRight: '1px solid #f0f0f0', ...extra }}>{content}</td>;
                   return (

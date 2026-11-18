@@ -24,7 +24,7 @@ export default function BrandCTA() {
             Pilih layanan <span style={{ color: 'var(--lime)' }}>campaign KOL kamu.</span>
           </h2>
           <p style={{ color: 'rgba(255,255,255,0.75)', fontSize: '1.02rem', lineHeight: 1.7, maxWidth: '560px', margin: '0 auto 48px' }}>
-            Empat layanan inti AzeraKOL, dari awareness sampai penjualan. Pilih yang paling sesuai dengan tujuan brand kamu.
+            Lima layanan inti AzeraKOL, dari awareness sampai penjualan. Pilih yang paling sesuai dengan tujuan brand kamu.
           </p>
         </motion.div>
 
@@ -32,6 +32,7 @@ export default function BrandCTA() {
           {services.map((s, i) => (
             <motion.div
               key={s.slug}
+              className="brand-service-item"
               initial={{ opacity: 0, y: 24 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.55, ease, delay: 0.1 + i * 0.08 }}
@@ -64,12 +65,15 @@ export default function BrandCTA() {
       </div>
 
       <style>{`
+        /* 5 layanan: 3 di atas, 2 di bawah (rata tengah) */
         .brand-services-grid {
-          display: grid;
-          grid-template-columns: repeat(4, minmax(0, 1fr));
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: center;
           gap: 16px;
           text-align: left;
         }
+        .brand-service-item { flex: 0 1 calc((100% - 32px) / 3); min-width: 0; }
         .brand-service-card {
           height: 100%;
           display: flex;
@@ -101,10 +105,10 @@ export default function BrandCTA() {
           color: var(--lime);
         }
         @media (max-width: 1024px) {
-          .brand-services-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+          .brand-service-item { flex-basis: calc((100% - 16px) / 2); }
         }
         @media (max-width: 560px) {
-          .brand-services-grid { grid-template-columns: 1fr; }
+          .brand-service-item { flex-basis: 100%; }
         }
       `}</style>
     </section>

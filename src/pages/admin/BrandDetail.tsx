@@ -32,6 +32,7 @@ const JASA_LABELS: Record<string, string> = {
   koc_campaign: 'KOC Campaign',
   affiliate_creator_campaign: 'Affiliate Creator Campaign',
   event_creator_activation: 'Event Creator Activation',
+  clippers_campaign: 'Clippers Campaign',
 };
 
 const labelSmall: React.CSSProperties = {

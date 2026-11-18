@@ -168,6 +168,14 @@ export const seoByPath: Record<string, SEOConfig> = {
     keywords: 'event creator activation, aktivasi event KOC, live content event, exposure event media sosial',
     jsonLd: [kolServiceJsonLd, breadcrumb([{ name: 'Home', path: '/' }, { name: 'Event Creator Activation', path: '/service/event-creator-activation' }])],
   },
+  '/service/clippers-campaign': {
+    title: 'Clippers Campaign | AzeraKOL',
+    description:
+      'Ubah rekaman podcast, live, atau footage brand jadi video pendek siap tayang di TikTok, Reels, dan YouTube Shorts lewat jaringan clipper AzeraKOL.',
+    path: '/service/clippers-campaign',
+    keywords: 'clippers campaign, jasa clipping video, potong video podcast, video pendek tiktok reels shorts, clipper',
+    jsonLd: [kolServiceJsonLd, breadcrumb([{ name: 'Home', path: '/' }, { name: 'Clippers Campaign', path: '/service/clippers-campaign' }])],
+  },
   '/kamus': {
     title: 'Kamus KOL | Istilah Influencer Marketing | AzeraKOL',
     description:

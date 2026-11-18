@@ -480,7 +480,7 @@ function CampaignInfo({ campaign: c, onSaved }: { campaign: Campaign; onSaved: (
     { label: 'Budget', value: rp(c.budget), bg: 'linear-gradient(135deg, #6728e4, #8b66eb)', fg: 'white' },
     { label: 'Fee Talent', value: rp(c.fee?.creatorFee), sub: c.feeNote, bg: '#eefad8', fg: '#2c4d00' },
     { label: 'Fee PIC', value: rp(c.fee?.picFee), bg: '#f0eeff', fg: '#4a2a9e' },
-    { label: 'Fee MG', value: rp(c.fee?.mgFee), bg: '#f0eeff', fg: '#4a2a9e' },
+    { label: 'Fee MG (Handle by)', value: rp(c.fee?.mgFee), bg: '#f0eeff', fg: '#4a2a9e' },
   ].filter((x) => x.value);
   const followersOf = (p: string) => c.criteria.minFollowersByPlatform?.[p];
   const lists = [
@@ -661,7 +661,7 @@ function CampaignInfoEdit({ campaign: c, onCancel, onSaved }: { campaign: Campai
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '0 12px' }}>
         {field('Fee Talent (Rp)', <input type="number" min={0} value={creatorFee} onChange={(e) => setCreatorFee(e.target.value)} style={editInput} />)}
         {field('Fee PIC (Rp)', <input type="number" min={0} value={picFee} onChange={(e) => setPicFee(e.target.value)} style={editInput} />)}
-        {field('Fee MG (Rp)', <input type="number" min={0} value={mgFee} onChange={(e) => setMgFee(e.target.value)} style={editInput} />)}
+        {field('Fee MG / Handle by (Rp)', <input type="number" min={0} value={mgFee} onChange={(e) => setMgFee(e.target.value)} style={editInput} />)}
       </div>
       {field('Catatan Fee', <input value={feeNote} onChange={(e) => setFeeNote(e.target.value)} placeholder="mis. include beli produk 5k" style={editInput} />)}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '0 12px' }}>

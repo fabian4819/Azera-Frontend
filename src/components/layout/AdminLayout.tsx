@@ -1,4 +1,5 @@
 import { Fragment, useState } from 'react';
+import { useAppManifest } from '../../lib/useAppManifest';
 import WaConfirmProvider from '../WaConfirmProvider';
 import { Link, useLocation, Outlet } from 'react-router-dom';
 import { LayoutDashboard, Building2, Users, Contact, UserCheck, UserRoundCheck, Smartphone, ImageIcon, Megaphone, Upload, MessageCircle, Inbox, MessageSquareText, Bot, Plug, LogOut, ChevronsLeft, ChevronsRight, FolderOpen, FileText, Receipt, FileSignature, ChevronDown, Wallet } from 'lucide-react';
@@ -74,6 +75,7 @@ function readFlag(key: string): boolean | null {
 
 export default function AdminLayout() {
   const location = useLocation();
+  useAppManifest('/admin.webmanifest');
   const { admin, logout } = useAuth();
   const [collapsed, setCollapsed] = useState(() => localStorage.getItem(COLLAPSE_KEY) === '1');
   const [docsOpen, setDocsOpen] = useState(() => readFlag(DOCS_OPEN_KEY) ?? location.pathname.startsWith('/admin/documents'));

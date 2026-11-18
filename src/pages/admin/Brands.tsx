@@ -24,6 +24,7 @@ const JASA_LABELS: Record<string, string> = {
   koc_campaign: 'KOC Campaign',
   affiliate_creator_campaign: 'Affiliate Creator Campaign',
   event_creator_activation: 'Event Creator Activation',
+  clippers_campaign: 'Clippers Campaign',
 };
 
 // Tabel ala Sheets: cari, filter & urut per kolom (termasuk Status & Sumber), bekukan, sembunyikan kolom.

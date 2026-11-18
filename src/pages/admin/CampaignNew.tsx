@@ -283,7 +283,7 @@ export default function CampaignNew() {
               <input value={picFee} onChange={(e) => setPicFee(e.target.value)} type="number" placeholder="7500" style={inputStyle} />
             </div>
             <div>
-              <label style={labelStyle}>Fee MG (Rp)</label>
+              <label style={labelStyle}>Fee MG / Handle by (Rp)</label>
               <input value={mgFee} onChange={(e) => setMgFee(e.target.value)} type="number" placeholder="7500" style={inputStyle} />
             </div>
           </div>

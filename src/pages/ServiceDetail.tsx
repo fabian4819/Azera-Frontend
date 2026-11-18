@@ -11,6 +11,8 @@ const serviceHeroImages: Record<string, string> = {
   'koc-campaign': '/service-heroes/koc-campaign-purple.webp',
   'affiliate-creator-campaign': '/service-heroes/affiliate-creator-campaign-purple.webp',
   'event-creator-activation': '/service-heroes/event-creator-activation-purple.webp',
+  // Sementara pakai gambar KOC sampai ada gambar hero khusus Clippers
+  'clippers-campaign': '/service-heroes/koc-campaign-purple.webp',
 };
 
 function FAQAccordion({ items }: { items: { question: string; answer: string }[] }) {
