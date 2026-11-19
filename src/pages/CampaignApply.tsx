@@ -96,6 +96,8 @@ export default function CampaignApply() {
   const [handleBy, setHandleBy] = useState('');
   const [customValues, setCustomValues] = useState<Record<string, string | string[]>>({});
   const [niches, setNiches] = useState<string[]>([]);
+  // Isian bebas saat pilih "Lainnya": yang tersimpan teks ini (kosong = tetap "Lainnya")
+  const [otherNiche, setOtherNiche] = useState('');
   // id wilayah (dropdown); nama dikirim ke server saat submit, sama seperti KOLRegister
   const [province, setProvince] = useState('');
   const [city, setCity] = useState('');
@@ -264,7 +266,7 @@ export default function CampaignApply() {
     setLoading(true);
     try {
       await api.post(`/campaigns/${slug}/apply`, {
-        name, phone, email, niches, updateName,
+        name, phone, email, niches: niches.map((n) => (n === 'Lainnya' && otherNiche.trim() ? otherNiche.trim() : n)), updateName,
         province: provinces.find((p) => p.id === province)?.name || '',
         city: cities.find((c) => c.id === city)?.name || '',
         socials: isBuzzer
@@ -408,6 +410,9 @@ export default function CampaignApply() {
                 <Pill label="Lainnya" selected={niches.includes('Lainnya')} onClick={() => setNiches((prev) => (prev.includes('Lainnya') ? prev.filter((x) => x !== 'Lainnya') : [...prev, 'Lainnya']))} />
               )}
             </div>
+            {niches.includes('Lainnya') && (
+              <input value={otherNiche} onChange={(e) => setOtherNiche(e.target.value)} placeholder="Tulis niche kamu (mis. Otomotif)" maxLength={60} aria-label="Niche lainnya" style={{ ...inputStyle, marginTop: '10px' }} />
+            )}
           </div>
                 );
                 case 'domicile': return askDomicile && (
