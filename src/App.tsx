@@ -53,6 +53,7 @@ const Broadcast = lazy(() => import('./pages/admin/Broadcast'));
 const Creators = lazy(() => import('./pages/admin/Creators'));
 const CreatorDetail = lazy(() => import('./pages/admin/CreatorDetail'));
 const PicUsers = lazy(() => import('./pages/admin/PicUsers'));
+const TopCreators = lazy(() => import('./pages/admin/TopCreators'));
 const ExtensionConnect = lazy(() => import('./pages/admin/ExtensionConnect'));
 
 // Talent Portal, creator-facing, juga bukan target SEO
@@ -194,6 +195,7 @@ export default function App() {
             <Route path="creators/:id" element={<CreatorDetail />} />
             <Route path="extension" element={<ExtensionConnect />} />
             <Route path="pic" element={<PicUsers />} />
+            <Route path="top-creators" element={<TopCreators />} />
             <Route path="portfolio" element={<PortfolioManager />} />
           </Route>
 

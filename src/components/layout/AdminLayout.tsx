@@ -2,7 +2,7 @@ import { Fragment, useState } from 'react';
 import { useAppManifest } from '../../lib/useAppManifest';
 import WaConfirmProvider from '../WaConfirmProvider';
 import { Link, useLocation, Outlet } from 'react-router-dom';
-import { LayoutDashboard, Building2, Users, Contact, UserCheck, UserRoundCheck, Smartphone, ImageIcon, Megaphone, Upload, MessageCircle, Inbox, MessageSquareText, Bot, Plug, LogOut, ChevronsLeft, ChevronsRight, FolderOpen, FileText, Receipt, FileSignature, ChevronDown, Wallet } from 'lucide-react';
+import { LayoutDashboard, Building2, Users, Contact, UserCheck, UserRoundCheck, Smartphone, ImageIcon, Megaphone, Upload, MessageCircle, Inbox, MessageSquareText, Bot, Plug, LogOut, ChevronsLeft, ChevronsRight, FolderOpen, FileText, Receipt, FileSignature, ChevronDown, Wallet, Trophy } from 'lucide-react';
 import { useAuth, hasOwnerAccess } from '../../hooks/useAuth';
 import BottomNav from './BottomNav';
 
@@ -25,6 +25,7 @@ const navItems = [
   { label: 'Ekstensi KOL Lister', to: '/admin/extension', icon: Plug },
   { label: 'PIC', to: '/admin/pic', icon: UserCheck },
   { label: 'Portfolio', to: '/admin/portfolio', icon: ImageIcon },
+  { label: 'Top Creator', to: '/admin/top-creators', icon: Trophy },
 ];
 
 /** Grup "Document" (bisa dibuka/tutup), dirender tepat setelah item DOCS_AFTER */
@@ -49,6 +50,7 @@ const pageTitles: Record<string, string> = {
   '/admin/wa-templates': 'Template Pesan WhatsApp',
   '/admin/lead-bot-templates': 'Template Bot WhatsApp (Lead Masuk)',
   '/admin/brands': 'Brand Submissions',
+  '/admin/top-creators': 'Top Creator',
   '/admin/creators': 'Creator Registrations',
   '/admin/campaign-creators': 'Creator Campaign',
   '/admin/existing-creators': 'Existing Creator (sebelum platform)',

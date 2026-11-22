@@ -226,6 +226,10 @@ export default function CampaignApply() {
       setSubmitError('Nama, nomor WA, dan email wajib diisi.');
       return;
     }
+    if (niches.includes('Lainnya') && !nicheOptions.includes('Lainnya') && !otherNiche.trim()) {
+      setSubmitError('Tulis niche kamu di kolom Lainnya.');
+      return;
+    }
     if (nichesRequired && !niches.length) {
       setSubmitError('Niche wajib diisi.');
       return;
@@ -411,7 +415,7 @@ export default function CampaignApply() {
               )}
             </div>
             {niches.includes('Lainnya') && (
-              <input value={otherNiche} onChange={(e) => setOtherNiche(e.target.value)} placeholder="Tulis niche kamu (mis. Otomotif)" maxLength={60} aria-label="Niche lainnya" style={{ ...inputStyle, marginTop: '10px' }} />
+              <input value={otherNiche} onChange={(e) => setOtherNiche(e.target.value)} placeholder="Tulis niche kamu (wajib, mis. Otomotif)" maxLength={60} aria-label="Niche lainnya" style={{ ...inputStyle, marginTop: '10px' }} />
             )}
           </div>
                 );

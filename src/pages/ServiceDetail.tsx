@@ -1,10 +1,11 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useParams, Navigate } from 'react-router-dom';
 import { motion, AnimatePresence, useInView, useMotionValue, useReducedMotion, useScroll, useSpring, useTransform } from 'framer-motion';
 import type { MouseEvent as ReactMouseEvent, RefObject } from 'react';
 import { Check, Plus } from 'lucide-react';
 import { getServiceBySlug } from '../data/services';
 import { ease, fadeUp, stagger, useParallax } from '../lib/motion';
+import api from '../lib/api';
 
 const serviceHeroImages: Record<string, string> = {
   'nano-micro-kol-campaign': '/service-heroes/nano-micro-kol-campaign-purple.webp',
@@ -108,6 +109,18 @@ export default function ServiceDetail() {
   };
   const resetHeroMouse = () => { mouseX.set(0); mouseY.set(0); };
 
+  // Kolase hero dari portfolio layanan ini (cover video top creator + foto konten); <3 gambar = gambar hero lama
+  const [collage, setCollage] = useState<string[]>([]);
+  useEffect(() => {
+    if (!service) return;
+    let alive = true;
+    api.get('/portfolio/service-media', { params: { category: service.portfolioCategory } })
+      .then((r) => { if (alive) setCollage(Array.isArray(r.data) ? r.data : []); })
+      .catch(() => undefined);
+    return () => { alive = false; setCollage([]); };
+  }, [service]);
+  const useCollage = collage.length >= 3;
+
   const { ref: scopeParallaxRef, y: scopeParallaxY } = useParallax(36);
   const { ref: workflowParallaxRef, y: workflowParallaxY } = useParallax(28);
   const { ref: pricingParallaxRef, y: pricingParallaxY } = useParallax(70);
@@ -122,15 +135,24 @@ export default function ServiceDetail() {
       {/* Hero */}
       <section
         ref={heroRef}
-        className="service-hero"
+        className={`service-hero${useCollage ? ' has-collage' : ''}`}
         onMouseMove={reduceMotion ? undefined : handleHeroMove}
         onMouseLeave={resetHeroMouse}
       >
-        <motion.div
-          aria-hidden="true"
-          className="service-hero-bg"
-          style={{ backgroundImage: `url(${serviceHeroImages[service.slug]})`, ...(reduceMotion ? {} : { x: bgX, y: bgY }) }}
-        />
+        {useCollage ? (
+          <motion.div aria-hidden="true" className="service-hero-bg service-hero-collage" style={reduceMotion ? undefined : { x: bgX, y: bgY }}>
+            {/* Diulang supaya grid penuh walau gambar portfolio masih sedikit */}
+            {Array.from({ length: 24 }, (_, i) => (
+              <img key={i} src={collage[i % collage.length]} alt="" loading={i < 8 ? 'eager' : 'lazy'} decoding="async" />
+            ))}
+          </motion.div>
+        ) : (
+          <motion.div
+            aria-hidden="true"
+            className="service-hero-bg"
+            style={{ backgroundImage: `url(${serviceHeroImages[service.slug]})`, ...(reduceMotion ? {} : { x: bgX, y: bgY }) }}
+          />
+        )}
         <motion.div
           className="service-hero-copy"
           variants={stagger(0.09, 0.05)}
@@ -391,6 +413,27 @@ export default function ServiceDetail() {
           background-size: cover;
           background-repeat: no-repeat;
         }
+        .service-hero.has-collage::after {
+          background:
+            linear-gradient(180deg, rgba(239,232,251,0) calc(100% - 180px), rgba(239,232,251,0.85) calc(100% - 50px), #efe8fb 100%),
+            radial-gradient(ellipse 60% 70% at 50% 52%, rgba(28,10,68,0.82) 0%, rgba(28,10,68,0.62) 55%, rgba(28,10,68,0.35) 100%);
+        }
+        .service-hero-collage {
+          display: grid;
+          grid-template-columns: repeat(6, 1fr);
+          gap: 14px;
+          padding: 14px;
+          align-content: center;
+          transform: rotate(-6deg) scale(1.18);
+          background: #5b3cc4;
+        }
+        .service-hero-collage img {
+          width: 100%;
+          aspect-ratio: 9 / 14;
+          object-fit: cover;
+          border-radius: 16px;
+          box-shadow: 0 10px 28px rgba(20,6,60,0.35);
+        }
         .service-hero::after {
           content: '';
           position: absolute;
@@ -629,6 +672,7 @@ export default function ServiceDetail() {
         }
         @media (max-width: 900px) {
           .service-hero { padding: 128px 20px 72px; }
+          .service-hero-collage { grid-template-columns: repeat(3, 1fr); gap: 10px; }
           .service-scope-layout { grid-template-columns: 1fr; }
           .service-scope-visual { min-height: 430px; }
           .service-workflow-heading { grid-template-columns: 1fr; gap: 18px; }
