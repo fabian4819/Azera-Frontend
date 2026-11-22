@@ -76,11 +76,14 @@ export default function SocialEmbed({ platform: savedPlatform, url }: { platform
       ) : (
         // Player resmi player/v1, BUKAN embed.js / embed/v2: keduanya kena rate-limit TikTok
         // ("overload-protect triggered", HTTP 503), embed/v2 terkonfirmasi 503 sementara player/v1 tetap 200.
+        // Atribut `allow` disamakan dengan iframe dari oEmbed resmi TikTok: dengan izin yang lebih sempit
+        // player bisa gagal jalan ("Unable to load player") walau videonya bisa di-embed.
         <iframe
-          src={`https://www.tiktok.com/player/v1/${tiktokVideoId(url)}?rel=0`}
+          src={`https://www.tiktok.com/player/v1/${tiktokVideoId(url)}?rel=0&music_info=1&description=1`}
           title="TikTok video"
           loading="lazy"
-          allow="encrypted-media; fullscreen"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; fullscreen; gyroscope; picture-in-picture; web-share"
+          allowFullScreen
           style={{ width: '100%', minWidth: '325px', height: `${TIKTOK_H}px`, border: 0, display: 'block' }}
         />
       )}
