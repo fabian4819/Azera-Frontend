@@ -173,8 +173,14 @@ export default function PortfolioDetail() {
               <p style={{ ...sectionLabel, marginBottom: '12px' }}>Contoh Konten</p>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', alignItems: 'start' }}>
                 {clips.map((clip, i) => (
-                  clip.kind === 'embed' ? (
-                    <ZoomFit key={i}><SocialEmbed platform={clip.creator.platform} url={clip.creator.postLink!} /></ZoomFit>
+                  // Player TikTok gagal ("Unable to load player") kalau dikecilkan CSS zoom, jadi postingan yang punya
+                  // cover tampil sebagai kotak cover; diklik → player ukuran penuh di popup
+                  clip.kind === 'embed' && clip.creator.thumb ? (
+                    <button key={i} onClick={() => setPlaying(clip)} style={{ ...tile, backgroundImage: `url(${clip.creator.thumb})`, backgroundSize: 'cover', backgroundPosition: 'center' }} aria-label={`Putar contoh konten ${i + 1}`}>
+                      <Play size={30} fill="#fff" color="#fff" style={{ position: 'relative' }} />
+                    </button>
+                  ) : clip.kind === 'embed' ? (
+                    <ZoomFit key={i}><SocialEmbed platform={clip.creator.platform} url={clip.creator.postLink!} thumb={clip.creator.thumb} /></ZoomFit>
                   ) : (
                     <button key={i} onClick={() => setPlaying(clip)} style={tile} aria-label={`Buka contoh konten ${i + 1}`}>
                       {isVideo(clip.url)
@@ -199,7 +205,9 @@ export default function PortfolioDetail() {
             <button onClick={() => setPlaying(null)} aria-label="Tutup" style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 1, width: '32px', height: '32px', borderRadius: '50%', border: 'none', background: 'rgba(0,0,0,0.6)', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <X size={16} />
             </button>
-            {playing.kind === 'embed' ? null : isVideo(playing.url) ? (
+            {playing.kind === 'embed' ? (
+              <SocialEmbed platform={playing.creator.platform} url={playing.creator.postLink!} />
+            ) : isVideo(playing.url) ? (
               <video src={playing.url} controls autoPlay playsInline style={{ maxWidth: '90vw', maxHeight: '85vh', borderRadius: '14px', background: '#000' }} />
             ) : (
               <img src={playing.url} alt={`Contoh konten ${item.brand}`} style={{ maxWidth: '90vw', maxHeight: '85vh', borderRadius: '14px' }} />

@@ -565,7 +565,7 @@ export default function FinanceRecap() {
 
   // Pengganti Export Excel: spreadsheet "Rekap Keuangan | AZERA" di Shared Drive, disinkron dulu baru dibuka.
   // Tab dibuka sinkron sebelum await supaya tidak diblokir popup blocker.
-  const openSheet = async (scope: 'all' | 'pintarnya') => {
+  const openSheet = async (scope: 'all' | 'pintarnya' | 'payment') => {
     setExporting(true);
     const tab = window.open('', '_blank');
     try {
@@ -667,6 +667,9 @@ export default function FinanceRecap() {
         )}
         <button onClick={() => setManaging((v) => !v)} style={btn(false)}><Columns3 size={13} /> Kolom Tambahan</button>
         {/* Dua spreadsheet terpisah: semua klien & khusus Pintarnya (PDS Digital Agency), realtime dua arah */}
+        <button onClick={() => void openSheet('payment')} disabled={exporting} title="Semua klien, kolom sampai Total Payment saja (tanpa status bayar & biaya internal), read-only" style={{ ...btn(false), opacity: exporting ? 0.6 : 1 }}>
+          <FileSpreadsheet size={13} /> Sheet s.d. Total Payment
+        </button>
         <button onClick={() => void openSheet('pintarnya')} disabled={exporting} title="Spreadsheet khusus klien Pintarnya (PDS Digital Agency)" style={{ ...btn(false), opacity: exporting ? 0.6 : 1 }}>
           <FileSpreadsheet size={13} /> Sheet Pintarnya
         </button>

@@ -25,6 +25,7 @@ const TRIGGER_LABELS: Record<string, string> = {
   reminder_insight: 'Reminder Insight',
   reminder_payment_creator: 'Reminder Pembayaran Creator',
   payment_completed: 'Pembayaran Creator Selesai',
+  payment_due_info: 'Info Batas Pembayaran (Done Insight)',
   invoice_new: 'Invoice Baru',
   invoice_paid: 'Invoice Terverifikasi',
   reminder_payment_client: 'Reminder Pembayaran Client',
@@ -38,6 +39,7 @@ const TRIGGER_LABELS: Record<string, string> = {
 
 /** Placeholder khusus per trigger, ditampilkan di bawah judul template */
 const TRIGGER_HINTS: Record<string, string> = {
+  payment_due_info: 'Dikirim ke grup WA campaign dari tombol Done Insight di tab Distribusi campaign. Placeholder: {{campaign}}, {{tanggal_insight}}, {{batas_payment}} (H+14 hari kalender).',
   creator_rejected: 'Sudah tidak dikirim: pendaftar campaign yang di-reject tidak menerima pesan apa pun.',
   creator_profile_approved: 'Dikirim saat creator disetujui di menu Creator (juga lewat Ubah keputusan), plus email. Placeholder: {{nama}}, {{community_link}} (link Komunitas WhatsApp AzeraKOL).',
   creator_profile_rejected: 'Dikirim saat creator ditolak di menu Creator (juga lewat Ubah keputusan), plus email. Placeholder: {{nama}}.',

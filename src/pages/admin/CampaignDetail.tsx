@@ -6,6 +6,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, Copy, Check, MessageCircle, LayoutDashboard, Building2, ExternalLink, UserCheck, MapPin, CalendarDays, Clock, Pencil, Sheet } from 'lucide-react';
 import { NICHES } from '../../lib/niches';
 import CampaignWaSenders, { type WaSenders } from './CampaignWaSenders';
+import DoneInsightCard from './DoneInsightCard';
 import { APPROVAL_FLOW_OPTIONS, approvalFlowLabel, type ApprovalFlow } from '../../lib/approvalFlow';
 import { buildBroadcast } from '../../lib/broadcast';
 import { SiInstagram, SiTiktok, SiThreads, SiX } from 'react-icons/si';
@@ -26,6 +27,7 @@ interface Campaign {
   briefCampaign?: { blocks: { kind: 'text' | 'file' | 'image' | 'video' | 'link'; content: string }[]; filledBy: 'admin' | 'client'; updatedAt: string };
   budget?: number; criteria: { niches: string[]; minFollowers?: number; minFollowersByPlatform?: Record<string, number | undefined>; provinces: string[]; cities?: string[]; platforms: string[]; avgMetrics?: boolean; buzzerMax?: Record<string, number | undefined> };
   status: string; workflowStage: string; applyOpen: boolean; applySlug: string; waGroupLink?: string;
+  waGroupJid?: string; doneInsightAt?: string; paymentDueAt?: string;
   customFields: CustomField[]; applyFields?: ApplyFields; accessCode: string; clientAccessCode?: string; clientSpreadsheetId?: string;
   approvalFlow?: ApprovalFlow;
   waSenders?: WaSenders;
@@ -395,6 +397,9 @@ export default function CampaignDetail() {
               </div>
             </div>
           </div>
+
+          <DoneInsightCard campaignId={campaign._id} value={{ doneInsightAt: campaign.doneInsightAt, paymentDueAt: campaign.paymentDueAt, waGroupJid: campaign.waGroupJid }}
+            onChange={(v) => setCampaign((c) => (c ? { ...c, ...v } : c))} />
 
           <CampaignWaSenders campaignId={campaign._id} value={campaign.waSenders}
             onSaved={(waSenders) => setCampaign((c) => (c ? { ...c, waSenders } : c))} />

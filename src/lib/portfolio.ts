@@ -32,6 +32,8 @@ export interface TopCreator {
   likes?: string;
   comments?: string;
   shares?: string;
+  /** Cover video (Cloudinary), tampil sebelum player TikTok dimuat */
+  thumb?: string;
 }
 
 export interface PortfolioItem {

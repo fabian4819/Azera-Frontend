@@ -289,7 +289,7 @@ export default function Portfolio() {
                                 ? <video src={slide.url} controls playsInline style={{ ...videoTile, objectFit: 'cover', background: '#000' }} />
                                 : <img src={slide.url} alt={`Contoh konten ${selected.brand}`} style={{ ...videoTile, objectFit: 'cover', cursor: 'default' }} />
                             ) : (
-                              <SocialEmbed platform={slide.creator.platform} url={slide.creator.postLink!} />
+                              <SocialEmbed platform={slide.creator.platform} url={slide.creator.postLink!} thumb={slide.creator.thumb} />
                             )}
                           </div>
                         ))}

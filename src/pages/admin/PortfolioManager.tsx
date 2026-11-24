@@ -7,7 +7,8 @@ import {
 } from '../../lib/portfolio';
 
 type CreatorPlatform = TopCreator['platform'];
-type FormCreator = Required<TopCreator>;
+// thumb diisi server (cover video), tidak diedit di form
+type FormCreator = Required<Omit<TopCreator, 'thumb'>>;
 
 // angka disimpan sebagai string di form: '' = data tidak tersedia (dikirim null, bukan 0)
 interface FormPlatform {

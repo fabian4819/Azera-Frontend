@@ -17,6 +17,7 @@ const ACTIONS: [string, string][] = [
   ['creator_bank_info_request', 'Minta info bank creator'],
   ['reminder_payment_creator', 'Reminder pembayaran creator'],
   ['payment_completed', 'Pembayaran creator selesai'],
+  ['payment_due_info', 'Info batas pembayaran (grup)'],
   ['pic_bank_info_request', 'Minta info bank PIC'],
   ['campaign_started', 'Campaign dimulai (ke client)'],
   ['campaign_completed', 'Campaign selesai (ke client)'],
