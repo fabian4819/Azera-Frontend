@@ -70,7 +70,7 @@ export default function CampaignWaSenders({ campaignId, value, onSaved }: { camp
   );
 
   return (
-    <div style={{ background: '#fff', borderRadius: '16px', padding: '28px', border: '1px solid #e1e0ff', boxShadow: '0 2px 12px rgba(107,46,232,0.05)', marginBottom: '20px' }}>
+    <div style={{ background: '#fff', borderRadius: '16px', padding: '20px', border: '1px solid #e1e0ff', boxShadow: '0 2px 12px rgba(107,46,232,0.05)' }}>
       <p style={{ fontFamily: f, fontWeight: 700, fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}><Send size={16} color="#6728e4" /> Pengirim Pesan Bot</p>
       <p style={{ fontFamily: f, fontSize: '0.8rem', color: '#777683', marginBottom: '16px', lineHeight: 1.5 }}>
         Pilih nomor yang mengirim tiap pesan bot campaign ini: WA Azera (bot bawaan) atau WA admin yang sudah disambungkan di menu WhatsApp Admin.

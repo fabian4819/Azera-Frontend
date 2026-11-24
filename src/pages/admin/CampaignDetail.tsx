@@ -359,25 +359,31 @@ export default function CampaignDetail() {
       )}
 
       {activeTab === 'distribusi' && (
-        <div style={{ maxWidth: '760px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          <ShareLink icon={Building2} title="Dashboard Client"
+        // Grid, bukan satu kolom panjang: 3 link dashboard sebaris, lalu 2 kolom (grup WA & done insight | pengirim WA).
+        // Layar sempit otomatis jadi satu kolom (auto-fit).
+        <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'grid', gap: '12px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '12px', alignItems: 'stretch' }}>
+          <ShareLink compact icon={Building2} title="Dashboard Client"
             description="Untuk brand/client: lihat progress creator, lalu Approve atau minta Revisi draft & hasil posting (dengan catatan). Tanpa login."
             url={campaign.clientAccessCode ? `${window.location.origin}/client-dashboard/${campaign._id}?code=${campaign.clientAccessCode}` : ''}
             copied={copiedKey === 'client'} onCopy={(url) => void copyLink('client', url)} />
           {/* Sheet external dibuat otomatis saat sync pertama campaign (folder campaign di Shared Drive) */}
-          <ShareLink icon={Sheet} title="Google Sheet Client"
+          <ShareLink compact icon={Sheet} title="Google Sheet Client"
             description="Versi Google Sheet dari dashboard client (Listing & Campaign Tracker, tanpa WA/email/PIC/handle by). Siapa pun yang punya link bisa edit, tapi hanya kolom Status & review/catatan revisi yang tidak dikunci. Tersambung realtime dengan platform."
             url={campaign.clientSpreadsheetId ? `https://docs.google.com/spreadsheets/d/${campaign.clientSpreadsheetId}/edit` : ''}
             copied={copiedKey === 'client-sheet'} onCopy={(url) => void copyLink('client-sheet', url)} />
-          <ShareLink icon={LayoutDashboard} title="Dashboard PIC / Handle-by"
+          <ShareLink compact icon={LayoutDashboard} title="Dashboard PIC / Handle-by"
             description="Untuk PIC/Handle-by: lihat progress semua creator di campaign ini (hanya lihat). Tanpa login."
             url={`${window.location.origin}/campaign-dashboard/${campaign._id}?code=${campaign.accessCode}`}
             copied={copiedKey === 'pic'} onCopy={(url) => void copyLink('pic', url)} />
+          </div>
           <p style={{ fontSize: '0.75rem', color: '#777683', padding: '0 4px' }}>
             Kolom yang terlihat di kedua dashboard sama dengan dashboard creator, atur lewat ikon di header kolom Master Sheet.
           </p>
 
-          <div style={{ ...cardStyle, display: 'flex', alignItems: 'flex-start', gap: '14px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(380px, 1fr))', gap: '12px', alignItems: 'start' }}>
+          <div style={{ display: 'grid', gap: '12px' }}>
+          <div style={{ ...cardStyle, padding: '20px', marginBottom: 0, display: 'flex', alignItems: 'flex-start', gap: '14px' }}>
             <span style={iconBox}><MessageCircle size={18} /></span>
             <div style={{ flex: 1, minWidth: 0 }}>
               <p style={shareTitle}>Link Grup WA</p>
@@ -400,9 +406,11 @@ export default function CampaignDetail() {
 
           <DoneInsightCard campaignId={campaign._id} value={{ doneInsightAt: campaign.doneInsightAt, paymentDueAt: campaign.paymentDueAt, waGroupJid: campaign.waGroupJid }}
             onChange={(v) => setCampaign((c) => (c ? { ...c, ...v } : c))} />
+          </div>
 
           <CampaignWaSenders campaignId={campaign._id} value={campaign.waSenders}
             onSaved={(waSenders) => setCampaign((c) => (c ? { ...c, waSenders } : c))} />
+          </div>
         </div>
       )}
 
